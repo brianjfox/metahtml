@@ -303,6 +303,7 @@ mhtml_path_translate (char *path)
 	    bprintf_free_buffer (buffer);
 	}
     }
+
   return (result);
 }
 

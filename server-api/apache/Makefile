@@ -1,7 +1,7 @@
 # Simplistic Makefile for mod_mhtml (Apache versions 1.3x)
 #
 APXS          = apxs
-APXS_STDFLAGS = -a -c
+APXS_STDFLAGS = -c
 APXS_INCFLAGS = -I ../.. -I ../../libutils
 APXS_MHTML    = -L ../../libmhtml -l mhtml
 APXS_SERVE    = -L ../../libserver -l server
@@ -12,7 +12,7 @@ APXS_LIBFLAGS = $(APXS_MHTML) $(APXS_SERVE) $(APXS_UTILS) \
 		$(APXS_GDBM) $(APXS_CRYPT)
 APXS_EXTRAFLAGS = $(APXS_INCFLAGS) $(APXS_LIBFLAGS)
 APXS_COMPILE_FLAGS = $(APXS_STDFLAGS) $(APXS_EXTRAFLAGS)
-APXS_INSTALL_FLAGS = -i
+APXS_INSTALL_FLAGS = -i -a
 
 all: mod_mhtml.so
 

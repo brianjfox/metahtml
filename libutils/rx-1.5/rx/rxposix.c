@@ -143,7 +143,6 @@ regcomp (preg, pattern, cflags)
   /* POSIX says a null character in the pattern terminates it, so we
    * can use strlen here in compiling the pattern.  
    */
-
   return regncomp (preg, pattern, strlen (pattern), cflags);
 }
 

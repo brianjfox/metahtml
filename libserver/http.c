@@ -1423,13 +1423,14 @@ mhtml_read_content_from_fd (HTTP_RESULT *result, int fd)
       /* Now we know how many milliseconds it takes to transfer
 	 CONTENT_LENGTH bytes from the client to this server.
 	 Guess we should set a variable? */
-      {
-	char dbuf[100];
-
-	sprintf (dbuf, "<div %d.0 %lu>",
-		 result->spec->content_length, diff_mills);
-	pagefunc_set_variable ("mhtml::bytes-per-ms", dbuf);
-      }
+      if (diff_mills)
+	{
+	  char dbuf[100];
+	  double val;
+	  val = (double)(result->spec->content_length) / (double) diff_mills;
+	  sprintf (dbuf, "%0.2f", (float) val);
+	  pagefunc_set_variable ("mhtml::bytes-per-ms", dbuf);
+	}
 #endif
     }
 }

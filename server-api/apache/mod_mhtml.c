@@ -145,7 +145,7 @@ initialize_engine (request_rec *r)
 
   pagefunc_set_variable ("mhtml::program-name", "mod_mhtml");
   pagefunc_set_variable ("mhtml::version", mhtml_version_string);
-  pagefunc_set_variable ("mhttpd::copyright-string",metahtml_copyright_string);
+  pagefunc_set_variable ("mhttpd::copyright-string", metahtml_copyright_string);
   pagefunc_set_variable ("mhtml::system-type", "linux-i386");
 
   /* MAKE THAT CONFIGURABLE!!! */
@@ -464,7 +464,8 @@ mhtml_handle_req (request_rec *r)
 
 	  header = (MIME_HEADER *)xmalloc (sizeof (MIME_HEADER));
 
-	  fprintf (stderr, "\n\t%s: %s", hdrs[i].key, hdrs[i].val? hdrs[i].val : "(null)");
+	  fprintf (stderr, "\n\t%s: %s",
+		   hdrs[i].key, hdrs[i].val? hdrs[i].val : "(null)");
 	  header->tag = strdup (hdrs[i].key);
 	  header->value = strdup (hdrs[i].val);
 
@@ -474,18 +475,9 @@ mhtml_handle_req (request_rec *r)
 
 	  req->headers[hdrs_index++] = header;
 	  req->headers[hdrs_index] = (MIME_HEADER *)NULL;
-
-#if 0
-	  /* Headers that come in the request are stored in a
-	     special package. */
-
-	  /* This is already done with mhttpd_mime_headers_to_package... */
-	  snprintf (buf, 255, "req::%s", header->tag);
-	  pagefunc_set_variable (buf, header->value);
-#endif
         }
-        
-      /* Now it's time to initialize MetaHTML engine. */
+
+      /* Now it's time to initialize the Meta-HTML engine. */
       initialize_engine (r);
 
       /* Set required variables, mostly for compatibility reasons */
@@ -497,7 +489,6 @@ mhtml_handle_req (request_rec *r)
       pagefunc_set_variable ("mhttpd::requester", req->requester);
       pagefunc_set_variable ("mhttpd::requester-addr", req->requester_addr);
 
-      /* Where the two are set in MetaHTML engine? Better set it here. */
       pagefunc_set_variable_readonly
 	("env::server_protocol", req->protocol);
       pagefunc_set_variable_readonly
@@ -547,9 +538,7 @@ mhtml_handle_req (request_rec *r)
     }
     
   /* Report the result code to Apache core. */
-  fprintf (stderr, "r->status = result->result_code; --> ");
   r->status = result->result_code;
-  fprintf (stderr, "done.\n");
 
   /* Destroy result structure, */
   if (result)

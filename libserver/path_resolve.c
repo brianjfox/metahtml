@@ -59,6 +59,10 @@ make_doc_spec (void)
   return (spec);
 }
 
+#if !defined (xfree)
+#  define xfree(x) do { if (x) free (x); } while (0)
+#endif
+
 void
 mhttpd_free_doc_spec (DOC_SPEC *spec)
 {
@@ -66,19 +70,22 @@ mhttpd_free_doc_spec (DOC_SPEC *spec)
 
   if (spec)
     {
-      if (spec->requested_path) free (spec->requested_path);
-      if (spec->physical_path) free (spec->physical_path);
-      if (spec->logical_path) free (spec->logical_path);
-      if (spec->query_string) free (spec->query_string);
+      xfree (spec->requested_path);
+      xfree (spec->physical_path);
+      xfree (spec->logical_path);
+      xfree (spec->query_string);
+
       if (spec->argv)
 	{
 	  for (i = 0; spec->argv[i] != (char *)NULL; i++)
-	    free (spec->argv[i]);
+	    {
+	      free (spec->argv[i]);
+	    }
+
 	  free (spec->argv);
 	}
 
-      if (spec->content)
-	free (spec->content);
+      xfree (spec->content);
 
       free (spec);
     }
@@ -94,7 +101,8 @@ strappend (char *string, char *appendage)
 
 #define STRAPPEND(x,y) x = strappend (x, y)
 
-#define PROXIES_ARE_BROKEN
+/* # define PROXIES_ARE_BROKEN */
+
 #if defined (PROXIES_ARE_BROKEN)
 /* Do the `%FF' and `+' hacking on string.  We can do this hacking in
    place, since the resultant string cannot be longer than the input

@@ -2,6 +2,16 @@
 
 #ifndef INST_RXPOSIXH
 #define INST_RXPOSIXH
+
+#undef regexec
+#undef regerror
+#undef regfree
+#undef regcomp
+#define regexec mhtml_regexec
+#define regerror mhtml_regerror
+#define regfree mhtml_regfree
+#define regcomp mhtml_regcomp
+
 /*	Copyright (C) 1995, 1996 Tom Lord
  * 
  * This program is free software; you can redistribute it and/or modify

@@ -431,10 +431,12 @@ CODEDISTFILES: FORCE
 	| sort | uniq > CODEDISTFILES
 
 support/metahtml.spec: $(SPECFILES) Makefile
+	MY_BUILD_ROOT=`/bin/pwd`/BUILDROOT/INSTALLROOT; \
 	cat support/metahtml.spec.in \
 	| sed -e 's/DISTNAME/$(DISTNAME)/g' \
 	      -e 's/PACKVER/$(PACKVER)/g' \
 	      -e 's/SUBVER/$(SUBVER)/g' \
+	      -e 's/{BUILDROOT}/$${MY_BUILD_ROOT}/g' \
 	      -e 's/RPMREL/$(RPMREL)/g' >support/metahtml.spec
 	@if [ -f ./modules/modmysql.so ]; then \
 	  cat support/mysql.spec.in >>support/metahtml.spec; \

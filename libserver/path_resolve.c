@@ -94,6 +94,7 @@ strappend (char *string, char *appendage)
 
 #define STRAPPEND(x,y) x = strappend (x, y)
 
+#define PROXIES_ARE_BROKEN
 #if defined (PROXIES_ARE_BROKEN)
 /* Do the `%FF' and `+' hacking on string.  We can do this hacking in
    place, since the resultant string cannot be longer than the input

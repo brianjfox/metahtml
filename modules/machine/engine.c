@@ -1729,6 +1729,8 @@ mh_welcome_to_the_machine_internal (mh_tag_t      tag,
 #define MH_STR_CASE_OP( op, func )		\
 	case MH_##op##_OP:			\
 	  object = STACK_TOP ();		\
+	  if (MH_VECTOR_P (object))		\
+	  object = MH_VECTOR_REF (MH_AS_VECTOR (object), 0); \
 	  assert (MH_STRING_P (object));	\
 	  func (MH_AS_STRING (object),		\
 		MH_AS_STRING (object));		\
@@ -2036,8 +2038,7 @@ mh_welcome_to_the_machine_internal (mh_tag_t      tag,
 	  STACK_SET_TOP 
 	    (MH_AS_OBJECT
 	     (mh_vector_member
-	      (MH_VECTOR_P (object2)
-	       ? MH_AS_VECTOR (object2) : mh_object_to_vector (object2),
+	      (MH_AS_VECTOR (mh_object_to_vector (object2)),
 	       object1,
 	       MH_EMPTY_P (object) ? false : true)));
 	  NEXTOP (ARRAY_MEM);
@@ -2049,10 +2050,7 @@ mh_welcome_to_the_machine_internal (mh_tag_t      tag,
 	  STACK_SET_TOP 
 	    (MH_AS_OBJECT
 	     (mh_vector_append
-	      (MH_VECTOR_P (object2)
-	       ? MH_AS_VECTOR (object2)
-	       : mh_object_to_vector (object2),
-	       object1)));
+	      (MH_AS_VECTOR (mh_object_to_vector (object2)), object1)));
 	  NEXTOP (ARRAY_APP);
 
 	case MH_ARRAY_COPY_OP:

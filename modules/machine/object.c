@@ -1464,8 +1464,9 @@ mh_vector_append (mh_vector_t vector,
 
   if (MH_OBJECT_EMPTY == item) item = MH_AS_OBJECT (mh_string_new (""));
 
-  return (mh_vector_extend
-	  (vector, MH_AS_OBJECT (mh_number_new ((long double) size)), item));
+  return (MH_AS_OBJECT
+	  (mh_vector_extend
+	   (vector, MH_AS_OBJECT (mh_number_new ((long double) size)), item)));
 }
 
 extern void
@@ -1511,14 +1512,67 @@ mh_vector_fill (mh_object_t *objects,
     vector->values[offset] = *objects++;
   return vector;
 }
-
 extern mh_object_t
 mh_object_to_vector (mh_object_t object)
 {
-  /* Only STRINGs can become vectors */
+  /* Only STRINGs can become vectors (bullshit: bfox) */
+#if defined (VECTOR_CONVERSION_IS_INCOMPLETE)
   return MH_STRING_P (object)
     ? mh_string_to_vector (MH_AS_STRING (object), "\n")
     : object;
+#else
+  mh_type_t tag = MH_OBJECT_TAG (object);
+  mh_object_t result = object;
+
+  switch (tag)
+    {
+    case MH_STRING_TAG:
+      result = mh_string_to_vector (MH_AS_STRING (object), "\n");
+      break;
+
+    case MH_NUMBER_TAG:
+      {
+	/* Convert number to vector of one number. */
+      }
+      break;
+
+    case MH_VECTOR_TAG:
+      /* Already a vector! */
+      break;
+
+    case MH_NIL_TAG:
+      /* Leave as the empty object? */
+      break;
+
+    case MH_ALIST_TAG:
+      {
+	/* Convert to vector of one alist. */
+	mh_vector_t  vector = mh_vector_new  (1);
+	MH_VECTOR_REF (vector, 0) = object;
+	result = MH_AS_OBJECT (vector);
+      }
+      break;
+
+    case MH_FUNCTION_TAG:
+      /* The only one that we don't care about. */
+      break;
+
+    case MH_UNBOUND_TAG:
+      /* OUCH! */
+      abort ();
+    }
+
+
+  if (!MH_VECTOR_P (result))
+    {
+      mh_vector_t vector = mh_vector_new (1);
+      MH_VECTOR_REF (vector, 0) = result;
+      result = MH_AS_OBJECT (vector);
+    }
+
+  return (result);
+#endif /* VECTOR_CONVERSION_IS_INCOMPLETE */
+
 }
 
 extern mh_object_t
@@ -1579,6 +1633,9 @@ mh_object_equal_1 (mh_object_t object1,
 
   if (object1 == object2)
     return true;
+
+  if ((object1 == (mh_object_t)NULL) || (object2 == (mh_object_t)NULL))
+    return (false);
 
   tag1 = MH_OBJECT_TAG (object1);
   tag2 = MH_OBJECT_TAG (object2);
@@ -1710,6 +1767,7 @@ mh_string_to_vector (mh_string_t string, char *delimiters)
   /* No vectors with a length of one or zero */
   if (0 == length)
     return MH_OBJECT_EMPTY;
+  /* I'm going to have to debug this -- it's wrong: bfox */
   else if (1 == length)
     return MH_AS_OBJECT (string);
 

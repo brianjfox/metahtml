@@ -20,7 +20,7 @@ SYSTEM:ERRORS:??<SYSTEM-ERROR-OUTPUT>??
    stream=<get-var default::s>
    filename=metahtml.info
    title="The Meta-HTML Reference Manual"
-   author[0]="Brian J. Fox, Universal Access Inc."
+   author[0]="Brian J. Fox"
    description = <prog
 		   This document describes the Meta-HTML Programming Language,
 		   a language specifically designed for writing applications

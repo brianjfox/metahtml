@@ -275,8 +275,8 @@ An example calling sequence:<subst-in-var body "@" "@@" "\\{" "@{" "\\}" "@}">
 
 Published by Brian J. Fox.@*
 bfox@ai.mit.edu@*
-1740 Clearview Rd.@*
-Santa Barbara, CA 93101 USA
+2441 Borton Dr.@*
+Santa Barbara, CA 93109 USA
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -293,7 +293,7 @@ except that this permission notice may be stated in a translation approved
 by Brian J. Fox.
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1995, 2000 <get-var-once author[0]>
+Copyright @copyright{} 1995, 2004 <get-var-once author[0]>
 @end titlepage
 <if <get-var draft>
     <set-var footer-title="Draft">

@@ -202,7 +202,7 @@ cp $root/server/rc.mhttpd $lib/metahtml/rc.mhttpd
 chmod a+x $lib/metahtml/rc.mhttpd
 
 cp $root/doc/manual/functions.db $lib/metahtml/functions.db
-cp $RPM_SOURCE_DIR/metahtml.ps $RPM_BUILD_DIR/
+cp $RPM_SOURCE_DIR/metahtml.pdf $RPM_BUILD_DIR/
 cp $RPM_BUILD_DIR/DISTNAME/README $RPM_BUILD_DIR/
 cp $RPM_BUILD_DIR/DISTNAME/COPYING $RPM_BUILD_DIR/
 cp $RPM_BUILD_DIR/DISTNAME/ChangeLog $RPM_BUILD_DIR/
@@ -316,7 +316,7 @@ exit 0
 (cd /home/mhttpd; tar -zxf modules-devel.tar.gz)
 
 %files
-%doc README COPYING ChangeLog RPM-RELEASE metahtml.ps
+%doc README COPYING ChangeLog RPM-RELEASE metahtml.pdf
 /usr/sbin/mhttpd
 /usr/bin/mhc
 /usr/bin/mdb

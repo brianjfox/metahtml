@@ -1,0 +1,159 @@
+;;; nntp.mhtml: -*- Meta-HTML -*-  Implementation of some NNTP Protocols.
+;;;
+;;; Copyright (c) 2002 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul 31 09:12:19 2002.
+
+<defun .libinit>
+  <set-var
+    nntp::me     = <http::host-part <thisdoc>>
+    nntp::domain = <subst-in-string <get-var-once nntp::me> "^[^.]+\\." "">>
+  <nntp::clear-logs>
+  <nntp::server news.<get-var-once nntp::domain>>
+  <nntp::user metahtml-news-poster>
+</defun>
+
+<defvar nntp::verbose-debugging "">
+
+<set-var
+  nntp-error-code::400 = "Service Discontinued"
+  nntp-error-code::411 = "No Such Newsgroup"
+  nntp-error-code::412 = "No Newsgroup has been selected"
+  nntp-error-code::418 = "No tin-style index is available"
+  nntp-error-code::420 = "No current article has been selected"
+  nntp-error-code::421 = "No next article in this group"
+  nntp-error-code::422 = "No previous article in this group"
+  nntp-error-code::423 = "No such article number in this group"
+  nntp-error-code::430 = "No such article found"
+  nntp-error-code::435 = "Article not wanted - do not send it"
+  nntp-error-code::436 = "Transfer failed - try again later"
+  nntp-error-code::437 = "Article rejected - do not try again"
+  nntp-error-code::440 = "Posting not allowed"
+  nntp-error-code::441 = "Posting failed"
+  nntp-error-code::480 = "Authentication required"
+  nntp-error-code::482 = "Authentication rejected"
+  nntp-error-code::500 = "Command not recognized"
+  nntp-error-code::501 = "Command syntax error"
+  nntp-error-code::502 = "Permission denied"
+  nntp-error-code::502 = "Program error">
+
+<defun nntp::server &optional server-name>
+  ;;; Set or get the current news server.
+  <if <get-var-once server-name>
+      <set-var nntp::server = <get-var-once server-name>>
+    <get-var-once nntp::server>>
+</defun>
+
+<defun nntp::user &optional user-name>
+  ;;; Set or get the current default news user.
+  <if <get-var-once user-name>
+      <set-var nntp::user = <get-var-once user-name>>
+    <get-var-once nntp::user>>
+</defun>
+
+<defun nntp::clear-logs>
+  ;;; Clear all existing log files, resetting the state to null.
+  <unset-var nntp::log nntp::recent-error nntp::error-log>
+</defun>
+
+<defun nntp::messageID-db>
+  <get-var-once mhtml::include-prefix>/nntp.db
+</defun>
+
+<defun nntp::next-message-id>
+  ;;; Returns the next message ID from the database.  Side effects the
+  ;;; database by incremented the message ID.
+  <with-open-database db <nntp::messageID-db> mode=write-create>
+    <set-var x = <database-load-record db mid prefix=nntp>>
+    <defvar nntp::incept-time <time>>
+    <increment nntp::messageID>
+    <set-var x = <database-save-package db mid nntp strip=true>>
+  </with-open-database>
+  <get-var-once nntp::messageID>
+</defun>
+
+<defun nntp::is-error? response>
+  <set-var
+    words[]=<subst-in-string <get-var-once response> "[ \t\r\n]+" "\n">
+    status =<get-var-once words[0]>>
+  <not <lt status 400>>
+</defun>
+
+<defun nntp::log statement>
+  <array-append <get-var-once statement> nntp::log>
+  <when <get-var-once nntp::verbose-debugging>>
+    <when <defined? *mdb*::break>>
+      <with-open-stream s *standard-output* mode=write>
+	<stream-put s "<get-var-once statement>\n">
+      </with-open-stream>
+    </when>
+    <if <not <defined? "*mdb::break">>
+	<page-debug <get-var-once statement>>>
+  </when>
+</defun>
+
+<defun nntp::tell stream statement>
+  ;;; Just send STATEMENT down STREAM, and don't read back from it.
+  <nntp::log "<-- <get-var-once statement>">
+  <stream-put stream "<get-var-once statement>\r\n">
+</defun>
+
+<defun nntp::converse stream statement>
+  ;;; Converse with the NNTP server located at the other end of STREAM,
+  ;;; which is currently open for reading and writing.  Tell STATEMENT,
+  ;;; and read status.  Append conversation to NNTP::LOG.
+  ;;; If there is an error, put the error in NNTP::RECENT-ERROR, and
+  ;;; return the empty string, otherwise return the result code.
+  <if <get-var-once statement>
+      <concat
+       <stream-put stream "<get-var-once statement>\r\n">
+       <nntp::log "<-- <get-var-once statement>">>>
+  <set-var response = <stream-get stream stop-at="\n">>
+  <strings::trim response>
+  <nntp::log "--> <get-var-once response>">
+  <if <nntp::is-error? <get-var-once response>>
+      <concat
+       <set-var nntp::recent-error = <get-var-once response>>
+       <array-append <get-var-once response> nntp::error-log>>
+    <get-var-once response>>
+</defun>
+
+<defun nntp::post &key from subject group content>
+  ;;; Post an article from the user FROM (defaults to NNTP::USER) with
+  ;;; SUBJECT (defaults to "No subject..." to GROUP, consisting of
+  ;;; CONTENT.  Returns "true" if successful, or the empty string if
+  ;;; not.  If unsuccessful, the error and reason are in
+  ;;; NNTP::RECENT-ERROR.
+  <defvar from <nntp::user>@<get-var-once nntp::domain>>
+  <defvar subject "No subject...">
+
+  <set-var messageID = <nntp::next-message-id>>
+
+  <with-open-stream stream <nntp::server>:119 type=tcp mode=read-write
+    timeout=never>
+    <if <not <nntp::converse <get-var-once stream> "">>
+	<return>>
+
+    <when <nntp::converse <get-var-once stream> POST>>
+      <nntp::tell <get-var-once stream>
+		  <concat "Relay-Version: version B 2.10 2/13/83; "
+			  "site <get-var-once nntp::me>">>
+      <nntp::tell <get-var-once stream>
+		  <concat "Posting-Version: version B 2.10 2/13/83; "
+			  "site <get-var-once nntp::me>">>
+      <nntp::tell <get-var-once stream> "Path: <get-var-once nntp::me>">
+      <nntp::tell <get-var-once stream> "From: <get-var-once from>">
+      <nntp::tell <get-var-once stream> "Newsgroups: <get-var-once group>">
+      <nntp::tell <get-var-once stream> "Subject: <get-var-once subject>">
+      <nntp::tell <get-var-once stream>
+		  <concat
+		   "Message-ID: <" <get-var-once messageID>
+		   "@<get-var-once nntp::me>" ">">>
+      <nntp::tell "Date: <date gmt=t>">
+      <set-var result = <nntp::converse <get-var-once stream>
+					"<get-var-once content>\r\n.">>
+    </when>
+    <set-var ignore = <nntp::converse <get-var-once stream> "QUIT">>
+  </with-open-stream>
+  <get-var-once result>
+</defun>
+

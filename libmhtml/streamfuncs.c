@@ -1036,7 +1036,8 @@ stream_read_chunk (Stream *stream, int length)
 	  buffer_index += bytes_read;
 	  bytes_left -= bytes_left;
 	}
-      else if ((bytes_read < 0) && (errno == EINTR))
+      else if ((bytes_read < 0) &&
+	       ((errno == EINTR) || (errno == EWOULDBLOCK)))
 	{
 	  continue;
 	}

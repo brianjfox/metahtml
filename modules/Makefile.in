@@ -273,7 +273,7 @@ clean-executables: FORCE
 clean:  FORCE
 	$(RM) *.o $(TARGETS) so_locations *.O *.so *.packed
 
-distclean realclean: clean
+distclean: clean
 	if [ -f compiler/Makefile ]; then \
 	  (cd compiler; make distclean); \
 	fi
@@ -282,6 +282,18 @@ distclean realclean: clean
 	fi
 	if [ -f libgd/Makefile ]; then \
 	  (cd libgd; make distclean); \
+	fi
+	$(RM) *.cache *.log Makefile *~ *mmm* try-method.mhtml
+
+realclean: clean
+	if [ -f compiler/Makefile ]; then \
+	  (cd compiler; make realclean); \
+	fi
+	if [ -f machine/Makefile ]; then \
+	  (cd machine; make realclean); \
+	fi
+	if [ -f libgd/Makefile ]; then \
+	  (cd libgd; make realclean); \
 	fi
 	$(RM) *.cache *.log Makefile *~ *mmm* try-method.mhtml
 

@@ -89,7 +89,6 @@ int fast_cgi_content_length = 0;
 
 static void mhttpd_fill_in_missing_headers (HTTP_RESULT *result);
 static PAGE *mhttpd_find_page_for_result (HTTP_RESULT *result);
-static void mhttpd_handle_empty_page (HTTP_RESULT *result);
 
 #define word_separator(x) whitespace(x)
 
@@ -629,7 +628,7 @@ downcase (char *string)
   return (buffer);
 }
 
-static void
+void
 mhttpd_handle_empty_page (HTTP_RESULT *result)
 {
   char *result_string;
@@ -1235,7 +1234,7 @@ mhttpd_debug_doc_spec (DOC_SPEC *spec)
   bprintf_free_buffer (b);
 }
 
-static HTTP_RESULT *
+HTTP_RESULT *
 mhtml_make_result (void)
 {
   HTTP_RESULT *result = (HTTP_RESULT *)xmalloc (sizeof (HTTP_RESULT));
@@ -2145,7 +2144,7 @@ decompose_and_post (char *enctype, char *data, int length)
   mhtml_post_to_document ("");
 }
 
-static void
+void
 mhttpd_metahtml_engine (HTTP_RESULT *result)
 {
   char *prologue_doc = pagefunc_get_variable ("mhtml::prologue-document");

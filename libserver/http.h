@@ -107,6 +107,7 @@ extern char *mhttpd_get_mime_header (MIME_HEADER **headers, char *which);
 extern void mhttpd_free_request (HTTP_REQUEST *request);
 extern void mhttpd_debug_request (HTTP_REQUEST *req);
 extern void mhttpd_reset_server_variables (void);
+extern void mhttpd_handle_empty_page (HTTP_RESULT *result);
 
 /* Yechh!  This is solely for making the Open Market Fast CGI implementation
    work without having to recompile this library separately for the engine.

@@ -62,8 +62,16 @@ main (int argc, char *argv[])
   int matches_found = 0;
   char *database_filename = (char *)NULL;
   FILE *output_stream = (FILE *)NULL;
+  struct passwd *entry = (struct passwd *)NULL;
 
   output_stream = stdout;
+
+  if ((argc > 2) && (strcmp (argv[1], "--user") == 0))
+    {
+      entry = getpwnam (argv[2]);
+      argc--; argc--;
+      argv++; argv++;
+    }
 
   if (strcmp (argv[0], "rolodex") == 0)
     {
@@ -73,9 +81,9 @@ main (int argc, char *argv[])
     }
   else
     {
-      struct passwd *entry;
+      if (entry == (struct passwd *)NULL)
+	entry = getpwuid (getuid ());
 
-      entry = getpwuid (getuid ());
       if (entry)
 	{
 	  database_filename = (char *) xmalloc
@@ -108,24 +116,6 @@ main (int argc, char *argv[])
       else if (strcmp (arg, "--separate-files") == 0)
 	{
 	  output_stream = (FILE *)NULL;
-	}
-      else if (strcmp (arg, "--test") == 0)
-	{
-	  WispObject *matches = find_matches (database, "name:", "Fox, Brian");
-	  if (matches != NIL)
-	    {
-	      WispObject *entry = CAR (matches);
-	      WispObject *item = assoc ("home:", entry);
-
-	      if (item)
-		{
-		  WispObject *val = make_string_object ("(805) 111-1111");
-		  CAR (CDR (item)) = val;
-		}
-
-	      write_database (header_obj, database, "/tmp/test.phones");
-	    }
-	  return (0);
 	}
       else if ((strcmp (arg, "-h") == 0) || (strcmp (arg, "--help") == 0))
 	{
@@ -177,7 +167,7 @@ main (int argc, char *argv[])
 	}
     }
 
-  return (matches_found != 0);
+  return (! (matches_found != 0));
 }
 
 static int

@@ -141,7 +141,7 @@
   <coerce-var plot type=string>
 
   ;;; Remove the temporary file.
-  <if <eq debug-level 0> <cgi-exec rm -f <get-var-once tempfile>>>
+  <if <eq :debug-level 0> <cgi-exec rm -f <get-var-once tempfile>>>
   <get-var-once plot>
 </defun>
 
@@ -364,7 +364,7 @@
 	 </with-open-stream>>>>
   </when>
 
-  <when <eq debug-level 0>>
+  <when <eq :debug-level 0>>
     <foreach file tempfiles>
       <cgi-exec rm -f <get-var-once file>>
     </foreach>

@@ -163,17 +163,17 @@ decode_data (char *data)
 }
 
 DEFUN (pf_encrypt, varname key &key algorithm=[3des],
-"Encrypts the contents of <var varname> using <var algorithm>
-(defaults to 3des).
-
-The contents of <var varname> are replaced with an encrypted version.
-<var key> is the cleartext key to use for encrypting the data.
-
-Example:
-<example>
-<set-var foo=\"Hello\">
-<encrypt foo \"secret password\">
-<get-var foo> --> 3b743366228f5f37
+"Encrypts the contents of <var varname> using <var algorithm>\n\
+(defaults to 3des).\n\
+\n\
+The contents of <var varname> are replaced with an encrypted version.\n\
+<var key> is the cleartext key to use for encrypting the data.\n\
+\n\
+Example:\n\
+<example>\n\
+<set-var foo=\"Hello\">\n\
+<encrypt foo \"secret password\">\n\
+<get-var foo> --> 3b743366228f5f37\n\
 </example>")
 {
   char *name = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -232,19 +232,19 @@ Example:
 }
 
 DEFUN (pf_decrypt, varname key &key algorithm=[3des],
-"Decrypts the contents of <var varname> using <var algorithm>
-(defaults to 3des).
-
-The contents of <var varname> are replaced with a decrypted version.
-<var key> is the cleartext key to use for decrypting the data.
-
-Example:
-<example>
-<set-var foo=\"Hello\">
-<encrypt foo \"secret password\">
-<get-var foo> --> 3b743366228f5f37
-<decrypt foo \"secret password\">
-<get-var foo> --> Hello
+"Decrypts the contents of <var varname> using <var algorithm>\n\
+(defaults to 3des).\n\
+\n\
+The contents of <var varname> are replaced with a decrypted version.\n\
+<var key> is the cleartext key to use for decrypting the data.\n\
+\n\
+Example:\n\
+<example>\n\
+<set-var foo=\"Hello\">\n\
+<encrypt foo \"secret password\">\n\
+<get-var foo> --> 3b743366228f5f37\n\
+<decrypt foo \"secret password\">\n\
+<get-var foo> --> Hello\n\
 </example>")
 {
   char *name = mhtml_evaluate_string (get_positional_arg (vars, 0));

@@ -45,11 +45,13 @@ static void print_entry (FILE *stream, WispObject *entry, int long_p);
 static void dump_vcards (FILE *stream, WispObject *database);
 static void dump_vcard (FILE *stream, WispObject *entry);
 static WispObject *read_database (char *filename);
+static void write_database (WispObject *header, WispObject *db, char *fname);
 static WispObject *find_matches (WispObject *database, char *key, char *string);
 
 static char *rolodex_file = "/homes/UniAx/Admin/ROLODEX";
 static char *user_file_template = "%s/.phones";
-
+static char *output_filename = (char *)NULL;
+static WispObject *header_obj = (WispObject *)NULL;
 
 int
 main (int argc, char *argv[])
@@ -106,6 +108,24 @@ main (int argc, char *argv[])
       else if (strcmp (arg, "--separate-files") == 0)
 	{
 	  output_stream = (FILE *)NULL;
+	}
+      else if (strcmp (arg, "--test") == 0)
+	{
+	  WispObject *matches = find_matches (database, "name:", "Fox, Brian");
+	  if (matches != NIL)
+	    {
+	      WispObject *entry = CAR (matches);
+	      WispObject *item = assoc ("home:", entry);
+
+	      if (item)
+		{
+		  WispObject *val = make_string_object ("(805) 111-1111");
+		  CAR (CDR (item)) = val;
+		}
+
+	      write_database (header_obj, database, "/tmp/test.phones");
+	    }
+	  return (0);
 	}
       else if ((strcmp (arg, "-h") == 0) || (strcmp (arg, "--help") == 0))
 	{
@@ -281,13 +301,38 @@ read_database (char *filename)
 
   /* Read and discard the first object. */
   wisp_push_input_string (buffer);
-  obj = wisp_read ();
+  header_obj = wisp_read ();
   obj = wisp_read ();
 
   free (buffer);
   return (obj);
 }
-  
+
+static void
+write_database (WispObject *header, WispObject *database, char *filename)
+{
+  int fd = open (filename, O_WRONLY|O_CREAT, 0666);
+
+  if (fd != -1)
+    {
+      if (header != (WispObject *)NULL)
+	{
+	  char *h = wisp_to_string (header);
+	  write (fd, h, strlen (h));
+	  // free (h);  NO, BECAUSE STRING_BUFFER DOESN'T WORK THAT WAY
+	}
+
+      if (database != (WispObject *)NULL)
+	{
+	  char *d = wisp_to_string (database);
+	  write (fd, d, strlen (d));
+	  free (d);
+	}
+
+      close (fd);
+    }
+}
+
 static char *
 strcasestr (char *big, char *little)
 {
@@ -337,7 +382,7 @@ dump_vcard (FILE *stream, WispObject *entry)
   char buffer[1024];
 
   /* Build and print a vcard reference. */
-  fprintf (stream, "BEGIN:VCARD\nVERSION:2.1\n");
+  fprintf (stream, "BEGIN:VCARD\r\nVERSION:2.1\r\n");
   contents = sassoc ("name:", entry);
 
   if (contents != (char *)NULL)

@@ -42,19 +42,26 @@
 static int list_length (WispObject *list);
 static void print_entries (FILE *stream, WispObject *list, int long_p);
 static void print_entry (FILE *stream, WispObject *entry, int long_p);
+static void dump_vcards (FILE *stream, WispObject *database);
+static void dump_vcard (FILE *stream, WispObject *entry);
 static WispObject *read_database (char *filename);
 static WispObject *find_matches (WispObject *database, char *key, char *string);
 
 static char *rolodex_file = "/homes/UniAx/Admin/ROLODEX";
 static char *user_file_template = "%s/.phones";
 
+
 int
 main (int argc, char *argv[])
 {
   WispObject *database;
   int do_long_listing = 0;
+  int do_vcard_dump = 0;
   int matches_found = 0;
   char *database_filename = (char *)NULL;
+  FILE *output_stream = (FILE *)NULL;
+
+  output_stream = stdout;
 
   if (strcmp (argv[0], "rolodex") == 0)
     {
@@ -92,6 +99,14 @@ main (int argc, char *argv[])
 	{
 	  do_long_listing = 1;
 	}
+      else if (strcmp (arg, "--vcard") == 0)
+	{
+	  do_vcard_dump++;
+	}
+      else if (strcmp (arg, "--separate-files") == 0)
+	{
+	  output_stream = (FILE *)NULL;
+	}
       else
 	{
 	  WispObject *matches;
@@ -100,24 +115,42 @@ main (int argc, char *argv[])
 	  if (matches != NIL)
 	    {
 	      matches_found += list_length (matches);
-	      print_entries (stdout, matches, do_long_listing);
+	      if (do_vcard_dump)
+		dump_vcards (output_stream, matches);
+	      else
+		print_entries (output_stream, matches, do_long_listing);
 	    }
 
-	  matches = find_matches (database, "email:", arg);
-	  if (matches != NIL)
+	  if (!do_vcard_dump || matches_found == 0)
 	    {
-	      matches_found += list_length (matches);
-	      print_entries (stdout, matches, do_long_listing);
+	      matches = find_matches (database, "email:", arg);
+	      if (matches != NIL)
+		{
+		  matches_found += list_length (matches);
+
+		  if (do_vcard_dump)
+		    dump_vcards (output_stream, matches);
+		  else
+		    print_entries (output_stream, matches, do_long_listing);
+		}
 	    }
 
-	  matches = find_matches (database, "e-mail:", arg);
-	  if (matches != NIL)
+	  if (!do_vcard_dump || matches_found == 0)
 	    {
-	      matches_found += list_length (matches);
-	      print_entries (stdout, matches, do_long_listing);
+	      matches = find_matches (database, "e-mail:", arg);
+	      if (matches != NIL)
+		{
+		  matches_found += list_length (matches);
+
+		  if (do_vcard_dump)
+		    dump_vcards (output_stream, matches);
+		  else
+		    print_entries (output_stream, matches, do_long_listing);
+		}
 	    }
 	}
     }
+
   return (matches_found != 0);
 }
 
@@ -291,3 +324,173 @@ find_matches (WispObject *database, char *key, char *string)
   return (result);
 }
 
+static void
+dump_vcard (FILE *stream, WispObject *entry)
+{
+  char *contents;
+  char buffer[1024];
+
+  /* Build and print a vcard reference. */
+  fprintf (stream, "BEGIN:VCARD\nVERSION:2.1\n");
+  contents = sassoc ("name:", entry);
+
+  if (contents != (char *)NULL)
+    {
+      char *comma = strchr (contents, ',');
+
+      if (comma == (char *)NULL)
+	comma = strchr (contents, ' ');
+
+      if (comma != (char *)NULL)
+	{
+	  strncpy (buffer, contents, (comma - contents));
+	  buffer[comma - contents] = '\0';
+	  comma++;
+	  while (whitespace (*comma)) comma++;
+	  fprintf (stream, "N:%s;%s\r\n", buffer, comma);
+	  fprintf (stream, "FN:%s %s\r\n", comma, buffer);
+	}
+      else
+	{
+	  fprintf (stream, "N:%s\r\nFN:%s\r\n", contents, contents);
+	}
+
+      /* Get Company? */
+      contents = sassoc ("company:", entry);
+      if (contents != (char *)NULL)
+	fprintf (stream, "ORG:%s\r\n", contents);
+
+      /* Get Title? */
+      contents = sassoc ("title:", entry);
+      if (contents != (char *)NULL)
+	fprintf (stream, "TITLE:%s\r\n", contents);
+
+      /* Get work phone. */
+      contents = sassoc ("work:", entry);
+      if (contents == (char *)NULL)
+	contents = sassoc ("office:", entry);
+
+      if (contents != (char *)NULL)
+	fprintf (stream, "TEL;WORK;VOICE:%s\r\n", contents);
+
+      /* Get Fax. */
+      contents = sassoc ("fax:", entry);
+
+      if (contents != (char *)NULL)
+	fprintf (stream, "TEL;WORK;FAX:%s\r\n", contents);
+
+      /* Get cell phone. */
+      contents = sassoc ("cell:", entry);
+
+      if (contents == (char *)NULL)
+	contents = sassoc ("mobile:", entry);
+
+      if (contents != (char *)NULL)
+	fprintf (stream, "TEL;CELL;VOICE:%s\r\n", contents);
+
+      /* Get home phone. */
+      contents = sassoc ("home:", entry);
+
+      if (contents != (char *)NULL)
+	fprintf (stream, "TEL;HOME;VOICE:%s\r\n", contents);
+
+      /* Get full address. */
+      fprintf (stream, "ADR;HOME:;;");
+
+      /* Get Street. */
+      contents = sassoc ("street:", entry);
+      if (contents != (char *)NULL)
+	fprintf (stream, "%s", contents);
+
+      fprintf (stream, ";");
+
+      /* Get City. */
+      contents = sassoc ("city:", entry);
+      if (contents != (char *)NULL)
+	fprintf (stream, "%s", contents);
+
+      fprintf (stream, ";");
+
+      /* Get State. */
+      contents = sassoc ("state:", entry);
+      if (contents != (char *)NULL)
+	fprintf (stream, "%s", contents);
+
+      fprintf (stream, ";");
+
+      /* Get Zip. */
+      contents = sassoc ("zip:", entry);
+      if (contents != (char *)NULL)
+	fprintf (stream, "%s", contents);
+
+      fprintf (stream, ";");
+      fprintf (stream, "\r\n");
+
+
+      /* Get E-Mail address. */
+      contents = sassoc ("e-mail:", entry);
+
+      if (contents == (char *)NULL)
+	contents = sassoc ("email:", entry);
+
+      if (contents != (char *)NULL)
+	fprintf (stream, "EMAIL;PREF;INTERNET:%s\r\n", contents);
+    }
+
+  fprintf (stream, "END:VCARD\r\n");
+}
+
+void
+dump_vcards (FILE *stream, WispObject *list)
+{
+  while (list != NIL)
+    {
+      if (stream == (FILE *)NULL)
+	{
+	  char *value = sassoc ("name:", CAR (list));
+
+	  if (value != (char *)NULL)
+	    {
+	      register int i, j;
+	      char filename[1024];
+	      FILE *file = (FILE *)NULL;
+
+	      for (i = 0, j = 0; value[i]; i++)
+		{
+		  if (((value[i] >= 'a') && (value[i] <= 'z')) ||
+		      ((value[i] >= 'A') && (value[i] <= 'Z')) ||
+		      ((value[i] >= '0') && (value[i] <= '9')))
+		    {
+		      filename[j++] = value[i];
+		    }
+		  else
+		    {
+		      if ((j > 0) && (filename[j - 1] != '_'))
+			filename[j++] = '_';
+		    }
+		}
+
+	      if (j > 0)
+		while (j && (filename[j - 1] == '_')) j--;
+
+	      filename[j] = '\0';
+
+	      file = fopen (filename, "w");
+
+	      if (file != (FILE *)NULL)
+		{
+		  dump_vcard (file, CAR (list));
+		  fclose (file);
+		}
+	    }
+	}
+      else
+	{
+	  dump_vcard (stream, CAR (list));
+	  if (list != NIL)
+	    fprintf (stream, "\r\n");
+	}
+
+      list = CDR (list);
+    }
+}

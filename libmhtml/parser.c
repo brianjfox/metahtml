@@ -1485,8 +1485,9 @@ page_process_page_internal (PAGE *page)
 
 /* Evaluate the string BODY in the current environment, returning the results
    as a newly consed string, or NULL if BODY was NULL. */
-char *
-mhtml_evaluate_string (char *body)
+
+static char *
+mhtml_evaluate_string_1 (char *body, int top_level_p)
 {
   PAGE *evaluated;
   char *result = (char *)NULL;
@@ -1500,7 +1501,12 @@ mhtml_evaluate_string (char *body)
 
   {
     int lineno = parser_current_lineno;
-    page_process_page_internal (evaluated);
+
+    if (top_level_p)
+      page_process_page (evaluated);
+    else
+      page_process_page_internal (evaluated);
+
     parser_current_lineno = lineno;
   }
 
@@ -1536,6 +1542,18 @@ mhtml_evaluate_string (char *body)
     }
 
   return (result);
+}
+
+char *
+mhtml_top_level_eval (char *body)
+{
+  return (mhtml_evaluate_string_1 (body, 1));
+}
+
+char *
+mhtml_evaluate_string (char *body)
+{
+  return (mhtml_evaluate_string_1 (body, 0));
 }
 
 extern Symbol *

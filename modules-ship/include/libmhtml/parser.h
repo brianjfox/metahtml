@@ -318,9 +318,14 @@ extern Package *alist_to_package (char *string);
    no package name is associated with the variables. */
 extern char *package_to_alist (Package *package, int strip);
 
-/* Evaluate the string BODY in the current environment, returning the results
-   as a newly consed string, or NULL if BODY was NULL. */
+/* Evaluate the string BODY in the current environment, returning the
+   results as a newly consed string, or NULL if BODY was NULL. */
 extern char *mhtml_evaluate_string (char *body);
+
+/* Same as mhtml_evaluate_string (), but called when there really isn't
+   a page in the process of being parsed.  For example, the server process
+   might call this function while resolving a page that wasn't found. */
+extern char *mhtml_top_level_eval (char *body);
 
 /* Add or replace a function of TYPE with NAME, BODY in the
    *user-functions* package. The definition is modified by variable

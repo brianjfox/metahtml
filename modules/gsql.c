@@ -2530,7 +2530,7 @@ pf_database_delete_record (PFunArgs)
       !(empty_string_p (table)) &&
       !(empty_string_p (keyname)))
     {
-      gsql_field *keyfield;
+      gsql_field *keyfield = (gsql_field *)NULL;
       int status = -1;
       char escape_char = gsql_database_sql_escape_character (db);
       int truncate_p = gsql_database_sql_truncate_columns (db);

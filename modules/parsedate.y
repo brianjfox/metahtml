@@ -62,6 +62,7 @@ static int zone_found = 0;
 /* Tokens which are simply words, like "hours" and "from", or "ago". */
 %token t_YEARS t_MONTHS t_DAYS t_HOURS t_MINUTES t_SECONDS
 %token t_AT t_FROM t_AGO t_NOW t_NEXT t_LAST t_AM t_PM t_TH t_BEFORE t_AFTER
+%token t_CHRISTMAS t_EASTER t_THANKSGIVING t_CHANUKAH t_NEWYEARS
 
 /* More words, specific days, months, and timezones. */
 %token t_WEEKDAY t_MONTH t_DSTZONE t_NDSTZONE
@@ -191,6 +192,10 @@ date_spec:
 	    input_date.tm_mon = $3 - 1;
 	    input_date.tm_mday = $5;
 	    DEBUGGING_OUTPUT ("DATE_SPEC 4.11 (1999-03-04)\n");
+	}
+	| t_CHRISTMAS {
+	  input_date.tm_mon = 11;
+	  input_date.tm_mday = 25;
 	}
 	| t_WEEKDAY { }
 	| t_YEARNUM {
@@ -441,6 +446,10 @@ static WordLookup known_words[] =
   { "st",		t_TH,		0 },
   { "nd",		t_TH,		0 },
   { "rd",		t_TH,		0 },
+  { "christmas",	t_CHRISTMAS,	0 },
+  { "easter",		t_EASTER,	0 },
+  { "chanukah",		t_CHANUKAH,	0 },
+  { "thanksgiving",	t_THANKSGIVING,	0 },
 
   { "zone-start-marker", t_TH,		0 },
   { "gmt",	t_NDSTZONE,     HOUR( 0) }, /* Greenwich Mean */

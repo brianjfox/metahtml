@@ -1141,7 +1141,7 @@ binary contents, placing the result in <var varname>.")
       int length = 0;
 
       block->length = length / 2;
-      block->data = (char *)xmalloc (1 + length);
+      block->data = (char *)xmalloc (1 + block->length);
 
       for (i = 0; i < length - 1; i += 2)
 	{

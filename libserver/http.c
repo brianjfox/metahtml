@@ -566,14 +566,14 @@ mhttpd_find_page_for_result (HTTP_RESULT *result)
 	  {
 	    bprintf_insert (funname, 0, "<");
 	    bprintf (funname, ">");
-	    value = mhtml_evaluate_string (funname->buffer);
+	    value = mhtml_top_level_eval (funname->buffer);
 	  }
 	bprintf_free_buffer (funname);
       }
 
     if ((uf == (UserFunction *)NULL) &&
 	((uf = mhtml_find_user_function ("mhttpd::default-document")) != NULL))
-      value = mhtml_evaluate_string ("<mhttpd::default-document>");
+      value = mhtml_top_level_eval ("<mhttpd::default-document>");
   }
 
   if (!empty_string_p (value))
@@ -664,6 +664,8 @@ mhttpd_handle_empty_page (HTTP_RESULT *result)
 		      result_string);
       page_clean_up (result->page);
     }
+  else
+    result->result_code = res_MOVED_TEMPORARILY;
 }
 
 #if defined (NOT_USED)

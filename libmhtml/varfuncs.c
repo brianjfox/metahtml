@@ -1118,12 +1118,12 @@ hexval (char c)
   if (c == '7') return (7);
   if (c == '8') return (8);
   if (c == '9') return (9);
-  if (c == 'A') return (10);
-  if (c == 'B') return (11);
-  if (c == 'C') return (12);
-  if (c == 'D') return (13);
-  if (c == 'E') return (14);
-  if (c == 'F') return (15);
+  if ((c == 'A') || (c == 'a')) return (10);
+  if ((c == 'B') || (c == 'b')) return (11);
+  if ((c == 'C') || (c == 'c')) return (12);
+  if ((c == 'D') || (c == 'd')) return (13);
+  if ((c == 'E') || (c == 'e')) return (14);
+  if ((c == 'F') || (c == 'f')) return (15);
   return (0);
 }
 
@@ -1139,16 +1139,17 @@ binary contents, placing the result in <var varname>.")
     {
       Datablock *block = (Datablock *)xmalloc (sizeof (Datablock));
       int length = strlen (hex_string);
+      unsigned char *bdata;
 
       block->length = length / 2;
-      block->data = (char *)xmalloc (1 + block->length);
+      bdata = (unsigned char *)xmalloc (1 + block->length);
 
       for (i = 0; i < length - 1; i += 2)
 	{
-	  unsigned int value =
-	    (hexval (hex_string[i]) * 16) + hexval (hex_string[i + 1]);
-	  block->data[i / 2] = (char)(value & 0xff);
+	  bdata[i / 2] = (hexval (hex_string[i]) * 16) + hexval (hex_string[i + 1]);
 	}
+
+      block->data = (char *)bdata;
 
       {
 	Symbol *sym;

@@ -1138,7 +1138,7 @@ binary contents, placing the result in <var varname>.")
   if ((!empty_string_p (hex_string)) && !(empty_string_p (varname)))
     {
       Datablock *block = (Datablock *)xmalloc (sizeof (Datablock));
-      int length = 0;
+      int length = strlen (hex_string);
 
       block->length = length / 2;
       block->data = (char *)xmalloc (1 + block->length);

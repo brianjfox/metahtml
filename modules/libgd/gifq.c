@@ -32,11 +32,11 @@
 #include <string.h>
 #include <sys/types.h>
 #include <ctype.h>
+#include <errno.h>
 
 #include "gd.h"
 
 static void usage (char *);
-extern int errno;
 
 int
 main (int argc, char *argv[])

@@ -280,7 +280,13 @@ mysock_connect (char *dsn)
 	  char *dbhost = dsn_lookup ("host", dsn);
 	  char *user = dsn_lookup ("uid", dsn);
 	  char *pass = dsn_lookup ("pwd", dsn);
-	  MYSQL *sock = mysql_connect (NULL, dbhost, user, pass);
+	  MYSQL *sock;
+
+	  mysql_init (sock);
+
+	  if (sock != NULL)
+	    sock = mysql_real_connect
+	      (sock, dbhost, user, pass, NULL, 0, NULL, 0);
 
 	  if (sock != (MYSQL *)NULL)
 	    {
@@ -835,7 +841,9 @@ pf_host_databases (PFunArgs)
       host = strdup ("localhost");
     }
 
-  if ((sock = mysql_connect (NULL, host, NULL, NULL)) != NULL)
+  if ((mysql_init (sock) != NULL) &&
+      ((sock = mysql_real_connect
+	(sock, host, NULL, NULL, NULL, 0, NULL, 0)) != NULL))
     {
       MYSQL_RES *result = mysql_list_dbs (sock, NULL);
       int nrows = (result ? mysql_num_rows (result) : 0);

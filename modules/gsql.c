@@ -2113,21 +2113,8 @@ lookup_fieldname (char *name, gsql_result *result)
    We also need the field type to decide whether to use single
    quotes around the data values (for char type). */
 
-#define QUOTE_KEYVAL_IF_NEEDED \
-	if ((gsql_field_type (keyfield) == GSQL_CHAR) || \
-	    (gsql_field_type (keyfield) == GSQL_VARCHAR) || \
-	    (gsql_field_type (keyfield) == GSQL_BLOB) || \
-	    (gsql_field_type (keyfield) == GSQL_VAR_STRING) || \
-	    (gsql_field_type (keyfield) == GSQL_STRING)) \
-	  bprintf (query, "'")
-
-#define QUOTE_VALUE_IF_NEEDED(field) \
-	if ((gsql_field_type (field) == GSQL_CHAR) || \
-	    (gsql_field_type (field) == GSQL_VARCHAR) || \
-	    (gsql_field_type (field) == GSQL_VAR_STRING) || \
-	    (gsql_field_type (field) == GSQL_BLOB) || \
-	    (gsql_field_type (field) == GSQL_STRING)) \
-	  bprintf (query, "'")
+#define QUOTE_VALUE_IF_NEEDED(field) if (CHARTYPE (field)) bprintf (query, "'")
+#define QUOTE_KEYVAL_IF_NEEDED  QUOTE_VALUE_IF_NEEDED (keyfield)
 
 static void
 pf_database_save_record (PFunArgs)

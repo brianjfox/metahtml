@@ -655,11 +655,14 @@ gsql_connect (char *dsn, Database *db)
   db->dbname = dbname;
   db->hostname = dbhost;
 
+
   if ((dbhost != (char *) NULL) && (dbname != (char *)NULL))
     {
-      sock = mysql_connect (NULL, dbhost, user, pass);
+      if ((sock = mysql_init (NULL)) != NULL)
+	sock = mysql_real_connect (sock, dbhost, user, pass, NULL, 0, NULL, 0);
 
       db->sock = sock;
+
       if (sock != NULL)
 	{
 	  if (mysql_select_db (sock, dbname) == -1)
@@ -728,8 +731,10 @@ pf_host_databases (PFunArgs)
       xfree (host);
       host = strdup ("localhost");
     }
-
-  if ((sock = mysql_connect (NULL, host, NULL, NULL)) != NULL)
+  
+  if ((mysql_init (sock) != NULL) &&
+      ((sock = mysql_real_connect
+	(sock, host, NULL, NULL, NULL, 0, NULL, 0)) != NULL))
     {
       MYSQL_RES *result = mysql_list_dbs (sock, NULL);
       int nrows = (result ? mysql_num_rows (result) : 0);

@@ -85,10 +85,6 @@ clean: FORCE
 	for dir in $(SUBDIRS); do (cd $$dir; $(MAKE) $(PCFLAGS) clean); done
 
 distclean: FORCE
-	for dir in $(SUBDIRS); do (cd $$dir; $(MAKE) $(PCFLAGS) distclean); done
-	$(RM) Makefile
-
-distclean: FORCE
 	for dir in $(SUBDIRS); do (cd $$dir; $(MAKE) $(PCFLAGS) realclean); done
 	$(RM) Makefile
 

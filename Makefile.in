@@ -64,7 +64,7 @@ BASH_SHELL = @BASH_SHELL@
 bindir	= $(exec_prefix)/bin
 libdir	= $(exec_prefix)/lib
 docdir	= $(WEBBASEDIR)
-DOCPS	= doc/manual/metahtml.ps
+DOCPDF	= doc/manual/metahtml.pdf
 redhat_bin = /usr/bin
 redhat_lib = /usr/lib/metahtml
 redhat_sbin= /usr/sbin
@@ -254,7 +254,7 @@ realclean: clean
 	$(RM) -f Install install-bin install-site
 	$(RM) -rf $(DISTNAME).tgz
 	$(RM) -f doc/manual/metahtml.dvi doc/manual/metahtml.newaux
-	$(RM) -f doc/manual/metahtml.ps doc/manual/metahtml.texi
+	$(RM) -f doc/manual/metahtml.pdf doc/manual/metahtml.texi
 	$(RM) -f doc/manual/page-counts.db doc/manual/page-counts.db.packed
 
 distclean: realclean
@@ -336,8 +336,8 @@ CODEDISTNAME = $(PACKNAME)-code-$(PACKVER).$(SUBVER)
 $(DISTNAME).tgz: $(EXECUTABLES)
 	$(MAKE) dist
 
-$(DOCPS):
-	(cd doc/manual; if [ ! -f ./metahtml.ps ]; then ./build-ps; fi)
+$(DOCPDF):
+	(cd doc/manual; if [ ! -f ./metahtml.pdf ]; then ./build-pdf; fi)
 
 dist: DISTFILES
 	(cd doc; $(MAKE) dist)
@@ -372,6 +372,7 @@ DISTFILES: FORCE
 		/\/\.gdbinit$$/d; \
 		/\/\.mdb_init$$/d; \
 		/\/\.ps$$/d; \
+		/\/\.pdf$$/d; \
 		/\/\.dvi$$/d; \
 		/\/.*\.BAK$$/d; \
 		/\/TAGS$$/d; \
@@ -502,14 +503,14 @@ newrpm new-rpm: FORCE
 	$(RM) -rf $(DISTNAME).tgz BUILDROOT support/metahtml.spec
 	$(MAKE) rpm
 
-rpm:  $(DISTNAME).tgz BUILDROOT support/metahtml.spec RPM-RELEASE $(DOCPS)
+rpm:  $(DISTNAME).tgz BUILDROOT support/metahtml.spec RPM-RELEASE $(DOCPDF)
 	$(CP) support/metahtml.spec BUILDROOT/SPECS/$(DISTNAME).spec
 	(cd BUILDROOT/SOURCES; \
-	 $(RM) -f $(DISTNAME).tgz metahtml.ps; \
+	 $(RM) -f $(DISTNAME).tgz metahtml.pdf; \
 	 $(LN) -s ../../$(DISTNAME).tgz .; \
-	 $(LN) -s ../../doc/manual/metahtml.ps .)
+	 $(LN) -s ../../doc/manual/metahtml.pdf .)
 	(topdir=`pwd`/BUILDROOT; export topdir; \
 	 cd BUILDROOT; \
-	 rpm $(i386_RPM_ARGS) -ba SPECS/$(DISTNAME).spec)
+	 rpmbuild $(i386_RPM_ARGS) -ba SPECS/$(DISTNAME).spec)
 
 FORCE:

@@ -39,7 +39,7 @@ dist: FORCE
 
 distclean realclean clean: FORCE
 	$(RM) *~ */*.db */*.db.packed
-	(cd manual; $(RM) metahtml.dvi metahtml.newaux metahtml.ps \
-		          metahtml.texi metahtml.ljet*)
+	(cd manual; $(RM) metahtml.dvi metahtml.newaux metahtml.pdf \
+		          metahtml.ps metahtml.texi metahtml.ljet*)
 
 FORCE:

@@ -151,6 +151,8 @@ extern Package *CurrentPackage;
 
 /* The list of every package. */
 extern Package **AllPackages;
+extern int AP_index;
+extern int AP_slots;
 
 /* An array of recently current packages.  The packages get on this list
    with symbol_push_package (new_package), and are removed with

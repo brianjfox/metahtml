@@ -1008,14 +1008,15 @@ stream_read_chunk (Stream *stream, int length)
 	  buffer_index += bytes_read;
 	  bytes_left -= bytes_left;
 	}
+      else if ((bytes_read < 0) && (errno == EINTR))
+	{
+	  continue;
+	}
       else
 	{
 	  done = 1;
 	  stream->type = stream_CLOSED;
 	}
-
-      if (bytes_left == 0)
-	done = 1;
     }
 
   alarm (0);

@@ -107,6 +107,12 @@ main (int argc, char *argv[])
 	{
 	  output_stream = (FILE *)NULL;
 	}
+      else if ((strcmp (arg, "-h") == 0) || (strcmp (arg, "--help") == 0))
+	{
+	  fprintf (stderr,
+		   "Usage: phone [-l] [--vcard [--separate-files]] name...\n");
+	  return (0);
+	}
       else
 	{
 	  WispObject *matches;
@@ -473,6 +479,10 @@ dump_vcards (FILE *stream, WispObject *list)
 	      if (j > 0)
 		while (j && (filename[j - 1] == '_')) j--;
 
+	      filename[j++] = '.';
+	      filename[j++] = 'v';
+	      filename[j++] = 'c';
+	      filename[j++] = 'f';
 	      filename[j] = '\0';
 
 	      file = fopen (filename, "w");

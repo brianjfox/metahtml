@@ -2113,7 +2113,10 @@ lookup_fieldname (char *name, gsql_result *result)
    We also need the field type to decide whether to use single
    quotes around the data values (for char type). */
 
-#define QUOTE_VALUE_IF_NEEDED(field) if (CHARTYPE (field)) bprintf (query, "'")
+#define QUOTE_VALUE_IF_NEEDED(field) \
+   do { if (!CHARTYPE (field) && !BLOBTYPE (field)) bprintf (query, "'"); } \
+   while (0)
+
 #define QUOTE_KEYVAL_IF_NEEDED  QUOTE_VALUE_IF_NEEDED (keyfield)
 
 static void

@@ -658,7 +658,7 @@ gsql_connect (char *dsn, Database *db)
 
   if ((dbhost != (char *) NULL) && (dbname != (char *)NULL))
     {
-      if ((sock = mysql_init (NULL)) != NULL)
+      if ((sock = mysql_init ((MYSQL *)NULL)) != NULL)
 	sock = mysql_real_connect (sock, dbhost, user, pass, NULL, 0, NULL, 0);
 
       db->sock = sock;
@@ -732,7 +732,7 @@ pf_host_databases (PFunArgs)
       host = strdup ("localhost");
     }
   
-  if ((mysql_init (sock) != NULL) &&
+  if (((sock = mysql_init ((MYSQL *)NULL)) != NULL) &&
       ((sock = mysql_real_connect
 	(sock, host, NULL, NULL, NULL, 0, NULL, 0)) != NULL))
     {

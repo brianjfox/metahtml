@@ -1,0 +1,60 @@
+#!../../mhc/mhc
+;;; build-pdf: -*- Meta-HTML -*-  Build an Adobe version of the Manual.
+;;;
+;;; Copyright (c) 1996 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sat Nov  2 09:50:54 1996.
+<set-var mhc::explicit-output-only=true>
+
+<defun print &body body>
+  <mhc::print "<get-var-once body>\n">
+</defun>
+
+<set-var continue=true output-stream=metahtml.texi dvifile=metahtml.dvi>
+
+;;; Make this environment look just like the canonical source one.
+<include canonical-source.mhtml>
+
+<when <or <file-newer? functions.db metahtml.texi>
+	  <file-newer? sections.db metahtml.texi>
+	  <file-newer? texinfo.mhtml metahtml.texi>
+	  <file-newer? build-ps metahtml.texi>
+	  <file-newer? make-printable.mhtml metahtml.texi>>>
+  <print Building metahtml.texi from the existing databases...>
+  <set-var bps::output =
+    <include make-printable.mhtml
+	     alt = <concat
+		     <print "Cannot Find make-printable.mhtml!">
+		     <unset-var continue>>>>
+</when>
+
+<when <get-var continue>>
+  <unset-var *meta-html*::redirect>
+  <print Running TeX for the first time...>
+  <cgi-exec tex <get-var output-stream> "<returns">
+  <print <system-error-output retrieve clear>>
+  <print Running texindex...>
+  <cgi-exec texindex metahtml.??>
+  <print <system-error-output retrieve clear>>
+  ;;; Now, add the variable definitions to the xref file.
+  <set-var data=<include metahtml.fns verbatim>>
+  <subst-in-var data "\\\\initial[^\n]+\n" "">
+  <subst-in-var data "\\\\entry \\{\\\\code" "'xrdef">
+  <subst-in-var data "\\}\\}\\{" "-pg}{">
+  <with-open-stream s metahtml.aux type=file mode=append>
+    <stream-put s <get-var data>>
+  </with-open-stream>
+  <print <system-error-output retrieve clear>>
+  <cgi-exec cp metahtml.aux metahtml.newaux>
+  <print <system-error-output retrieve clear>>
+  <print Running TeX for the second time...>
+  <cgi-exec tex <get-var output-stream> "<returns">
+  <print <system-error-output retrieve clear>>
+  <print Running dvipdf <get-var dvifile> metahtml.pdf...>
+  <cgi-exec dvipdf <get-var dvifile> metahtml.pdf>
+  <print <system-error-output retrieve clear>>
+  <print Deleting intermediate files...>
+  <cgi-exec rm *.aux *.cp *.fn *.fns *.ky *.kys *.log *.pg *.pgs
+	    *.toc *.tp *.tps *.vr *.vrs *.cps>
+  <print <system-error-output retrieve clear>>
+  <print Done.>
+</when>

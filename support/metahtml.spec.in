@@ -81,9 +81,7 @@ fi
 exit 0
 %build
 cd $RPM_BUILD_DIR/DISTNAME
-if [ ! -f ./Makefile ]; then
- ./configure;
-fi
+./configure --with-mysql
 make
 make RPM-RELEASE
 %install
@@ -136,7 +134,7 @@ scripts="$scripts gc-sessions mysql-user.mhc"
 lib_files="example.so directory.so logs.so parser.so timer.so profiler.so"
 lib_files="$lib_files elsewhen.so serverfuncs.so modperl.so csv.so"
 lib_files="$lib_files modmath.so modstat.so modimage.so moddate.so modecho.so"
-lib_files="$lib_files modsyslog.so modsession.so modmd5.so"
+lib_files="$lib_files modsyslog.so modsession.so modmd5.so modhtml.so"
 lib_files="$lib_files modmachine.so modcompiler.so"
 lib_files="$lib_files session-server"
 
@@ -379,6 +377,7 @@ exit 0
 /usr/lib/metahtml/moddate.so
 /usr/lib/metahtml/modsession.so
 /usr/lib/metahtml/modmd5.so
+/usr/lib/metahtml/modhtml.so
 /usr/lib/metahtml/modecho.so
 /usr/lib/metahtml/modsyslog.so
 /usr/lib/metahtml/session-server

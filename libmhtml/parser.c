@@ -2808,7 +2808,7 @@ mhtml_funargs (Package *pack)
 	  if ((values[i] != (char *)NULL) && (values[i][0] != '\0'))
 	    {
 	      /* Place quotes around this string on the way out. */
-	      bprintf (string, "%s=\"%s\"", names[i], values[i]);
+	      bprintf (string, "%s=%s", names[i], quote_for_setvar(values[i]));
 	    }
 	  else
 	    {

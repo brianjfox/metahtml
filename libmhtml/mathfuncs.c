@@ -887,10 +887,10 @@ Examples:
       start += strlen (fname);
       if (funargs != (char *)NULL)
 	{
-	  bprintf_insert (page, " %s", funargs);
+	  bprintf_insert (page, start, " %s", funargs);
 	  start += strlen (funargs);
 	}
-      bprintf_insert (page, ">");
+      bprintf_insert (page, start, ">");
       *newstart = ++start;
     }
   else

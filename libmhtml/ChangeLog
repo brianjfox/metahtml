@@ -1,3 +1,11 @@
+2002-07-15  Brian J. Fox  <bfox@ua.com>
+
+	* mathfuncs.c (pf_div): Don't output extra space if none present.
+	Use the exact case of the input function name, instead of "DIV".
+
+	* parser.c (mhtml_funargs): Use quote_for_setvar () to ensure that
+	the quoting takes place correctly.
+
 2001-02-01  Brian J. Fox  <bfox@ua.com>
 
 	* powerstrip-tags/pagelist.mhtml (def-pagelist): Use "strip=true"

@@ -17,7 +17,7 @@
   ENV::REMOTE_USER = ""
   ENV::REQUEST_METHOD = "GET"
   ENV::SCRIPT_NAME = "make-printable.mhtml"
-  ENV::SERVER_NAME = localhost.metahtml.com
+  ENV::SERVER_NAME = localhost.metahtml.org
   ENV::SERVER_PORT = 80
   ENV::SERVER_PROTOCOL = HTTP/1.0
   ENV::SERVER_SOFTWARE = MHttpd/3.2 (UAI; i386-linux; Meta-HTML/5.01)
@@ -32,11 +32,11 @@
   MHTML::CURRENT-URL-SANS-SID = "/meta-html/manual/make-printable.mhtml"
   MHTML::DOCUMENT-ROOT = "/www/localhost/docs"
   MHTML::EPILOGUE-DOCUMENT = "/www/localhost/epilogue.mhtml"
-  MHTML::FULL-URL = "http://localhost.metahtml.com/meta-html/manual/make-printable.mhtml"
-  MHTML::FULL-URL-SANS-SID = "http://localhost.metahtml.com/meta-html/manual/make-printable.mhtml"
-  MHTML::HTTP-PREFIX = "http://localhost.metahtml.com"
-  MHTML::HTTP-PREFIX-SANS-SID = "http://localhost.metahtml.com"
-  MHTML::HTTP-TO-HOST = "http://localhost.metahtml.com"
+  MHTML::FULL-URL = "http://localhost.metahtml.org/meta-html/manual/make-printable.mhtml"
+  MHTML::FULL-URL-SANS-SID = "http://localhost.metahtml.org/meta-html/manual/make-printable.mhtml"
+  MHTML::HTTP-PREFIX = "http://localhost.metahtml.org"
+  MHTML::HTTP-PREFIX-SANS-SID = "http://localhost.metahtml.org"
+  MHTML::HTTP-TO-HOST = "http://localhost.metahtml.org"
   ;;; MHTML::INCLUDE-PREFIX = "/www/localhost/docs"
   ;;; MHTML::RELATIVE-PREFIX = "/meta-html/manual"
   MHTML::LOCATION = "/meta-html/manual/make-printable.mhtml"
@@ -44,6 +44,6 @@
   MHTML::METAHTML-EXTENSIONS = ".mhtml"
   MHTML::MHTTPD-PAGES = "/www/localhost/mhttpd-pages"
   MHTML::PROLOGUE-DOCUMENT = "/www/localhost/prologue.mhtml"
-  MHTML::SERVER-NAME = "localhost.metahtml.com"
-  MHTML::URL-TO-DIR = "http://localhost.metahtml.com/meta-html/manual"
-  MHTML::URL-TO-DIR-SANS-SID = "http://localhost.metahtml.com/meta-html/manual">
+  MHTML::SERVER-NAME = "localhost.metahtml.org"
+  MHTML::URL-TO-DIR = "http://localhost.metahtml.org/meta-html/manual"
+  MHTML::URL-TO-DIR-SANS-SID = "http://localhost.metahtml.org/meta-html/manual">

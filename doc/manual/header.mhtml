@@ -10,7 +10,7 @@
     author-name="Brian J. Fox"
     the-author=<get-var author-name>
     author-email="bfox@ai.mit.edu"
-    author-url="http://www.metahtml.com/~bfox/"
+    author-url="http://www.metahtml.org/~bfox/"
     manual-ref=<concat <a href="welcome.mhtml">
 		       "The <meta-html> Language Reference Manual"
 		       </a>>>

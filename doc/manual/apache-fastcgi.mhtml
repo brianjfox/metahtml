@@ -17,8 +17,8 @@
     <Meta-HTML> as a <a href="http://www.fastcgi.com/">FastCGI</a>
     application is to download the <Meta-HTML> Apache FastCGI Kit from
 
-    <a href="ftp://ftp.metahtml.com/APACHE-FASTCGI/metahtml-apache-kit.tar.gz">
-      <code>ftp://ftp.metahtml.com/APACHE-FASTCGI/metahtml-apache-kit.tar.gz</code></a>
+    <a href="ftp://ftp.metahtml.org/APACHE-FASTCGI/metahtml-apache-kit.tar.gz">
+      <code>ftp://ftp.metahtml.org/APACHE-FASTCGI/metahtml-apache-kit.tar.gz</code></a>
 
     Unpack the file, and follow the instructions found in the
     <code>INSTALL</code> file.
@@ -40,8 +40,8 @@
       <code>ftp://ftp.apache.org/apache/dist/</code></a>, which is
     where the latest releases are stored.  We maintain a mirror of
     this version at
-    <a href="ftp://ftp.metahtml.com/pub/APACHE-FASTCGI/apache_1.2.4.tar.gz">
-    <code>ftp://ftp.metahtml.com/pub/APACHE-FASTCGI/apache_1.2.4.tar.gz</code></a>.
+    <a href="ftp://ftp.metahtml.org/pub/APACHE-FASTCGI/apache_1.2.4.tar.gz">
+    <code>ftp://ftp.metahtml.org/pub/APACHE-FASTCGI/apache_1.2.4.tar.gz</code></a>.
     </step>
     
     <step "Download apache-fastcgi.tar.Z">

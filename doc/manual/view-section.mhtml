@@ -96,7 +96,7 @@
 </when>
 
 <p>
-<when <not <string-eq <get-var env::server_name> "www.metahtml.com">>>
+<when <not <string-eq <get-var env::server_name> "www.metahtml.org">>>
   <a href="create-section.mhtml?<cgi-encode key>">
     Edit Section
   </a>

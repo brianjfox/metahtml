@@ -19,7 +19,7 @@
     This manual is not a tutorial, or user guide.  There is a project
     underway to create such tools -- a short web-based tutorial exists at
     <url http://www.metahtml.org/tutorial>; there are code examples at
-    <url http://www.metahtml.com/examples>; there is a complete function
+    <url http://www.metahtml.org/examples>; there is a complete function
     index at <url function-index.mhtml>.
 
     I have tried to lay the manual out so that it can be viewed from
@@ -32,8 +32,8 @@
 
     Comments and/or suggestions for improvement on this manual, the
     language definition, or writing style(!!) should be sent to
-    <a href="mailto:bug-manual@metahtml.com">
-    <b>bug-manual@metahtml.com</b></a>.
+    <a href="mailto:bug-manual@metahtml.org">
+    <b>bug-manual@metahtml.org</b></a>.
   </ptext>
 
   ;;;

@@ -666,6 +666,9 @@ engine_make_request (void)
   pagefunc_set_variable ("env::remote_ident", temp);
   pagefunc_set_variable ("mhtml::remote-ident", temp);
 
+  temp = (char *)getenv ("HTTP_HOST");
+  pagefunc_set_variable ("env::http_host", temp);
+
 #if defined (BUILDING_WITH_FAST_CGI)
   /* Now set our local variables. */
   temp = (char *)getenv ("SERVER_NAME");

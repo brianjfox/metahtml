@@ -18,7 +18,7 @@ Packager:     bfox@metahtml.com
 Version:      PACKVER.SUBVER
 Summary:      A programming language for building Web applications
 Source:	      ftp.metahtml.com:/pub/GNU/DISTNAME.tgz
-Buildroot:    {BUILDROOT}
+Buildroot:    BUILDROOT
 
 %description
 Meta-HTML is a programming language specifically designed for working

@@ -12,7 +12,7 @@
 <set-var
  mhtml::author-name="Brian J. Fox"
  mhtml::author-email="bfox@ua.com"
- mhtml::author-url="http://www.metahtml.com/~bfox/"
+ mhtml::author-url="http://www.metahtml.org/~bfox/"
  mhtml::manual-ref =
  <concat <a href="manual/">
 	 <prog The <meta-html> Language Reference Manual>

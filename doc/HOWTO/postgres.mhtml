@@ -22,14 +22,14 @@
       <li> Download the OpenLink Request Broker from either
            <a href="http://www.openlinksw.com">OpenLink's site</a>, or
            from <a
-           href="ftp://ftp.metahtml.com/pub/OPENLINK/glibc21-openlink-rqb.tar.gz">
+           href="ftp://ftp.metahtml.org/pub/OPENLINK/glibc21-openlink-rqb.tar.gz">
            the Meta-HTML site</a>.
 
       <li> Download the driver for PostGreSQL (this is called
       pgr95_srv) from either <a
       href="ftp://ftp.openlinksw.com/open40/l3adg95.taz">OpenLink's
       site</a>, or from <a
-      href="ftp://ftp.metahtml.com/pub/OPENLINK/glibc21-postgres-driver-6.3.tar.gz">the
+      href="ftp://ftp.metahtml.org/pub/OPENLINK/glibc21-postgres-driver-6.3.tar.gz">the
       Meta-HTML site</a>.
 
       <li> Create a user called "postgres":
@@ -90,12 +90,12 @@
       <code>root@machine$<b> psql -U postgres mydb</b><br>
       mydb=# <b>create table foo ( username varchar(16), email varchar(100), age int );</b><br>
       CREATE<br>
-      mydb=# <b>insert into foo values ('bfox', 'bfox@metahtml.com', 41);</b><br>
+      mydb=# <b>insert into foo values ('bfox', 'bfox@metahtml.org', 41);</b><br>
       INSERT 18923 1<br>
       mydb# <b>select * from foo;</b><br>
       username |       email       | age <br>
       ----------+-------------------+-----<br>
-      bfox     | bfox@metahtml.com |  41<br>
+      bfox     | bfox@metahtml.org |  41<br>
       (1 row)</code>
 
       <li> Edit the file <code>/home/openlink/bin/oplrqb.ini</code> commenting
@@ -117,7 +117,7 @@
         "select * from foo"&gt;<br>
       &lt;/sql::with-open-database&gt;</b><br>
       (mdb)<b> p results[]</b><br>
-      (("AGE"&nbsp;.&nbsp;"41")("USERNAME"&nbsp;.&nbsp;"bfox")("EMAIL"&nbsp;.&nbsp;"bfox@metahtml.com"))<br>
+      (("AGE"&nbsp;.&nbsp;"41")("USERNAME"&nbsp;.&nbsp;"bfox")("EMAIL"&nbsp;.&nbsp;"bfox@metahtml.org"))<br>
       (mdb)<b> &lt;alist-get-var results[0] username&gt;</b><br>
       bfox
       </code>

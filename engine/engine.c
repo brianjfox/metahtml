@@ -752,7 +752,7 @@ engine_make_request (void)
 #if (BUILDING_WITH_FAST_CGI)
 	/* When we are using the losing OpenMarket FCGI library, there
 	   isn't a single clean way to simply pass a file descriptor off
-	   to our previously build libraries.  This just totally sucks.
+	   to our previously built libraries.  This just totally sucks.
 
 	   If we pass off the socket file descriptor, it is possible that
 	   the over-zealous buffering of the Open Market code will have

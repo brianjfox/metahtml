@@ -1142,6 +1142,30 @@ DEFUN (pf_lang_message,  &key en de fr it es &rest message,
 " This function uses the value of <tag lang::current-language>
  to select a language, and then calls <var message> with that choice.
 ")
+DOC_SECTION (MISCELLANEOUS-TAGS)
+DEFMACRO (pf_layout_checkboxes,  :varname :limit &body body,
+" Call like:
+ <example code>
+ <layout-checkboxes name [columns]>
+    Checkbox Label 1
+    Checkbox Label 2
+    ...
+ </layout;checkboxes>
+ </example>
+ COLUMNS defaults to 3 if not specified.
+")
+DOC_SECTION (MISCELLANEOUS-TAGS)
+DEFMACRO (pf_layout_radiobuttons,  :varname :limit &body body,
+" Call like:
+ <example code>
+ <layout-radiobuttons name [columns]>
+    Checkbox Label 1
+    Checkbox Label 2
+    ...
+ </layout;checkboxes>
+ </example>
+ COLUMNS defaults to 3 if not specified.
+")
 DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
 DEFUN (pf_layout::clear_contents, ,
 " Discard any content that has been previously assigned to the

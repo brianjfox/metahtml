@@ -878,8 +878,20 @@ Examples:
      not us. */
   if (get_positional_arg (vars, 0) == (char *)NULL)
     {
-      bprintf_insert (page, start, "<DIV %s>", mhtml_funargs (vars));
-      *newstart += 4;
+      char *funargs = mhtml_funargs (vars);
+#if !defined (FNAME_ARG)
+      char *fname = "Div";
+#endif
+
+      bprintf_insert (page, start, "<%s", fname);
+      start += strlen (fname);
+      if (funargs != (char *)NULL)
+	{
+	  bprintf_insert (page, " %s", funargs);
+	  start += strlen (funargs);
+	}
+      bprintf_insert (page, ">");
+      *newstart = ++start;
     }
   else
     {

@@ -884,11 +884,11 @@ Examples:
 #endif
 
       bprintf_insert (page, start, "<%s", fname);
-      start += strlen (fname);
+      start += 1 + strlen (fname);
       if (funargs != (char *)NULL)
 	{
 	  bprintf_insert (page, start, " %s", funargs);
-	  start += strlen (funargs);
+	  start += 1 + strlen (funargs);
 	}
       bprintf_insert (page, start, ">");
       *newstart = ++start;

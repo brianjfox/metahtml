@@ -891,7 +891,7 @@ Examples:
 	  start += 1 + strlen (funargs);
 	}
       bprintf_insert (page, start, ">");
-      *newstart = ++start;
+      *newstart += 4;
     }
   else
     {

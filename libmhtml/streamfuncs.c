@@ -899,16 +899,44 @@ stream_read (Stream *stream, char char_to_stop_at)
 		read_result = -1;
 	      else
 		{
-		  buffer = (char *)
-		    xrealloc (buffer, (buffer_size = 1 + (int)finfo.st_size));
-		  buffer[0] = '0';
-		  read_result = read (stream->fd, buffer, buffer_size);
-		  done = 1;
-
-		  if (read_result > -1)
+		  if (finfo.st_size == 0)
 		    {
-		      buffer_index = read_result;
-		      buffer[buffer_index] = '\0';
+		      /* Likely reading from stdin til eof.
+			 Do it in 32k chunks. */
+		      int bits_size = 20 * 1024;
+
+		      while (!done)
+			{
+			  if ((buffer_index + bits_size) >= buffer_size)
+			    {
+			      buffer = (char *)
+				xrealloc (buffer, (buffer_size += bits_size));
+			    }
+
+			  read_result = read
+			    (stream->fd, buffer + buffer_index, bits_size);
+
+			  if (read_result > 0)
+			    {
+			      buffer_index += read_result;
+			    }
+			  else
+			    done = 1;
+			}
+		    }
+		  else
+		    {
+		      buffer = (char *)xrealloc
+			(buffer, (buffer_size = 1 + (int)finfo.st_size));
+		      buffer[0] = '0';
+		      read_result = read (stream->fd, buffer, buffer_size);
+		      done = 1;
+
+		      if (read_result > -1)
+			{
+			  buffer_index = read_result;
+			  buffer[buffer_index] = '\0';
+			}
 		    }
 		}
 	    }

@@ -233,7 +233,9 @@ rigidly along with this one."
      "frameset" "msql::with-open-database" "odbc::with-open-database"
      "sql::with-open-database" "dbm::with-open-database" "def-pagelist"
      "defweakmacro" "with-safe-environment" "tab-menu" "tdbox" "description"
-     "tdbox" "config::information-item" "define-db-form")
+     "tdbox" "config::information-item" "define-db-form" "soap:envelope" "soap:body"
+     "EscalatingMessageRequest" "application" "authorization" "accountNumber" "senderToken"
+     "destination" "item" "message" "text" "button" "list" "selections")
   "List of tag starts which are complex.")
 
 (defconst mhtml-complex-tag-start-regex

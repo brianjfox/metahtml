@@ -136,6 +136,7 @@
 <include tagsets/session.mhtml>
 <include tagsets/locale.mhtml>
 <include tagsets/sendmail.mhtml>
+<include tagsets/nntp.mhtml>
 <include tagsets/this.mhtml>
 <include tagsets/math.mhtml>
 <include tagsets/characters.mhtml>

@@ -1477,6 +1477,43 @@ DEFUN (pf_navbar::use_navbar,  name navinfo[],
  Undocumented by intent.  This interface is not complete yet.
 ")
 DOC_SECTION (MISCELLANEOUS-TAGS)
+DEFUN (pf_nntp::clear_logs, ,
+" Clear all existing log files, resetting the state to null.
+")
+DOC_SECTION (MISCELLANEOUS-TAGS)
+DEFUN (pf_nntp::converse,  stream statement,
+" Converse with the NNTP server located at the other end of STREAM,
+ which is currently open for reading and writing.  Tell STATEMENT,
+ and read status.  Append conversation to NNTP::LOG.
+ If there is an error, put the error in NNTP::RECENT-ERROR, and
+ return the empty string, otherwise return the result code.
+")
+DOC_SECTION (MISCELLANEOUS-TAGS)
+DEFUN (pf_nntp::next_message_id, ,
+" Returns the next message ID from the database.  Side effects the
+ database by incremented the message ID.
+")
+DOC_SECTION (MISCELLANEOUS-TAGS)
+DEFUN (pf_nntp::post,  &key from subject group content,
+" Post an article from the user FROM (defaults to NNTP::USER) with
+ SUBJECT (defaults to \"No subject...\" to GROUP, consisting of
+ CONTENT.  Returns \"true\" if successful, or the empty string if
+ not.  If unsuccessful, the error and reason are in
+ NNTP::RECENT-ERROR.
+")
+DOC_SECTION (MISCELLANEOUS-TAGS)
+DEFUN (pf_nntp::server,  &optional server-name,
+" Set or get the current news server.
+")
+DOC_SECTION (MISCELLANEOUS-TAGS)
+DEFUN (pf_nntp::tell,  stream statement,
+" Just send STATEMENT down STREAM, and don't read back from it.
+")
+DOC_SECTION (MISCELLANEOUS-TAGS)
+DEFUN (pf_nntp::user,  &optional user-name,
+" Set or get the current default news user.
+")
+DOC_SECTION (MISCELLANEOUS-TAGS)
 DEFUN (pf_number_to_english,  value,
 " Take the numeric value of VALUE and produce an English representation
  of it.  For example:

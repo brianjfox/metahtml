@@ -127,7 +127,7 @@ STANDARD_TAGS = standard.mhtml \
 	$(T)/form-to-database.mhtml $(T)/general.mhtml $(T)/locale.mhtml \
 	$(T)/menus.mhtml $(T)/message.mhtml $(T)/forms.mhtml \
 	$(T)/mhttpd.mhtml $(T)/numbers.mhtml $(T)/pagecount.mhtml \
-	$(T)/date-time.mhtml $(T)/sendmail.mhtml \
+	$(T)/date-time.mhtml $(T)/sendmail.mhtml $(T)/nntp.mhtml \
 	$(T)/session.mhtml $(T)/source.mhtml $(T)/this.mhtml $(T)/math.mhtml \
 	$(T)/parser.mhtml $(T)/form-to-database.mhtml $(T)/lang.mhtml \
 	$(T)/http.mhtml $(T)/sql.mhtml $(T)/pagelist.mhtml \

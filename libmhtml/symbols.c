@@ -78,8 +78,8 @@ typedef struct
 
 /* The list of all created packages. */
 Package **AllPackages = (Package **)NULL;
-static int AP_index = 0;
-static int AP_slots = 0;
+int AP_index = 0;
+int AP_slots = 0;
 
 /* Default number of slots for a symbol table.  Some callers
    may want to change this if they create a large number of
@@ -363,7 +363,7 @@ symbol_pop_package (void)
     }
 }
 
-static void
+void
 package_pdl_remove (Package *package)
 {
   register int i;

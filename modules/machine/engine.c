@@ -966,6 +966,31 @@ mh_machine_format (mh_object_t *sp,
  */
 static unsigned int mh_welcome_entry_count = 0;
 
+static int
+mh_object_is_empty_p (mh_object_t object)
+{
+  int empty = 0;
+
+  if (MH_EMPTY_P (object))
+    empty++;
+  else if (MH_STRING_P (object))
+    empty = ! (MH_STRING_LENGTH (MH_AS_STRING (object)));
+  else if (MH_VECTOR_P (object))
+    {
+      int l = MH_VECTOR_LENGTH (MH_AS_VECTOR (object));
+
+      if (l == 0)
+	empty++;
+      else if (l == 1)
+	{
+	  if (MH_EMPTY_P (MH_VECTOR_VALUES (MH_AS_VECTOR (object))[0]))
+	    empty++;
+	}
+    }
+
+  return (empty);
+}
+
 static mh_object_t
 mh_welcome_to_the_machine_internal (mh_tag_t      tag,
 				    mh_object_t  *args,
@@ -1260,7 +1285,11 @@ mh_welcome_to_the_machine_internal (mh_tag_t      tag,
 
 	case MH_JUMP_IF_FALSE_OP:
 	  object = STACK_POP ();
+#if 0
 	  if (MH_EMPTY_P (object)) /* MH_FALSE_P (object) */
+#else
+	    if (mh_object_is_empty_p (object))
+#endif
 	    {
 	      cp = code + 256 * OPERAND (1) + OPERAND (2);
 	      break;

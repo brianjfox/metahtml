@@ -282,8 +282,9 @@ gsql_save_error_message (Database *db, char *msg)
 static int
 gsql_number_of_rows (gsql_result *result)
 {
-  if (result && result->mysql_result && result->mysql_result->handle)
-    return (result->mysql_result->handle->affected_rows);
+  if ((result != (gsql_result *)NULL) &&
+      (result->mysql_result != (MYSQL_RES *)NULL))
+    return (mysql_num_rows (result->mysql_result));
   else
     return (0);
 }

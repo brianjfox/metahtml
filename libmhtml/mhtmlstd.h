@@ -140,11 +140,13 @@
 #include <signal.h>
 
 #include <setjmp.h>
-#if !defined (HAVE_REGEX_H)
-#  include <regex/regex.h>
-#else
-#  include <regex.h>
-#endif
+#if !defined (NO_REGEX_H)
+#  if !defined (HAVE_REGEX_H)
+#    include <regex/regex.h>
+#  else
+#    include <regex.h>
+#  endif
+#endif /* NO_REGEX_H */
 #include <bprintf/bprintf.h>
 #include <xmalloc/xmalloc.h>
 #include <tcp/tcp.h>

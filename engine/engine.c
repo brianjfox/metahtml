@@ -527,8 +527,17 @@ find_config_file (void)
 static void
 usage (void)
 {
-  fprintf (stderr, "Usage: %s --config config-path\n", progname);
-  exit (1);
+  if ((char *)getenv ("SCRIPT_NAME"))
+    {
+      fprintf (stdout, "Content-type: text/plain\n\n");
+      fprintf (stdout, "I'm not digging you, man");
+      exit (0);
+    }
+  else
+    {
+      fprintf (stderr, "Usage: %s --config config-path\n", progname);
+      exit (1);
+    }
 }
 
 static void
@@ -553,7 +562,8 @@ parse_program_args (int argc, char *argv[])
 	}
       else
 	{
-	  if ((char *)NULL == (char *)getenv ("PATH_INFO")
+	  if ((char *)NULL == (char *)getenv ("PATH_INFO") &&
+	      (char *)NULL == (char *)getenv ("QUERY_STRING")
 #if defined (BUILDING_WITH_FAST_CGI)
 	      && FCGX_IsCGI()
 #endif

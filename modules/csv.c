@@ -42,9 +42,9 @@ static PFunDesc ftab[] =
 MODULE_INITIALIZE ("csv", ftab)
 
 DEFINE_SECTION (CSV-MODULE, , 
-"The CSV module is useful for importing <b>C</b>omma <b>S</b>eparated
-<b>V</b>alues from external programs which are capable of producing them.
-Such programs include word processors, legacy database systems, spreadsheets,
+"The CSV module is useful for importing <b>C</b>omma <b>S</b>eparated\n\
+<b>V</b>alues from external programs which are capable of producing them.\n\
+Such programs include word processors, legacy database systems, spreadsheets,\n\
 and the like.", "")
 
 /* Return an array of strings, each one representing data taken from the
@@ -114,8 +114,8 @@ csv_to_array (char *text, char *sep)
 }
 
 DEFUNX (pf_csv::csv_to_array, cvs-text array-name &key sep=SEPARATOR,
-"Returns an array of the values specified in the comma separated values
-represented by <var csv-text>.  The values are placed in <var array-name>
+"Returns an array of the values specified in the comma separated values\n\
+represented by <var csv-text>.  The values are placed in <var array-name>\n\
 in the order in which they are found.")
 static void
 pf_csv_to_array (PFunArgs)

@@ -740,28 +740,28 @@ mh_heap_summarize (mh_heap_t heap)
   mh_heap_type_data (heap, MH_ALIST_TAG,    &data[6], &data[7]);
   mh_heap_type_data (heap, MH_FUNCTION_TAG, &data[8], &data[9]);
 
-  printf ("
-HEAP: %p
-  Dirty Pages
-    Count: %u
-    Allocated: %lu (objs)
-  Clean Pages
-    Count: %u
-    Available: %lu (objs)
-  Collections
-    Pending: %s
-    Enabled: %s (%d)
-    Count  : %d
-    Total   Time: %f (sec)
-    Average Time: %f (sec)
-    Objects Retained : %6lu (average)
-    Objects Discarded: %6lu (average)
-  Object Types:
-    String: %6Lu, %10Lu
-    Number: %6Lu, %10Lu
-    Vector: %6Lu, %10Lu
-    Alist : %6Lu, %10Lu
-    Tag   : %6Lu, %10Lu
+  printf ("\n\
+HEAP: %p\n\
+  Dirty Pages\n\
+    Count: %u\n\
+    Allocated: %lu (objs)\n\
+  Clean Pages\n\
+    Count: %u\n\
+    Available: %lu (objs)\n\
+  Collections\n\
+    Pending: %s\n\
+    Enabled: %s (%d)\n\
+    Count  : %d\n\
+    Total   Time: %f (sec)\n\
+    Average Time: %f (sec)\n\
+    Objects Retained : %6lu (average)\n\
+    Objects Discarded: %6lu (average)\n\
+  Object Types:\n\
+    String: %6Lu, %10Lu\n\
+    Number: %6Lu, %10Lu\n\
+    Vector: %6Lu, %10Lu\n\
+    Alist : %6Lu, %10Lu\n\
+    Tag   : %6Lu, %10Lu\n\
   Roots",
 	  heap,
 	  mh_heap_dirty_pages_count (heap),
@@ -960,13 +960,13 @@ main (int   argc,
   mh_object_t object;
   mh_vector_t vector;
 
-  printf ("
-OBJECT_SIZE_IN_BYTES: %d
-OBJECT_ALIGNMENT_IN_BYTES: %d
-OBJECT_ALIGNMENT_IN_OBJECTS: %d
-OBJECT_ALIGNMENT_SIZE (1-5): %d, %d, %d, %d, %d
-OBJECT_SIZE (1-11/2): %d, %d, %d, %d, %d, %d
-OBJECT_ALIGNMENT_SIZE (bytes): %d, %d, %d, %d, %d, %d
+  printf ("\
+OBJECT_SIZE_IN_BYTES: %d\n\
+OBJECT_ALIGNMENT_IN_BYTES: %d\n\
+OBJECT_ALIGNMENT_IN_OBJECTS: %d\n\
+OBJECT_ALIGNMENT_SIZE (1-5): %d, %d, %d, %d, %d\n\
+OBJECT_SIZE (1-11/2): %d, %d, %d, %d, %d, %d\n\
+OBJECT_ALIGNMENT_SIZE (bytes): %d, %d, %d, %d, %d, %d\n\
 ",
 	  OBJECT_SIZE_IN_BYTES,
 	  OBJECT_ALIGNMENT_IN_BYTES,

@@ -83,8 +83,8 @@ DEFUN (pf_read_command,, "Read a command from the incoming connection.")
 }
 
 DEFUN (pf_read_dbobj, &optional objectvar,
-"Read an object from the incoming port, and optionally store it in OBJECTVAR.
-If OBJECTVAR is specified, this function returns the length of the read
+"Read an object from the incoming port, and optionally store it in OBJECTVAR.\n\
+If OBJECTVAR is specified, this function returns the length of the read\n\
 object.  If OBJECTVAR is not specified, this function returns the object.")
 {
   int fd = mhtml_stdin_fileno;

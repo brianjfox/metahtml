@@ -217,33 +217,33 @@ DEFUNX (pf_dir::dir-table, &optional webpath regexp
 	&key show-icons=true icon-dir=pathname
 	sort=sort-op
 	link=URL,
-"Produces a clickable listing of the files in <var webpath> limited to
-those which match <var regexp>, displaying icons found in <var icon-dir>.
-
-<var webpath> defaults to the directory containing this page.
-
-<var regexp>  defaults to <code>\"(^[^.].*[^~]$)|(^\\.\\.$)|(^\\.$)\"</code>,
-i.e., files which do not begin with a dot, and files which do not end with
-a tilde, and the two special directories, <code>`.'</code> and <code>`..'</code>.
-
-<var icon-dir> defaults to /images/icons -- each file is associated with an
-icon file named by file extension (e.g, mhtml.gif, html.gif, etc.)
-Icons are only shown if <var show-icons> is set.
-
-Possible values for <var sort-op> are:
-<ul>
-<li> <code>size</code>: Order by size of file,
-<li> <code>name</code>: Order alphabetically by name,
-<li> <code>type</code>: Order by directory .vs. file, and filename extension,
-<li> <code>created</code>: Order by creation date,
-<li> <code>accessed</code>: Order by last access time, and
-<li> <code>modified</code>: Order by last modification time.
-</ul>
-
-<var sort-op> defaults to <code>name</code>.
-
-<example>
-<dir::dir-table>
+"Produces a clickable listing of the files in <var webpath> limited to\n\
+those which match <var regexp>, displaying icons found in <var icon-dir>.\n\
+\n\
+<var webpath> defaults to the directory containing this page.\n\
+\n\
+<var regexp>  defaults to <code>\"(^[^.].*[^~]$)|(^\\.\\.$)|(^\\.$)\"</code>,\n\
+i.e., files which do not begin with a dot, and files which do not end with\n\
+a tilde, and the two special directories, <code>`.'</code> and <code>`..'</code>.\n\
+\n\
+<var icon-dir> defaults to /images/icons -- each file is associated with an\n\
+icon file named by file extension (e.g, mhtml.gif, html.gif, etc.)\n\
+Icons are only shown if <var show-icons> is set.\n\
+\n\
+Possible values for <var sort-op> are:\n\
+<ul>\n\
+<li> <code>size</code>: Order by size of file,\n\
+<li> <code>name</code>: Order alphabetically by name,\n\
+<li> <code>type</code>: Order by directory .vs. file, and filename extension,\n\
+<li> <code>created</code>: Order by creation date,\n\
+<li> <code>accessed</code>: Order by last access time, and\n\
+<li> <code>modified</code>: Order by last modification time.\n\
+</ul>\n\
+\n\
+<var sort-op> defaults to <code>name</code>.\n\
+\n\
+<example>\n\
+<dir::dir-table>\n\
 </example>")
 
 static void

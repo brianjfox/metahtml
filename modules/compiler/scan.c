@@ -693,13 +693,6 @@ main (int   argc,
   string_t source_dup;
   mh_token_list_t list, deleted, cleaned;
 
-
-#if 0
-  strcpy (buffer, 
-	  "abc \n  hij=10 xyz[  i];;; cmnt
-zzz<if <foo bar>><defun foo>\"bar\\\n\\\"baz\"</defun>";
-#endif
-
 #if 0
   sprintf (buffer,
 	   "<subst-in-var val \"%s\" \" \" \"%s\" \"%s\">",

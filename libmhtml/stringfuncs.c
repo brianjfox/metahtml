@@ -99,18 +99,18 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_string_functions)
 DEFINE_SECTION (STRING-OPERATORS, strings; characters; changing case,
-"There is a single function in <meta-html> which performs pattern
-matching, substring extraction, and substring deletion.  For
-convenience, a blind substring extraction function is supplied as
-well.  Three functions perform the three most common case changes.
-Finally, the <funref \"string operators\" pad> function allows
+"There is a single function in <meta-html> which performs pattern\n\
+matching, substring extraction, and substring deletion.  For\n\
+convenience, a blind substring extraction function is supplied as\n\
+well.  Three functions perform the three most common case changes.\n\
+Finally, the <funref \"string operators\" pad> function allows\n\
 alignment of fixed-width text.  ", "")
 
 DEFUN (pf_string_length, string,
-"Returns the number of characters present in <var string>.
-
-<complete-example>
-<string-length \"This is an interesting string\">
+"Returns the number of characters present in <var string>.\n\
+\n\
+<complete-example>\n\
+<string-length \"This is an interesting string\">\n\
 </complete-example>")
 {
   char *string = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -128,49 +128,49 @@ DEFUN (pf_string_length, string,
 DEFUN (pf_match, string regex
        &key action=[delete|extract|report|startpos|endpos|length]
        caseless=true,
-"Matches <var regexp> against <var string>, and then performs the
-indicated <var action>.  The default for <var action> is \"report\".
-
-When action is \"report\" (the default), returns \"true\" if <var
-regex> matched.<br>
-When action is \"extract\", returns the substring of <var string>
-matching <var regex>.<br>
-When action is \"delete\", returns <var string> with the matched
-substring removed.<br>
-When action is \"startpos\", returns the numeric offset of the start of
-the matched substring.<br>
-When action is \"endpos\", returns the numeric offset of the end of the
-matched substring.
-
-<var regexp> is an extended Unix regular expression, the complete syntax of
-which is beyond the scope of this document.  However, the essential
-basics are:
-<ul>
-<li> A period (<code>.</code>) matches any one character.
-<li> An asterisk (<code>*</code>) matches any number of occurrences of
-the preceding expression, including none.
-<li> A plus-sign matches one or more occurrences of the preceding expression.
-<li> Square brackets are used to enclose lists of characters which may
-match.  For example, \"[a-zA-Z]+\" matches one or more occurrences of
-alphabetic characters.
-<li> The vertical bar is used to separate alternate expressions to
-match against.  For example, \"foo|bar\" says to match either \"foo\"
-<i>or</i> \"bar\".
-<li> A dollar-sign (<code>$</code>) matches the end of <var STRING>.
-<li> Parenthesis are used to group subexpressions.
-</ul>
-
-Here are a few examples:
-
-<example>
-  <match \"foobar\" \".*\">                 --> \"true\"
-  <match \"foobar\" \"foo\">                --> \"true\"
-  <match \"foobar\" \"foo\" action=extract> --> \"foo\"
-  <match \"foobar\" \"oob\" action=delete>  --> \"far\"
-  <match \"foobar\" \"oob\" action=startpos>--> \"1\"
-  <match \"foobar\" \"oob\" action=endpos>  --> \"4\"
-  <match \"foobar\" \"oob\" action=length>  --> \"3\"
-  <match \"foobar\" \"[0-9]+\">             --> \"\"
+"Matches <var regexp> against <var string>, and then performs the\n\
+indicated <var action>.  The default for <var action> is \"report\".\n\
+\n\
+When action is \"report\" (the default), returns \"true\" if <var\n\
+regex> matched.<br>\n\
+When action is \"extract\", returns the substring of <var string>\n\
+matching <var regex>.<br>\n\
+When action is \"delete\", returns <var string> with the matched\n\
+substring removed.<br>\n\
+When action is \"startpos\", returns the numeric offset of the start of\n\
+the matched substring.<br>\n\
+When action is \"endpos\", returns the numeric offset of the end of the\n\
+matched substring.\n\
+\n\
+<var regexp> is an extended Unix regular expression, the complete syntax of\n\
+which is beyond the scope of this document.  However, the essential\n\
+basics are:\n\
+<ul>\n\
+<li> A period (<code>.</code>) matches any one character.\n\
+<li> An asterisk (<code>*</code>) matches any number of occurrences of\n\
+the preceding expression, including none.\n\
+<li> A plus-sign matches one or more occurrences of the preceding expression.\n\
+<li> Square brackets are used to enclose lists of characters which may\n\
+match.  For example, \"[a-zA-Z]+\" matches one or more occurrences of\n\
+alphabetic characters.\n\
+<li> The vertical bar is used to separate alternate expressions to\n\
+match against.  For example, \"foo|bar\" says to match either \"foo\"\n\
+<i>or</i> \"bar\".\n\
+<li> A dollar-sign (<code>$</code>) matches the end of <var STRING>.\n\
+<li> Parenthesis are used to group subexpressions.\n\
+</ul>\n\
+\n\
+Here are a few examples:\n\
+\n\
+<example>\n\
+  <match \"foobar\" \".*\">                 --> \"true\"\n\
+  <match \"foobar\" \"foo\">                --> \"true\"\n\
+  <match \"foobar\" \"foo\" action=extract> --> \"foo\"\n\
+  <match \"foobar\" \"oob\" action=delete>  --> \"far\"\n\
+  <match \"foobar\" \"oob\" action=startpos>--> \"1\"\n\
+  <match \"foobar\" \"oob\" action=endpos>  --> \"4\"\n\
+  <match \"foobar\" \"oob\" action=length>  --> \"3\"\n\
+  <match \"foobar\" \"[0-9]+\">             --> \"\"\n\
 </example>")
 {
   char *_string = get_positional_arg (vars, 0);
@@ -312,26 +312,26 @@ Here are a few examples:
 }
 
 DEFUN (pf_substring, string &optional start end,
-"Extracts the substring of <var string> whose first character starts
-at offset <var start>, and whose last character ends at offset
-<var end>. The indexing is zero-based, so that:
-
-<example>
-  <substring \"Hello\" 1 2> --> \"e\"
-</example>
-
-This function is useful when you know in advance which part of the
-string you would like to extract, and do not need the pattern matching
-facilities of <funref string-operators match>.
-
-If you wish to index through each character of a string, the most direct
-way is to convert it to an array first using
-<funref string-operators string-to-array>, and then use the
-<funref array-operators foreach> function to iterate over the members.
-<complete-example>
-<set-var s=\"This is a string.\">
-<string-to-array <get-var-once s> chars>
-<foreach character chars><get-var character>-</foreach>
+"Extracts the substring of <var string> whose first character starts\n\
+at offset <var start>, and whose last character ends at offset\n\
+<var end>. The indexing is zero-based, so that:\n\
+\n\
+<example>\n\
+  <substring \"Hello\" 1 2> --> \"e\"\n\
+</example>\n\
+\n\
+This function is useful when you know in advance which part of the\n\
+string you would like to extract, and do not need the pattern matching\n\
+facilities of <funref string-operators match>.\n\
+\n\
+If you wish to index through each character of a string, the most direct\n\
+way is to convert it to an array first using\n\
+<funref string-operators string-to-array>, and then use the\n\
+<funref array-operators foreach> function to iterate over the members.\n\
+<complete-example>\n\
+<set-var s=\"This is a string.\">\n\
+<string-to-array <get-var-once s> chars>\n\
+<foreach character chars><get-var character>-</foreach>\n\
 </complete-example>")
 {
   char *str_arg = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -454,11 +454,11 @@ subst_in_string_internal (char *contents, Package *vars, int debug_level)
 }
 
 DEFUN (pf_subst_in_var, varname &optional this-string with-that,
-"Replaces all occurrences of <var this-string> with <var with-that> in the
-contents of the variable named <var varname>.  Both <var this-string> and
-<var with-that> are evaluated before the replacement is done. <var
-this-string> can be any regular expression allowed by the POSIX extended
-regular expression matching.  This command can be useful when parsing
+"Replaces all occurrences of <var this-string> with <var with-that> in the\n\
+contents of the variable named <var varname>.  Both <var this-string> and\n\
+<var with-that> are evaluated before the replacement is done. <var\n\
+this-string> can be any regular expression allowed by the POSIX extended\n\
+regular expression matching.  This command can be useful when parsing\n\
 the output of <funref osfuncs cgi-exec>.")
 {
   char *varname = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -480,22 +480,22 @@ the output of <funref osfuncs cgi-exec>.")
 }
 
 DEFUN (pf_subst_in_string, string &rest regexp replacement,
-"Replaces all occurrences of <var regexp> with <var replacement> in
-<var string>.
-
-<var regexp> can be any regular expression allowed by POSIX extended
-regular expression matching.
-
-In the replacement string, a backslash followed by a number <var n> is
-replaced with the contents of the <var n>th subexpression from <var
-regexp>.
-
-<example>
-<set-var foo=\"This is a list\">
-<subst-in-string <get-var foo> \"is\" \"HELLO\">
-     --> \"ThHELLO HELLO a lHELLOt\"
-.blank
-<subst-in-string \"abc\" \"([a-z])\" \"\\\\1 \"> --> \"a b c \"
+"Replaces all occurrences of <var regexp> with <var replacement> in\n\
+<var string>.\n\
+\n\
+<var regexp> can be any regular expression allowed by POSIX extended\n\
+regular expression matching.\n\
+\n\
+In the replacement string, a backslash followed by a number <var n> is\n\
+replaced with the contents of the <var n>th subexpression from <var\n\
+regexp>.\n\
+\n\
+<example>\n\
+<set-var foo=\"This is a list\">\n\
+<subst-in-string <get-var foo> \"is\" \"HELLO\">\n\
+     --> \"ThHELLO HELLO a lHELLOt\"\n\
+.blank\n\
+<subst-in-string \"abc\" \"([a-z])\" \"\\\\1 \"> --> \"a b c \"\n\
 </example>")
 {
   char *contents = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -516,11 +516,11 @@ regexp>.
 }
 
 DEFUN (pf_downcase, string,
-"Converts all of the uppercase characters in <var string> to
-lowercase.
-
-<complete-example>
-<downcase \"This is Written in Meta-HTML\">
+"Converts all of the uppercase characters in <var string> to\n\
+lowercase.\n\
+\n\
+<complete-example>\n\
+<downcase \"This is Written in Meta-HTML\">\n\
 </complete-example>")
 {
   unsigned char *value = (unsigned char *)
@@ -541,11 +541,11 @@ lowercase.
 }
 
 DEFUN (pf_upcase, string,
-"Converts all of the lowercase characters in <var string> to
-uppercase.
-
-<complete-example>
-<upcase \"This is Written in Meta-HTML\">
+"Converts all of the lowercase characters in <var string> to\n\
+uppercase.\n\
+\n\
+<complete-example>\n\
+<upcase \"This is Written in Meta-HTML\">\n\
 </complete-example>")
 {
   unsigned char *value = (unsigned char *)
@@ -566,14 +566,14 @@ uppercase.
 }
 
 DEFUN (pf_capitalize, string,
-"Changes the case of each character in <var string> to uppercase or
-lowercase depending on the surrounding characters.
-
-<complete-example>
-<capitalize \"This is a list\">
-</complete-example>
-
-Also see <funref string-operators downcase>, and
+"Changes the case of each character in <var string> to uppercase or\n\
+lowercase depending on the surrounding characters.\n\
+\n\
+<complete-example>\n\
+<capitalize \"This is a list\">\n\
+</complete-example>\n\
+\n\
+Also see <funref string-operators downcase>, and\n\
 <funref string-operators upcase>.")
 {
   unsigned char *value = (unsigned char *)
@@ -615,28 +615,28 @@ Also see <funref string-operators downcase>, and
 }
 
 DEFUN (pf_string_compare, string1 string2 &key caseless,
-"Compare the two strings <var string1> and <var string2>, and return
-a string which specifies the relationship between them.  The
-comparison is normall case-sensitive, unless the keyword argument <var
-caseless=true> is given.
-
-The possible return values are:
-<ol>
-<li> equal<br>
-The two strings are exactly alike.
-<li> greater<br>
-<var string1> is lexically greater than <var string2>.
-<li> less<br>
-<var string1> is lexically less than <var string2>.
-</ol>
-
-Examples:
-
-<example>
-<string-compare \"aaa\" \"aab\">               --> less
-<string-compare \"zzz\" \"aab\">               --> greater
-<string-compare \"zzz\" \"ZZZ\">               --> greater
-<string-compare \"zzz\" \"ZZZ\" caseless=true> --> equal
+"Compare the two strings <var string1> and <var string2>, and return\n\
+a string which specifies the relationship between them.  The\n\
+comparison is normall case-sensitive, unless the keyword argument <var\n\
+caseless=true> is given.\n\
+\n\
+The possible return values are:\n\
+<ol>\n\
+<li> equal<br>\n\
+The two strings are exactly alike.\n\
+<li> greater<br>\n\
+<var string1> is lexically greater than <var string2>.\n\
+<li> less<br>\n\
+<var string1> is lexically less than <var string2>.\n\
+</ol>\n\
+\n\
+Examples:\n\
+\n\
+<example>\n\
+<string-compare \"aaa\" \"aab\">               --> less\n\
+<string-compare \"zzz\" \"aab\">               --> greater\n\
+<string-compare \"zzz\" \"ZZZ\">               --> greater\n\
+<string-compare \"zzz\" \"ZZZ\" caseless=true> --> equal\n\
 </example>")
 {
   char *string_1 = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -680,27 +680,27 @@ Examples:
 
 DEFUN (pf_word_wrap,
        string &key width=charwidth indent=indentation skip-first=true,
-"Produce paragraphs of text from the string <var string> with the text
-filled to a width of <var charwidth>.
-
-This is provided for convenience only, and is of use when you need to
-present some free form text in pre-formatted fashion, such as when
-sending an E-mail message, or the like.
-
-If the keyword <var indent=indentation> is supplied, it says to indent
-each line in the output by <var indentation>, using space characters.
-
-If the keyword <var skip-first=true> is given, it says not to indent
-the first line of the output -- just each successive line.  For
-example:
-<complete-example>
-<set-var text =
-   <concat \"This is provided for convenience only, and is of use \"
-           \"when you need to present some free form text in \"
-           \"pre-formatted fashion, as in this example.\">>
-<pre>
-Title Topic: <word-wrap <get-var text> 40 indent=13 skip-first=true>
-</pre>
+"Produce paragraphs of text from the string <var string> with the text\n\
+filled to a width of <var charwidth>.\n\
+\n\
+This is provided for convenience only, and is of use when you need to\n\
+present some free form text in pre-formatted fashion, such as when\n\
+sending an E-mail message, or the like.\n\
+\n\
+If the keyword <var indent=indentation> is supplied, it says to indent\n\
+each line in the output by <var indentation>, using space characters.\n\
+\n\
+If the keyword <var skip-first=true> is given, it says not to indent\n\
+the first line of the output -- just each successive line.  For\n\
+example:\n\
+<complete-example>\n\
+<set-var text =\n\
+   <concat \"This is provided for convenience only, and is of use \"\n\
+           \"when you need to present some free form text in \"\n\
+           \"pre-formatted fashion, as in this example.\">>\n\
+<pre>\n\
+Title Topic: <word-wrap <get-var text> 40 indent=13 skip-first=true>\n\
+</pre>\n\
 </complete-example>")
 {
   char *width_spec = mhtml_evaluate_string (get_value (vars, "width"));
@@ -775,28 +775,28 @@ Title Topic: <word-wrap <get-var text> 40 indent=13 skip-first=true>
 
 DEFUN (pf_pad,
        string width &key align=[left|right|middle] truncate=true pad-char=x,
-"Pads <var string> to a length of <var total-size>.  <var align> can
-be one of <code>LEFT</code>, <code>MIDDLE</code>, or
-<code>RIGHT</code> (the default).
-
-<code>PAD</code> inserts the correct number of <var pad-char>acters to
-make the input argument take the desired number of spaces (presumably
-for use in a <example code><pre> ... </pre></example> statement).  The
-default value for <var pad-char> is a space character.
-
-If keyword argument <var truncate=true> is given, it  says to force
-the string to be the specified length.
-
-Before any padding is done, leading and trailing whitespace is removed
-from <var string>.
-
-Examples:
-
-<example>
-  <pad \"Hello\" 10>              --> \"     Hello\"
-  <pad \"Hello\" 10 align=left>   --> \"Hello     \"
-  <pad \"Hello\" 10 align=middle> --> \"  Hello   \"
-  <pad \"  Heckle  \" 4 truncate> --> \"Heck\"
+"Pads <var string> to a length of <var total-size>.  <var align> can\n\
+be one of <code>LEFT</code>, <code>MIDDLE</code>, or\n\
+<code>RIGHT</code> (the default).\n\
+\n\
+<code>PAD</code> inserts the correct number of <var pad-char>acters to\n\
+make the input argument take the desired number of spaces (presumably\n\
+for use in a <example code><pre> ... </pre></example> statement).  The\n\
+default value for <var pad-char> is a space character.\n\
+\n\
+If keyword argument <var truncate=true> is given, it  says to force\n\
+the string to be the specified length.\n\
+\n\
+Before any padding is done, leading and trailing whitespace is removed\n\
+from <var string>.\n\
+\n\
+Examples:\n\
+\n\
+<example>\n\
+  <pad \"Hello\" 10>              --> \"     Hello\"\n\
+  <pad \"Hello\" 10 align=left>   --> \"Hello     \"\n\
+  <pad \"Hello\" 10 align=middle> --> \"  Hello   \"\n\
+  <pad \"  Heckle  \" 4 truncate> --> \"Heck\"\n\
 </example>")
 {
   register int i;
@@ -903,18 +903,18 @@ Examples:
 }
 
 DEFUN (pf_string_eq, string-1 string-2 &key caseless=true,
- "Compare <var string1> to <var string2> and return the string
-<code>\"true\"</code> if they are character-wise identical.
-
-The optional keyword argument <var caseless=true> indicates that no
-consideration should be given to the case of the characters during
-comparison.
-
-<example>
-<string-eq \"foo\" \"FOO\">               -->
-<string-eq \"foo\" \"foo\">               -->true
-<string-eq <upcase \"foo\"> \"FOO\">      -->true
-<string-eq \"foo\" \"FOO\" caseless=true> -->true
+ "Compare <var string1> to <var string2> and return the string\n\
+<code>\"true\"</code> if they are character-wise identical.\n\
+\n\
+The optional keyword argument <var caseless=true> indicates that no\n\
+consideration should be given to the case of the characters during\n\
+comparison.\n\
+\n\
+<example>\n\
+<string-eq \"foo\" \"FOO\">               -->\n\
+<string-eq \"foo\" \"foo\">               -->true\n\
+<string-eq <upcase \"foo\"> \"FOO\">      -->true\n\
+<string-eq \"foo\" \"FOO\" caseless=true> -->true\n\
 </example>")
 {
   char *arg1 = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -948,18 +948,18 @@ comparison.
 }
 
 DEFUN (pf_string_neq, string-1 string-2 &key caseless=true,
- "Compare <var string1> to <var string2> and return the string
-<code>\"true\"</code> if they are NOT character-wise identical.
-
-The optional keyword argument <var caseless=true> indicates that no
-consideration should be given to the case of the characters during
-comparison.
-
-<example>
-<string-neq \"foo\" \"FOO\">               -->true
-<string-neq \"foo\" \"foo\">               -->
-<string-neq <upcase \"foo\"> \"FOO\">      -->
-<string-neq \"foo\" \"FOO\" caseless=true> -->
+ "Compare <var string1> to <var string2> and return the string\n\
+<code>\"true\"</code> if they are NOT character-wise identical.\n\
+\n\
+The optional keyword argument <var caseless=true> indicates that no\n\
+consideration should be given to the case of the characters during\n\
+comparison.\n\
+\n\
+<example>\n\
+<string-neq \"foo\" \"FOO\">               -->true\n\
+<string-neq \"foo\" \"foo\">               -->\n\
+<string-neq <upcase \"foo\"> \"FOO\">      -->\n\
+<string-neq \"foo\" \"FOO\" caseless=true> -->\n\
 </example>")
 {
   char *arg1 = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -991,25 +991,25 @@ comparison.
    on the first character of paragraphs.  The text starts with a <P>,
    unless the variable NOBR is set.*/
 DEFMACRO (pf_plain_text, &key first-char=expr nobr=true,
-"Performs the following steps:
-
-<ol>
-  <li> Replace occurrences of pairs of newline characters with a
-  single <example code><P></example> tag.
-
-  <li> Applies the function <var expr> to the first character of every
-  paragraph, and inserts the closing tag after that character.
-</ol>
-
-The output will start with a <example code><P></example> tag, unless the
-optional argument <var nobr=true> is given.
-
-<complete-example>
-<plain-text first-char=<font size=\"+1\"> nobr=true>
-This is line 1.
-.blank
-This is line 2.
-</plain-text>
+"Performs the following steps:\n\
+\n\
+<ol>\n\
+  <li> Replace occurrences of pairs of newline characters with a\n\
+  single <example code><P></example> tag.\n\
+\n\
+  <li> Applies the function <var expr> to the first character of every\n\
+  paragraph, and inserts the closing tag after that character.\n\
+</ol>\n\
+\n\
+The output will start with a <example code><P></example> tag, unless the\n\
+optional argument <var nobr=true> is given.\n\
+\n\
+<complete-example>\n\
+<plain-text first-char=<font size=\"+1\"> nobr=true>\n\
+This is line 1.\n\
+.blank\n\
+This is line 2.\n\
+</plain-text>\n\
 </complete-example>")
 {
   register int i;
@@ -1122,26 +1122,26 @@ This is line 2.
 }
 
 DEFUN (pf_base64encode, varname &key shortlines=[true|value],
-"Performs the translation operation commonly known as <i>Base64
-Encoding</i> on the contents of the binary variable referenced by <var
-varname>, and returns the results of that encoding.
-
-Base64 encoding is a common transfer encoding for binary data and for
-Basic Authorization values -- this function can be used to turn data
-from its original pre-encoded state to an encoded one.
-
-If the keyword argument <var shortlines=value> is supplied, then the result
-of encoding is broken up into lines containing <var value> characters
-each, rounded up to the nearest multiple of 4.  This format is
-commonly implemented by many base 64 encoding programs.  A value of
-<code>true</code> uses the Meta-HTML default value of 64.  If the
-argument is not supplied, the data is returned in a single line of data.
-
-The following code reads a GIF image into a binary variable, and then
-displays the base64 encoded version:
-<example>
-<dir::read-file /tmp/image.gif gif>	==> true
-<base64encode gif>			==> [base64 encoded data]
+"Performs the translation operation commonly known as <i>Base64\n\
+Encoding</i> on the contents of the binary variable referenced by <var\n\
+varname>, and returns the results of that encoding.\n\
+\n\
+Base64 encoding is a common transfer encoding for binary data and for\n\
+Basic Authorization values -- this function can be used to turn data\n\
+from its original pre-encoded state to an encoded one.\n\
+\n\
+If the keyword argument <var shortlines=value> is supplied, then the result\n\
+of encoding is broken up into lines containing <var value> characters\n\
+each, rounded up to the nearest multiple of 4.  This format is\n\
+commonly implemented by many base 64 encoding programs.  A value of\n\
+<code>true</code> uses the Meta-HTML default value of 64.  If the\n\
+argument is not supplied, the data is returned in a single line of data.\n\
+\n\
+The following code reads a GIF image into a binary variable, and then\n\
+displays the base64 encoded version:\n\
+<example>\n\
+<dir::read-file /tmp/image.gif gif>	==> true\n\
+<base64encode gif>			==> [base64 encoded data]\n\
 </example>")
 {
   char *varname = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -1202,23 +1202,23 @@ displays the base64 encoded version:
 }
 
 DEFUN (pf_base64decode, string &optional varname,
-"Performs the translation operation commonly known as <i>Base64
-Decoding</i> on <var STRING>, and returns the results of that
-decoding.
-
-If the optional <var varname> is supplied, the results of decoding are
-placed into the binary variable named <var varname> instead of being
-returned in the page.  This allows random binary data to be decoded,
-and perhaps written to the output stream using <funref
-stream-operators stream-put-contents>.
-
-Base64 encoding is a common transfer encoding for binary data and for
-Basic Authorization values -- this function can be used to turn such
-strings into their original, pre-encoded state.
-
-<complete-example>
-<set-var the-data = \"YmZveDpmcm9ibml0eg==\">
-<base64decode <get-var the-data>>
+"Performs the translation operation commonly known as <i>Base64\n\
+Decoding</i> on <var STRING>, and returns the results of that\n\
+decoding.\n\
+\n\
+If the optional <var varname> is supplied, the results of decoding are\n\
+placed into the binary variable named <var varname> instead of being\n\
+returned in the page.  This allows random binary data to be decoded,\n\
+and perhaps written to the output stream using <funref\n\
+stream-operators stream-put-contents>.\n\
+\n\
+Base64 encoding is a common transfer encoding for binary data and for\n\
+Basic Authorization values -- this function can be used to turn such\n\
+strings into their original, pre-encoded state.\n\
+\n\
+<complete-example>\n\
+<set-var the-data = \"YmZveDpmcm9ibml0eg==\">\n\
+<base64decode <get-var the-data>>\n\
 </complete-example>")
 {
   char *string = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -1267,12 +1267,12 @@ strings into their original, pre-encoded state.
 }
 
 DEFUN (pf_char_offsets, string ch &key caseless,
-"Return an array of numbers,  each one representing the offset from the
-start of <var string> of <var ch>.  This function is useful for finding
-candidate locations for word-wrapping, for example.
-Here is a complete example:
-<complete-example>
-<char-offsets \"This is a list\" \" \">
+"Return an array of numbers,  each one representing the offset from the\n\
+start of <var string> of <var ch>.  This function is useful for finding\n\
+candidate locations for word-wrapping, for example.\n\
+Here is a complete example:\n\
+<complete-example>\n\
+<char-offsets \"This is a list\" \" \">\n\
 </complete-example>")
 {
   char *string = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -1320,7 +1320,6 @@ mhtml_left_trim (char *str, char *trimchars)
 	}
     }
 }
-
 
 void
 mhtml_right_trim (char *str, char *trimchars)
@@ -1432,16 +1431,16 @@ pf_trim_generic (PFunArgs, int which)
 }
 
 DEFUNX (strings::left-trim, varname &optional trim-chars,
-"Trims the characters specified in <var trim-chars> from the
-\"left-hand\" side of the string stored in <var varname>, replacing
-the contents of that variable with the trimmed string.  If <var trim-chars>
-is not specified, it defaults to the set of whitespace characters, i.e.,
-Space, Tab, CR, and Newline.
-<complete-example>
-<set-var foo=\"    string with whitespace on the left\">
-String: [<get-var-once foo>]
-<strings::left-trim foo>
-String: [<get-var-once foo>]
+"Trims the characters specified in <var trim-chars> from the\n\
+\"left-hand\" side of the string stored in <var varname>, replacing\n\
+the contents of that variable with the trimmed string.  If <var trim-chars>\n\
+is not specified, it defaults to the set of whitespace characters, i.e.,\n\
+Space, Tab, CR, and Newline.\n\
+<complete-example>\n\
+<set-var foo=\"    string with whitespace on the left\">\n\
+String: [<get-var-once foo>]\n\
+<strings::left-trim foo>\n\
+String: [<get-var-once foo>]\n\
 </complete-example>")
 
 static void
@@ -1451,16 +1450,16 @@ pf_left_trim (PFunArgs)
 }
 
 DEFUNX (strings::right-trim, varname &optional trim-chars,
-"Trims the characters specified in <var trim-chars> from the
-\"right-hand\" side of the string stored in <var varname>, replacing
-the contents of that variable with the trimmed string.  If <var trim-chars>
-is not specified, it defaults to the set of whitespace characters, i.e.,
-Space, Tab, CR, and Newline.
-<complete-example>
-<set-var foo=\"string with whitespace on the right     \">
-String: [<get-var-once foo>]
-<strings::right-trim foo>
-String: [<get-var-once foo>]
+"Trims the characters specified in <var trim-chars> from the\n\
+\"right-hand\" side of the string stored in <var varname>, replacing\n\
+the contents of that variable with the trimmed string.  If <var trim-chars>\n\
+is not specified, it defaults to the set of whitespace characters, i.e.,\n\
+Space, Tab, CR, and Newline.\n\
+<complete-example>\n\
+<set-var foo=\"string with whitespace on the right     \">\n\
+String: [<get-var-once foo>]\n\
+<strings::right-trim foo>\n\
+String: [<get-var-once foo>]\n\
 </complete-example>")
 
 static void
@@ -1469,18 +1468,18 @@ pf_right_trim (PFunArgs)
   pf_trim_generic (PassPFunArgs, MHTML_TRIM_RIGHT);
 }
 
-DEFUNX (strings::collapse, varname &optional collapsible-chars,
-"Collapses multiple occurrences of any of the characters specified in
-<var collapsible-chars> into a single occurrence of the first character
-in <var collapsible-chars>, throughout the string stored in <var varname>.
-If <var collapsible-chars> is not specified, it defaults to the set of
-whitespace characters, with a Space character as the first element, i.e.,
-Space, Tab, CR, and Newline.
-<complete-example>
-<set-var foo=\" string with    whitespace     in   various Spots \">
-String: [<get-var-once foo>]
-<strings::collapse foo>
-String: [<get-var-once foo>]
+DEFUNX (strings::collapse, varname &optional collapsible-chars,\n\
+"Collapses multiple occurrences of any of the characters specified in\n\
+<var collapsible-chars> into a single occurrence of the first character\n\
+in <var collapsible-chars>, throughout the string stored in <var varname>.\n\
+If <var collapsible-chars> is not specified, it defaults to the set of\n\
+whitespace characters, with a Space character as the first element, i.e.,\n\
+Space, Tab, CR, and Newline.\n\
+<complete-example>\n\
+<set-var foo=\" string with    whitespace     in   various Spots \">\n\
+String: [<get-var-once foo>]\n\
+<strings::collapse foo>\n\
+String: [<get-var-once foo>]\n\
 </complete-example>")
 static void
 pf_collapse (PFunArgs)
@@ -1518,33 +1517,33 @@ create_password (char *clear, char *salt)
 }
 
 DEFUNX (pf_unix::crypt, string &optional salt,
-"Return <var string> encrypted using the local system's <code>crypt()</code>
-function with the salt <var salt>.
-
-<var salt> is a two character string -- if you wish to compare the
-cleartext value that a user has entered against a Unix-style encrypted
-password, such as one from <code>/etc/passwd</code>, or from a
-<code>.htaccess</code> file, use the first two characters of the
-existing encrypted password as the salt, and then compare the
-resulting strings.
-
-For example, if the variable <var existing-pass> contains a previously
-encypted password, and the variable <var entered-pass> contains the
-cleartext that the user has just entered, you may encrypt the user's
-password and compare it with the existing one with the following code:
-
-<example>
-<set-var encrypted-pass =
-   <unix::crypt <get-var entered-pass>
-                <substring <get-var existing-pass> 0 2>>>
-.blank
-<when <string-eq <get-var encrypted-pass>
-                 <get-var existing-pass>>>
-   <set-session-var logged-in=true>
-   <redirect members-only.mhtml>
-</when>
-.blank
-<h3>Please enter your password again.  It didn't match.</h3>
+"Return <var string> encrypted using the local system's <code>crypt()</code>\n\
+function with the salt <var salt>.\n\
+\n\
+<var salt> is a two character string -- if you wish to compare the\n\
+cleartext value that a user has entered against a Unix-style encrypted\n\
+password, such as one from <code>/etc/passwd</code>, or from a\n\
+<code>.htaccess</code> file, use the first two characters of the\n\
+existing encrypted password as the salt, and then compare the\n\
+resulting strings.\n\
+\n\
+For example, if the variable <var existing-pass> contains a previously\n\
+encypted password, and the variable <var entered-pass> contains the\n\
+cleartext that the user has just entered, you may encrypt the user's\n\
+password and compare it with the existing one with the following code:\n\
+\n\
+<example>\n\
+<set-var encrypted-pass =\n\
+   <unix::crypt <get-var entered-pass>\n\
+                <substring <get-var existing-pass> 0 2>>>\n\
+.blank\n\
+<when <string-eq <get-var encrypted-pass>\n\
+                 <get-var existing-pass>>>\n\
+   <set-session-var logged-in=true>\n\
+   <redirect members-only.mhtml>\n\
+</when>\n\
+.blank\n\
+<h3>Please enter your password again.  It didn't match.</h3>\n\
 </example>")
 
 static void

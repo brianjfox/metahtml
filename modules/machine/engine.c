@@ -902,8 +902,8 @@ mh_machine_perf_extern_report (void)
 
   if (mh_machine_perf_extern_list)
     printf
-      ("\n
-Extern Perf Report
+      ("\n\
+Extern Perf Report\n\
   COUNT      ELAPSED   PER_CALL (ms)   EXPRESSION\n");
 
   for (; this; this = this->next)

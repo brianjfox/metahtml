@@ -59,12 +59,12 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_dbm_functions)
 DEFINE_SECTION (DIRECT-DBM-ACCESS, database; perl, 
-"There are times when it is desirable to directly access DBM, NDBM, or
-GDBM databases, for example, when reading or writing values to a
-database created with a different tool, such as Perl or TCL.
-
-<Meta-HTML> provides low-level access primitives for such databases in
-addition to a higher-level, more generally useful abstraction
+"There are times when it is desirable to directly access DBM, NDBM, or\n\
+GDBM databases, for example, when reading or writing values to a\n\
+database created with a different tool, such as Perl or TCL.\n\
+\n\
+<Meta-HTML> provides low-level access primitives for such databases in\n\
+addition to a higher-level, more generally useful abstraction\n\
 (which is detailed in <secref DATABASE-COMMANDS>).", "")
 
 /************************************************************/

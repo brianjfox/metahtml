@@ -79,42 +79,42 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_flowfunc_functions)
 DEFINE_SECTION (FLOW-CONTROL, flow control;if statements; while; until,
-"<Meta-HTML> contains commands for controlling which of a set
-of statements will be executed, and for repetitive execution of a set
-of statements.
-
-Such commands constitute what is called <i>flow control</i>, since
-they tell the <meta-html> interpreter where or what the next statement
-to interpret resides.
-
-All of the flow control operators in <meta-html> take a test and some
-additional statements; the closest thing to a <b>goto</b> statement in
+"<Meta-HTML> contains commands for controlling which of a set\n\
+of statements will be executed, and for repetitive execution of a set\n\
+of statements.\n\
+\n\
+Such commands constitute what is called <i>flow control</i>, since\n\
+they tell the <meta-html> interpreter where or what the next statement\n\
+to interpret resides.\n\
+\n\
+All of the flow control operators in <meta-html> take a test and some\n\
+additional statements; the closest thing to a <b>goto</b> statement in\n\
 <meta-html> is the <funref page-operators redirect> command.", "")
 
 DEFUN (pf_group, &rest args,
-"Combine all of the material passed into a single Meta-HTML statement.
-This is the primitive for grouping multiple statements where only a
-single statement is expected.  Whitespace within the group is preserved,
-making this command useful for assigning to array variables.
-
-Some examples:
-<example>
-<set-var array[] =
-  <group this is element 0
-         this is element 1
-         this is element 2>>
-</example>
-
-<example>
-<if <eq this that>
-    <group <h2> This is equal to That </h2>>
-   <group <h2> This is NOT equal to That </h2>>>
-</example>
-
-Although <code>group</code> is a primitive in Meta-HTML, it could
-have been defined as:
-<example>
-  <defsubst group &body body><get-var-once body></defsubst>
+"Combine all of the material passed into a single Meta-HTML statement.\n\
+This is the primitive for grouping multiple statements where only a\n\
+single statement is expected.  Whitespace within the group is preserved,\n\
+making this command useful for assigning to array variables.\n\
+\n\
+Some examples:\n\
+<example>\n\
+<set-var array[] =\n\
+  <group this is element 0\n\
+         this is element 1\n\
+         this is element 2>>\n\
+</example>\n\
+\n\
+<example>\n\
+<if <eq this that>\n\
+    <group <h2> This is equal to That </h2>>\n\
+   <group <h2> This is NOT equal to That </h2>>>\n\
+</example>\n\
+\n\
+Although <code>group</code> is a primitive in Meta-HTML, it could\n\
+have been defined as:\n\
+<example>\n\
+  <defsubst group &body body><get-var-once body></defsubst>\n\
 </example>")
 {
   if ((body != (PAGE *)NULL) && (!empty_string_p (body->buffer)))
@@ -124,16 +124,16 @@ have been defined as:
 DEFUNX (pf_prog, &rest args, "Synonym for <funref FLOW-CONTROL group>.")
 
 DEFUN (pf_concat, &rest args,
-"Concatenate all of the arguments given, creating a single token with no
-intervening whitespace. This is quite useful for those situations where
-intervening whitespace would look bad in the output, but the input source
-would be unreadable without any.
-
-For example:
-<example>
-<concat <textarea name=label rows=10 cols=40>
-        <get-var-once label>
-        </textarea>>
+"Concatenate all of the arguments given, creating a single token with no\n\
+intervening whitespace. This is quite useful for those situations where\n\
+intervening whitespace would look bad in the output, but the input source\n\
+would be unreadable without any.\n\
+\n\
+For example:\n\
+<example>\n\
+<concat <textarea name=label rows=10 cols=40>\n\
+        <get-var-once label>\n\
+        </textarea>>\n\
 </example>")
 {
   register int i = 0;
@@ -160,16 +160,16 @@ count_newlines (char *text)
 }
 
 DEFUN (pf_if, test &optional then else,
-"First <var test> is evaluated. If the result does not contain only
-whitespace characters the <var then> clause is evaluated, otherwise,
-the <var else> clause is evaluated. Although <Meta-HTML> has the
-relational operator <funref relational-operators or>, you can
-efficiently test for the presence of any of a group of variables
-with code similar to the following:
-<example>
-<if <get-var foo bar>
-   \"Either FOO or BAR is present\"
-  \"Neither FOO nor BAR is present\">
+"First <var test> is evaluated. If the result does not contain only\n\
+whitespace characters the <var then> clause is evaluated, otherwise,\n\
+the <var else> clause is evaluated. Although <Meta-HTML> has the\n\
+relational operator <funref relational-operators or>, you can\n\
+efficiently test for the presence of any of a group of variables\n\
+with code similar to the following:\n\
+<example>\n\
+<if <get-var foo bar>\n\
+   \"Either FOO or BAR is present\"\n\
+  \"Neither FOO nor BAR is present\">\n\
 </example>")
 {
   char *test_clause = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -195,11 +195,11 @@ with code similar to the following:
 }
 
 DEFUN (pf_ifeq, this that &optional then else &key caseless=true,
-"The <var this> and <var that> clauses are evaluated.
-If the results are text-wise identical, then the <var then>
-clause is evaluated, otherwise, the <var else> clause is
-evaluated.  If <var caseless=true> is given, the text-wise
-comparison of the values is done with no regard to upper and lower
+"The <var this> and <var that> clauses are evaluated.\n\
+If the results are text-wise identical, then the <var then>\n\
+clause is evaluated, otherwise, the <var else> clause is\n\
+evaluated.  If <var caseless=true> is given, the text-wise\n\
+comparison of the values is done with no regard to upper and lower\n\
 case distinctions.")
 {
   char *left_clause = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -231,11 +231,11 @@ case distinctions.")
 }
 
 DEFUN (pf_ifneq, this that &optional then else &key caseless=true,
-"The <var this> and <var that> clauses are evaluated.
-If the results are not text-wise identical, then the <var then>
-clause is evaluated, otherwise, the <var else> clause is
-evaluated.  If <var caseless=true> is given, the text-wise
-comparison of the values is done with no regard to upper and lower
+"The <var this> and <var that> clauses are evaluated.\n\
+If the results are not text-wise identical, then the <var then>\n\
+clause is evaluated, otherwise, the <var else> clause is\n\
+evaluated.  If <var caseless=true> is given, the text-wise\n\
+comparison of the values is done with no regard to upper and lower\n\
 case distinctions.")
 {
   char *left_clause = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -267,9 +267,9 @@ case distinctions.")
 }
 
 DEFMACRO (pf_when, test,
-"Evaluate <var test>.  If the result is a non-empty string,
-then execute the <var body> statements.  This is a cleaner way to
-handle optional multiple statement execution rather than dealing with
+"Evaluate <var test>.  If the result is a non-empty string,\n\
+then execute the <var body> statements.  This is a cleaner way to\n\
+handle optional multiple statement execution rather than dealing with\n\
 quoting everything inside of an <funref FLOW-CONTROL if> form.")
 {
   char *test = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -281,20 +281,20 @@ quoting everything inside of an <funref FLOW-CONTROL if> form.")
 }
 
 DEFUN (pf_break, ,
-"Unconditionally and immediately stop the execution of the nearest
-surrounding <funref FLOW-CONTROL while> or <funref ARRAYS foreach>.
-
-Example usage:
-<example>
-<while true>
-  ;;; Check to see if the user has changed the file.
-  <if <file-newer? <get-var foo.c> <get-var foo.o>>
-    <break>>
-
-  ;;; Not changed yet, so do some more in the background.
-  <process-chunk <get-var chunk-num>>
-  <increment chunk-num>
-</while>
+"Unconditionally and immediately stop the execution of the nearest\n\
+surrounding <funref FLOW-CONTROL while> or <funref ARRAYS foreach>.\n\
+\n\
+Example usage:\n\
+<example>\n\
+<while true>\n\
+  ;;; Check to see if the user has changed the file.\n\
+  <if <file-newer? <get-var foo.c> <get-var foo.o>>\n\
+    <break>>\n\
+\n\
+  ;;; Not changed yet, so do some more in the background.\n\
+  <process-chunk <get-var chunk-num>>\n\
+  <increment chunk-num>\n\
+</while>\n\
 </example>")
 {
   page->attachment = (void *)bprintf_create_buffer ();
@@ -304,19 +304,19 @@ Example usage:
 }
 
 DEFUN (pf_return, &rest args,
-"Unconditionally and immediately stop the execution of the current
-function, macro, <funref FLOW-CONTROL while> or <funref ARRAYS
-foreach> statement, and return the evaluated <var args>.
-
-Example usage:
-<complete-example>
-<define-function countdown start stop>
-  <if <eq start stop>
-      <return BlastOff!>>
-  <get-var start>, 
-  <countdown <sub start 1> <get-var stop>>
-</define-function>
-<countdown 10 4>
+"Unconditionally and immediately stop the execution of the current\n\
+function, macro, <funref FLOW-CONTROL while> or <funref ARRAYS\n\
+foreach> statement, and return the evaluated <var args>.\n\
+\n\
+Example usage:\n\
+<complete-example>\n\
+<define-function countdown start stop>\n\
+  <if <eq start stop>\n\
+      <return BlastOff!>>\n\
+  <get-var start>, \n\
+  <countdown <sub start 1> <get-var stop>>\n\
+</define-function>\n\
+<countdown 10 4>\n\
 </complete-example>")
 {
   register int i = 0;
@@ -337,12 +337,12 @@ Example usage:
 }
 
 DEFVAR (mhtml::iteration-limit,
-"The use of this variable has been deprecated.  <funref flow-control while>
-loops last until either the <var test-clause> is met, or a
+"The use of this variable has been deprecated.  <funref flow-control while>\n\
+loops last until either the <var test-clause> is met, or a\n\
 <funref flow-control break> statement is seen.")
 
 DEFMACRO (pf_while, test,
-"<var test> is evaluated.  If the result is a non-empty string, then
+"<var test> is evaluated.  If the result is a non-empty string, then\n\
 the <var body> statements are evaluated, and the process is repeated.")
 {
   char *test = get_positional_arg (vars, 0);
@@ -483,28 +483,28 @@ pf_var_case_internal (PFunArgs, int regexp_p)
 
 DEFUN (pf_var_case, &optional name=value consequent... default
        default-consequent,
-"For each <var name=value> pair, the value of <var name> is
-string-wise compared with <var value>.  If they are identical, then
-the corresponding <var consequent> code is performed, and its value is
-the return value of the <example code><var-case></example> form.
-
-If none of the clauses match, and there is a <code>default</code>
-clause, then the <var default-consequent> is evaluated, and its return
-value is the return value of the <example code><var-case></example>
-form.
-
-<code>var-case</code> is especially useful as a `traffic
-switch' to select one of several actions based on a user button
-press.
-
-For example:
-
-<example>
-<var-case
-   action=\"Save Files\"      <save-files <get-var posted::files[]>>
-   action=\"Delete Files\"    <delete-files <get-var posted::files[]>>
-   action=\"Rename Files\"    <redirect
-                                 rename-files.mhtml?<cgi-encode files>>>
+"For each <var name=value> pair, the value of <var name> is\n\
+string-wise compared with <var value>.  If they are identical, then\n\
+the corresponding <var consequent> code is performed, and its value is\n\
+the return value of the <example code><var-case></example> form.\n\
+\n\
+If none of the clauses match, and there is a <code>default</code>\n\
+clause, then the <var default-consequent> is evaluated, and its return\n\
+value is the return value of the <example code><var-case></example>\n\
+form.\n\
+\n\
+<code>var-case</code> is especially useful as a `traffic\n\
+switch' to select one of several actions based on a user button\n\
+press.\n\
+\n\
+For example:\n\
+\n\
+<example>\n\
+<var-case\n\
+   action=\"Save Files\"      <save-files <get-var posted::files[]>>\n\
+   action=\"Delete Files\"    <delete-files <get-var posted::files[]>>\n\
+   action=\"Rename Files\"    <redirect\n\
+                                 rename-files.mhtml?<cgi-encode files>>>\n\
 </example>")
 {
   pf_var_case_internal (PassPFunArgs, 0);
@@ -512,33 +512,33 @@ For example:
 
 DEFUN (pf_match_case, &optional name=regexp consequent... default
        default-consequent,
-"For each <var name=value> pair, the value of <var name> is
-compared with the regular expression <var regexp>.  If the expression matches,
-then the corresponding <var consequent> code is performed, and its value is
-the return value of the <example code><match-case></example> form.
-
-If none of the clauses match, and there is a <code>default</code>
-clause, then the <var default-consequent> is evaluated, and its return
-value is the return value of the <example code><match-case></example>
-form.
-
-<code>match-case</code> is especially useful as a `traffic
-switch' to select one of several actions based on a user button
+"For each <var name=value> pair, the value of <var name> is\n\
+compared with the regular expression <var regexp>.  If the expression matches,\n\
+then the corresponding <var consequent> code is performed, and its value is\n\
+the return value of the <example code><match-case></example> form.\n\
+\n\
+If none of the clauses match, and there is a <code>default</code>\n\
+clause, then the <var default-consequent> is evaluated, and its return\n\
+value is the return value of the <example code><match-case></example>\n\
+form.\n\
+\n\
+<code>match-case</code> is especially useful as a `traffic\n\
+switch' to select one of several actions based on a user button\n\
 press.")
 {
   pf_var_case_internal (PassPFunArgs, 1);
 }
 
 DEFMACRO (pf_with, &optional var=val...,
-"Execute <var body> in an environment where <var var> has the value
-<var val>.  Execution takes place in the current package.  After
-execution, the value of <var var> is restored to the value that it
-had before encountering the <code>with</code> macro.
-
-<complete-example>
-<set-var x=hello>
-<with x=1 z=<get-var foo>> <get-var x> </with>
-<get-var x>
+"Execute <var body> in an environment where <var var> has the value\n\
+<var val>.  Execution takes place in the current package.  After\n\
+execution, the value of <var var> is restored to the value that it\n\
+had before encountering the <code>with</code> macro.\n\
+\n\
+<complete-example>\n\
+<set-var x=hello>\n\
+<with x=1 z=<get-var foo>> <get-var x> </with>\n\
+<get-var x>\n\
 </complete-example>")
 {
   register int i;

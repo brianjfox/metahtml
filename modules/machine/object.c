@@ -2784,7 +2784,7 @@ main (int   argc,
 #if 0
   string_t source = strdup ("(0 1)((0 1) 2)(\"abc\" . \"def\")");
   string_t source = strdup ("abc\"def\\\"ghi\\\"jkl\"mno");
-  strdup ("abc \n(0 1 2)hij=10 xyz[  i];;; cmnt
+  strdup ("abc \n(0 1 2)hij=10 xyz[  i];;; cmnt\n\
 zzz<if <foo bar>><defun foo>\"bar\\n\\\"baz\"</defun>");
 
   string_t source_save = source;

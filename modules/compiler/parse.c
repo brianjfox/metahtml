@@ -2371,32 +2371,32 @@ main (int   argc,
   string_t recon;
 #if 0
   string_t source =
-    "
-<defun foo &rest x><a>ghi< /a ></defun>\"
-<jkl < mno > pqr> stu<>><\"<get-var foo>
-\"<xxx array[index]=foo[<get-var ~::def[>]> foo=bar stuff::<get-var foo>";
-
-  string_t source = "abc\"def\\\"123ghi\"jkl";
-  string_t source = "abc<def <ghi>jkl/foo<bar>[]=10 <x>mno>pqr";
-  string_t source = "abc\n\n\n   jkl  def";
-  string_t source = "
-<func link=foo=bar name=foo?=<random>
-      part=foo[]=bar time=\"a time x\"=<time>
-      date[]=12:1:00>";
+    "\n\
+<defun foo &rest x><a>ghi< /a ></defun>\"\n\
+<jkl < mno > pqr> stu<>><\"<get-var foo>\n\
+\"<xxx array[index]=foo[<get-var ~::def[>]> foo=bar stuff::<get-var foo>";\n\
+\n\
+  string_t source = "abc\"def\\\"123ghi\"jkl";\n\
+  string_t source = "abc<def <ghi>jkl/foo<bar>[]=10 <x>mno>pqr";\n\
+  string_t source = "abc\n\n\n   jkl  def";\n\
+  string_t source = "\n\
+<func link=foo=bar name=foo?=<random>\n\
+      part=foo[]=bar time=\"a time x\"=<time>\n\
+      date[]=12:1:00>";\n\
   string_t source = "<set-var foo=10 foo[1]=20 <get-var-once foo>=30 <get-var-once foo>[2]=40 <get-var-once foo[1]>[2]=50>";
 
 string_t source =
-  "<defsubst parser::canonicalize-var :pcv-var :pcv-pack whitespace=delete>
-  <defvar :pcv-pack \"^\">
-  <if <not <match <get-var-once <get-var-once :pcv-var>> \"::\">>
-      <set-var <get-var-once :pcv-var> =
-	<get-var-once :pcv-pack>::<get-var-once <get-var-once :pcv-var>>>>
+  "<defsubst parser::canonicalize-var :pcv-var :pcv-pack whitespace=delete>\n\
+  <defvar :pcv-pack \"^\">\n\
+  <if <not <match <get-var-once <get-var-once :pcv-var>> \"::\">>\n\
+      <set-var <get-var-once :pcv-var> =\n\
+	<get-var-once :pcv-pack>::<get-var-once <get-var-once :pcv-var>>>>\n\
 </defsubst>";
 #endif
 
 string_t source =
-  "<defun foo>
-     <ext \"\\\\123 and \\\"456 and \\\n and \\\t and \\\\789\">
+  "<defun foo>\n\
+     <ext \"\\\\123 and \\\"456 and \\\n and \\\t and \\\\789\">\n\
   </defun>";
 
   mh_parse_t parse = mh_parse ("main", source);
@@ -2418,9 +2418,9 @@ string_t source =
 
   printf ("\n\nPARSE_LIST_AS_CONCAT\n");
   source =
-    "<concat
-<href a b>
-  \"This \\\"is a test.\"
+    "<concat\n\
+<href a b>\n\
+  \"This \\\"is a test.\"\n\
 </href>>";
 
   parse = mh_parse ("main", source);

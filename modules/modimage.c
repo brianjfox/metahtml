@@ -87,13 +87,13 @@ MODULE_INITIALIZE ("modimage", ftab)
    functions that you declare with DEFUN, DEFMACRO, etc., will be documented
    in that section. */
 DEFINE_SECTION (IMAGE-MODULE, image-keywords; more keywords,
-"Functions which allow the creation of GIF images.
-You create an image with <var IMAGE::CREATE>, and you can then draw lines,
-arcs, and points into the image.  When you are done creating the image,
-you call <var IMAGE::RETRIEVE> to get the GIF image in a binary variable.
-
-Finally, when you are totally done with the image, you call <var IMAGE::DELETE>
-to make the image go away.", "")
+"Functions which allow the creation of GIF images.\n\
+You create an image with <var IMAGE::CREATE>, and you can then draw lines,\n\
+arcs, and points into the image.  When you are done creating the image,\n\
+you call <var IMAGE::RETRIEVE> to get the GIF image in a binary variable.\n\
+\n\
+Finally, when you are totally done with the image, you call\n\
+<var IMAGE::DELETE> to make the image go away.", "")
 
 /* An IMAGE object in Meta-HTML under this GD-based library is a variable
    name which encodes the location of a data structure within our code. */
@@ -192,10 +192,10 @@ integer_val (char *string)
 }
 
 DEFUNX(image::create, imagevar &key width height src,
-"Creates a new image with the specified width and height, and makes
-<var imagevar> be a receptacle for that image.
-
-If you pass <var src=/www/docs/images/foo.gif>, then <var foo.gif> will
+"Creates a new image with the specified width and height, and makes\n\
+<var imagevar> be a receptacle for that image.\n\
+\n\
+If you pass <var src=/www/docs/images/foo.gif>, then <var foo.gif> will\n\
 be loaded into the image variable instead of an empty image.")
 
 static void
@@ -265,9 +265,9 @@ pf_image_create (PFunArgs)
 }
 
 DEFUNX (image::info, imagevar,
-"Returns an alist representing information about the image in <var imagevar>.
-The alist contains <var width>, <var height>, <var total-colors>, and
-<var colors>.  <var colors> is an array of the color values which appear in
+"Returns an alist representing information about the image in <var imagevar>.\n\
+The alist contains <var width>, <var height>, <var total-colors>, and\n\
+<var colors>.  <var colors> is an array of the color values which appear in\n\
 the image.")
 
 #define alist_set(name, num)					\
@@ -418,7 +418,7 @@ rgb_to_index (gdImage *image, char *rgb, int allocate_p)
 }
   
 DEFUNX (image::set-pixel, imagevar &key x y color,
-"Set the pixel in <var imagevar> at location <var x>, <var y> to the color
+"Set the pixel in <var imagevar> at location <var x>, <var y> to the color\n\
 <var color>.")
 static void
 pf_image_set_pixel (PFunArgs)
@@ -499,13 +499,13 @@ pf_image_get_pixel (PFunArgs)
 }
 
 DEFUNX (image::text, imagevar text &key x y color size align report,
-"Write text on the image in <var imagevar> at position <var x>, <var y>,
-in the color <var color>.
-<var align> can be one of \"right\", \"center\", or \"left\", and defaults
-to \"center\".
-<var size> ranges frome 1 to 6 and defaults to 3.
-
-If <var report=true> is specified, the text isn't drawn, but all of the
+"Write text on the image in <var imagevar> at position <var x>, <var y>,\n\
+in the color <var color>.\n\
+<var align> can be one of \"right\", \"center\", or \"left\", and defaults\n\
+to \"center\".\n\
+<var size> ranges frome 1 to 6 and defaults to 3.\n\
+\n\
+If <var report=true> is specified, the text isn't drawn, but all of the\n\
 information about the drawing is returned as an alist.")
 
 static void
@@ -657,10 +657,10 @@ pf_image_text (PFunArgs)
 }
 
 DEFUNX (image::line, imagevar &key x1 y1 x2 y2 color brush,
-"Draw a line in <var imagevar> from (<var x1>, <var y1>) to
-(<var x2>, <var y2>) in the color <var color>.
-<var brush>, if supplied, is another image created with
-<funref image-module image::create>, that will be used as the brush to
+"Draw a line in <var imagevar> from (<var x1>, <var y1>) to\n\
+(<var x2>, <var y2>) in the color <var color>.\n\
+<var brush>, if supplied, is another image created with\n\
+<funref image-module image::create>, that will be used as the brush to\n\
 paint the line.  In that case, the <var color> argument is ignored.")
 static void
 pf_image_line (PFunArgs)
@@ -726,10 +726,10 @@ pf_image_line (PFunArgs)
 }
 
 DEFUNX (image::fill, imagevar &key x y color border,
-"Fill an area of the image in <var imagevar> with the color specified by
-<var color>.  The filling starts at the point specified by (<var x>, <var y>),
-and continues in all directions bounded by pixels which are not the same
-color as the color at (<var x>, <var y>), or, optionally, which are not the
+"Fill an area of the image in <var imagevar> with the color specified by\n\
+<var color>.  The filling starts at the point specified by (<var x>, <var y>),\n\
+and continues in all directions bounded by pixels which are not the same\n\
+color as the color at (<var x>, <var y>), or, optionally, which are not the\n\
 same color as the color specified by <var border>.")
 
 static void
@@ -779,9 +779,9 @@ pf_image_fill (PFunArgs)
 }
 
 DEFUNX (image::rect, imagevar &key x1 y1 x2 y2 color fill,
-"Draw a rectangle with the border lines in the color <var color> and perhaps
-filled with the color <var fill>.  The rectangle is drawn with the upper-left
-corner specified by (<var x1> <var y1>) and the bottom-right corner specified
+"Draw a rectangle with the border lines in the color <var color> and perhaps\n\
+filled with the color <var fill>.  The rectangle is drawn with the upper-left\n\
+corner specified by (<var x1> <var y1>) and the bottom-right corner specified\n\
 by (<var x2>, <var y2>).")
 
 static void
@@ -842,16 +842,16 @@ pf_image_rect (PFunArgs)
 }
 
 DEFUNX (image::arc, imagevar &key x y width height start end color fill,
-"Draws a partial ellipse centered at the point specified by <var x> and
-<var y>, with a width of <var width> and height of <var height>.
-
-The arguments of <var start> and <var end> are given in degrees, and specify
-the starting and ending points on the curve.
-
-The following code draws a red circle with a radius of 50 pixels where
-the exact center of the circle appears at 100,100:
-<example>
-<image::arc image x=100 y=100 width=50 height=50 start=0 end=360 color=FF0000>
+"Draws a partial ellipse centered at the point specified by <var x> and\n\
+<var y>, with a width of <var width> and height of <var height>.\n\
+\n\
+The arguments of <var start> and <var end> are given in degrees, and specify\n\
+the starting and ending points on the curve.\n\
+\n\
+The following code draws a red circle with a radius of 50 pixels where\n\
+the exact center of the circle appears at 100,100:\n\
+<example>\n\
+<image::arc image x=100 y=100 width=50 height=50 start=0 end=360 color=FF0000>\n\
 </example>")
 
 static void
@@ -947,7 +947,7 @@ pf_image_arc (PFunArgs)
 }
 
 DEFUNX (image::write, imagevar filename,
-"Writes the contents of the image in <var imagevar> to the file specified
+"Writes the contents of the image in <var imagevar> to the file specified\n\
 by <var filename>.  Returns \"true\" if the image was successfully written.")
 static void
 pf_image_write (PFunArgs)
@@ -1015,9 +1015,9 @@ pf_image_poly (PFunArgs)
 }
 
 DEFUNX (image::copy, src-image dst-image &key src-x src-y dst-x dst-y src-width src-height dst-width dst-height,
-"Copies bits from <var src-image> to <var dst-image>.
-Both images must exist.
-If a different width or height is specified for the destination, the image is
+"Copies bits from <var src-image> to <var dst-image>.\n\
+Both images must exist.\n\
+If a different width or height is specified for the destination, the image is\n\
 resized to fit the specified values.")
 static void
 pf_image_copy (PFunArgs)

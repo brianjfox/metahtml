@@ -52,21 +52,21 @@ MODULE_INITIALIZE ("parser", ftab)
 /* <parser::change-brackets "{}"> --> Allow new opener and closer. */
 DOC_SECTION (LANGUAGE-OPERATORS)
 DEFUNX (pf_parser::change-brackets, bracket-pair,
-"Add the matched open and close bracket characters to the special
-characters that are understood by the Meta-HTML parser.  For example,
-calling this function like this:
-<example>
-<parser::change-brackets \"{}\">
-</example>
-causes the character \"{\" to be in the same syntax class as \"<\", such
-that an expression {get-var foo} would return the value of <var foo>.
-
-This function is only available after loading the <b>parser</b> module:
-<example>
-<load-module parser> --> /www/lib/parser.so
-</example>
-
-For more information on loading dynamic modules in Meta-HTML, please see
+"Add the matched open and close bracket characters to the special\n\
+characters that are understood by the Meta-HTML parser.  For example,\n\
+calling this function like this:\n\
+<example>\n\
+<parser::change-brackets \"{}\">\n\
+</example>\n\
+causes the character \"{\" to be in the same syntax class as \"<\", such\n\
+that an expression {get-var foo} would return the value of <var foo>.\n\
+\n\
+This function is only available after loading the <b>parser</b> module:\n\
+<example>\n\
+<load-module parser> --> /www/lib/parser.so\n\
+</example>\n\
+\n\
+For more information on loading dynamic modules in Meta-HTML, please see\n\
 the documentation for <funref dynamic-modules load-module>.")
 
 static void

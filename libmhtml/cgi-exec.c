@@ -55,16 +55,16 @@ PACKAGE_INITIALIZER (initialize_cgi_exec_functions)
 DOC_SECTION (FILE-OPERATORS)
 
 DEFVAR (mhtml::exec-path,
-"A colon-seperated list of directories in which <Meta-HTML> searches
-for executables when executing the <funref FILE-OPERATORS cgi-exec> tag.
-Each component is a path to a directory, without the final trailing
-slash, separated from its neighbors by a colon character
-(<code>:</code>).
-
-For example:
-
-<example>
-   <set-var mhtml::exec-path=\"/www/bin:/www/docs/cgi-bin\">
+"A colon-seperated list of directories in which <Meta-HTML> searches\n\
+for executables when executing the <funref FILE-OPERATORS cgi-exec> tag.\n\
+Each component is a path to a directory, without the final trailing\n\
+slash, separated from its neighbors by a colon character\n\
+(<code>:</code>).\n\
+\n\
+For example:\n\
+\n\
+<example>\n\
+   <set-var mhtml::exec-path=\"/www/bin:/www/docs/cgi-bin\">\n\
 </example>")
 
 #if defined (NEW_CGI_EXEC)
@@ -370,15 +370,15 @@ shell_execute (char *command, char **output_textp, char **errors_textp,
 DEFUN (pf_cgi_exec,
        pathname &optional arg... &key output=varname errors=varname
        timeout=seconds nowait=true,
-"Execute the system function named by <var pathname>, perhaps passing
-it arguments <var arg ... argn>.
-
-If <var output=varname> is supplied, then the variable referenced by
-<var varname> receives the output of the command.  Otherwise, the
-resultant output is placed in the page.
-
-If <var errors=varname> is supplied, then <var varname> receives the
-error output of the command. Otherwise, the resultant output is placed
+"Execute the system function named by <var pathname>, perhaps passing\n\
+it arguments <var arg ... argn>.\n\
+\n\
+If <var output=varname> is supplied, then the variable referenced by\n\
+<var varname> receives the output of the command.  Otherwise, the\n\
+resultant output is placed in the page.\n\
+\n\
+If <var errors=varname> is supplied, then <var varname> receives the\n\
+error output of the command. Otherwise, the resultant output is placed\n\
 in <funref language-operators SYSTEM-ERROR-OUTPUT>.")
 {
   if (vars != (Package *)NULL)

@@ -196,16 +196,16 @@ cleanup_html_whitespace (char *string, int len, int beautify_p)
 }
 
 DEFUN (pf_cleanup_whitespace, &optional varname &key beautify,
-"Reduces the amount of whitespace in the output page to the minimum
-required.  This function carefully avoids the contents of <example
-code><pre> ... </pre></example> constructs, as well as any material
-appearing in a <example code><textarea ...> ... </textarea></example>
-construct.
-
-Given <var varname>, operates on the contents of that variable.
-
-Placed as the last instruction on a page, it is an effective way to
-reduce the amount of data sent back over the network to the connecting
+"Reduces the amount of whitespace in the output page to the minimum\n\
+required.  This function carefully avoids the contents of <example\n\
+code><pre> ... </pre></example> constructs, as well as any material\n\
+appearing in a <example code><textarea ...> ... </textarea></example>\n\
+construct.\n\
+\n\
+Given <var varname>, operates on the contents of that variable.\n\
+\n\
+Placed as the last instruction on a page, it is an effective way to\n\
+reduce the amount of data sent back over the network to the connecting\n\
 browser.")
 {
   char *varname = mhtml_evaluate_string (get_positional_arg (vars, 0));

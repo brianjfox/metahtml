@@ -53,23 +53,23 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_relational_functions)
 DEFINE_SECTION (RELATIONAL-OPERATORS, boolean; relational; logical, 
-"<i>Relational operators</i> in <Meta-HTML> return information about the
-relationship between two items.  There are three logical operators,
-<funref RELATIONAL-OPERATORS and>, <funref RELATIONAL-OPERATORS
-or>,  and <funref RELATIONAL-OPERATORS not>.
-
-There are several other operators which compare numeric values; the
+"<i>Relational operators</i> in <Meta-HTML> return information about the\n\
+relationship between two items.  There are three logical operators,\n\
+<funref RELATIONAL-OPERATORS and>, <funref RELATIONAL-OPERATORS\n\
+or>,  and <funref RELATIONAL-OPERATORS not>.\n\
+\n\
+There are several other operators which compare numeric values; the\n\
 section <secref ARITHMETIC-OPERATORS> cover those in detail.", "")
 
 DEFUN (pf_not, &optional body,
-"<var body> is evaluated.  If the result is the empty string, then the
-string \"true\" is returned, otherwise nothing is returned.  <var body>
-is simply the entire contents of the simple tag, with the word \"not\"
-in it.  Thus, in typical usage one might write:
-<example>
-<when <not <get-var foo>>>
-  Hey!  You didn't set the variable FOO.
-</when>
+"<var body> is evaluated.  If the result is the empty string, then the\n\
+string \"true\" is returned, otherwise nothing is returned.  <var body>\n\
+is simply the entire contents of the simple tag, with the word \"not\"\n\
+in it.  Thus, in typical usage one might write:\n\
+<example>\n\
+<when <not <get-var foo>>>\n\
+  Hey!  You didn't set the variable FOO.\n\
+</when>\n\
 </example>")
 {
   int offset = 0;
@@ -84,33 +84,33 @@ in it.  Thus, in typical usage one might write:
 }
 
 DEFUN (pf_and, &unevalled &rest expr...,
-"<code>and</code> evaluates each <var expr> given until one of them
-evaluates to the empty string, or until they are all exhausted.  The
-result is the result of the last evaluation.  Evaluating just <example
-code><and></example> returns <code>\"true\"</code>.
-
-Examples:
-<example>
-<and>                    --> true
-<and this that>          --> that
-<unset-var foo>
-<and <get-var foo> this> -->
-<and this <get-var foo>> -->
-<set-var foo=bar>
-<and this long list <get-var foo>> --> bar
-</example>
-
-<tag and> could have been defined in <Meta-HTML> as follows:
-<example>
-<define-tag and &unevalled &rest expressions[] whitespace=delete>
-  <set-var result=true>
-  <foreach :expr expressions>
-    <set-var result = <get-var-eval :expr>>
-    <if <not <get-var-once result>>
-      <break>>
-  </foreach>
-  <get-var-once result>
-</define-tag>
+"<code>and</code> evaluates each <var expr> given until one of them\n\
+evaluates to the empty string, or until they are all exhausted.  The\n\
+result is the result of the last evaluation.  Evaluating just <example\n\
+code><and></example> returns <code>\"true\"</code>.\n\
+\n\
+Examples:\n\
+<example>\n\
+<and>                    --> true\n\
+<and this that>          --> that\n\
+<unset-var foo>\n\
+<and <get-var foo> this> -->\n\
+<and this <get-var foo>> -->\n\
+<set-var foo=bar>\n\
+<and this long list <get-var foo>> --> bar\n\
+</example>\n\
+\n\
+<tag and> could have been defined in <Meta-HTML> as follows:\n\
+<example>\n\
+<define-tag and &unevalled &rest expressions[] whitespace=delete>\n\
+  <set-var result=true>\n\
+  <foreach :expr expressions>\n\
+    <set-var result = <get-var-eval :expr>>\n\
+    <if <not <get-var-once result>>\n\
+      <break>>\n\
+  </foreach>\n\
+  <get-var-once result>\n\
+</define-tag>\n\
 </example>")
 {
   register int i = 0;
@@ -143,32 +143,32 @@ Examples:
 }
 
 DEFUN (pf_or, &unevalled &rest expr...,
-"<code>or</code> evaluates each <var expr> given until one of them
-evaluates to a non-empty string, or until they are all exhausted.  The
-result is the result of the last evaluation.  Evaluating just <example
-code><or></example> returns the empty string.
-
-Examples:
-<example>
-<or>                    --> 
-<or this that>          --> this
-<unset-var foo>
-<or <get-var foo> this> --> this
-<or this <get-var foo>> --> this
-<set-var foo=bar>
-<or <get-var foo> this> --> bar
-</example>
-
-<tag or> could have been defined in <Meta-HTML> as follows:
-<example>
-<define-tag or &unevalled &rest expressions[] whitespace=delete>
-  <foreach :expr expressions>
-    <set-var result = <get-var-eval :expr>>
-    <if <get-var-once result>
-        <break>>
-  </foreach>
-  <get-var-once result>
-</define-tag>
+"<code>or</code> evaluates each <var expr> given until one of them\n\
+evaluates to a non-empty string, or until they are all exhausted.  The\n\
+result is the result of the last evaluation.  Evaluating just <example\n\
+code><or></example> returns the empty string.\n\
+\n\
+Examples:\n\
+<example>\n\
+<or>                    --> \n\
+<or this that>          --> this\n\
+<unset-var foo>\n\
+<or <get-var foo> this> --> this\n\
+<or this <get-var foo>> --> this\n\
+<set-var foo=bar>\n\
+<or <get-var foo> this> --> bar\n\
+</example>\n\
+\n\
+<tag or> could have been defined in <Meta-HTML> as follows:\n\
+<example>\n\
+<define-tag or &unevalled &rest expressions[] whitespace=delete>\n\
+  <foreach :expr expressions>\n\
+    <set-var result = <get-var-eval :expr>>\n\
+    <if <get-var-once result>\n\
+        <break>>\n\
+  </foreach>\n\
+  <get-var-once result>\n\
+</define-tag>\n\
 </example>")
 {
   register int i = 0;

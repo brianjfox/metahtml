@@ -55,8 +55,8 @@ MODULE_INITIALIZE ("echo", ftab)
    functions that you declare with DEFUN, DEFMACRO, etc., will be documented
    in that section. */
 DEFINE_SECTION (ECHO-MODULE, testing; displaying arguments,
-"ECHO::ECHO simply echoes the arguments it was passed.  This is solely for
-the purposes of debugging Meta-HTML internals, but can be relatively useful
+"ECHO::ECHO simply echoes the arguments it was passed.  This is solely for\n\
+the purposes of debugging Meta-HTML internals, but can be relatively useful\n\
 when building new language constructs.", "")
 
 /* 5) Write the actual code which implements your functionality. */
@@ -64,7 +64,7 @@ when building new language constructs.", "")
 /* <echo arg arg arg> --> the args, one per line, each surrounded by `' */
 
 DEFUN (pf_echo, &rest args,
-"Echo the passed in arguments, one per line, and each one surrounded by 
+"Echo the passed in arguments, one per line, and each one surrounded by \n\
 single quotes.")
 {
   register int i;

@@ -234,8 +234,8 @@ DEFUN (pf_asin, x, "Return the arc sin of <var x>.")
 }
 
 DEFUN (pf_atan, x &optional y,
-"Return the arc tangent of <var x>.
-If <var y> is supplied, then this returns the arg tangent of <var y/x>,
+"Return the arc tangent of <var x>.\n\
+If <var y> is supplied, then this returns the arg tangent of <var y/x>,\n\
 using the signs of both arguments to determine the quadrant of the result.")
 {
   double x, y;
@@ -289,7 +289,7 @@ DEFUN (pf_tan, x, "Return the tangent of <var x>.")
 }
 
 DEFUN (pf_cosh, x,
-"Return the hyperbolic cosine of <var x>,
+"Return the hyperbolic cosine of <var x>,\n\
 i.e., (exp (<var x>) + exp (<var -x>)) / 2.")
 {
   double x;
@@ -301,7 +301,7 @@ i.e., (exp (<var x>) + exp (<var -x>)) / 2.")
     }
 }
 
-DEFUN (pf_sinh, x, "Return the hyperbolic sine of <var x>,
+DEFUN (pf_sinh, x, "Return the hyperbolic sine of <var x>,\n\
 i.e. (exp(<var x>) - exp(<var -x>) / 2.")
 {
   double x;
@@ -313,7 +313,7 @@ i.e. (exp(<var x>) - exp(<var -x>) / 2.")
     }
 }
 
-DEFUN (pf_tanh, x, "Return the hyperbolic tangent of <var x>,
+DEFUN (pf_tanh, x, "Return the hyperbolic tangent of <var x>,\n\
 i.e. sinh(<var x>) / cosh(<var x>).")
 {
   double x;
@@ -359,7 +359,7 @@ DEFUN (pf_atanh, x, "Return the inverse hyperbolic tangent of <var x>.")
 }
 
 DEFUN (pf_exp, x,
-"Return the value of <i>e</i> (the base of natural logarithms), raised 
+"Return the value of <i>e</i> (the base of natural logarithms), raised \n\
 to the power of <var x>.")
 {
   double x;

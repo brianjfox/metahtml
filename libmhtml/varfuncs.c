@@ -83,27 +83,27 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_variable_functions)
 DEFINE_SECTION (VARIABLES, variables; symbols; lookup,
-"<Meta-HTML> provides a simple mechanism for the storage and retrieval
-of variables during a single (possibly recursive) processing pass.  In
-addition to this, functions are provided which test the value of a
-variable, and conditionally execute other code based upon the result.
-
-There is also a mechanism to group a set of variables using <secref
+"<Meta-HTML> provides a simple mechanism for the storage and retrieval\n\
+of variables during a single (possibly recursive) processing pass.  In\n\
+addition to this, functions are provided which test the value of a\n\
+variable, and conditionally execute other code based upon the result.\n\
+\n\
+There is also a mechanism to group a set of variables using <secref\n\
 packages>.",
 
-"<h3>Variable Types and Information</h3>
-
-There are internal functions in <meta-html> which create <i>binary</i>
-variables.  Such variables cannot be used in the ordinary way, since
-the data contained within them may not retain integrity once printed
-out and read back in.  You can check to see what the type of a
-particular variable is with the <funref variables symbol-info>
-function.
-
-Many variables are predefined by <Meta-HTML>, and made available to
-the page writer.  The <secref Page-Variables> section of this manual
-documents those variables fully, while the <secref server-variables>
-section contains more information on variables which control, or were
+"<h3>Variable Types and Information</h3>\n\
+\n\
+There are internal functions in <meta-html> which create <i>binary</i>\n\
+variables.  Such variables cannot be used in the ordinary way, since\n\
+the data contained within them may not retain integrity once printed\n\
+out and read back in.  You can check to see what the type of a\n\
+particular variable is with the <funref variables symbol-info>\n\
+function.\n\
+\n\
+Many variables are predefined by <Meta-HTML>, and made available to\n\
+the page writer.  The <secref Page-Variables> section of this manual\n\
+documents those variables fully, while the <secref server-variables>\n\
+section contains more information on variables which control, or were\n\
 specifically created by, the web server.")
 
 static void
@@ -180,53 +180,53 @@ generic_set_variable (Package *vars, int debug_level, int eval_p, int readonly_p
 
 
 DEFUN (pf_set_var, &optional name=value...,
-"Gives the variable <var name> the value of <var value> for the
-current processing run.  Any number of name/value pairs may be given,
-and whitespace is not significant.  Where <var =value> is omitted, the
-value is the empty string.
-
-<example>
-<set-var foo=bar bar=baz>
-<get-var foo>              --> bar
-<get-var bar>              --> baz
-<get-var <get-var foo>>    --> baz
+"Gives the variable <var name> the value of <var value> for the\n\
+current processing run.  Any number of name/value pairs may be given,\n\
+and whitespace is not significant.  Where <var =value> is omitted, the\n\
+value is the empty string.\n\
+\n\
+<example>\n\
+<set-var foo=bar bar=baz>\n\
+<get-var foo>              --> bar\n\
+<get-var bar>              --> baz\n\
+<get-var <get-var foo>>    --> baz\n\
 </example>")
 {
   generic_set_variable (vars, debug_level, 1, 0);
 }
 
 DEFUN (pf_set_var_verbatim, &optional name=value...,
-"Gives the variable <var name> the value of <var value> for the
-current processing run.  The difference between
-<code>set-var-verbatim</code> and <funref variables set-var> is that
-in <code>set-var-verbatim</code> the right-hand side of assignments
-are not evaluated.
-
-Example:
-<complete-example>
-<set-var-verbatim foo=<get-var bar>>
-<get-var-once foo>
+"Gives the variable <var name> the value of <var value> for the\n\
+current processing run.  The difference between\n\
+<code>set-var-verbatim</code> and <funref variables set-var> is that\n\
+in <code>set-var-verbatim</code> the right-hand side of assignments\n\
+are not evaluated.\n\
+\n\
+Example:\n\
+<complete-example>\n\
+<set-var-verbatim foo=<get-var bar>>\n\
+<get-var-once foo>\n\
 </complete-example>")
 {
   generic_set_variable (vars, debug_level, 0, 0);
 }
 
 DEFUN (pf_set_var_readonly, &optional name=value...,
-"For each <var name> specified, if that name is not already assigned a
-value with <code>set-var-readonly</code>, assigns the associated <var
-value> to it, exactly in the way that <funref variables set-var> would.
-
-Once <var name> has had a value assigned to it with
-<code>set-var-readonly</code>, then that variable is <i>immutable</i>,
-i.e., its value cannot be changed using any Meta-HTML commands.
-
-A useful construct for setting various site specific variables in your
-<code>engine.conf</code> or <code>mhttpd.conf</code> file, this allows
-one to create globally defined variables which cannot be changed by
-the execution of Meta-HTML statements in a page.
-
-Variables which can usefully benefit from this type of setting
-include <varref mhtml::include-prefix> and <varref
+"For each <var name> specified, if that name is not already assigned a\n\
+value with <code>set-var-readonly</code>, assigns the associated <var\n\
+value> to it, exactly in the way that <funref variables set-var> would.\n\
+\n\
+Once <var name> has had a value assigned to it with\n\
+<code>set-var-readonly</code>, then that variable is <i>immutable</i>,\n\
+i.e., its value cannot be changed using any Meta-HTML commands.\n\
+\n\
+A useful construct for setting various site specific variables in your\n\
+<code>engine.conf</code> or <code>mhttpd.conf</code> file, this allows\n\
+one to create globally defined variables which cannot be changed by\n\
+the execution of Meta-HTML statements in a page.\n\
+\n\
+Variables which can usefully benefit from this type of setting\n\
+include <varref mhtml::include-prefix> and <varref\n\
 mhtml::relative-prefix> among others.")
 {
   generic_set_variable (vars, debug_level, 1, 1);
@@ -275,62 +275,62 @@ DEFUN (pf_get_var, &optional name ..., "Synonym for <tag get-var-eval>".)
 }
 
 DEFUN (pf_get_var_eval, &optional name...,
-"Return the value of the <var name>s given.  Each <var name> is a
-variable name which has had a value assigned to it with <funref
-variables set-var>, <funref variables set-var-readonly>, or was
-created implicity via <funref alists alist-to-package> or <funref
-variables coerce-var>.
-
-The values are returned in the order in which the <var name>s appear.
-
-Examples:
-<complete-example>
-<set-var foo=Var-1 bar=Var-2>
-<get-var-eval foo>, <get-var bar>
-</complete-example>
-
-When multiple <var name>s are given:
-<complete-example>
-<set-var foo=Var-1 bar=Var-2>
-<get-var foo bar foo>
+"Return the value of the <var name>s given.  Each <var name> is a\n\
+variable name which has had a value assigned to it with <funref\n\
+variables set-var>, <funref variables set-var-readonly>, or was\n\
+created implicity via <funref alists alist-to-package> or <funref\n\
+variables coerce-var>.\n\
+\n\
+The values are returned in the order in which the <var name>s appear.\n\
+\n\
+Examples:\n\
+<complete-example>\n\
+<set-var foo=Var-1 bar=Var-2>\n\
+<get-var-eval foo>, <get-var bar>\n\
+</complete-example>\n\
+\n\
+When multiple <var name>s are given:\n\
+<complete-example>\n\
+<set-var foo=Var-1 bar=Var-2>\n\
+<get-var foo bar foo>\n\
 </complete-example>")
 {
   get_var_internal (PassPFunArgs, 0);
 }
 
 DEFUN (pf_get_var_once, &optional name...,
-"Returns the current value of the variables named by the <var name>s
-given.  The interpreter pointer is then moved to after the returned
-data, thus preventing further interpretation of the data.
-
-Example:
-<example>
-<set-var bar=HELLO>
-<set-var-verbatim foo=<get-var bar>>
-<get-var-once foo>   --> &lt;get-var bar&gt;
-</example>
-but...
-<example>
-<get-var foo>        --> HELLO
+"Returns the current value of the variables named by the <var name>s\n\
+given.  The interpreter pointer is then moved to after the returned\n\
+data, thus preventing further interpretation of the data.\n\
+\n\
+Example:\n\
+<example>\n\
+<set-var bar=HELLO>\n\
+<set-var-verbatim foo=<get-var bar>>\n\
+<get-var-once foo>   --> &lt;get-var bar&gt;\n\
+</example>\n\
+but...\n\
+<example>\n\
+<get-var foo>        --> HELLO\n\
 </example>")
 {
   get_var_internal (PassPFunArgs, 1);
 }
 
 DEFUN (pf_unset_var, &optional name...,
-"Make <var name>s be non-existent in the page environment.
-
-This is different than <example code><set-var foo=\"\"></example>
-because the variable actually ceases to exist, rather than is given no
-value.
-
-Example:
-<example>
-<set-var foo=\"\">
-<var-exists foo>      --> true
-<get-var foo>         -->
-<unset-var foo>
-<var-exists foo>      -->
+"Make <var name>s be non-existent in the page environment.\n\
+\n\
+This is different than <example code><set-var foo=\"\"></example>\n\
+because the variable actually ceases to exist, rather than is given no\n\
+value.\n\
+\n\
+Example:\n\
+<example>\n\
+<set-var foo=\"\">\n\
+<var-exists foo>      --> true\n\
+<get-var foo>         -->\n\
+<unset-var foo>\n\
+<var-exists foo>      -->\n\
 </example>")
 {
   register int i;
@@ -371,21 +371,21 @@ Example:
 }
 
 DEFUN (pf_var_exists, name,
-"<code>var-exists</code> checks for the <i>existence</i> of
-the variable named by <var varname>, and returns <code>true</code> if that
-variable exists.
-
-The existence of a variable has nothing to do with its value -- a variable
-exists if it has been created with <funref variables set-var>, and doesn't
-exist after it has been unset with <funref variables unset-var>.
-
-<example>
-  <set-var foo=1 bar>
-  <var-exists foo>       --> true
-  <var-exists bar>       --> true
-  <get-var bar>          -->
-  <unset-var foo>
-  <var-exists foo>       -->
+"<code>var-exists</code> checks for the <i>existence</i> of\n\
+the variable named by <var varname>, and returns <code>true</code> if that\n\
+variable exists.\n\
+\n\
+The existence of a variable has nothing to do with its value -- a variable\n\
+exists if it has been created with <funref variables set-var>, and doesn't\n\
+exist after it has been unset with <funref variables unset-var>.\n\
+\n\
+<example>\n\
+  <set-var foo=1 bar>\n\
+  <var-exists foo>       --> true\n\
+  <var-exists bar>       --> true\n\
+  <get-var bar>          -->\n\
+  <unset-var foo>\n\
+  <var-exists foo>       -->\n\
 </example>")
 {
   char *arg = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -404,7 +404,7 @@ exist after it has been unset with <funref variables unset-var>.
 }
 
 DEFUN (pf_binary_concat, collector &rest binary-vars,
-"Concatenate the contents of <var collector> and the supplied <var binary-var>s
+"Concatenate the contents of <var collector> and the supplied <var binary-var>s\n\
 into a single binary variable, and store the results back in <var collector>.")
 {
   register int i = 0;
@@ -495,62 +495,62 @@ change_increment (PFunArgs, int default_amount)
 }
 
 DEFUN (pf_increment, name &key by=amount,
-"Add <var amount> (default 1) to the contents of the variable named by
-<var varname>.
-
-<example>
-<set-var foo=1>
-<get-var foo> --> 1
-<increment foo>
-<get-var foo> --> 2
-</example>
-
+"Add <var amount> (default 1) to the contents of the variable named by\n\
+<var varname>.\n\
+\n\
+<example>\n\
+<set-var foo=1>\n\
+<get-var foo> --> 1\n\
+<increment foo>\n\
+<get-var foo> --> 2\n\
+</example>\n\
+\n\
 Also see <funref variables decrement>.")
 {
   change_increment (PassPFunArgs, 1);
 }
 
 DEFUN (pf_decrement, name &key by=amount,
-"Subtract <var amount> (default 1) from the contents of the variable named
-by <var varname>.
-
-<example>
-   <set-var foo=1>
-   <get-var foo> --> 1
-   <decrement foo>
-   <get-var foo> --> 0
-</example>
-
+"Subtract <var amount> (default 1) from the contents of the variable named\n\
+by <var varname>.\n\
+\n\
+<example>\n\
+   <set-var foo=1>\n\
+   <get-var foo> --> 1\n\
+   <decrement foo>\n\
+   <get-var foo> --> 0\n\
+</example>\n\
+\n\
 Also see <funref variables increment>.")
 {
   change_increment (PassPFunArgs, -1);
 }
 
 DEFUN (pf_cgi_encode, &rest vars &key preserve-case=true strip=true,
-"A CGI readable string is created from the names of the <var var>s given,
-and the associated values of those variables.  For example, if the
-variable <code>FOO-VAR</code> has the value <code>\"Foo &
-Value\"</code>, then the invocation
-<set-var foo-var=\"Foo & Value\">
-<complete-example-global>
-<cgi-encode FOO-VAR>
-</complete-example-global>
-
-Given the optional keyword argument of <var preserve-case=true>,
-<code>cgi-encode</code> encodes the variables preserving the case of
-them as they were input.
-
-<complete-example-global>
-<cgi-encode Foo-Var preserve-case=true>
-</complete-example-global>
-
-Finally, the keyword flag <var strip=true>, when present, says to
-strip off the package name of each variable before placing it in an
-assignment statement (also see <funref packages package-vars>).
-
-<complete-example>
-<set-var FOO::BAR=value>
-<cgi-encode Foo::Bar preserve-case=true strip=true>
+"A CGI readable string is created from the names of the <var var>s given,\n\
+and the associated values of those variables.  For example, if the\n\
+variable <code>FOO-VAR</code> has the value <code>\"Foo &\n\
+Value\"</code>, then the invocation\n\
+<set-var foo-var=\"Foo & Value\">\n\
+<complete-example-global>\n\
+<cgi-encode FOO-VAR>\n\
+</complete-example-global>\n\
+\n\
+Given the optional keyword argument of <var preserve-case=true>,\n\
+<code>cgi-encode</code> encodes the variables preserving the case of\n\
+them as they were input.\n\
+\n\
+<complete-example-global>\n\
+<cgi-encode Foo-Var preserve-case=true>\n\
+</complete-example-global>\n\
+\n\
+Finally, the keyword flag <var strip=true>, when present, says to\n\
+strip off the package name of each variable before placing it in an\n\
+assignment statement (also see <funref packages package-vars>).\n\
+\n\
+<complete-example>\n\
+<set-var FOO::BAR=value>\n\
+<cgi-encode Foo::Bar preserve-case=true strip=true>\n\
 </complete-example>")
 {
   char **names = get_vars_names (vars);
@@ -624,28 +624,28 @@ assignment statement (also see <funref packages package-vars>).
 }
 
 DEFUN (pf_cgi_decode, string &optional package,
-"Decode <var string> into <var package>.
-
-If <var package> is not specified the current package is used.
-
-<var string> is a string that might have appeared in
-<code>QUERY_STRING</code> or the contents of the data that was posted
-to a document, such that it consists of name value pairs:
-
-<example>
-FOO=bar&STRING=this+is+a+string%2C+other+chars
-</example>
-
-<var package> is the name of a package to bind the variables in.  So,
-given the above example as the text in a variable called <var string>,
-here is what you get:
-
-<complete-example>
-<set-var string=\"FOO=bar&STRING=this+is+a+string%2C+other+chars\">
-<cgi-decode <get-var string> mypack>
-<get-var mypack::string>
-</complete-example>
-
+"Decode <var string> into <var package>.\n\
+\n\
+If <var package> is not specified the current package is used.\n\
+\n\
+<var string> is a string that might have appeared in\n\
+<code>QUERY_STRING</code> or the contents of the data that was posted\n\
+to a document, such that it consists of name value pairs:\n\
+\n\
+<example>\n\
+FOO=bar&STRING=this+is+a+string%2C+other+chars\n\
+</example>\n\
+\n\
+<var package> is the name of a package to bind the variables in.  So,\n\
+given the above example as the text in a variable called <var string>,\n\
+here is what you get:\n\
+\n\
+<complete-example>\n\
+<set-var string=\"FOO=bar&STRING=this+is+a+string%2C+other+chars\">\n\
+<cgi-decode <get-var string> mypack>\n\
+<get-var mypack::string>\n\
+</complete-example>\n\
+\n\
 Also see <funref variables cgi-encode>.")
 {
   char *string, *packname = (char *)NULL;
@@ -686,37 +686,37 @@ Also see <funref variables cgi-encode>.")
 }
 
 DEFUN (pf_symbol_info, symbol,
-"Returns information about the symbol <var symbol>.
-
-The information is returned in an alist containing:
-<ul>
-<li> The type of the symbol (TYPE), which is one of:
-<ol>
-<li><code>STRING</code>,
-<li><code>BINARY</code>,
-<li><code>USER DEFUN</code>,
-<li><code>USER SUBST</code>,
-<li><code>USER MACRO</code>,
-<li><code>PRIM DEFUN</code>, or
-<li><code>PRIM MACRO</code>.
-</ol>
-<li> The \"size\" of the symbol.
-<li> The symbol's flags, including:
-<ol>
-<li><code>READONLY</code>
-<li><code>INVISIBLE</code>
-<li><code>NOEXPAND</code>
-<li><code>MODIFIED</code>
-<li><code>MACH_RES</code>
-<li><code>FLAGGED</code>
-</ol>
-</ul>
-
-For <code>STRING</code>. variables, the size value is the number of
-elements in the array.<br>
-For BINARY variables, the size value is the number of bytes of binary
-data stored within.
-
+"Returns information about the symbol <var symbol>.\n\
+\n\
+The information is returned in an alist containing:\n\
+<ul>\n\
+<li> The type of the symbol (TYPE), which is one of:\n\
+<ol>\n\
+<li><code>STRING</code>,\n\
+<li><code>BINARY</code>,\n\
+<li><code>USER DEFUN</code>,\n\
+<li><code>USER SUBST</code>,\n\
+<li><code>USER MACRO</code>,\n\
+<li><code>PRIM DEFUN</code>, or\n\
+<li><code>PRIM MACRO</code>.\n\
+</ol>\n\
+<li> The \"size\" of the symbol.\n\
+<li> The symbol's flags, including:\n\
+<ol>\n\
+<li><code>READONLY</code>\n\
+<li><code>INVISIBLE</code>\n\
+<li><code>NOEXPAND</code>\n\
+<li><code>MODIFIED</code>\n\
+<li><code>MACH_RES</code>\n\
+<li><code>FLAGGED</code>\n\
+</ol>\n\
+</ul>\n\
+\n\
+For <code>STRING</code>. variables, the size value is the number of\n\
+elements in the array.<br>\n\
+For BINARY variables, the size value is the number of bytes of binary\n\
+data stored within.\n\
+\n\
 The size value is zero for all other variable types.")
 {
   char *name = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -815,21 +815,21 @@ The size value is zero for all other variable types.")
 }
 
 DEFUN (pf_copy_var, from-var &optional to-var...,
-"Copies the variable <var from-var> to each of the named <var to-var>s.
-
-Each <var to-var> becomes the repository of a copy of the information
-already stored under <var from-var>.  This is a <i>true</i> copy; not
-an alias to the original variable.
-
-<example>
-<set-var foo=bar>
-<get-var foo>      --> bar
-<get-var new>      --> 
-<copy-var foo new> -->
-<get-var new>      --> bar
-
-<copy-var *meta-html*::get-var *meta-html*::foo>
-<foo new>          --> bar
+"Copies the variable <var from-var> to each of the named <var to-var>s.\n\
+\n\
+Each <var to-var> becomes the repository of a copy of the information\n\
+already stored under <var from-var>.  This is a <i>true</i> copy; not\n\
+an alias to the original variable.\n\
+\n\
+<example>\n\
+<set-var foo=bar>\n\
+<get-var foo>      --> bar\n\
+<get-var new>      --> \n\
+<copy-var foo new> -->\n\
+<get-var new>      --> bar\n\
+\n\
+<copy-var *meta-html*::get-var *meta-html*::foo>\n\
+<foo new>          --> bar\n\
 </example>")
 {
   char *source_name = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -889,23 +889,23 @@ an alias to the original variable.
 #define symtype_ARRAY 78
 #endif
 DEFUN (pf_coerce_var, varname &key type=(STRING|BINARY|ARRAY),
-"Coerces <var varname>'s data to have the type specified by the
-argument to <var type>.  You can convert a binary object to a string
-object, and vice-versa.
-
-A binary variable might be created as the result of a call to <funref
-stream-commands stream-get-contents>, for example.  Once the data is
-read, you might wish to perform some substitutions on it, or otherwise
-get its value.  To do so, you call <code>coerce-var</code> on the
-value:
-
-<example>
-<with-open-stream s /tmp/file mode=read>
-  <stream-get-contents s foo>
-</with-open-stream>
-
-<coerce-var foo type=string>
-<subst-in-string <get-var-once foo> \"Hello\" \"Goodbye\">
+"Coerces <var varname>'s data to have the type specified by the\n\
+argument to <var type>.  You can convert a binary object to a string\n\
+object, and vice-versa.\n\
+\n\
+A binary variable might be created as the result of a call to <funref\n\
+stream-commands stream-get-contents>, for example.  Once the data is\n\
+read, you might wish to perform some substitutions on it, or otherwise\n\
+get its value.  To do so, you call <code>coerce-var</code> on the\n\
+value:\n\
+\n\
+<example>\n\
+<with-open-stream s /tmp/file mode=read>\n\
+  <stream-get-contents s foo>\n\
+</with-open-stream>\n\
+\n\
+<coerce-var foo type=string>\n\
+<subst-in-string <get-var-once foo> \"Hello\" \"Goodbye\">\n\
 </example>")
 {
   char *source_name = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -1128,7 +1128,7 @@ hexval (char c)
 }
 
 DEFUN (pf_hex_to_contents, string varname,
-"Convert the string of hexadecimal digits passed in <var string> to their
+"Convert the string of hexadecimal digits passed in <var string> to their\n\
 binary contents, placing the result in <var varname>.")
 {
   register int i;
@@ -1163,7 +1163,7 @@ binary contents, placing the result in <var varname>.")
 }
 
 DEFUN (pf_contents_to_hex, varname,
-"Convert the contents of the binary variable named by <var varname> to
+"Convert the contents of the binary variable named by <var varname> to\n\
 be a sequence of hex characters.")
 {
   register int i, j;
@@ -1205,20 +1205,20 @@ be a sequence of hex characters.")
 }
 
 DEFUN (pf_defvar, name value,
-"<b>DEF</b>ault the value of the <b>VAR</b>iable named by <var name>
-to <var value>.
-
-<code>defvar</code> assigns <var value> to <var name> if, and only if,
-<var name> has a empty value.
-
-<code>defvar</code> could have been defined in <Meta-HTML> using
-<funref macro-commands define-tag>:
-
-<example>
-<define-tag defvar var &optional val>
-  <if <not <get-var <get-var-once var>>>
-      <set-var <get-var-once var>=<get-var-once val>>>
-</define-tag>
+"<b>DEF</b>ault the value of the <b>VAR</b>iable named by <var name>\n\
+to <var value>.\n\
+\n\
+<code>defvar</code> assigns <var value> to <var name> if, and only if,\n\
+<var name> has a empty value.\n\
+\n\
+<code>defvar</code> could have been defined in <Meta-HTML> using\n\
+<funref macro-commands define-tag>:\n\
+\n\
+<example>\n\
+<define-tag defvar var &optional val>\n\
+  <if <not <get-var <get-var-once var>>>\n\
+      <set-var <get-var-once var>=<get-var-once val>>>\n\
+</define-tag>\n\
 </example>")
 {
   char *name = mhtml_evaluate_string (get_positional_arg (vars, 0));

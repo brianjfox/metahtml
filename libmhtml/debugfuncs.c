@@ -56,28 +56,28 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_debugger_functions)
 DEFINE_SECTION (DEBUGGING-COMMANDS, debug; variables; trouble-shooting,
-"Debugging a CGI application executing under a running Web server can be
-quite problematic.  <Meta-HTML> provides the following functions, macros,
-and variables in an effort to alleviate the problems associated with this
+"Debugging a CGI application executing under a running Web server can be\n\
+quite problematic.  <Meta-HTML> provides the following functions, macros,\n\
+and variables in an effort to alleviate the problems associated with this\n\
 situation.",
-"In addition to the functions and variables above, <Meta-HTML> has a complete
-source language debugger called <code>mdb</code>, which can be used to
-interactively execute expressions, to place breakpoints in files and then
-run them examining local and global variables, and to single-step through
-source code that you have written in <Meta-HTML>.  Instructions on the
-use of the debugger is beyong the scope of <i>this</i> manual -- please see
-<b>MDB: A User's Guide to Debugging <Meta-HTML> Programs</b> for more
+"In addition to the functions and variables above, <Meta-HTML> has a complete\n\
+source language debugger called <code>mdb</code>, which can be used to\n\
+interactively execute expressions, to place breakpoints in files and then\n\
+run them examining local and global variables, and to single-step through\n\
+source code that you have written in <Meta-HTML>.  Instructions on the\n\
+use of the debugger is beyong the scope of <i>this</i> manual -- please see\n\
+<b>MDB: A User's Guide to Debugging <Meta-HTML> Programs</b> for more\n\
 information specific to the debugger.")
 
 DEFUN (pf_debugging_on, &optional function-name=level...,
-"Turns on debugging for the <var function-name>s mentioned, setting
-the level of output to <var level>.  <var level> is a number between
-<code>0</code> (the least amount of debugging info) and
-<code>10</code> (the maximum amount of debugging info).
-
-The output is placed into the <Meta-HTML> internal debugger buffer, and
-can be placed into an output page by simply placing the tag
-<tag DEBUGGING-OUTPUT> somewhere in the page, or can be explicity
+"Turns on debugging for the <var function-name>s mentioned, setting\n\
+the level of output to <var level>.  <var level> is a number between\n\
+<code>0</code> (the least amount of debugging info) and\n\
+<code>10</code> (the maximum amount of debugging info).\n\
+\n\
+The output is placed into the <Meta-HTML> internal debugger buffer, and\n\
+can be placed into an output page by simply placing the tag\n\
+<tag DEBUGGING-OUTPUT> somewhere in the page, or can be explicity\n\
 retrieved using <example code><debugging-output retrieve></example>.")
 {
   if (vars)
@@ -94,11 +94,11 @@ retrieved using <example code><debugging-output retrieve></example>.")
 }
 
 DEFUN (pf_page_debug, &rest body,
-"Cause <var body> to be inserted into the debugger output.
-
-The output is placed into the <Meta-HTML> internal debugger buffer, and
-can be placed into an output page by simply placing the tag
-<tag DEBUGGING-OUTPUT> somewhere in the page, or can be explicity
+"Cause <var body> to be inserted into the debugger output.\n\
+\n\
+The output is placed into the <Meta-HTML> internal debugger buffer, and\n\
+can be placed into an output page by simply placing the tag\n\
+<tag DEBUGGING-OUTPUT> somewhere in the page, or can be explicity\n\
 retrieved using <example code><debugging-output retrieve></example>.")
 {
   char *value;
@@ -110,28 +110,28 @@ retrieved using <example code><debugging-output retrieve></example>.")
 }
 
 DEFUN (pf_debugging_output, &optional action...,
-"<Meta-HTML> stores debugging information in an internal buffer.  You
-may directly place information into this buffer using the <funref
-language-operators page-debug> command, and you may retrieve or clear
-this buffer using <example code><debugging-output></example>.
-
-Possible values for <var action> are:
-<ul>
-<li> <b>retrieve</b><br>
-Inserts the current contents of the debugging buffer into the page at
-the current location.
-<li> <b>clear</b><br>
-Empties the debugging buffer of all stored information.
-</ul>
-
-If you place  <example code><debugging-output></example> into your
-page without passing any arguments, <Meta-HTML> treats this invocation
-specially; it marks the location at which any debugging statements
-which have been collected during the processing of the entire page
-should be placed.
-
-We recommend that you always place this tag somewhere in the output
-page, whenever that output is an HTML document, as opposed to a
+"<Meta-HTML> stores debugging information in an internal buffer.  You\n\
+may directly place information into this buffer using the <funref\n\
+language-operators page-debug> command, and you may retrieve or clear\n\
+this buffer using <example code><debugging-output></example>.\n\
+\n\
+Possible values for <var action> are:\n\
+<ul>\n\
+<li> <b>retrieve</b><br>\n\
+Inserts the current contents of the debugging buffer into the page at\n\
+the current location.\n\
+<li> <b>clear</b><br>\n\
+Empties the debugging buffer of all stored information.\n\
+</ul>\n\
+\n\
+If you place  <example code><debugging-output></example> into your\n\
+page without passing any arguments, <Meta-HTML> treats this invocation\n\
+specially; it marks the location at which any debugging statements\n\
+which have been collected during the processing of the entire page\n\
+should be placed.\n\
+\n\
+We recommend that you always place this tag somewhere in the output\n\
+page, whenever that output is an HTML document, as opposed to a\n\
 standalone script.")
 {
   register int i = 0;
@@ -171,33 +171,33 @@ standalone script.")
 }
 
 DEFUN (pf_system_error_output, &optional action...,
-"<Meta-HTML> stores system error information in an internal buffer.
-Such information may be the results of an error which occurred during
-the execution of an external command (such as with <funref
-file-operators cgi-exec>), or other information which is generated by
-the inability of <Meta-HTML> to access a particular file (such as with
-the <funref file-operators require> command).
-
-You may retrieve or clear this buffer using <example
-code><system-error-output></example>.
-
-Possible values for <var action> are:
-<ul>
-<li> <b>retrieve</b><br>
-Inserts the current contents of the system error buffer into the page at
-the current location.
-<li> <b>clear</b><br>
-Empties the system error buffer of all stored information.
-</ul>
-
-If you place  <example code><system-error-output></example> into your
-page without passing any arguments, <Meta-HTML> treats this invocation
-specially; it marks the location at which any system errors
-which have been collected during the processing of the entire page
-should be placed.
-
-We recommend that you always place this tag somewhere in the output
-page, whenever that output is an HTML document, as opposed to a
+"<Meta-HTML> stores system error information in an internal buffer.\n\
+Such information may be the results of an error which occurred during\n\
+the execution of an external command (such as with <funref\n\
+file-operators cgi-exec>), or other information which is generated by\n\
+the inability of <Meta-HTML> to access a particular file (such as with\n\
+the <funref file-operators require> command).\n\
+\n\
+You may retrieve or clear this buffer using <example\n\
+code><system-error-output></example>.\n\
+\n\
+Possible values for <var action> are:\n\
+<ul>\n\
+<li> <b>retrieve</b><br>\n\
+Inserts the current contents of the system error buffer into the page at\n\
+the current location.\n\
+<li> <b>clear</b><br>\n\
+Empties the system error buffer of all stored information.\n\
+</ul>\n\
+\n\
+If you place  <example code><system-error-output></example> into your\n\
+page without passing any arguments, <Meta-HTML> treats this invocation\n\
+specially; it marks the location at which any system errors\n\
+which have been collected during the processing of the entire page\n\
+should be placed.\n\
+\n\
+We recommend that you always place this tag somewhere in the output\n\
+page, whenever that output is an HTML document, as opposed to a\n\
 standalone script.")
 {
   register int i = 0;
@@ -237,8 +237,8 @@ standalone script.")
 }
 
 DEFUNX (pf_%%stack_trace, ,
-"Return an array of function calls that are pending the return of this one.
-This functionality can only be turned on by setting the variable
+"Return an array of function calls that are pending the return of this one.\n\
+This functionality can only be turned on by setting the variable\n\
 mhtml::remember-function-calls to a non-empty value.")
 
 extern char **mdb_pushed_function_names (void);

@@ -3850,23 +3850,23 @@ main (int   argc,
 {
 #if 0
   string_t source =
-    "<add 10 20><if <not <get-var foo>> bar baz><if 1 2>foo[]=<get-var bar>
-<if 1 2><get-var zzz>=1000</if>
-<foo>bar</foo>
-<and 1 2 3 4><add 10 20>
-<while <get-var x>><set-var x=\"\"></while>
-<<foo> bar>
-<defun foo &rest x>< a >ghi< /a ></defun><foo a b c>
+    "<add 10 20><if <not <get-var foo>> bar baz><if 1 2>foo[]=<get-var bar>\n\
+<if 1 2><get-var zzz>=1000</if>\n\
+<foo>bar</foo>\n\
+<and 1 2 3 4><add 10 20>\n\
+<while <get-var x>><set-var x=\"\"></while>\n\
+<<foo> bar>\n\
+<defun foo &rest x>< a >ghi< /a ></defun><foo a b c>\n\
 <jkl < mno > pqr> stu<>><\"<get-var foo>\"";
 
   string_t source = "<set-var foo=10 <get-var-once foo>=30 foo[1]=20 <get-var-once foo>[2]=40 <get-var-once foo[1]>[2]=50><get-var-once foo[1]><alist-get-var foo key><alist-set-var foo key=value><add foo 1><foo 1>";
 
 string_t source =
-  "<defsubst parser::canonicalize-var :pcv-var :pcv-pack whitespace=delete>
-  <defvar :pcv-pack \"^\">
-  <if <not <match <get-var-once <get-var-once :pcv-var>> \"::\">>
-      <set-var <get-var-once :pcv-var> =
-	<get-var-once :pcv-pack>::<get-var-once <get-var-once :pcv-var>>>>
+  "<defsubst parser::canonicalize-var :pcv-var :pcv-pack whitespace=delete>\n\
+  <defvar :pcv-pack \"^\">\n\
+  <if <not <match <get-var-once <get-var-once :pcv-var>> \"::\">>\n\
+      <set-var <get-var-once :pcv-var> =\n\
+	<get-var-once :pcv-pack>::<get-var-once <get-var-once :pcv-var>>>>\n\
 </defsubst>";
 
 string_t source = 
@@ -3876,15 +3876,15 @@ string_t source =
   "<defun foo &rest bars[]><foreach bar bars><get-var-once bar></foreach></defun>";
 
 string_t source =
-  "<defun foo a b whitespace=keep>
-<get-var-once a>,
-<get-var-once b>
+  "<defun foo a b whitespace=keep>\n\
+<get-var-once a>,\n\
+<get-var-once b>\n\
 </defun>";
  
 string_t source =
-  "<concat
- <when <eq 0 0>>
-\"This is a test.\"
+  "<concat\n\
+ <when <eq 0 0>>\n\
+\"This is a test.\"\n\
 </when>>";
 
 string_t source =
@@ -3892,14 +3892,14 @@ string_t source =
 #endif
 
 string_t source =
-  "<defun foo a &optional b &key c d &rest e></defun>
-   <foo 1 2 c=3 4 5 6>
-   <foo 1>
-
-   <defun bar a &unevalled &optional b &key c d &rest e></defun>
-   <bar 1 <get-var x> c=3 4 5 6>
-
-   <defun bar a &unevalled &optional b &key &unevalled c d &rest e></defun>
+  "<defun foo a &optional b &key c d &rest e></defun>\n\
+   <foo 1 2 c=3 4 5 6>\n\
+   <foo 1>\n\
+\n\
+   <defun bar a &unevalled &optional b &key c d &rest e></defun>\n\
+   <bar 1 <get-var x> c=3 4 5 6>\n\
+\n\
+   <defun bar a &unevalled &optional b &key &unevalled c d &rest e></defun>\n\
    <bar 1 <get-var x> c=<get-var z> d=<get-var y> 4 5 6>";
 
 

@@ -44,46 +44,46 @@ static PFunDesc ftab[] =
 MODULE_INITIALIZE ("serverfuncs", ftab)
 
 DEFINE_SECTION (META-HTML-TCP/IP-SERVERS, tcp/ip;port;telnet,
-"<Meta-HTML> provides an extremely convenient path for creating a TCP/IP
-server which will listen on a particular port, and handle line-based
-commands.
-
-Typically, an <b>mhc</b> script is used to start the server process -- it
-loads the <code>serverfuncs</code> module, creates a server process, binds
-<code>*standard-input*</code> and <code>*standard-output</code> to the
-specified port, and waits for connections.
-
-When a connection is received, the server process forks and executes the
-function that you have specified to run.  Upon exit from that function,
-the connection is closed.
-
-The libraries that are provided in the <code>modules/serverfunc-examples</code>
-tagsets directory do most of the work for implementing a complete server --
-you need only to write the commands which implement the specific functionality
+"<Meta-HTML> provides an extremely convenient path for creating a TCP/IP\n\
+server which will listen on a particular port, and handle line-based\n\
+commands.\n\
+\n\
+Typically, an <b>mhc</b> script is used to start the server process -- it\n\
+loads the <code>serverfuncs</code> module, creates a server process, binds\n\
+<code>*standard-input*</code> and <code>*standard-output</code> to the\n\
+specified port, and waits for connections.\n\
+\n\
+When a connection is received, the server process forks and executes the\n\
+function that you have specified to run.  Upon exit from that function,\n\
+the connection is closed.\n\
+\n\
+The libraries that are provided in the <code>modules/serverfunc-examples</code>\n\
+tagsets directory do most of the work for implementing a complete server --\n\
+you need only to write the commands which implement the specific functionality\n\
 that you require.",
-"The type of server that is implemented by the <code>tagsets/server.mhtml</code>
-code expect to interact in an ASCII based conversation mode; each request
-from the client is a single line of ASCII text, and your server is expected
-to produce a response (which can be multiple lines, or a single line, or
-anything that your protocol implements).
-
-The code in <code>tagsets/server.mhtml</code> implement a few commands for you
-already, including <code>quit</code>, <code>help</code>, and <code>login</code>.
-
-You implement new commands by simply writing a function whose name is
-<code>COMMAND::<i>function-name</i></code>, where <i>function-name</i>
-is the exact string that the client should send to invoke the command.
-
-The convenience functions <tag server::put-line> and <tag server::get-line>
-write and read newline terminated lines of text to and from the client
-respectively.
-
-If you are interested in writing a TCP/IP based server, we would suggest that
-you read the source code to the <code>tagsets/server.mhtml</code> library,
+"The type of server that is implemented by the <code>tagsets/server.mhtml</code>\n\
+code expect to interact in an ASCII based conversation mode; each request\n\
+from the client is a single line of ASCII text, and your server is expected\n\
+to produce a response (which can be multiple lines, or a single line, or\n\
+anything that your protocol implements).\n\
+\n\
+The code in <code>tagsets/server.mhtml</code> implement a few commands for you\n\
+already, including <code>quit</code>, <code>help</code>, and <code>login</code>.\n\
+\n\
+You implement new commands by simply writing a function whose name is\n\
+<code>COMMAND::<i>function-name</i></code>, where <i>function-name</i>\n\
+is the exact string that the client should send to invoke the command.\n\
+\n\
+The convenience functions <tag server::put-line> and <tag server::get-line>\n\
+write and read newline terminated lines of text to and from the client\n\
+respectively.\n\
+\n\
+If you are interested in writing a TCP/IP based server, we would suggest that\n\
+you read the source code to the <code>tagsets/server.mhtml</code> library,\n\
 and peruse the examples.")
 
 DEFUNX (pf_server::kill-server, ,
-"Kill the server process created with <tag server::make-server>.
+"Kill the server process created with <tag server::make-server>.\n\
 This should only be called from within a running server.")
 
 static void
@@ -94,21 +94,21 @@ pf_kill_server (PFunArgs)
 }
 
 DEFUNX (pf_server::make_server, &key hostname &rest start-fun port,
-"Create a server process which will listen on <var port> for incoming
-TCP/IP connections, and return a <i>server indentifier</i> which can
-be used to crudely control that process.
-
-When a connection is received on that port, the standard streams are
-bound to the <Meta-HTML> variables <code>*standard-input*</code> and
-<code>*standard-output*</code>, and <var start-fun> is invoked.  Only the
-functions which have been defined before the invocation of
-<code>server::make-server</code> are available to the server process.
-
-A number of variables are bound at connection time.  These are:
-
-<ul>
-<li> <b>SERVER::REMOTE-ADDR</b><br>The IP address of the connecting machine.
-<li> <b>SERVER::REMOTE-PORT</b><br>The port number which the remote machine connected to.
+"Create a server process which will listen on <var port> for incoming\n\
+TCP/IP connections, and return a <i>server indentifier</i> which can\n\
+be used to crudely control that process.\n\
+\n\
+When a connection is received on that port, the standard streams are\n\
+bound to the <Meta-HTML> variables <code>*standard-input*</code> and\n\
+<code>*standard-output*</code>, and <var start-fun> is invoked.  Only the\n\
+functions which have been defined before the invocation of\n\
+<code>server::make-server</code> are available to the server process.\n\
+\n\
+A number of variables are bound at connection time.  These are:\n\
+\n\
+<ul>\n\
+<li> <b>SERVER::REMOTE-ADDR</b><br>The IP address of the connecting machine.\n\
+<li> <b>SERVER::REMOTE-PORT</b><br>The port number which the remote machine connected to.\n\
 </ul>")
 
 /* Release a child that has died in the normal way. */

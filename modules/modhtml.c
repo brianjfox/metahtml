@@ -54,7 +54,7 @@ static PFunDesc ftab[] =
 MODULE_INITIALIZE ("modhtml", ftab)
 
 DEFINE_SECTION (HTML-HELPERS, HTML; helper; convenience, 
-"The following functions all produce HTML as output and are defined in
+"The following functions all produce HTML as output and are defined in\n\
 order to help with the creation of forms and tables.", "")
 
 #define OTHER 1
@@ -150,14 +150,14 @@ wrap_by_character_class (char *string, int small_caps_p, int leave_braces,
 }
 
 DEFMACRO (pf_small_caps, &key upper=size lower=size other=size,
-"Modify the characters in <var body> raising lower-case
-characters to upper-case, and changing the size of fonts as directed.
-
-For example, this is how the text of \"Hello There\" can be displayed with
-lowercase characters as smaller uppercase versions of themselves.
-
-<complete-example>
-  <small-caps lower=-1>Hello There</small-caps>
+"Modify the characters in <var body> raising lower-case\n\
+characters to upper-case, and changing the size of fonts as directed.\n\
+\n\
+For example, this is how the text of \"Hello There\" can be displayed with\n\
+lowercase characters as smaller uppercase versions of themselves.\n\
+\n\
+<complete-example>\n\
+  <small-caps lower=-1>Hello There</small-caps>\n\
 </complete-example>")
 {
   char *string = mhtml_evaluate_string (body->buffer);
@@ -186,14 +186,15 @@ lowercase characters as smaller uppercase versions of themselves.
 }
 
 DEFUN (pf_verbatim, &key quote,
-"Insert <var body> verbatim, avoiding doing any processing on
-the contents.  If the keyword argument <var quote> is given,
-occurrences of characters with special meaning to <b>HTML</b> are
-replaced with the <b>HTML</b> code to produce that character in the
-output page.
-
+"Insert <var body> verbatim, avoiding doing any processing on\n\
+the contents.  If the keyword argument <var quote> is given,\n\
+occurrences of characters with special meaning to <b>HTML</b> are\n\
+replaced with the <b>HTML</b> code to produce that character in the\n\
+output page.\n\
+\n\
 Contrast this with <funref page-operators comment>.")
 {
+  extern char *html_quote_string (char *s);
   int quote_p = var_present_p (vars, "quote");
 
   /* Insert the contents, and then skip past them. */

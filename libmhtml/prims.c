@@ -71,36 +71,36 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_primitive_functions)
 DEFINE_SECTION (PRIMITIVE-OPERATORS, builtins; primitives; low-level,
-"While most functions in <Meta-HTML> are used to create or manipulate Web
-pages, there may be times when you will wish to manipulate the <Meta-HTML>
-language itself, the low-level operation of the server, or have direct
-access to the current page that is executing, and information pertaining
-to the <Meta-HTML> parser itself.
-
-The functions described in this section allow just this type of low-level
-access.  Programming wizards may find these functions useful -- many of
-them are here to allow the implementation of core functionality in <Meta-HTML>
-in the <Meta-HTML> language itself.
-
-All of the primitive language operators begin with the two-character sequence
-of double percent signs (\"%%\") in order to distinguish them from the
+"While most functions in <Meta-HTML> are used to create or manipulate Web\n\
+pages, there may be times when you will wish to manipulate the <Meta-HTML>\n\
+language itself, the low-level operation of the server, or have direct\n\
+access to the current page that is executing, and information pertaining\n\
+to the <Meta-HTML> parser itself.\n\
+\n\
+The functions described in this section allow just this type of low-level\n\
+access.  Programming wizards may find these functions useful -- many of\n\
+them are here to allow the implementation of core functionality in <Meta-HTML>\n\
+in the <Meta-HTML> language itself.\n\
+\n\
+All of the primitive language operators begin with the two-character sequence\n\
+of double percent signs (\"%%\") in order to distinguish them from the\n\
 other, higher-level functions in <Meta-HTML>.", "")
 
 DEFUNX (pf_%%eval, &rest body,
-"Evaluate the result of evaluating <var body> and return that value.
-
-It would be a very rare case indeed, where a user-level program would require
-the use of this tag.  If you think you want to use this tag, you probably want
-to use <tag apply> instead.
-
-You may use this function to call another function on some arguments,
-where the other function is determined dynamically.  For example:
-<example>
-<if <set-in-session>
-    <set-var func=set-session-var>
-  <set-var func=set-var>>
-.blank
-<%%eval <<get-var-once func> <get-var-once name> = <get-var-once value>>>
+"Evaluate the result of evaluating <var body> and return that value.\n\
+\n\
+It would be a very rare case indeed, where a user-level program would require\n\
+the use of this tag.  If you think you want to use this tag, you probably want\n\
+to use <tag apply> instead.\n\
+\n\
+You may use this function to call another function on some arguments,\n\
+where the other function is determined dynamically.  For example:\n\
+<example>\n\
+<if <set-in-session>\n\
+    <set-var func=set-session-var>\n\
+  <set-var func=set-var>>\n\
+.blank\n\
+<%%eval <<get-var-once func> <get-var-once name> = <get-var-once value>>>\n\
 </example>")
 static void
 pf_eval (PFunArgs)
@@ -124,10 +124,10 @@ pf_eval (PFunArgs)
 }
 
 DEFUNX (pf_%%read_sexp, string-var &optional index-var,
-"Reads one symbolic expression from <var string-var> and returns it.
-Sets <var index-var> to the first unread character in <var string-var>.
-If <var index-var> is empty, it defaults to zero.
-There isn't the slightest possibility that you need this in your
+"Reads one symbolic expression from <var string-var> and returns it.\n\
+Sets <var index-var> to the first unread character in <var string-var>.\n\
+If <var index-var> is empty, it defaults to zero.\n\
+There isn't the slightest possibility that you need this in your\n\
 programs.")
 static void
 pf_read_sexp (PFunArgs)
@@ -186,20 +186,20 @@ pf_read_sexp (PFunArgs)
 }
 
 DEFUNX (pf_%%write_package_file, filename &key flagged no-code &rest packages,
-"Writes the contents of <var packages> to the file specified by <var filename>.
-This function is used internally when creating libraries.  There isn't the
-slightest possibility that you need this in your programs -- if you think
-you do, you probably simply want to use <b>mklib</b>.
-
-If the keyword argument <var flagged> is set, is means to only write those
-symbols whose flags contain a FLAGGED value, i.e., where
-<example code><alist-get-var <symbol-info sym> FLAGGED></example> would
-return 'true'.
-
-Keyword argument <var no-code> with a non-null value, means don't bother
-saving the textual body of functions with the machine code -- it isn't
-generally necessary to do so, but the default is to save the bodies so
-that <Meta-HTML> installations which don't have the modmachine.so library
+"Writes the contents of <var packages> to the file specified by <var filename>.\n\
+This function is used internally when creating libraries.  There isn't the\n\
+slightest possibility that you need this in your programs -- if you think\n\
+you do, you probably simply want to use <b>mklib</b>.\n\
+\n\
+If the keyword argument <var flagged> is set, is means to only write those\n\
+symbols whose flags contain a FLAGGED value, i.e., where\n\
+<example code><alist-get-var <symbol-info sym> FLAGGED></example> would\n\
+return 'true'.\n\
+\n\
+Keyword argument <var no-code> with a non-null value, means don't bother\n\
+saving the textual body of functions with the machine code -- it isn't\n\
+generally necessary to do so, but the default is to save the bodies so\n\
+that <Meta-HTML> installations which don't have the modmachine.so library\n\
 installed can still read and execute the resultant '.lib' files.")
 static void
 pf_write_package_file (PFunArgs)
@@ -251,10 +251,10 @@ pf_write_package_file (PFunArgs)
 }
 
 DEFUNX (pf_%%read_package_file, filename,
-"Reads package contents from the file specified by <var filename>, which
-had best be created using <funref primitive-operators %%write-package-file>.
-This function is used internally when loading libraries.  There isn't the
-slightest possibility that you need this in your programs -- if you think
+"Reads package contents from the file specified by <var filename>, which\n\
+had best be created using <funref primitive-operators %%write-package-file>.\n\
+This function is used internally when loading libraries.  There isn't the\n\
+slightest possibility that you need this in your programs -- if you think\n\
 you do, you probably simply want to use <funref file-operators require>.")
 static void
 pf_read_package_file (PFunArgs)
@@ -310,10 +310,10 @@ pf_read_package_file (PFunArgs)
 }
 
 DEFUNX (pf_%%switch_user, newuser,
-"Changes the current user to <var newuser>, and returns \"true\" if the
-switch was successful.  This can only take place if <Meta-HTML> is
-running under the user ID of the superuser (root).  After calling this
-function, it is impossible to switch back to another user, so it really
+"Changes the current user to <var newuser>, and returns \"true\" if the\n\
+switch was successful.  This can only take place if <Meta-HTML> is\n\
+running under the user ID of the superuser (root).  After calling this\n\
+function, it is impossible to switch back to another user, so it really\n\
 isn't of much use in Meta-HTML programs.")
 static void
 pf_switch_user (PFunArgs)
@@ -346,7 +346,7 @@ pf_switch_user (PFunArgs)
 }
 
 DEFUNX (pf_%%the_page,  &optional varname,
-"Places the current page into <var varname> as a binary variable, or,
+"Places the current page into <var varname> as a binary variable, or,\n\
 returns the current page as text if <var varname> is not supplied.")
 static void
 pf_the_page (PFunArgs)
@@ -377,7 +377,7 @@ pf_the_page (PFunArgs)
 }
 
 DEFUNX (pf_%%point, ,
-"Returns the current parser marker in the page.
+"Returns the current parser marker in the page.\n\
 <b>CAVEAT</b>!  Currently, can only be called at top level.")
 static void
 pf_point (PFunArgs)
@@ -386,8 +386,8 @@ pf_point (PFunArgs)
 }
 
 DEFUNX (pf_%%function_documentation,  user-function,
-"Returns the documentation for <var user-function>.  Only works if the
-variable <var mhtml::gather-documentation> was set at the time the
+"Returns the documentation for <var user-function>.  Only works if the\n\
+variable <var mhtml::gather-documentation> was set at the time the\n\
 <var user-function> was defined.")
 static void
 pf_function_documentation (PFunArgs)
@@ -416,8 +416,8 @@ pf_function_documentation (PFunArgs)
 }
 
 DEFUNX (pf_%%function_arguments, user-function,
-"Returns an array of the formal parameters for <var user-function>.
-Essentially, this returns exactly what was entered at the time the
+"Returns an array of the formal parameters for <var user-function>.\n\
+Essentially, this returns exactly what was entered at the time the\n\
 function definition was defined.")
 static void
 pf_function_arguments (PFunArgs)
@@ -447,10 +447,10 @@ pf_function_arguments (PFunArgs)
 }
 
 DEFUNX (pf_%%function_alist, user-function,
-"Returns all information that we store about the user-defined function
-<var user-function>, in the form of an alist.  This function is used
-internally by the <Meta-HTML> grinder and beautifier -- it is unlikely
-in the extreme that one would use this in application programs -- it is
+"Returns all information that we store about the user-defined function\n\
+<var user-function>, in the form of an alist.  This function is used\n\
+internally by the <Meta-HTML> grinder and beautifier -- it is unlikely\n\
+in the extreme that one would use this in application programs -- it is\n\
 meant for use in programs that manipulate the <Meta-HTML> language itself.")
 
 static void
@@ -597,10 +597,10 @@ pf_function_alist (PFunArgs)
 }
 
 DEFUNX (pf_%%function_def, user-function,
-"Returns a string, which, if read back into Meta-HTML, would result in the
-re-defining of the user function <var user-function>.  This function is used
-internally by the <Meta-HTML> compiler -- it is unlikely in the extreme that
-one would use this in application programs -- it is meant for use in programs
+"Returns a string, which, if read back into Meta-HTML, would result in the\n\
+re-defining of the user function <var user-function>.  This function is used\n\
+internally by the <Meta-HTML> compiler -- it is unlikely in the extreme that\n\
+one would use this in application programs -- it is meant for use in programs\n\
 that manipulate the <Meta-HTML> language itself.")
 
 static void
@@ -632,8 +632,8 @@ pf_function_def (PFunArgs)
 }
 
 DEFUNX (pf_%%quote_for_set_var, &rest body,
-"After evaluating <var body>, the results are quoted in such a way that
-Meta-HTML will treat it as one argument.  Used internally by the function
+"After evaluating <var body>, the results are quoted in such a way that\n\
+Meta-HTML will treat it as one argument.  Used internally by the function\n\
 invoker.")
 static void
 pf_quote_for_setvar (PFunArgs)
@@ -657,13 +657,13 @@ pf_quote_for_setvar (PFunArgs)
 }
 
 DEFMACROX (pf_%%after_page_return, ,
-"Store <var body> for execution at a later time, specifically, after the top
-level process is completed.  For the <Meta-HTML> server or engine, this is
-after the requested page has been successfully delivered; for <code>mhc</code>,
-this is after the main document has finished processing, and the results have
-been returned.
-
-I would be interested if anybody actually needs this function -- if you do,
+"Store <var body> for execution at a later time, specifically, after the top\n\
+level process is completed.  For the <Meta-HTML> server or engine, this is\n\
+after the requested page has been successfully delivered; for <code>mhc</code>,\n\
+this is after the main document has finished processing, and the results have\n\
+been returned.\n\
+\n\
+I would be interested if anybody actually needs this function -- if you do,\n\
 please drop me a line showing how it made your life easier.")
 
 static PAGE *after_page_return_buffer = (PAGE *)NULL;
@@ -686,29 +686,29 @@ get_after_page_return_buffer (void)
 }
       
 DEFUN (pf_apply, func &rest args,
-"Apply <var func> to <var args>.
-
-This <i>weak</i>macro can either be used as a simple tag or as a
-complex tag -- its usage is dependent on the function being called.
-
-Using <tag apply> as a simple tag:
-<example>
-<apply add 3 4 5>         --> 12
-<defun foo &key bar baz>
-  <get-var bar>, <get-var baz>
-</defun>
-<apply foo \"bar=this baz=2\"> --> this,2
-</example>
-
-Using <tag apply> as a complex tag:
-<example>
-<defmacro upcase-text &key bold? &body body>
-   <if <get-var-once bold?> <b>>
-   <upcase <get-var-once body>>
-   <if <get-var-once bold?> </b>>
-</defmacro>
-<apply upcase-text> This is a list of things to \"change case of\" </apply>
-<apply upcase-text bold?=true> And this is upcased <i>and</i> bold </apply>
+"Apply <var func> to <var args>.\n\
+\n\
+This <i>weak</i>macro can either be used as a simple tag or as a\n\
+complex tag -- its usage is dependent on the function being called.\n\
+\n\
+Using <tag apply> as a simple tag:\n\
+<example>\n\
+<apply add 3 4 5>         --> 12\n\
+<defun foo &key bar baz>\n\
+  <get-var bar>, <get-var baz>\n\
+</defun>\n\
+<apply foo \"bar=this baz=2\"> --> this,2\n\
+</example>\n\
+\n\
+Using <tag apply> as a complex tag:\n\
+<example>\n\
+<defmacro upcase-text &key bold? &body body>\n\
+   <if <get-var-once bold?> <b>>\n\
+   <upcase <get-var-once body>>\n\
+   <if <get-var-once bold?> </b>>\n\
+</defmacro>\n\
+<apply upcase-text> This is a list of things to \"change case of\" </apply>\n\
+<apply upcase-text bold?=true> And this is upcased <i>and</i> bold </apply>\n\
 </example>")
 {
   char *func = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -799,19 +799,19 @@ Using <tag apply> as a complex tag:
 }
 
 DEFUNX (pf_%%bootstrap_metahtml, &optional call-initializer?,
-"Bootstrap the user defined functions which are compiled into <Meta-HTML>.
-This loads the definitions into the inpterpreter, and then calls
-<tag bootstrapper::system-initialize>.
-
-When <var call-initializer?> is non-empty, this function also calls
-<tag bootstrapper::initialize>.
-
-The one obvious use for this function is in <b>mhc</b> programs which
-are run with the `-z' flag (which prevents bootstrapping from taking place).
-Such programs may read some files in order to define a set of functions,
-remember those functions (by calling
-<example code><package-vars *user-functions*></example>), and then instantiate
-the standard set of Meta-HTML functions for further processing.")
+"Bootstrap the user defined functions which are compiled into <Meta-HTML>.\n\
+This loads the definitions into the inpterpreter, and then calls\n\
+<tag bootstrapper::system-initialize>.\n\
+\n\
+When <var call-initializer?> is non-empty, this function also calls\n\
+<tag bootstrapper::initialize>.\n\
+\n\
+The one obvious use for this function is in <b>mhc</b> programs which\n\
+are run with the `-z' flag (which prevents bootstrapping from taking place).\n\
+Such programs may read some files in order to define a set of functions,\n\
+remember those functions (by calling\n\
+<example code><package-vars *user-functions*></example>), and then\n\
+instantiate the standard set of Meta-HTML functions for further processing.")
 
 static void
 pf_bootstrap_metahtml (PFunArgs)

@@ -53,22 +53,22 @@ static PFunDesc ftab[] =
 MODULE_INITIALIZE ("elsewhen", ftab)
 
 DEFINE_SECTION (ELSEWHEN-MODULE, ,
-"This module is provided for those programmers who feel more comfortable with
-a balanced tag syntax for flow control over a balanced brace syntax.
-Using the tags in this package will greatly reduce the number of
-<funref flow-control group>, or <funref flow-control concat> tags, at the
-slight cost of interpreter speed.  In many cases, the clarity of the code
-is more important, so if you are one of those programmers that feel more
-comfortable with the tag-based syntax, you might consider the use of this
+"This module is provided for those programmers who feel more comfortable with\n\
+a balanced tag syntax for flow control over a balanced brace syntax.\n\
+Using the tags in this package will greatly reduce the number of\n\
+<funref flow-control group>, or <funref flow-control concat> tags, at the\n\
+slight cost of interpreter speed.  In many cases, the clarity of the code\n\
+is more important, so if you are one of those programmers that feel more\n\
+comfortable with the tag-based syntax, you might consider the use of this\n\
 module.", "")
 
 DEFMACRO (pf_whenelse, test,
-"Evaluate <var test>.  If the result is a non-empty string,
-then execute the <var body> statements.  If the tag &lt;elsewhen&gt;
-appears in the body, then the commands between that tag and the closing
-&lt;/whenelse&gt; will be executed if, and only if, the <var test> evaluates
-to the empty string.  This is a cleaner way to handle optional multiple
-statement execution rather than dealing with quoting everything inside
+"Evaluate <var test>.  If the result is a non-empty string,\n\
+then execute the <var body> statements.  If the tag &lt;elsewhen&gt;\n\
+appears in the body, then the commands between that tag and the closing\n\
+&lt;/whenelse&gt; will be executed if, and only if, the <var test> evaluates\n\
+to the empty string.  This is a cleaner way to handle optional multiple\n\
+statement execution rather than dealing with quoting everything inside\n\
 of an <funref FLOW-CONTROL if> form.")
 {
   char *test = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -115,18 +115,18 @@ of an <funref FLOW-CONTROL if> form.")
 }
 
 DEFMACROX (pf_cif, test &optional then-clause <else> else-clause,
-"First <var test> is evaluated. If the result is a non-whitespace only string,
-the statements between the <var then-clause> and the <var else-clause> are
-evaluated.  Otherwise, if the the <var else-clause> is present, it is
-evaluated. Although Meta-HTML has an <code>or</code> function, you can
-efficiently test for the presence of any of a group of variables with code
-similar to the following:
-<example>
-<if <get-var foo bar>>
-  \"Either FOO or BAR is present\"
-<else>
-  \"Neither FOO nor BAR is present\"
-</if>
+"First <var test> is evaluated. If the result is a non-whitespace only string,\n\
+the statements between the <var then-clause> and the <var else-clause> are\n\
+evaluated.  Otherwise, if the the <var else-clause> is present, it is\n\
+evaluated. Although Meta-HTML has an <code>or</code> function, you can\n\
+efficiently test for the presence of any of a group of variables with code\n\
+similar to the following:\n\
+<example>\n\
+<if <get-var foo bar>>\n\
+  \"Either FOO or BAR is present\"\n\
+<else>\n\
+  \"Neither FOO nor BAR is present\"\n\
+</if>\n\
 </example>")
 
 /* A non-lisp friendly <if> <else> </if> tag. */

@@ -46,9 +46,10 @@ static PFunDesc ftab[] =
 MODULE_INITIALIZE ("moddate", ftab)
 
 DEFINE_SECTION (MODDATE-MODULE, dates; times; date; parsing,
-"Complex date parsing.  Not normally included in the straight Meta-HTML binary,
-DATE::DATE-TO-TIME attempts to understand all kinds of dates, including those
-that are relative, such as 'next tuesday', or '2 hours ago'.", "")
+"Complex date parsing.  Not normally included in the straight Meta-HTML\n\
+binary, DATE::DATE-TO-TIME attempts to understand all kinds of dates,\n\
+including those that are relative, such as 'next tuesday', or '2 hours ago'.",
+"")
 
 DEFUNX (date::date-to-time, &optional date-string pack &key parse zone,
 "Parse <var DATE-STRING>, and return the seconds since the Epoch.")

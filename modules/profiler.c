@@ -284,43 +284,43 @@ profiler_dump (Symbol **symbols, char *filename)
 }
 
 DEFINE_SECTION (CODE-PROFILING, ,
-"The <b>profiler</b> module allows you to get a detailed listing of the
-number of times a particular function has executed, the amount of time
-spent within each function, and other information which can help you to
-tune your Meta-HTML application, and get it running as fast as possible.
-
-The use of this module is trivial.  First, place
-<example>
-<set-var mhtml::profile-functions = true>
-</example>
-at the top of the page that you would like to profile.
-
-At the bottom of the page, after the last normal instruction, place
-<example>
-<profiler::dump /tmp/meta.prof>
-</example>
-
-After visiting the page in a browser, the file <i>/tmp/meta.prog</i> will
-contain a human readable dump of the profile information.  Your page won't
-perceptibly slow down during loading -- the only indication that profiling
+"The <b>profiler</b> module allows you to get a detailed listing of the\n\
+number of times a particular function has executed, the amount of time\n\
+spent within each function, and other information which can help you to\n\
+tune your Meta-HTML application, and get it running as fast as possible.\n\
+\n\
+The use of this module is trivial.  First, place\n\
+<example>\n\
+<set-var mhtml::profile-functions = true>\n\
+</example>\n\
+at the top of the page that you would like to profile.\n\
+\n\
+At the bottom of the page, after the last normal instruction, place\n\
+<example>\n\
+<profiler::dump /tmp/meta.prof>\n\
+</example>\n\
+\n\
+After visiting the page in a browser, the file <i>/tmp/meta.prog</i> will\n\
+contain a human readable dump of the profile information.  Your page won't\n\
+perceptibly slow down during loading -- the only indication that profiling\n\
 is on is the creation of the output file that you specify.", "")
 
 DEFUNX (pf_profiler::dump, filename &key sort=[names|times|calls|expense],
-"Write profiling information to <var filename>.  Unlike C profilers,
-the output is quite self-explanatory.
-
-To try it out, do the following in mdb:
-<example>
-<set-var mhtml::profile-functions = true>
-<set-var x=<make-alist foo=bar bar=<make-alist foo=bar>>>
-<profiler::dump /tmp/alist.calls sort=calls>
-<profiler::dump /tmp/alist.time sort=time>
-<profiler::dump /tmp/alist.expense sort=expense>
-</example>
-
-Known bugs:  The total time doesn't really correctly reflect the amount
-of time spent processing the entire page -- the time displayed is additive,
-so it is always orders of magnitude larger than it should be.  However, the
+"Write profiling information to <var filename>.  Unlike C profilers,\n\
+the output is quite self-explanatory.\n\
+\n\
+To try it out, do the following in mdb:\n\
+<example>\n\
+<set-var mhtml::profile-functions = true>\n\
+<set-var x=<make-alist foo=bar bar=<make-alist foo=bar>>>\n\
+<profiler::dump /tmp/alist.calls sort=calls>\n\
+<profiler::dump /tmp/alist.time sort=time>\n\
+<profiler::dump /tmp/alist.expense sort=expense>\n\
+</example>\n\
+\n\
+Known bugs:  The total time doesn't really correctly reflect the amount\n\
+of time spent processing the entire page -- the time displayed is additive,\n\
+so it is always orders of magnitude larger than it should be.  However, the\n\
 time displayed for each function call is correct.")
 static void
 pf_profiler_dump (PFunArgs)

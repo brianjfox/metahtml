@@ -57,26 +57,26 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_stream_functions)
 
-DEFINE_SECTION (STREAM-OPERATORS, files; streams; reading; writing;
-creating, "A <i>stream</i> is a data object upon which various input
-and output operations may be performed.
-
-<meta-html> provides commands for creating, opening, reading from, and
-writing to, stream objects.  The referenced underlying object may
-either be a file or a network connection.", "There are three special
-names which can be used with <funref stream-operators
-with-open-stream>, these are <code>*standard-input*</code>,
-<code>*standard-output*</code>, and <code>*standard-error*</code>.
-
-<code>*standard-input*</code> always names the stream that from which
-input was being read at the time the engine, server, or
-<code>mhc</code> invoked.  <code>*standard-output*</code> always names
-the stream to which output is being written by the engine, server or
-<code>mhc</code>.
-
-<code>*standard-error*</code> always names the stream where error
-output will appear -- this stream could be the same as the one named
-by <code>*standard-output*</code>, but this does not have to be the
+DEFINE_SECTION (STREAM-OPERATORS, files; streams; reading; writing;\n\
+creating, "A <i>stream</i> is a data object upon which various input\n\
+and output operations may be performed.\n\
+\n\
+<meta-html> provides commands for creating, opening, reading from, and\n\
+writing to, stream objects.  The referenced underlying object may\n\
+either be a file or a network connection.", "There are three special\n\
+names which can be used with <funref stream-operators\n\
+with-open-stream>, these are <code>*standard-input*</code>,\n\
+<code>*standard-output*</code>, and <code>*standard-error*</code>.\n\
+\n\
+<code>*standard-input*</code> always names the stream that from which\n\
+input was being read at the time the engine, server, or\n\
+<code>mhc</code> invoked.  <code>*standard-output*</code> always names\n\
+the stream to which output is being written by the engine, server or\n\
+<code>mhc</code>.\n\
+\n\
+<code>*standard-error*</code> always names the stream where error\n\
+output will appear -- this stream could be the same as the one named\n\
+by <code>*standard-output*</code>, but this does not have to be the\n\
 case.")
 
 #if defined (mhtml_stream_MUST_SEEK)
@@ -317,71 +317,71 @@ int mhtml_stderr_fileno = 2;
 
 DEFMACRO (pf_with_open_stream, var name
 	  &key type=(FILE|TCP|PROG|FD) mode=OPEN-MODE timeout=(value|NEVER),
-"Create an environment in which <var var> is bound to the
-<i>indicator</i> of an open stream, named by <var name>.
-
-The stream is either of type <code>FILE</code>, in which case it is a simple
-file in the file system, of type <code>TCP</code>,
-in which case it is an open network connection, or of type <code>PROG</code>,
-in which case it is an open connection to a running process.
-
-When <var type> is <code>TCP</code>, <var name> specifies the host and
-port to connect to, in the form <code>Hostname:Port-Number</code>.
-<var port-number> can either be a symbolic name which is widely
-recognized (e.g., <code>SMTP</code>), or the digits which make up the
-port number, (e.g., <code>25</code>). <var port-number> can either be
-a symbolic name which is widely recognized (e.g., <code>SMTP</code>),
-or the digits which make up the port number, (e.g., <code>25</code>).
-
-When <var type> is <code>FD</code>, <var name> specifies an already open
-file descriptor to connect to.  This should be used with caution, as the
-standard file descriptors for stdin, stdout, and stderr might not be what
-you expect.  To talk to those streams, you should use <var *standard-input*>,
-<var *standard-output*>, and <var *standard-error*> as the stream names,
-without passing a <var type> argument.
-
-Finally, the keyword argument <var notimeout=true> may be given, which
-indicates that the amount of time that <Meta-HTML> should wait during
-IO operations on this stream is infinite -- all processing will block
-until the stream is successfully read from or written to.  The default
-timeout is dependent on which specific operation is being performed,
-and the amount of data which is being read or written, but is
-generally suitable for writing data at about 14.4kbps.
-
-The possible values for <var mode> are:
-
-<ul>
-  <li> <code>READ</code>:<br>
-  The stream is opened for reading only.  The underlying object must
-already exist.
-
-  <li> <code>WRITE</code>:<br>
-  The stream is opened for writing only.  The underlying object must
-already exist.
-
-  <li> <code>READ-WRITE</code>:<br>
-  The stream is opened for both reading and writing.  The underlying
-object must already exist.
-
-  <li> <code>APPEND</code>:<br>
-  The stream is opened for writing only.  If the underlying object did
-not already exist, it is created.  Information written to this stream
-appears after any information that was already present in the
-underlying object.
-
-  <li> <code>WRITE-CREATE</code>:<br>
-  The stream is opened for writing only.  The underlying object is
-created fresh, even if it had already existed.
-</ul>
-
-When one is opening, reading to, or writing from a network stream, the 
-amount of time it can take to finish the operation is indeterminate.  So,
-the keyword argument <var timeout=value> can be used to specify the maximum
-amount of time (in seconds) that these operations may take.  If the value
-is specified as \"never\", then these operations can take \"forever\".
-If the value isn't specified, then the operations calculate the maximum
-wait time dynamically, based upon the amount of information to be read
-or written.  Any other value specifies an absolute maximum number of
+"Create an environment in which <var var> is bound to the\n\
+<i>indicator</i> of an open stream, named by <var name>.\n\
+\n\
+The stream is either of type <code>FILE</code>, in which case it is a simple\n\
+file in the file system, of type <code>TCP</code>,\n\
+in which case it is an open network connection, or of type <code>PROG</code>,\n\
+in which case it is an open connection to a running process.\n\
+\n\
+When <var type> is <code>TCP</code>, <var name> specifies the host and\n\
+port to connect to, in the form <code>Hostname:Port-Number</code>.\n\
+<var port-number> can either be a symbolic name which is widely\n\
+recognized (e.g., <code>SMTP</code>), or the digits which make up the\n\
+port number, (e.g., <code>25</code>). <var port-number> can either be\n\
+a symbolic name which is widely recognized (e.g., <code>SMTP</code>),\n\
+or the digits which make up the port number, (e.g., <code>25</code>).\n\
+\n\
+When <var type> is <code>FD</code>, <var name> specifies an already open\n\
+file descriptor to connect to.  This should be used with caution, as the\n\
+standard file descriptors for stdin, stdout, and stderr might not be what\n\
+you expect.  To talk to those streams, you should use <var *standard-input*>,\n\
+<var *standard-output*>, and <var *standard-error*> as the stream names,\n\
+without passing a <var type> argument.\n\
+\n\
+Finally, the keyword argument <var notimeout=true> may be given, which\n\
+indicates that the amount of time that <Meta-HTML> should wait during\n\
+IO operations on this stream is infinite -- all processing will block\n\
+until the stream is successfully read from or written to.  The default\n\
+timeout is dependent on which specific operation is being performed,\n\
+and the amount of data which is being read or written, but is\n\
+generally suitable for writing data at about 14.4kbps.\n\
+\n\
+The possible values for <var mode> are:\n\
+\n\
+<ul>\n\
+  <li> <code>READ</code>:<br>\n\
+  The stream is opened for reading only.  The underlying object must\n\
+already exist.\n\
+\n\
+  <li> <code>WRITE</code>:<br>\n\
+  The stream is opened for writing only.  The underlying object must\n\
+already exist.\n\
+\n\
+  <li> <code>READ-WRITE</code>:<br>\n\
+  The stream is opened for both reading and writing.  The underlying\n\
+object must already exist.\n\
+\n\
+  <li> <code>APPEND</code>:<br>\n\
+  The stream is opened for writing only.  If the underlying object did\n\
+not already exist, it is created.  Information written to this stream\n\
+appears after any information that was already present in the\n\
+underlying object.\n\
+\n\
+  <li> <code>WRITE-CREATE</code>:<br>\n\
+  The stream is opened for writing only.  The underlying object is\n\
+created fresh, even if it had already existed.\n\
+</ul>\n\
+\n\
+When one is opening, reading to, or writing from a network stream, the \n\
+amount of time it can take to finish the operation is indeterminate.  So,\n\
+the keyword argument <var timeout=value> can be used to specify the maximum\n\
+amount of time (in seconds) that these operations may take.  If the value\n\
+is specified as \"never\", then these operations can take \"forever\".\n\
+If the value isn't specified, then the operations calculate the maximum\n\
+wait time dynamically, based upon the amount of information to be read\n\
+or written.  Any other value specifies an absolute maximum number of\n\
 seconds.")
 {
   char *varname = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -1074,10 +1074,10 @@ DEFUN (pf_stream_put, stream string,
 }
 
 DEFUN (pf_stream_put_contents, stream var,
-"Writes the contents of the variable <var var> to the open <var
-stream>.  This is the only way to get the contents of a binary variable
-written to a stream.  Binary variables are generally created with <funref
-stream-operators stream-get-contents>, or when uploading a file from
+"Writes the contents of the variable <var var> to the open <var\n\
+stream>.  This is the only way to get the contents of a binary variable\n\
+written to a stream.  Binary variables are generally created with <funref\n\
+stream-operators stream-get-contents>, or when uploading a file from\n\
 a Web browser.")
 {
   Stream *stream = mhtml_get_stream_reference (vars);
@@ -1123,17 +1123,17 @@ a Web browser.")
 }
 
 DEFUN (pf_stream_get, stream &key stop-at=character,
-"Reads a chunk of data from <var stream> and returns it. <var stream>
-is read until the character value specified by <var character>
-(defaulting to a newline) is reached, and that data upto and including
-the final <var character> is returned. One way to read all of the
-available data is to supply the empty string as the value of <var stop-at>: 
-
-<example>
-<with-open-stream stream www.ua.com:80 type=tcp mode=read-write>
-  <stream-put stream \"GET /welcome.mhtml HTTP/1.0\\n\\n\">
-  <set-var the-page = <stream-get stream stop-at=\"\">>
-</with-open-stream>
+"Reads a chunk of data from <var stream> and returns it. <var stream>\n\
+is read until the character value specified by <var character>\n\
+(defaulting to a newline) is reached, and that data upto and including\n\
+the final <var character> is returned. One way to read all of the\n\
+available data is to supply the empty string as the value of <var stop-at>: \n\
+\n\
+<example>\n\
+<with-open-stream stream www.ua.com:80 type=tcp mode=read-write>\n\
+  <stream-put stream \"GET /welcome.mhtml HTTP/1.0\\n\\n\">\n\
+  <set-var the-page = <stream-get stream stop-at=\"\">>\n\
+</with-open-stream>\n\
 </example>")
 {
   Stream *stream = mhtml_get_stream_reference (vars);
@@ -1161,33 +1161,33 @@ available data is to supply the empty string as the value of <var stop-at>:
 
 DEFUN (pf_stream_get_contents,
        stream var &key chunk-size=size stop-at=character,
-"Reads the contents of the stream <var stream> into the binary
-variable <var var>.  You can easily use this in conjunction with
-<funref stream-operators stream-put-contents> and <funref variables
-coerce-var>.
-
-If <var stop-at> is supplied, it is a character at which the function
-should stop reading data from the stream.  Unlike
-<code>stream-get</code>, <var stop-at> defaults to the empty
-character, thus causing the entire stream to be read.
-
-If <var chunk-size> is supplied, it is the amount to read at one
-time.  This is useful for when you have an unbounded amount of data to
-read, and you would like to process it in manageable chunks.
-
-For example, the following code copies data from an open network
-stream to a file on the local disk, without using more than 32k of
-memory:
-
-<example>
-<with-open-stream src data-server.ua.com:2345 type=tcp mode=read>
-  <with-open-stream dst /tmp/datafile type=file mode=write-create>
-    <while <stream-readable s>>
-      <stream-get-contents src chunk chunk-size=32768>
-      <stream-put-contents dst chunk>
-    </while>
-  </with-open-stream>
-</with-open-stream>
+"Reads the contents of the stream <var stream> into the binary\n\
+variable <var var>.  You can easily use this in conjunction with\n\
+<funref stream-operators stream-put-contents> and <funref variables\n\
+coerce-var>.\n\
+\n\
+If <var stop-at> is supplied, it is a character at which the function\n\
+should stop reading data from the stream.  Unlike\n\
+<code>stream-get</code>, <var stop-at> defaults to the empty\n\
+character, thus causing the entire stream to be read.\n\
+\n\
+If <var chunk-size> is supplied, it is the amount to read at one\n\
+time.  This is useful for when you have an unbounded amount of data to\n\
+read, and you would like to process it in manageable chunks.\n\
+\n\
+For example, the following code copies data from an open network\n\
+stream to a file on the local disk, without using more than 32k of\n\
+memory:\n\
+\n\
+<example>\n\
+<with-open-stream src data-server.ua.com:2345 type=tcp mode=read>\n\
+  <with-open-stream dst /tmp/datafile type=file mode=write-create>\n\
+    <while <stream-readable s>>\n\
+      <stream-get-contents src chunk chunk-size=32768>\n\
+      <stream-put-contents dst chunk>\n\
+    </while>\n\
+  </with-open-stream>\n\
+</with-open-stream>\n\
 </example>")
 {
   Stream *stream = mhtml_get_stream_reference (vars);
@@ -1244,12 +1244,12 @@ memory:
 }
 
 DEFUN (pf_stream_readable, stream &key delay=seconds,
-"Returns \"true\" if <var stream> is an open stream which was opened
-with a mode of read, or read-write, and which still has data pending.
-
-The optional keyword <var delay> is used to specify the amount of time
-in seconds that <code>stream-readable</code> should wait for the
-stream to become ready for reading.  The default value is zero seconds;
+"Returns \"true\" if <var stream> is an open stream which was opened\n\
+with a mode of read, or read-write, and which still has data pending.\n\
+\n\
+The optional keyword <var delay> is used to specify the amount of time\n\
+in seconds that <code>stream-readable</code> should wait for the\n\
+stream to become ready for reading.  The default value is zero seconds;\n\
 no waiting period is used.")
 {
   Stream *stream = mhtml_get_stream_reference (vars);
@@ -1298,13 +1298,13 @@ no waiting period is used.")
 
 
 DEFUN (pf_stream_writable, stream &key delay=seconds,
-"Returns \"true\" if <var stream> is an open stream which was opened
-with a mode of write, append, read-write, or write-create, and which
-is available to have data written to it.
-
-The optional keyword <var delay> is used to specify the amount of time
-in seconds that <code>stream-writable</code> should wait for the
-stream to become ready for writing.  The default value is zero seconds;
+"Returns \"true\" if <var stream> is an open stream which was opened\n\
+with a mode of write, append, read-write, or write-create, and which\n\
+is available to have data written to it.\n\
+\n\
+The optional keyword <var delay> is used to specify the amount of time\n\
+in seconds that <code>stream-writable</code> should wait for the\n\
+stream to become ready for writing.  The default value is zero seconds;\n\
 no waiting period is used.")
 {
   Stream *stream = mhtml_get_stream_reference (vars);
@@ -1348,14 +1348,14 @@ no waiting period is used.")
 }
 
 DEFUN (pf_stream_shutdown, stream,
-"Only for use with network streams, this tells the underlying
-operating system (and the other end of the network connection) that no
-additional input or output will be done using this object. In effect,
-it immediately closes the stream.
-
-When used in conjunction with a network stream opened on
-<code>*standard-output*</code>, this can be used to close the
-<code>HTTP</code> connection to the client, and yet continue
+"Only for use with network streams, this tells the underlying\n\
+operating system (and the other end of the network connection) that no\n\
+additional input or output will be done using this object. In effect,\n\
+it immediately closes the stream.\n\
+\n\
+When used in conjunction with a network stream opened on\n\
+<code>*standard-output*</code>, this can be used to close the\n\
+<code>HTTP</code> connection to the client, and yet continue\n\
 processing data.")
 {
   Stream *stream = mhtml_get_stream_reference (vars);

@@ -66,51 +66,51 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_module_functions)
 DEFINE_SECTION (DYNAMIC-MODULES, dynamic; load-module, 
-"You can write C, C++, or other language code to implement your own built-in
-<Meta-HTML> functions.  Such functions are first-class objects, and
-can manipulate the <Meta-HTML> environment directly, reset the parser pointer,
-manage hardware devices or talk on proprietery networks, or anything else that
-you would like to do. 
-
-It works by supplying you with the necessary <Meta-HTML> header files
-and a Makefile for building modules on your system.  Using the supplied
-Makefile provides you with a resultant <i>dynamically loadable</i> module,
-which can be loaded into an invocation of the <Meta-HTML> server, engine,
-debugger, or standalone processor with the <funref dynamic-modules
-load-module> function.
-
-Combined with the <funref language-operators autoload> function, one
-can extend the <Meta-HTML> language without limits, and without
-forcing all of the functionality to be present all the time.
-
-See the <code>modules</code> directory of the distribution for more
+"You can write C, C++, or other language code to implement your own built-in\n\
+<Meta-HTML> functions.  Such functions are first-class objects, and\n\
+can manipulate the <Meta-HTML> environment directly, reset the parser pointer,\n\
+manage hardware devices or talk on proprietery networks, or anything else that\n\
+you would like to do. \n\
+\n\
+It works by supplying you with the necessary <Meta-HTML> header files\n\
+and a Makefile for building modules on your system.  Using the supplied\n\
+Makefile provides you with a resultant <i>dynamically loadable</i> module,\n\
+which can be loaded into an invocation of the <Meta-HTML> server, engine,\n\
+debugger, or standalone processor with the <funref dynamic-modules\n\
+load-module> function.\n\
+\n\
+Combined with the <funref language-operators autoload> function, one\n\
+can extend the <Meta-HTML> language without limits, and without\n\
+forcing all of the functionality to be present all the time.\n\
+\n\
+See the <code>modules</code> directory of the distribution for more\n\
 details.", "")
 
 DEFVAR (mhtml::module-directories,
-"An array of pathnames used to locate dynamic modules.
-
-When <funref dynamic-modules load-module> is called with a non-fully qualified
-pathname as an argument, the location of the file containing the module code
-is searched for throughout the list of directories in
-<var mhtml::module-directories>.  The default list of directories includes at
-least the following, and may have more dependent on your system type:
-<example>
-/www/lib, /www/bin, /www/metahtml/lib, /www/metahtml/bin,
-/opt/lib, /opt/bin, /opt/metahtml/lib, /opt/metahtml/bin,
-/usr/lib/metahtml, /usr/lib/mhtml, /home/mhttpd/lib, /usr/local/mhtml/lib,
-and /www/src/metahtml/modules
+"An array of pathnames used to locate dynamic modules.\n\
+\n\
+When <funref dynamic-modules load-module> is called with a non-fully qualified\n\
+pathname as an argument, the location of the file containing the module code\n\
+is searched for throughout the list of directories in\n\
+<var mhtml::module-directories>.  The default list of directories includes at\n\
+least the following, and may have more dependent on your system type:\n\
+<example>\n\
+/www/lib, /www/bin, /www/metahtml/lib, /www/metahtml/bin,\n\
+/opt/lib, /opt/bin, /opt/metahtml/lib, /opt/metahtml/bin,\n\
+/usr/lib/metahtml, /usr/lib/mhtml, /home/mhttpd/lib, /usr/local/mhtml/lib,\n\
+and /www/src/metahtml/modules\n\
 </example>")
 
 #define MODULE_SYM_NAME "mhtml::loaded-modules"
 
 DEFVAR (mhtml::loaded-modules,
-"An array of fully qualified pathnames to the modules which have been loaded
-via the function <funref dynamic-modules load-module>.  Used internally
+"An array of fully qualified pathnames to the modules which have been loaded\n\
+via the function <funref dynamic-modules load-module>.  Used internally\n\
 during the module search process.")
 
 DEFVAR (mhtml::module-capable,
-"This value of this symbol is \"true\" when the system on which <Meta-HTML>
-is running is capable of loading dynamic modules.  The value is determined
+"This value of this symbol is \"true\" when the system on which <Meta-HTML>\n\
+is running is capable of loading dynamic modules.  The value is determined\n\
 at the time <Meta-HTML> is compiled.")
 
 static char *static_dirs[] =
@@ -441,44 +441,44 @@ mhtml_load_module (char *module_name, char *mode_arg,
 }
 
 DEFUN (pf_load_module, module-name &key noinitialize initfunc,
-"Loads a module dynamically at runtime, adding the function
-definitions found therein to the global package of <Meta-HTML>
-functions.
-
-<code>load-module</code> returns a non-empty string if the module is
-loaded successfully, or places an error in <funref language-operators
-system-error-output> if not.  The string returned is the fully
-qualified pathname of the module just loaded.
-
-<var module-name> is searched for by looking in each directory
-specified in the array <varref mhtml::module-directories>, or by
-loading the module as if the name specified is the full pathname to
-that file.
-
-Once a module is loaded, the functions within it can be invoked just
-as with any standard <Meta-HTML> command.
-
-See the <code>examples.c</code> file in the <code>modules</code>
-directory of your distribution for more information on writing
-<Meta-HTML> modules.
-
-The keyword argument <var noinitialize> when set to \"true\" says
-not to call the default initialization function of the module
-(<i>module_initialize</i>).  This function is typically used to install
-the function names of the Meta-HTML callable functions present within the
-module.  When such initialization is not required (perhaps you are planning
-to do this from within a different module), the use of this argument
-prevents the attempted call.
-
-The keyword argument <var initfunc> may be set to the name of the
-initialization function to call immediately after the module is
-loaded.  If it is not set, or it is empty, the function
-<b>module_initialize</b> is called.
-
-Example:
-
-<example>
-<set-var loaded? = <load-module /www/lib/example.so>>
+"Loads a module dynamically at runtime, adding the function\n\
+definitions found therein to the global package of <Meta-HTML>\n\
+functions.\n\
+\n\
+<code>load-module</code> returns a non-empty string if the module is\n\
+loaded successfully, or places an error in <funref language-operators\n\
+system-error-output> if not.  The string returned is the fully\n\
+qualified pathname of the module just loaded.\n\
+\n\
+<var module-name> is searched for by looking in each directory\n\
+specified in the array <varref mhtml::module-directories>, or by\n\
+loading the module as if the name specified is the full pathname to\n\
+that file.\n\
+\n\
+Once a module is loaded, the functions within it can be invoked just\n\
+as with any standard <Meta-HTML> command.\n\
+\n\
+See the <code>examples.c</code> file in the <code>modules</code>\n\
+directory of your distribution for more information on writing\n\
+<Meta-HTML> modules.\n\
+\n\
+The keyword argument <var noinitialize> when set to \"true\" says\n\
+not to call the default initialization function of the module\n\
+(<i>module_initialize</i>).  This function is typically used to install\n\
+the function names of the Meta-HTML callable functions present within the\n\
+module.  When such initialization is not required (perhaps you are planning\n\
+to do this from within a different module), the use of this argument\n\
+prevents the attempted call.\n\
+\n\
+The keyword argument <var initfunc> may be set to the name of the\n\
+initialization function to call immediately after the module is\n\
+loaded.  If it is not set, or it is empty, the function\n\
+<b>module_initialize</b> is called.\n\
+\n\
+Example:\n\
+\n\
+<example>\n\
+<set-var loaded? = <load-module /www/lib/example.so>>\n\
 </example>")
 {
   char *module_name = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -504,10 +504,10 @@ Example:
 }
 
 DEFUN (pf_unload_module, module-name,
-"Unloads a previously loaded dynamic module.  You might want this if you
-are running Meta-HTML as a FastCGI, and the module was temporarily needed
-for some service, and was inordinately large.
-
+"Unloads a previously loaded dynamic module.  You might want this if you\n\
+are running Meta-HTML as a FastCGI, and the module was temporarily needed\n\
+for some service, and was inordinately large.\n\
+\n\
 Returns \"true\" if the module was successfully unloaded.")
 {
   char *module_name = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -532,14 +532,14 @@ Returns \"true\" if the module was successfully unloaded.")
 }
 
 DEFUN (pf_module_function, module-name function-name,
-"Returns the address of <var function-name> in <var module-name> if
-<var module-name> is an already loaded dynamic module, and <var function-name>
-is a function defined within that module.
-
-Otherwise, it returns the empty string.
-<example>
-<load-module example>                 --> /www/lib/example.so
-<module-function example pf_apropos>  --> 0X0EF8C437C
+"Returns the address of <var function-name> in <var module-name> if\n\
+<var module-name> is an already loaded dynamic module, and\n\
+<var function-name> is a function defined within that module.\n\
+\n\
+Otherwise, it returns the empty string.\n\
+<example>\n\
+<load-module example>                 --> /www/lib/example.so\n\
+<module-function example pf_apropos>  --> 0X0EF8C437C\n\
 </example>")
 {
   char *module_name = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -579,19 +579,19 @@ Otherwise, it returns the empty string.
 }
 
 DEFUN (pf_module_call_function, module-name function-name &rest args,
-"Call the function <var function-name> in the dynamically loaded module
-<var module_name> with character arguments of <var args>.
-It returns \"true\" if the function invocation took place.  More likely,
-you will be crashing Meta-HTML without a way to debug it.
-
-Up to ten arguments can be passed to the function.
-
-It is so unlikely that you need this, that you will have to write me E-mail
-or read the source to see exactly how this works.  If you are calling this
-function, the called function should not produce any output at all, and,
-in fact, there isn't a way for you to get output back from the function,
-since you can't pass the address of a variable, etc.  This might be used to
-re-initialize some internals of your module, but you should really just
+"Call the function <var function-name> in the dynamically loaded module\n\
+<var module_name> with character arguments of <var args>.\n\
+It returns \"true\" if the function invocation took place.  More likely,\n\
+you will be crashing Meta-HTML without a way to debug it.\n\
+\n\
+Up to ten arguments can be passed to the function.\n\
+\n\
+It is so unlikely that you need this, that you will have to write me E-mail\n\
+or read the source to see exactly how this works.  If you are calling this\n\
+function, the called function should not produce any output at all, and,\n\
+in fact, there isn't a way for you to get output back from the function,\n\
+since you can't pass the address of a variable, etc.  This might be used to\n\
+re-initialize some internals of your module, but you should really just\n\
 provide an interface for that instead.")
 {
   char *module_name = mhtml_evaluate_string (get_positional_arg (vars, 0));

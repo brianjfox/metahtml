@@ -101,7 +101,7 @@ time_spec:
 	  input_date.tm_min = $3;
 	  input_date.tm_sec = $5;
 	}
-	| t_NUMBER t_TIMESEP t_NUMBER t_TIMESEP t_NUMBER t_NUMBER {
+/*	| t_NUMBER t_TIMESEP t_NUMBER t_TIMESEP t_NUMBER t_NUMBER {
 	  int year = $6;
 
 	  if (year < 50) year += 2000;
@@ -111,7 +111,7 @@ time_spec:
 	  input_date.tm_min = $3;
 	  input_date.tm_sec = $5;
 	  DEBUGGING_OUTPUT ("TIME_SPEC 2.1\n");
-	}
+	  } */
 	| t_NUMBER t_AM {
 	  DEBUGGING_OUTPUT ("TIME_SPEC 3\n");
 	  input_date.tm_hour = $1;
@@ -197,7 +197,7 @@ date_spec:
 	  input_date.tm_mon = 11;
 	  input_date.tm_mday = 25;
 	}
-	| t_WEEKDAY { }
+/* | t_WEEKDAY { } */
 	| t_YEARNUM {
 	  int year = $1;
 	  if (year < 50) year += 2000;
@@ -238,10 +238,7 @@ date_spec:
 	;
 
 useless_word:
-	t_WEEKDAY {
-	  /* Does nothing by itself. */
-	}
-	| t_TH { /* Ignored at all times. */ }
+	t_TH { /* Ignored at all times. */ }
 	;
 
 zone_spec:
@@ -306,7 +303,7 @@ rel_spec:
 	  relative_seconds -= days * seconds_per_day;
 	  DEBUGGING_OUTPUT ("REL_SPEC 5\n");
 	}
-	| t_FROM t_WEEKDAY {
+/*	| t_FROM t_WEEKDAY {
 	  int days;
 
 	  if ($2 == input_date.tm_wday)
@@ -318,7 +315,7 @@ rel_spec:
 
 	  relative_seconds += days * seconds_per_day;
 	  DEBUGGING_OUTPUT ("REL_SPEC 6\n");
-	}
+	  } */
 	| t_FROM date_spec { /* Nothing special happens here. */
 	  DEBUGGING_OUTPUT ("REL_SPEC 6.1\n");
 	}
@@ -682,7 +679,7 @@ moddate_lex (void)
 static void
 zone_handle (time_t seconds_from_gmt, int dst_p)
 {
-#if defined (linux)
+#if defined (__linux__)
   register int i;
   static int zone_start = 0;
   static int zone_end = 0;
@@ -707,11 +704,12 @@ zone_handle (time_t seconds_from_gmt, int dst_p)
 	input_date.tm_zone = known_words[i].word;
 	break;
       }
-#endif
+#endif /* __linux__ */
   input_date.tm_isdst = dst_p;
   zone_found++;
 }
 
+#if defined (PARSEDATE_DEBUGGING_STRUCT)
 static char *
 dump_struct_tm (struct tm *tm, char *label)
 {
@@ -728,14 +726,15 @@ dump_struct_tm (struct tm *tm, char *label)
   bprintf (b, "   tm_wday = %d,\n", tm->tm_wday);
   bprintf (b, "   tm_yday = %d,\n", tm->tm_yday);
   bprintf (b, "   tm_isdst =%d,\n", tm->tm_isdst);
-#if defined (linux)
+#if defined (__linux__)
   bprintf (b, "   tm_zone = %s,\n", tm->tm_zone ? tm->tm_zone : "[none]");
-#endif
+#endif /* __linux__ */
   bprintf (b, "}\n");
   result = b->buffer;
   free (b);
   return (result);
 }
+#endif
   
 time_t
 get_date (char *string, char *zone_name)
@@ -884,14 +883,14 @@ get_date (char *string, char *zone_name)
       bprintf_free_buffer (b);
     }
 
-#if defined (linux)
+#if defined (__linux__)
   if (input_date.tm_zone != (char *)NULL)
     strcpy (use_zone, input_date.tm_zone);
 
   for (i = 0; use_zone[i] != '\0'; i++)
     if (islower (use_zone[i]))
       use_zone[i] = toupper (use_zone[i]);
-#endif
+#endif /* __linux__ */
 
   if (use_zone != (char *)NULL && *use_zone != '\0')
     {

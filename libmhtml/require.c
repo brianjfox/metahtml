@@ -205,30 +205,30 @@ require_remember_pathname (char *pathname)
 }
 
 DEFUN (pf_require, stem,
-"<code>require</code> tries hard to locate the source or library file
-specified by <var stem>, and then loads that file if it hasn't already
-been loaded.
-
-Both `<var stem>.lib' and `<var stem>.mhtml' are searched for -- <tag
-require> loads the one which is newer.  In either case, if a function
-named `<var .libinit>' is defined after the load, then that function is
-executed with 0 arguments, and the function definition is then removed.
-
-If the variable <varref mhtml::require-directories> is present, then
-it is an array of directory names (without trailing slashes) relative
-to Web space that should be searched through, in the order that they
-appear in the array.
-
-<code>require</code> understands the following extensions:
-
-<ul>
-<li> <b>.mhtml</b>, or <b>.src</b>: A <meta-html> source file.
-
-<li> <b>.lib</b>: A <meta-html> library file.
-</ul>
-
-<code>require</code> loads the newest version of the file that it
-finds, and records the complete pathname of the loaded file in the
+"<code>require</code> tries hard to locate the source or library file\n\
+specified by <var stem>, and then loads that file if it hasn't already\n\
+been loaded.\n\
+\n\
+Both `<var stem>.lib' and `<var stem>.mhtml' are searched for -- <tag\n\
+require> loads the one which is newer.  In either case, if a function\n\
+named `<var .libinit>' is defined after the load, then that function is\n\
+executed with 0 arguments, and the function definition is then removed.\n\
+\n\
+If the variable <varref mhtml::require-directories> is present, then\n\
+it is an array of directory names (without trailing slashes) relative\n\
+to Web space that should be searched through, in the order that they\n\
+appear in the array.\n\
+\n\
+<code>require</code> understands the following extensions:\n\
+\n\
+<ul>\n\
+<li> <b>.mhtml</b>, or <b>.src</b>: A <meta-html> source file.\n\
+\n\
+<li> <b>.lib</b>: A <meta-html> library file.\n\
+</ul>\n\
+\n\
+<code>require</code> loads the newest version of the file that it\n\
+finds, and records the complete pathname of the loaded file in the\n\
 array variable <varref mhtml::require-loaded>.")
 {
   register int i;

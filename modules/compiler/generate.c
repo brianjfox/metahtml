@@ -1889,11 +1889,11 @@ main (int   argc,
   string_t source = "<set-var foo=10 <get-var-once foo>=30 foo[1]=20 <get-var-once foo>[2]=40 <get-var-once foo[1]>[2]=50><get-var-once foo[1]><alist-get-var foo key><alist-set-var foo key=value><add foo 1><foo 1>";
 
 string_t source =
-  "<defsubst parser::canonicalize-var :pcv-var :pcv-pack whitespace=delete>
-  <defvar :pcv-pack \"^\">
-  <if <not <match <get-var-once <get-var-once :pcv-var>> \"::\">>
-      <set-var <get-var-once :pcv-var> =
-	<get-var-once :pcv-pack>::<get-var-once <get-var-once :pcv-var>>>>
+  "<defsubst parser::canonicalize-var :pcv-var :pcv-pack whitespace=delete>\n\
+  <defvar :pcv-pack \"^\">\n\
+  <if <not <match <get-var-once <get-var-once :pcv-var>> \"::\">>\n\
+      <set-var <get-var-once :pcv-var> =\n\
+	<get-var-once :pcv-pack>::<get-var-once <get-var-once :pcv-var>>>>\n\
 </defsubst>";
 
  string_t source = "<set-var foo=10 <get-var-once foo>=30 foo[1]=20 <get-var-once foo>[2]=40 <get-var-once foo[1]>[2]=50 foo[5]=200>";

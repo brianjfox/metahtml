@@ -55,17 +55,17 @@ MODULE_INITIALIZE ("timer", ftab)
 DOC_SECTION (CODE-PROFILING)
 DEFMACRO (pf_measuring_elapsed_time,
 	  varname &key units=milliseconds|microseconds|seconds,
-"Place the amount of time it takes to execute <var code> into <var varname>.
-The value appears as a floating point number which represents the
-elapsed time in milliseconds (by default -- use the <var units> keyword
-argument to change this).
-
-For example:
-<complete-example>
-<measuring-elapsed-time timer>
-  <set-var sample-code=<get-var x>>
-</measuring-elapsed-time>
-It took <get-var timer> milliseconds to execute the sample code.
+"Place the amount of time it takes to execute <var code> into <var varname>.\n\
+The value appears as a floating point number which represents the\n\
+elapsed time in milliseconds (by default -- use the <var units> keyword\n\
+argument to change this).\n\
+\n\
+For example:\n\
+<complete-example>\n\
+<measuring-elapsed-time timer>\n\
+  <set-var sample-code=<get-var x>>\n\
+</measuring-elapsed-time>\n\
+It took <get-var timer> milliseconds to execute the sample code.\n\
 </complete-example>")
 {
   char *varname = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -119,18 +119,18 @@ It took <get-var timer> milliseconds to execute the sample code.
 }
 
 DEFUN (pf_mtime, ,
-"Returns the number of milliseconds that have elapsed since Jan 1st, 1970,
-as a large floating point value.
-
-This can be more convenient to use than <tag measuring-elapsed-time> since
-the use of it can be broken up across many include files.  It isn't as
-accurate to use this over <tag measuring-elapsed-time> since the overhead
-of setting a variable and getting its value is included in your timing:
-<complete-example>
-<set-var start=<mtime>>
-<set-var sample-code=<get-var x>>
-<set-var end=<mtime>>
-It took <sub end start> milliseconds to execute the sample code.
+"Returns the number of milliseconds that have elapsed since Jan 1st, 1970,\n\
+as a large floating point value.\n\
+\n\
+This can be more convenient to use than <tag measuring-elapsed-time> since\n\
+the use of it can be broken up across many include files.  It isn't as\n\
+accurate to use this over <tag measuring-elapsed-time> since the overhead\n\
+of setting a variable and getting its value is included in your timing:\n\
+<complete-example>\n\
+<set-var start=<mtime>>\n\
+<set-var sample-code=<get-var x>>\n\
+<set-var end=<mtime>>\n\
+It took <sub end start> milliseconds to execute the sample code.\n\
 </complete-example>")
 {
   struct timeval now;

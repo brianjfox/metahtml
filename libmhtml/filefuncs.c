@@ -63,18 +63,18 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_file_functions)
 DEFINE_SECTION (FILE-OPERATORS, files; disk; system, 
-"There are several types of commands in <meta-html> for dealing with files.
-
-Some of these commands operate directly on an open files, while others
-operate on <i>streams</i> (see <secref stream-operators>), which may be
-connected to files or network data.
-
-The functions allow you to <funref FILE-OPERATORS include> the
-contents of, open (<funref STREAM-OPERATORS with-open-stream>), create,
-read, or write various data sources, or to replace the contents of a page
+"There are several types of commands in <meta-html> for dealing with files.\n\
+\n\
+Some of these commands operate directly on an open files, while others\n\
+operate on <i>streams</i> (see <secref stream-operators>), which may be\n\
+connected to files or network data.\n\
+\n\
+The functions allow you to <funref FILE-OPERATORS include> the\n\
+contents of, open (<funref STREAM-OPERATORS with-open-stream>), create,\n\
+read, or write various data sources, or to replace the contents of a page\n\
 (<funref PAGE-OPERATORS replace-page>) with another file.",
-"Commands such as <funref FILE-OPERATORS get-file-properties> may
-return additional information on some systems; this is documented with
+"Commands such as <funref FILE-OPERATORS get-file-properties> may\n\
+return additional information on some systems; this is documented with\n\
 each function where that is the case.")
 
 /* <get-file-properties /www/nirvana/docs/welcome.mhtml>
@@ -226,58 +226,58 @@ unix_username_from_uid (uid_t uid)
    are *not* relative to web space in any way.  This is probably a huge
    security hole, but it can't be any worse than CGI-EXEC.  Yeeesh. */
 DEFUN (pf_get_file_properties, pathname,
-"Return an association-list containing operating system information
-about the file or directory named by <var path>. <var pathname> must be
-given fully; it is <i>not</i> relative to Web space in any way.
-
-If the file exists and is accessible, the members of the returned
-association-list which are guaranteed to be present are:
-
-<ul>
-<li> <b>NAME</b>: <i>welcome.mhtml</i><br>
-The name of the file or directory, without any of the path information.
-
-<li> <b>FULL-NAME</b>: <i>/www/site/docs/welcome.mhtml</i><br>
-The name of the file or directory, with full path
-information.  This should be identical to <var PATH> as
-received by <tag get-file-properties>.
-
-<li> <b>SIZE</b>: <i> 2188 </i> <br>
-The size of the file in bytes.
-
-<li> <b>TYPE</b>: <i>FILE</i><br>
-The <i>type</i> of the file.  This will either be
-<code>FILE</code> or <code>DIRECTORY</code>.
-</ul>
-
-In addition to the above fields, the following fields appear on Unix
-based systems:
-
-<ul>
-<li> <b>CREATED</b>: <i>6 29 96 10 3 24 897595648</i><br>
-The date on which this file was created.  The value is an
-array, with ordered values being: month, day, year, hours,
-minutes, and seconds, and then the number of seconds since
-Jan 1st, 1970.
-
-<li> <b>WRITTEN</b>: <i>6 29 96 10 3 24 897595648</i><br>
-The date on which this file was last written.  The value is an
-array, with ordered values being: month, day, year, hours,
-minutes, and seconds, and then the number of seconds since
-Jan 1st, 1970.
-
-<li> <b>READ</b>: <i>6 30 96 19 27 51 897595648</i><br>
-The date on which this file was last read.  The value is an
-array, with ordered values being: month, day, year, hours,
-minutes, and seconds, and then the number of seconds since
-Jan 1st, 1970.
-
-<li> <b>CREATOR</b>: <i>bfox</i> <br>
-The system identifier of the user who created this file.
-</ul>
-
-<html-complete-example>
-<dump-alist <get-file-properties />>
+"Return an association-list containing operating system information\n\
+about the file or directory named by <var path>. <var pathname> must be\n\
+given fully; it is <i>not</i> relative to Web space in any way.\n\
+\n\
+If the file exists and is accessible, the members of the returned\n\
+association-list which are guaranteed to be present are:\n\
+\n\
+<ul>\n\
+<li> <b>NAME</b>: <i>welcome.mhtml</i><br>\n\
+The name of the file or directory, without any of the path information.\n\
+\n\
+<li> <b>FULL-NAME</b>: <i>/www/site/docs/welcome.mhtml</i><br>\n\
+The name of the file or directory, with full path\n\
+information.  This should be identical to <var PATH> as\n\
+received by <tag get-file-properties>.\n\
+\n\
+<li> <b>SIZE</b>: <i> 2188 </i> <br>\n\
+The size of the file in bytes.\n\
+\n\
+<li> <b>TYPE</b>: <i>FILE</i><br>\n\
+The <i>type</i> of the file.  This will either be\n\
+<code>FILE</code> or <code>DIRECTORY</code>.\n\
+</ul>\n\
+\n\
+In addition to the above fields, the following fields appear on Unix\n\
+based systems:\n\
+\n\
+<ul>\n\
+<li> <b>CREATED</b>: <i>6 29 96 10 3 24 897595648</i><br>\n\
+The date on which this file was created.  The value is an\n\
+array, with ordered values being: month, day, year, hours,\n\
+minutes, and seconds, and then the number of seconds since\n\
+Jan 1st, 1970.\n\
+\n\
+<li> <b>WRITTEN</b>: <i>6 29 96 10 3 24 897595648</i><br>\n\
+The date on which this file was last written.  The value is an\n\
+array, with ordered values being: month, day, year, hours,\n\
+minutes, and seconds, and then the number of seconds since\n\
+Jan 1st, 1970.\n\
+\n\
+<li> <b>READ</b>: <i>6 30 96 19 27 51 897595648</i><br>\n\
+The date on which this file was last read.  The value is an\n\
+array, with ordered values being: month, day, year, hours,\n\
+minutes, and seconds, and then the number of seconds since\n\
+Jan 1st, 1970.\n\
+\n\
+<li> <b>CREATOR</b>: <i>bfox</i> <br>\n\
+The system identifier of the user who created this file.\n\
+</ul>\n\
+\n\
+<html-complete-example>\n\
+<dump-alist <get-file-properties />>\n\
 </html-complete-example>")
 {
   char *filename = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -295,13 +295,13 @@ The system identifier of the user who created this file.
 }
 
 DEFUN (pf_file_exists, pathname,
-"Returns \"true\" if <var pathname> is an existing file or directory.
-
-<var pathname> is absolute, that is to say that it is looked up in
-absolute file system space, not in Web space.  To find out if a file
-<code>foo</code> in the current directory exists, use:
-<example>
-<file-exists <thisdir>/foo>
+"Returns \"true\" if <var pathname> is an existing file or directory.\n\
+\n\
+<var pathname> is absolute, that is to say that it is looked up in\n\
+absolute file system space, not in Web space.  To find out if a file\n\
+<code>foo</code> in the current directory exists, use:\n\
+<example>\n\
+<file-exists <thisdir>/foo>\n\
 </example>")
 {
   char *filename = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -330,12 +330,12 @@ pf_set_file_properties (PFunArgs)
 
 DEFUN (pf_directory_contents,
        pathname &optional package-name &key matching=pattern,
-"Returns a newline separated list of association lists for
-the files matching <var pattern>.
-
-When <var package-name> is supplied, each variable in
-<var package-name> is the name of a file in <var pathname>, and
-the value of each variable is the association list for that
+"Returns a newline separated list of association lists for\n\
+the files matching <var pattern>.\n\
+\n\
+When <var package-name> is supplied, each variable in\n\
+<var package-name> is the name of a file in <var pathname>, and\n\
+the value of each variable is the association list for that\n\
 file.")
 {
   char *dirname = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -424,18 +424,18 @@ file.")
 
 #if defined (HAVE_MKFIFO)
 DEFUNX (pf_unix::mkfifo, filename &optional mode-bits,
-"Create a named pipe on unix systems that support named pipes.
-
-The pipe is named <var filename> and is created with the access mode
-specified by <var mode-bits>, an octal permissions mask.
-
-<var mode-bits> defaults to 0666 if not specified.
-
-After a named pipe is created, it can be written to and read from
-in the normal manner for writing and reading file streams.
-
-UNIX::MKFIFO returns \"true\" if the named pipe could be created, or
-the empty string if not.  In the case of an error, the human readable
+"Create a named pipe on unix systems that support named pipes.\n\
+\n\
+The pipe is named <var filename> and is created with the access mode\n\
+specified by <var mode-bits>, an octal permissions mask.\n\
+\n\
+<var mode-bits> defaults to 0666 if not specified.\n\
+\n\
+After a named pipe is created, it can be written to and read from\n\
+in the normal manner for writing and reading file streams.\n\
+\n\
+UNIX::MKFIFO returns \"true\" if the named pipe could be created, or\n\
+the empty string if not.  In the case of an error, the human readable\n\
 text of the error message appears in SYSTEM-ERROR-OUTPUT.")
 
 static void

@@ -78,52 +78,51 @@ static PFunDesc func_table[] =
 PACKAGE_INITIALIZER (initialize_arithmetic_functions)
 DEFINE_SECTION (ARITHMETIC-OPERATORS,
 		math; addition; subtraction; artithmetic, 
-"<Meta-HTML> contains a small set of commands for operating on
-numerical quantities.
-
-All of the arithmetic operators described in this section can accept a
-number, or simply the name of a variable, which is then looked up as
-if it had been written with <example code><get-var-once ...></example>.
-
-That is to say:
-
-<example>
-   <set-var total = <add <get-var-once subtotals[0]>
-                         <get-var-once subtotals[current]>>>
-</example>
-
-can be written as:
-
-<example>
-   <set-var total = <add subtotals[0] subtotals[current]>>
-</example>
-
+"<Meta-HTML> contains a small set of commands for operating on\n\
+numerical quantities.\n\
+\n\
+All of the arithmetic operators described in this section can accept a\n\
+number, or simply the name of a variable, which is then looked up as\n\
+if it had been written with <example code><get-var-once ...></example>.\n\
+\n\
+That is to say:\n\
+\n\
+<example>\n\
+   <set-var total = <add <get-var-once subtotals[0]>\n\
+                         <get-var-once subtotals[current]>>>\n\
+</example>\n\
+\n\
+can be written as:\n\
+\n\
+<example>\n\
+   <set-var total = <add subtotals[0] subtotals[current]>>\n\
+</example>\n\
+\n\
 ",
-"The binary arithmetic operators always expect two arguments, and will
-produce a warning message in <funref DEBUGGING-COMMANDS DEBUGGING-OUTPUT>
-when given too few arguments.
-
-You can perform floating point arithmetic if one or both of the
-arguments is already a floating point number:
-
-<example>
-  <div 10 3>    --> 3
-  <div 10.0 3>  --> 3.33
-</example>
+"The binary arithmetic operators always expect two arguments, and will\n\
+produce a warning message in <funref DEBUGGING-COMMANDS DEBUGGING-OUTPUT>\n\
+when given too few arguments.\n\
+\n\
+You can perform floating point arithmetic if one or both of the\n\
+arguments is already a floating point number:\n\
+\n\
+<example>\n\
+  <div 10 3>    --> 3\n\
+  <div 10.0 3>  --> 3.33\n\
+</example>\n\
 ")
 
 DEFVAR (mhtml::decimal-places,
-"Controls the number of decimal places which arithmetic functions
-produce.  The default value of this variable is <code>2</code>, but
-for times when you need greater resolution in your calculations, you
-may wish to set it higher.
-<complete-example>
-<set-var mhtml::decimal-places = 10>
-To 10 places: <div 1 .34567>
-<unset-var mhtml::decimal-places>
-To  2 places: <div 1 .34567>
+"Controls the number of decimal places which arithmetic functions\n\
+produce.  The default value of this variable is <code>2</code>, but\n\
+for times when you need greater resolution in your calculations, you\n\
+may wish to set it higher.\n\
+<complete-example>\n\
+<set-var mhtml::decimal-places = 10>\n\
+To 10 places: <div 1 .34567>\n\
+<unset-var mhtml::decimal-places>\n\
+To  2 places: <div 1 .34567>\n\
 </complete-example>")
-
 
 
 /* Arithmetic operations. */
@@ -208,25 +207,25 @@ void mhtml_set_output_radix (int radix) { mhtml_output_radix = radix; }
 char *mhtml_output_to_radix (long num, int radix);
 
 DEFUN (pf_set_output_radix, new-radix,
-"Set the output radix for numbers produced by arithmetic operations to
-<var new-radix>, which is specified in decimal.  Returns the value of
-the previous output radix.  Note that there is no corresponding function
-for setting the input radix.  If the value of <var new-radix> is a number
-between  2 and 32 decimal, inclusive, then the output radix is set to that
-value.  <var new-radix> can also be the name of a function of one argument,
-which should be called to produce the appropriate output.
-
-If the argument to <tag set-output-radix> does not fall between 2 and 32
-inclusive, and is not the name of a defined function, then the output radix
-remains unchanged, and <tag set-output-radix> produces no output.
-
-Examples:
-<example>
-<set-output-radix 16>                --> 10
-<add 0x3e 1>                         --> 0x3f
-<set-output-radix 10>                --> 16
-<set-output-radix number-to-english> --> 10
-<add 23.4 32.32>                     --> Fifty-Five point Seven Two
+"Set the output radix for numbers produced by arithmetic operations to\n\
+<var new-radix>, which is specified in decimal.  Returns the value of\n\
+the previous output radix.  Note that there is no corresponding function\n\
+for setting the input radix.  If the value of <var new-radix> is a number\n\
+between  2 and 32 decimal, inclusive, then the output radix is set to that\n\
+value.  <var new-radix> can also be the name of a function of one argument,\n\
+which should be called to produce the appropriate output.\n\
+\n\
+If the argument to <tag set-output-radix> does not fall between 2 and 32\n\
+inclusive, and is not the name of a defined function, then the output radix\n\
+remains unchanged, and <tag set-output-radix> produces no output.\n\
+\n\
+Examples:\n\
+<example>\n\
+<set-output-radix 16>                --> 10\n\
+<add 0x3e 1>                         --> 0x3f\n\
+<set-output-radix 10>                --> 16\n\
+<set-output-radix number-to-english> --> 10\n\
+<add 23.4 32.32>                     --> Fifty-Five point Seven Two\n\
 </example>")
 {
   char *new_radix = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -650,167 +649,171 @@ arithmetic_process (int op, PFunArgs)
 }
 
 DEFUN (pf_gt, arg1 arg2 &rest more-args...,
-"Returns \"true\" if the numeric value of <var arg1> is greater than
-the numeric value of <var arg2> (which is greater than <var
-more-args>.  Just as with the arithmetic functions (<secref
-Arithmetic-Operators>), the arguments may be the names of
-variables containing numeric values, and not just the values
-themselves.  In that case, <code>gt</code> performs an implicit call
-to <example code><get-var-once ...></example> in order to get the value to
-operate on.
-
-Examples:
-<example>
-<gt 4 3>            --> true
-<set-var x=3.4 y=3.5>
-<gt x y>            -->
-<gt y x>            --> true
-<gt <get-var-once y> x>  --> true
-
-<defun between? item high low>
-  <gt high item low>
-</defun>
-
-<between? 7 8 6>    --> true
+"Returns \"true\" if the numeric value of <var arg1> is greater than\n\
+the numeric value of <var arg2> (which is greater than <var\n\
+more-args>.  Just as with the arithmetic functions (<secref\n\
+Arithmetic-Operators>), the arguments may be the names of\n\
+variables containing numeric values, and not just the values\n\
+themselves.  In that case, <code>gt</code> performs an implicit call\n\
+to <example code><get-var-once ...></example> in order to get the value to\n\
+operate on.\n\
+\n\
+Examples:\n\
+<example>\n\
+<gt 4 3>            --> true\n\
+<set-var x=3.4 y=3.5>\n\
+<gt x y>            -->\n\
+<gt y x>            --> true\n\
+<gt <get-var-once y> x>  --> true\n\
+\n\
+<defun between? item high low>\n\
+  <gt high item low>\n\
+</defun>\n\
+\n\
+<between? 7 8 6>    --> true\n\
 </example>")
 {
   arithmetic_process (pf_GT, PassPFunArgs);
 }
 
 DEFUN (pf_ge, arg1 arg2 &rest more-args...,
-"Returns \"true\" if the numeric value of <var arg1> is greater than
-or equal to numeric value of <var arg2> (which is greater than
-or equal to <var more-args>.
-
-Just as with the arithmetic functions (<secref Arithmetic-Operators>),
-the arguments may be the names of variables containing numeric values,
-and not just the values themselves.  In that case, <code>gt</code>
-performs an implicit call to <example code><get-var-once ...></example> in
-order to get the value to operate on.
-
-Examples:
-<example>
-<ge 4 3>            --> true
-<set-var x=3.4 y=3.5>
-<ge x y>            -->
-<ge y x>            --> true
-<ge <get-var-once y> x>  --> true
-<ge 3 2 3.0>        --> true
-<ge 3 2 3>          -->
-<ge 3 3 2>          --> true
+"Returns \"true\" if the numeric value of <var arg1> is greater than\n\
+or equal to numeric value of <var arg2> (which is greater than\n\
+or equal to <var more-args>.\n\
+\n\
+Just as with the arithmetic functions (<secref Arithmetic-Operators>),\n\
+the arguments may be the names of variables containing numeric values,\n\
+and not just the values themselves.  In that case, <code>gt</code>\n\
+performs an implicit call to <example code><get-var-once ...></example> in\n\
+order to get the value to operate on.\n\
+\n\
+Examples:\n\
+<example>\n\
+<ge 4 3>            --> true\n\
+<set-var x=3.4 y=3.5>\n\
+<ge x y>            -->\n\
+<ge y x>            --> true\n\
+<ge <get-var-once y> x>  --> true\n\
+<ge 3 2 3.0>        --> true\n\
+<ge 3 2 3>          -->\n\
+<ge 3 3 2>          --> true\n\
 </example>")
 {
   arithmetic_process (pf_GE, PassPFunArgs);
 }
 
 DEFUN (pf_lt, arg1 arg2 &rest more-args,
-"Returns \"true\" if the numeric value of <var arg1> is less than
-the numeric value of <var arg2> (which is less than <var more-args>.
-Just as with the arithmetic functions (<secref Arithmetic-Operators>),
-<var arg1> and <var arg2> may be the names of variables containing
-numeric values, and not just the values themselves.  In that case,
-<code>lt</code> performs an implicit call to <example code><get-var-once ...></example> in order to get the value to operate on.
-
-Examples:
-<example>
-<lt 3 4>            --> true
-<lt 4 3>            --> 
-<set-var x=3.4 y=3.5>
-<lt x y>            --> true
-<lt y x>            --> 
-<lt x <get-var-once y>>  --> true
-<lt 4 5 6>          --> true
+"Returns \"true\" if the numeric value of <var arg1> is less than\n\
+the numeric value of <var arg2> (which is less than <var more-args>.\n\
+Just as with the arithmetic functions (<secref Arithmetic-Operators>),\n\
+<var arg1> and <var arg2> may be the names of variables containing\n\
+numeric values, and not just the values themselves.  In that case,\n\
+<code>lt</code> performs an implicit call to \n\
+<example code><get-var-once ...></example> in order to get the value\n\
+to operate on.\n\
+\n\
+Examples:\n\
+<example>\n\
+<lt 3 4>            --> true\n\
+<lt 4 3>            --> \n\
+<set-var x=3.4 y=3.5>\n\
+<lt x y>            --> true\n\
+<lt y x>            --> \n\
+<lt x <get-var-once y>>  --> true\n\
+<lt 4 5 6>          --> true\n\
 </example>")
 {
   arithmetic_process (pf_LT, PassPFunArgs);
 }
 
 DEFUN (pf_le, arg1 arg2 &rest more-args,
-"Returns \"true\" if the numeric value of <var arg1> is less than or
-equal to the numeric value of <var arg2> (which is less than or equal
-to <var more-args>.
-
-Just as with the arithmetic functions (<secref Arithmetic-Operators>),
-<var arg1> and <var arg2> may be the names of variables containing
-numeric values, and not just the values themselves.  In that case,
-<code>lt</code> performs an implicit call to <example code><get-var-once ...></example> in order to get the value to operate on.
-
-Examples:
-<example>
-<le 3 4>            --> true
-<le 4 3>            --> 
-<set-var x=3.4 y=3.5>
-<le x y>            --> true
-<le x 3.4 y>        --> true
-<le x y 3.4>        -->
-<le 4 5 6>          --> true
+"Returns \"true\" if the numeric value of <var arg1> is less than or\n\
+equal to the numeric value of <var arg2> (which is less than or equal\n\
+to <var more-args>.\n\
+\n\
+Just as with the arithmetic functions (<secref Arithmetic-Operators>),\n\
+<var arg1> and <var arg2> may be the names of variables containing\n\
+numeric values, and not just the values themselves.  In that case,\n\
+<code>lt</code> performs an implicit call to\n\
+<example code><get-var-once ...></example> in order to get the value\n\
+to operate on.\n\
+\n\
+Examples:\n\
+<example>\n\
+<le 3 4>            --> true\n\
+<le 4 3>            --> \n\
+<set-var x=3.4 y=3.5>\n\
+<le x y>            --> true\n\
+<le x 3.4 y>        --> true\n\
+<le x y 3.4>        -->\n\
+<le 4 5 6>          --> true\n\
 </example>")
 {
   arithmetic_process (pf_LE, PassPFunArgs);
 }
 
 DEFUN (pf_eq, arg1 arg2,
-"Returns \"true\" if the numeric value of <var arg1> is exactly equal to
-the numeric value of <var arg2>.  Just as with the arithmetic
-functions (<secref Arithmetic-Operators>), the arguments
-may be the names of variables containing numeric values, and not just
-the values themselves.  In that case, <code>eq</code> performs an
-implicit call to <example code><get-var-once ...></example> in order to get
-the value to operate on.
-
-Examples:
-<example>
-<eq 3 4>              --> 
-<eq 3 3>              --> true
-<eq 3.0 3>            --> true
-<set-var x=3.01>
-<eq <get-var-once x> 3.01> --> true
+"Returns \"true\" if the numeric value of <var arg1> is exactly equal to\n\
+the numeric value of <var arg2>.  Just as with the arithmetic\n\
+functions (<secref Arithmetic-Operators>), the arguments\n\
+may be the names of variables containing numeric values, and not just\n\
+the values themselves.  In that case, <code>eq</code> performs an\n\
+implicit call to <example code><get-var-once ...></example> in order to get\n\
+the value to operate on.\n\
+\n\
+Examples:\n\
+<example>\n\
+<eq 3 4>              --> \n\
+<eq 3 3>              --> true\n\
+<eq 3.0 3>            --> true\n\
+<set-var x=3.01>\n\
+<eq <get-var-once x> 3.01> --> true\n\
 </example>")
 {
   arithmetic_process (pf_EQ, PassPFunArgs);
 }
 
 DEFUN (pf_neq, arg1 arg2,
-"Returns \"true\" if the numeric value of <var arg1> is NOT equal to
-the numeric value of <var arg2>.  Just as with the arithmetic
-functions (<secref Arithmetic-Operators>), the arguments
-may be the names of variables containing numeric values, and not just
-the values themselves.  In that case, <code>eq</code> performs an
-implicit call to <example code><get-var-once ...></example> in order to get
-the value to operate on.
-
-Examples:
-<example>
-<neq 3 4>              --> true
-<neq 3 3>              --> 
-<neq 3.0 3>            --> 
-<set-var x=3.01>
-<neq <get-var-once x> 3.00> --> true
+"Returns \"true\" if the numeric value of <var arg1> is NOT equal to\n\
+the numeric value of <var arg2>.  Just as with the arithmetic\n\
+functions (<secref Arithmetic-Operators>), the arguments\n\
+may be the names of variables containing numeric values, and not just\n\
+the values themselves.  In that case, <code>eq</code> performs an\n\
+implicit call to <example code><get-var-once ...></example> in order to get\n\
+the value to operate on.\n\
+\n\
+Examples:\n\
+<example>\n\
+<neq 3 4>              --> true\n\
+<neq 3 3>              --> \n\
+<neq 3.0 3>            --> \n\
+<set-var x=3.01>\n\
+<neq <get-var-once x> 3.00> --> true\n\
 </example>")
 {
   arithmetic_process (pf_NEQ, PassPFunArgs);
 }
 
 DEFUN (pf_add, arg1 arg2 &rest more-args,
-"Returns the summation of all of the arguments passed.
-
-Examples:
-<example>
-<add 1 2>        --> 3
-<add -1 2 2 1>   --> 4
+"Returns the summation of all of the arguments passed.\n\
+\n\
+Examples:\n\
+<example>\n\
+<add 1 2>        --> 3\n\
+<add -1 2 2 1>   --> 4\n\
 </example>")
 {
   arithmetic_process (pf_ADD, PassPFunArgs);
 }
 
 DEFUN (pf_sub, arg1 arg2 &rest more-args,
-"Returns the difference of all of the arguments passed.
-
-Examples:
-<example>
-<sub 2 1>        --> 1
-<sub 6 2 1>      --> 3
-<sub -1 -2>      --> 1
+"Returns the difference of all of the arguments passed.\n\
+\n\
+Examples:\n\
+<example>\n\
+<sub 2 1>        --> 1\n\
+<sub 6 2 1>      --> 3\n\
+<sub -1 -2>      --> 1\n\
 </example>")
 {
   if ((body == (PAGE *)NULL) || (empty_string_p (body->buffer)))
@@ -825,53 +828,53 @@ Examples:
 }
 
 DEFUN (pf_max, arg1 arg2 &rest more-args,
-"Returns the largets of all of the arguments passed.
-
-Examples:
-<example>
-<max 2 2>        --> 2
-<max 2.3 8 7>    --> 8.00
-<max 4 10 -4>    --> 10
+"Returns the largets of all of the arguments passed.\n\
+\n\
+Examples:\n\
+<example>\n\
+<max 2 2>        --> 2\n\
+<max 2.3 8 7>    --> 8.00\n\
+<max 4 10 -4>    --> 10\n\
 </example>")
 {
   arithmetic_process (pf_MAX, PassPFunArgs);
 }
 
 DEFUN (pf_min, arg1 arg2 &rest more-args,
-"Returns the smallest of all of the arguments passed.
-
-Examples:
-<example>
-<min 2 2>        --> 2
-<min 2.3 8 3>    --> 2.30
-<min 3 -4 10>    --> -4
+"Returns the smallest of all of the arguments passed.\n\
+\n\
+Examples:\n\
+<example>\n\
+<min 2 2>        --> 2\n\
+<min 2.3 8 3>    --> 2.30\n\
+<min 3 -4 10>    --> -4\n\
 </example>")
 {
   arithmetic_process (pf_MIN, PassPFunArgs);
 }
 
 DEFUN (pf_mul, arg1 arg2 &rest more-args,
-"Returns the product of all of the arguments passed.
-
-Examples:
-<example>
-<mul 2 2>        --> 4
-<mul 2.3 8 3>    --> 55.20
-<mul -4 10>      --> -40
+"Returns the product of all of the arguments passed.\n\
+\n\
+Examples:\n\
+<example>\n\
+<mul 2 2>        --> 4\n\
+<mul 2.3 8 3>    --> 55.20\n\
+<mul -4 10>      --> -40\n\
 </example>")
 {
   arithmetic_process (pf_MUL, PassPFunArgs);
 }
 
 DEFUN (pf_div, arg1 arg2 &rest more-args,
-"Returns the quotient of all of the arguments passed.
-
-Examples:
-<example>
-<div 100 5>      --> 20
-<div 5 100>      --> 0
-<div 5.0 100.0>  --> 0.05
-<div 100 5 2>    --> 10
+"Returns the quotient of all of the arguments passed.\n\
+\n\
+Examples:\n\
+<example>\n\
+<div 100 5>      --> 20\n\
+<div 5 100>      --> 0\n\
+<div 5.0 100.0>  --> 0.05\n\
+<div 100 5 2>    --> 10\n\
 </example>")
 {
   /* If it only contains assigned attributes, it is meant for the browser,
@@ -900,34 +903,34 @@ Examples:
 }
 
 DEFUN (pf_mod, arg1 arg2 &rest more-args,
-"Returns the remainder of all of the arguments passed.
-
-Examples:
-<example>
-<mod 100 10>    --> 0
-<mod 101 10>    --> 1
-<mod 89 9 3>    --> 2
+"Returns the remainder of all of the arguments passed.\n\
+\n\
+Examples:\n\
+<example>\n\
+<mod 100 10>    --> 0\n\
+<mod 101 10>    --> 1\n\
+<mod 89 9 3>    --> 2\n\
 </example>")
 {
   arithmetic_process (pf_MOD, PassPFunArgs);
 }
 
 DEFUNX (pf_integer?, string &key base[=10],
-"Returns \"true\" if <var string> is the string representation of an integer
-value in base <var base> (default <code>10</code>).  This function is useful
-for checking the validity of user input to a form.
-
-You call this function with the actual value -- you may not pass the name
-of a variable instead.
-
-Some examples:
-<example>
-<set-var x=123>
-<integer? -90>          --> true
-<integer? <get-var-once x>>  --> true
-<integer? 2.3>          -->
-<integer? FEFE base=16> --> true
-<integer? 874 base=8>   -->
+"Returns \"true\" if <var string> is the string representation of an integer\n\
+value in base <var base> (default <code>10</code>).  This function is useful\n\
+for checking the validity of user input to a form.\n\
+\n\
+You call this function with the actual value -- you may not pass the name\n\
+of a variable instead.\n\
+\n\
+Some examples:\n\
+<example>\n\
+<set-var x=123>\n\
+<integer? -90>          --> true\n\
+<integer? <get-var-once x>>  --> true\n\
+<integer? 2.3>          -->\n\
+<integer? FEFE base=16> --> true\n\
+<integer? 874 base=8>   -->\n\
 </example>")
 
 static void
@@ -956,9 +959,9 @@ pf_integerp (PFunArgs)
 }
 
 DEFUN (pf_integer, num,
-"Returns the integer representation of <var num>.
-<complete-example>
-<integer 3.45> is less than <integer 3.54>
+"Returns the integer representation of <var num>.\n\
+<complete-example>\n\
+<integer 3.45> is less than <integer 3.54>\n\
 </complete-example>")
 {
   char *arg = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -972,20 +975,20 @@ DEFUN (pf_integer, num,
 }
 
 DEFUNX (pf_real?, string,
-"Returns \"true\" if <var string> is the string representation of
-a real number.Useful for checking the validity of user input to a form.
-
-You call this function with the actual value -- you may not pass the name
-of a variable instead.
-
-Some examples:
-<example>
-<set-var pi=3.141569>
-<real? <get-var-once pi>>    --> true
-<real? 45>              --> 
-<real? 2.3>             --> true
-<real? \"This\">          -->
-<real? -.087e4>         --> true
+"Returns \"true\" if <var string> is the string representation of\n\
+a real number.Useful for checking the validity of user input to a form.\n\
+\n\
+You call this function with the actual value -- you may not pass the name\n\
+of a variable instead.\n\
+\n\
+Some examples:\n\
+<example>\n\
+<set-var pi=3.141569>\n\
+<real? <get-var-once pi>>    --> true\n\
+<real? 45>              --> \n\
+<real? 2.3>             --> true\n\
+<real? \"This\">          -->\n\
+<real? -.087e4>         --> true\n\
 </example>")
 
 static void

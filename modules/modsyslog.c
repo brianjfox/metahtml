@@ -109,7 +109,7 @@ find_mask (char *label, trans *array)
 }
 
 DEFUN (pf_syslog, &optional who message &key facility priority,
-"<var syslog> generates a log message, which will be distributed by
+"<var syslog> generates a log message, which will be distributed by\n\
 syslogd(8).")
 {
   char *whoarg = mhtml_evaluate_string (get_positional_arg (vars, 0));

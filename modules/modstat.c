@@ -195,8 +195,8 @@ DEFUN (pf_create_combination, &key mincol=x &rest args,
 }
 
 DEFUN (pf_next_combination, combination,
-"Return the next combination of <var combination>, or the empty array if there
-are no more combinations to process.")
+"Return the next combination of <var combination>, or the empty array if\n\
+there are no more combinations to process.")
 {
   char *address_string = mhtml_evaluate_string (get_positional_arg (vars, 0));
   COMBINATION *c;
@@ -226,7 +226,7 @@ are no more combinations to process.")
 }
 
 DEFUN (pf_free_combination, combination,
-"Free any memory associated with <var combination>, which must be a value
+"Free any memory associated with <var combination>, which must be a value\n\
 returned from <tag stat::create-combination>.")
 {
   char *address_string = mhtml_evaluate_string (get_positional_arg (vars, 0));

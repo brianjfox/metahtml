@@ -77,24 +77,24 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_alist_functions)
 DEFINE_SECTION (ALISTS, alists; association lists; symbols; lisp; lookup,
-"<Meta-HTML> provides a textual way to manipulate complex data structures
-which would (in normal use) be stored in <i>packages</i>.
-
-The textual representation of a package is called an <i>alist</i>, which
-is short for <i>association list</i>, and which is a construct well known
-to Lisp and Scheme programmers.
-
-An <b>alist</b> consists of name and value pairs, surrounded by parentheses,
-with the entire set of name and value pairs also parenthesized.
-
-Functions exist to create alists from scratch, to modify the variable settings
-within an alist, to create an alist from the contents of a package, and to
+"<Meta-HTML> provides a textual way to manipulate complex data structures\n\
+which would (in normal use) be stored in <i>packages</i>.\n\
+\n\
+The textual representation of a package is called an <i>alist</i>, which\n\
+is short for <i>association list</i>, and which is a construct well known\n\
+to Lisp and Scheme programmers.\n\
+\n\
+An <b>alist</b> consists of name and value pairs, surrounded by parentheses,\n\
+with the entire set of name and value pairs also parenthesized.\n\
+\n\
+Functions exist to create alists from scratch, to modify the variable settings\n\
+within an alist, to create an alist from the contents of a package, and to\n\
 populate a package with the contents of an alist.",
 
-"Association lists are an efficient and extensible way to hold on to complex
-data structure across invocations of <Meta-HTML>, akin to printing out
-and reading back in complex C structure.  Fortunately, you don't have to
-do the parsing of the association list yourself, since <Meta-HTML> provides
+"Association lists are an efficient and extensible way to hold on to complex\n\
+data structure across invocations of <Meta-HTML>, akin to printing out\n\
+and reading back in complex C structure.  Fortunately, you don't have to\n\
+do the parsing of the association list yourself, since <Meta-HTML> provides\n\
 that functionality for you.")
 
 DEFUNX (pf_alist?, string,
@@ -124,21 +124,21 @@ pf_alist_p (PFunArgs)
 }
 
 DEFUN (pf_alist_merge, &rest alist-vars &key strip append,
-"Merge the alists stored in the passed variable names into a single alist,
-and return that new alist.
-
-By default, each <var alist-var> encountered overrides values set in
-previous alists that were encountered -- the values do not \"pile up\" --
-they instead replace each other.
-
-Passing the keyword argument <var append=true> changes this behavior; in
-this case values seen in subsequent alists are appended to the values in
-previous alists, creating array variables in the output.
-<complete-example>
-<set-var a1=<make-alist foo=foo1 bar=bar1>
-         a2=<make-alist foo=foo2 newvar=newval>>
-<alist-merge a1 a2>
-<alist-merge a1 a2 append=true>
+"Merge the alists stored in the passed variable names into a single alist,\n\
+and return that new alist.\n\
+\n\
+By default, each <var alist-var> encountered overrides values set in\n\
+previous alists that were encountered -- the values do not \"pile up\" --\n\
+they instead replace each other.\n\
+\n\
+Passing the keyword argument <var append=true> changes this behavior; in\n\
+this case values seen in subsequent alists are appended to the values in\n\
+previous alists, creating array variables in the output.\n\
+<complete-example>\n\
+<set-var a1=<make-alist foo=foo1 bar=bar1>\n\
+         a2=<make-alist foo=foo2 newvar=newval>>\n\
+<alist-merge a1 a2>\n\
+<alist-merge a1 a2 append=true>\n\
 </complete-example>")
 {
   register int i;
@@ -212,9 +212,9 @@ previous alists, creating array variables in the output.
 }
 
 DEFUN (pf_make_alist, &rest name-value-pairs,
-"Return an alist from the <var name-value> pairs passed.
-<complete-example>
- <make-alist foo=bar baz=this>
+"Return an alist from the <var name-value> pairs passed.\n\
+<complete-example>\n\
+ <make-alist foo=bar baz=this>\n\
 </complete-example>")
 {
   BPRINTF_BUFFER *expr = bprintf_create_buffer ();
@@ -235,19 +235,19 @@ DEFUN (pf_make_alist, &rest name-value-pairs,
 }
 
 DEFUN (pf_package_to_alist, &optional package &key strip,
-"Returns a Lisp readable string containing the names and values of the
- variables in <var package>.  If <var strip=true> is supplied, the
- package name is removed from the variables before placing them in the
- list.  See the following code sequence:
-
-<complete-example>
-<set-var
-  foo::bar=baz
-  foo::array[0]=Elt-0
-  foo::array[1]=Elt-1>
-
-  The contents of Foo: <package-to-alist foo>
-The stripped contents: <package-to-alist foo strip=true>
+"Returns a Lisp readable string containing the names and values of the\n\
+ variables in <var package>.  If <var strip=true> is supplied, the\n\
+ package name is removed from the variables before placing them in the\n\
+ list.  See the following code sequence:\n\
+\n\
+<complete-example>\n\
+<set-var\n\
+  foo::bar=baz\n\
+  foo::array[0]=Elt-0\n\
+  foo::array[1]=Elt-1>\n\
+\n\
+  The contents of Foo: <package-to-alist foo>\n\
+The stripped contents: <package-to-alist foo strip=true>\n\
 </complete-example>")
 {
   char *packname = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -275,19 +275,19 @@ The stripped contents: <package-to-alist foo strip=true>
 }
 
 DEFUN (pf_alist_to_package, alist &optional package,
-"Takes the textual list representation of a package, and creates (or
-modifies) the package named by <var package-name>.
-
-<code>alist-to-package</code> is the inverse of the <funref packages
-package-to-alist> function -- given an \"alist\" (short for
-`association list') you can create a package, and vice-versa.  The
-following expression is one way to copy all of the variables from the
-package <code>FOO</code> into the package <code>BAR</code>:
-
-<example>
-<alist-to-package <package-to-alist foo> bar>
-</example>
-
+"Takes the textual list representation of a package, and creates (or\n\
+modifies) the package named by <var package-name>.\n\
+\n\
+<code>alist-to-package</code> is the inverse of the <funref packages\n\
+package-to-alist> function -- given an \"alist\" (short for\n\
+`association list') you can create a package, and vice-versa.  The\n\
+following expression is one way to copy all of the variables from the\n\
+package <code>FOO</code> into the package <code>BAR</code>:\n\
+\n\
+<example>\n\
+<alist-to-package <package-to-alist foo> bar>\n\
+</example>\n\
+\n\
 But don't use that, of course.  Use <funref packages copy-package> instead.")
 {
   char *alist = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -384,10 +384,10 @@ set_alist_var (Package *vars, Package *value)
 }
 
 DEFUN (pf_alist_defvar, alistvar name value,
-"<b>DEF</b>ault the value of the <b>VAR</b>iable named by <var name>
-to <var value>, in the association list referenced by <var alistvar>.
-
-<code>alist-defvar</code> assigns <var value> to <var name> if, and only if,
+"<b>DEF</b>ault the value of the <b>VAR</b>iable named by <var name>\n\
+to <var value>, in the association list referenced by <var alistvar>.\n\
+\n\
+<code>alist-defvar</code> assigns <var value> to <var name> if, and only if,\n\
 <var name> has a non-empty value.")
 {
   Package *alist = get_alist_var (vars);
@@ -415,7 +415,7 @@ to <var value>, in the association list referenced by <var alistvar>.
 }
 
 DEFUN (pf_alist_unset_var, alistvar &rest names...,
-"Make <var name>s be non-existent in the association list specified
+"Make <var name>s be non-existent in the association list specified\n\
 by <var alistvar>.")
 {
   Package *alist = get_alist_var (vars);
@@ -442,13 +442,13 @@ by <var alistvar>.")
 }
 
 DEFUN (pf_alist_var_exists, alistvar name,
-"<code>var-exists</code> checks for the <i>existence</i> of
-the variable named by <var varname>, in the association list specified by
-<var alistvar>, and returns <code>true</code> if that variable does in
-fact exist.
-
-The existence of a variable has nothing to do with its value -- a
-variable exists if it is present within the list, whether or not it
+"<code>var-exists</code> checks for the <i>existence</i> of\n\
+the variable named by <var varname>, in the association list specified by\n\
+<var alistvar>, and returns <code>true</code> if that variable does in\n\
+fact exist.\n\
+\n\
+The existence of a variable has nothing to do with its value -- a\n\
+variable exists if it is present within the list, whether or not it\n\
 has a value.")
 {
   Package *alist = get_alist_var (vars);
@@ -472,16 +472,16 @@ has a value.")
 }
 
 DEFUN (pf_alist_set_var, alistvar &optional name=value...,
-"Gives the variable <var name> the value of <var value> in the association
-list specified by <var alistvar>. Any number of name/value pairs may be given,
-and whitespace is not significant.  Where <var =value> is omitted, the
-value is the empty string.
-
-<example>
-<alist-set-var myalist foo=bar bar=baz>
-<alist-get-var myalist foo>    --> bar
-<alist-get-var myalist bar>    --> baz
-<alist-get-var myalist <alist-get-var myalist foo>>    --> baz
+"Gives the variable <var name> the value of <var value> in the association\n\
+list specified by <var alistvar>. Any number of name/value pairs may be given,\n\
+and whitespace is not significant.  Where <var =value> is omitted, the\n\
+value is the empty string.\n\
+\n\
+<example>\n\
+<alist-set-var myalist foo=bar bar=baz>\n\
+<alist-get-var myalist foo>    --> bar\n\
+<alist-get-var myalist bar>    --> baz\n\
+<alist-get-var myalist <alist-get-var myalist foo>>    --> baz\n\
 </example>")
 {
   Package *alist = get_alist_var (vars);
@@ -539,12 +539,12 @@ value is the empty string.
 }
 
 DEFUN (pf_alist_get_var, alistvar &optional name...,
-"Return the value of the <var name>s given from the association list
-specified by <var alistvar>.  Each <var name> is a
-variable name which has had a value assigned to it with <funref
-variables alist-set-var>, or was created implicity via
-<funref packages alist-to-package>.
-
+"Return the value of the <var name>s given from the association list\n\
+specified by <var alistvar>.  Each <var name> is a\n\
+variable name which has had a value assigned to it with <funref\n\
+variables alist-set-var>, or was created implicity via\n\
+<funref packages alist-to-package>.\n\
+\n\
 The values are returned in the order in which the <var name>s appear.")
 {
   Package *alist = get_alist_var (vars);
@@ -587,10 +587,10 @@ The values are returned in the order in which the <var name>s appear.")
 }
 
 DEFUN (pf_alist_package_names, alistvar,
-"Return a newline separated list of all of the packages which are
-defined within the association list stored within <var alistvar>.
-Because the list is newline separated, the result can easily be
-assigned to an array variable:")
+"Return a newline separated list of all of the packages which are\n\
+defined within the association list stored within <var alistvar>.\n\
+Because the list is newline separated, the result can easily be\n\
+assigned to an array variable.")
 {
   Package *alist = get_alist_var (vars);
 
@@ -654,19 +654,19 @@ assigned to an array variable:")
 }
 
 DEFUN (pf_alist_package_vars, alistvar &key strip=true,
-"Returns a newline separated list of the fully qualified variable
-names found in the alist named by <var alistvar>
-
-When <var strip=true> is supplied, the returned variable names have
-the package prefix stripped off, making them <i>not</i> fully qualified.
-The names are not returned in any significant order.  Because the list is
-newline separated, the results can easily be assigned to an array
-variable:
-
-<complete-example>
-<set-var alist=<make-alist this::foo=bar this::bar=baz>>
-<set-var names[]=<alist-package-vars alist>>
-<get-var-once names[1]> is <alist-get-var alist <get-var-once names[1]>>
+"Returns a newline separated list of the fully qualified variable\n\
+names found in the alist named by <var alistvar>\n\
+\n\
+When <var strip=true> is supplied, the returned variable names have\n\
+the package prefix stripped off, making them <i>not</i> fully qualified.\n\
+The names are not returned in any significant order.  Because the list is\n\
+newline separated, the results can easily be assigned to an array\n\
+variable:\n\
+\n\
+<complete-example>\n\
+<set-var alist=<make-alist this::foo=bar this::bar=baz>>\n\
+<set-var names[]=<alist-package-vars alist>>\n\
+<get-var-once names[1]> is <alist-get-var alist <get-var-once names[1]>>\n\
 </complete-example>")
 {
   Package *alist = get_alist_var (vars);
@@ -696,26 +696,26 @@ variable:
 }
 
 DEFUN (pf_alist_package_delete, alistvar &rest packages[],
-"For each variable in the association list within <var alistvar>, remove
-the variable from the association list if it is prefixed with one of the
-specifed package names.  For example, given that the variable <var alist>
-contained the alist:
-
-<example>
-((\"FOO::BAR\" . \"bar\") (\"FOO::BAZ\" . \"baz\") (\"BAR::X\" . \"val\"))
-</example>
-
-then calling:
-
-<example>
-<alist-package-delete alist foo>
-<get-var-once alist>
-</example>
-
-produces:
-
-<example>
-((\"BAR::X\" . \"val\"))
+"For each variable in the association list within <var alistvar>, remove\n\
+the variable from the association list if it is prefixed with one of the\n\
+specifed package names.  For example, given that the variable <var alist>\n\
+contained the alist:\n\
+\n\
+<example>\n\
+((\"FOO::BAR\" . \"bar\") (\"FOO::BAZ\" . \"baz\") (\"BAR::X\" . \"val\"))\n\
+</example>\n\
+\n\
+then calling:\n\
+\n\
+<example>\n\
+<alist-package-delete alist foo>\n\
+<get-var-once alist>\n\
+</example>\n\
+\n\
+produces:\n\
+\n\
+<example>\n\
+((\"BAR::X\" . \"val\"))\n\
 </example>")
 {
   Package *alist = get_alist_var (vars);

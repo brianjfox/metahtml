@@ -58,67 +58,67 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_array_functions)
 DEFINE_SECTION (ARRAYS, variables; arrays; multiple values, 
-"<meta-html> allows the use of <i>array</i> variables as well as single
-element variables.  In fact, all string variables in <meta-html> can be
-treated as array variables -- there is no special command for creating
+"<meta-html> allows the use of <i>array</i> variables as well as single\n\
+element variables.  In fact, all string variables in <meta-html> can be\n\
+treated as array variables -- there is no special command for creating\n\
 such variables.",
 
-"Array variable values are referenced by placing the array index directly
-after the variable name, enclosed in square brackets (<b>[</b> and <b>]</b>).
-Array references use a zero-base index, so that the first accessible element
-in the array is at index <b>0</b> and a reference to the 4th accessible
-element of the array <var foo> looks like:
-
-<example>
-   foo[3]
-</example>
-
-When an array reference is made without any containing index, the
-reference refers to the entire array.  So, to get the value of the
-entire array stored in <var foo>, you would write:
-
-<example>
-   <get-var-once foo[]>
-</example>
-
-In order to ease the writing of array references which rely on a
-variable index, a variable name seen as an array reference index is
-automatically looked up as if you had written <example code><get-var
-VAR></example>.  Finally, multiple values may be given in a <funref
-variables set-var> command by separating those values with newline
-characters.  The following sequence of commands illustrates the
-typical use of array variables.
-
-<complete-example>
-<set-var array[] =
-       \"value-zero
-        value-one
-        value-two
-        value-three\">
-    <set-var i=0>
-    <while <get-var-once array[i]>>
-      The value of array[<get-var-once i>] is `<get-var-once array[i]>'.<br>
-      <increment i>
-    </while>
-</complete-example>
+"Array variable values are referenced by placing the array index directly\n\
+after the variable name, enclosed in square brackets (<b>[</b> and <b>]</b>).\n\
+Array references use a zero-base index, so that the first accessible element\n\
+in the array is at index <b>0</b> and a reference to the 4th accessible\n\
+element of the array <var foo> looks like:\n\
+\n\
+<example>\n\
+   foo[3]\n\
+</example>\n\
+\n\
+When an array reference is made without any containing index, the\n\
+reference refers to the entire array.  So, to get the value of the\n\
+entire array stored in <var foo>, you would write:\n\
+\n\
+<example>\n\
+   <get-var-once foo[]>\n\
+</example>\n\
+\n\
+In order to ease the writing of array references which rely on a\n\
+variable index, a variable name seen as an array reference index is\n\
+automatically looked up as if you had written <example code><get-var\n\
+VAR></example>.  Finally, multiple values may be given in a <funref\n\
+variables set-var> command by separating those values with newline\n\
+characters.  The following sequence of commands illustrates the\n\
+typical use of array variables.\n\
+\n\
+<complete-example>\n\
+<set-var array[] =\n\
+       \"value-zero\n\
+        value-one\n\
+        value-two\n\
+        value-three\">\n\
+    <set-var i=0>\n\
+    <while <get-var-once array[i]>>\n\
+      The value of array[<get-var-once i>] is `<get-var-once array[i]>'.<br>\n\
+      <increment i>\n\
+    </while>\n\
+</complete-example>\n\
 ")
 
 DEFUN (pf_array_size, arrayvar,
-"Returns the number of elements in the array referenced by the
-variable <var arrayvar>.
-
-Examples:
-
-<complete-example>
-<set-var array[]=\"this\">
-<array-size array>
-</complete-example>
-
-and,
-
-<complete-example>
-<array-shift 4 array>
-<array-size array>
+"Returns the number of elements in the array referenced by the\n\
+variable <var arrayvar>.\n\
+\n\
+Examples:\n\
+\n\
+<complete-example>\n\
+<set-var array[]=\"this\">\n\
+<array-size array>\n\
+</complete-example>\n\
+\n\
+and,\n\
+\n\
+<complete-example>\n\
+<array-shift 4 array>\n\
+<array-size array>\n\
 </complete-example>")
 {
   char *array_name = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -137,33 +137,33 @@ and,
 }
 
 DEFUN (pf_array_member, item arrayvar &key caseless=true compare=func,
-"Look up (and return) the index of <var item> in the contents of the
-array referenced by <var arrayvar>.
-
-If <var item> is not found, then <code>array-member</code> returns the
-empty string.
-
-If <var caseless> is non-empty, then the comparison is done without
-regard to character case.  Otherwise, character case is significant in
-the location of the item.
-
-If a function name is passed, as in <var compare=func>, it should be
-the name of a function which receives two required arguments -- the
-item that is to be looked for, and an element of the array that this
-item is to be compared against, and an optional keyword argument of
-\"caseless\".  If the function returns a non-empty string, then this
-item is considered a match.
-
-By default, string comparison is done on the elements.
-
-<complete-example>
-<set-var array[] =
-  <prog
-     this
-     another
-     multi word
-     thing>>
-<array-member \"multi word\" array>
+"Look up (and return) the index of <var item> in the contents of the\n\
+array referenced by <var arrayvar>.\n\
+\n\
+If <var item> is not found, then <code>array-member</code> returns the\n\
+empty string.\n\
+\n\
+If <var caseless> is non-empty, then the comparison is done without\n\
+regard to character case.  Otherwise, character case is significant in\n\
+the location of the item.\n\
+\n\
+If a function name is passed, as in <var compare=func>, it should be\n\
+the name of a function which receives two required arguments -- the\n\
+item that is to be looked for, and an element of the array that this\n\
+item is to be compared against, and an optional keyword argument of\n\
+\"caseless\".  If the function returns a non-empty string, then this\n\
+item is considered a match.\n\
+\n\
+By default, string comparison is done on the elements.\n\
+\n\
+<complete-example>\n\
+<set-var array[] =\n\
+  <prog\n\
+     this\n\
+     another\n\
+     multi word\n\
+     thing>>\n\
+<array-member \"multi word\" array>\n\
 </complete-example>")
 {
   char *item = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -245,17 +245,17 @@ By default, string comparison is done on the elements.
 }
 
 DEFUN (pf_array_append, item arrayvar,
-"Add <var item> as the last array element of the contents
-of <var arrayvar>.  This is especially useful in conjunction with
-<funref arrays foreach> as a <i>collector</i>:
-
-<example>
-<foreach name allnames>
-  <if <satifies-criteria <get-var-once name>>
-     <array-append <get-var-once name> useful-names>>
-</foreach>
-</example>
-
+"Add <var item> as the last array element of the contents\n\
+of <var arrayvar>.  This is especially useful in conjunction with\n\
+<funref arrays foreach> as a <i>collector</i>:\n\
+\n\
+<example>\n\
+<foreach name allnames>\n\
+  <if <satifies-criteria <get-var-once name>>\n\
+     <array-append <get-var-once name> useful-names>>\n\
+</foreach>\n\
+</example>\n\
+\n\
 See also <funref arrays array-add-unique>.")
 {
   char *item = mhtml_evaluate_string (get_positional_arg (vars, 0)); 
@@ -274,17 +274,17 @@ See also <funref arrays array-add-unique>.")
 }
 
 DEFUN (pf_array_add_unique, item arrayvar &key caseless=true tellme=true,
-"Add <var item> as the last array element of the contents
-of <var arrayvar> if, and only if, <var item> is not already
-a member of that array.
-
-The comparison is a direct string-wise compare.  If <var CASELESS> is
-non-empty, then a caseless string compare is done.
-
-If the keyword argument <var tellme> is supplied with a non-null value,
-then this function returns the word \"true\" if the item was added, or
-the empty string if not.
-
+"Add <var item> as the last array element of the contents\n\
+of <var arrayvar> if, and only if, <var item> is not already\n\
+a member of that array.\n\
+\n\
+The comparison is a direct string-wise compare.  If <var CASELESS> is\n\
+non-empty, then a caseless string compare is done.\n\
+\n\
+If the keyword argument <var tellme> is supplied with a non-null value,\n\
+then this function returns the word \"true\" if the item was added, or\n\
+the empty string if not.\n\
+\n\
 See also <funref arrays array-append>.")
 {
   char *item = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -343,47 +343,47 @@ See also <funref arrays array-append>.")
 }
 
 DEFUN (pf_array_shift, amount arrayvar &key start,
-"Shift the elements of <var arrayvar> the indicated amount.
-
-If <var amount> is negative, the elements are shifted down
-(i.e. towards zero), with the lowest number elements being lost.
-
-If <var amount> is positive, the elements are shifted up, with
-no loss at all -- instead empty elements are used to fill the
-created space.
-
-If the keyword argument <var start> is present, it indicates the
-zero-based offset from which to start shifting.
-
-Given the array:
-<example>
-<set-var array[] =
-   <prog
-       0
-       1
-       2>>
-</example>
-
-<set-var array[] =
-   <prog
-       0
-       1
-       2>>
-
-then after executing <example code><array-shift 2 array></example>, 
-the array looks like:
-<example>
-   \"\"
-   \"\"
-   \"0\"
-   \"1\"
-   \"2\"
-</example>
-and, a subsequent execution of
-<example code><array-shift -3 array></example> leaves <var array>:
-<example>
-   \"1\"
-   \"2\"
+"Shift the elements of <var arrayvar> the indicated amount.\n\
+\n\
+If <var amount> is negative, the elements are shifted down\n\
+(i.e. towards zero), with the lowest number elements being lost.\n\
+\n\
+If <var amount> is positive, the elements are shifted up, with\n\
+no loss at all -- instead empty elements are used to fill the\n\
+created space.\n\
+\n\
+If the keyword argument <var start> is present, it indicates the\n\
+zero-based offset from which to start shifting.\n\
+\n\
+Given the array:\n\
+<example>\n\
+<set-var array[] =\n\
+   <prog\n\
+       0\n\
+       1\n\
+       2>>\n\
+</example>\n\
+\n\
+<set-var array[] =\n\
+   <prog\n\
+       0\n\
+       1\n\
+       2>>\n\
+\n\
+then after executing <example code><array-shift 2 array></example>, \n\
+the array looks like:\n\
+<example>\n\
+   \"\"\n\
+   \"\"\n\
+   \"0\"\n\
+   \"1\"\n\
+   \"2\"\n\
+</example>\n\
+and, a subsequent execution of\n\
+<example code><array-shift -3 array></example> leaves <var array>:\n\
+<example>\n\
+   \"1\"\n\
+   \"2\"\n\
 </example>")
 {
   char *amount_txt =  mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -459,12 +459,12 @@ and, a subsequent execution of
 }
 
 DEFUN (pf_array_reverse, arrayvar,
-"Directly modify the values of <var arrayvar> making the first element be
-the last, and the last be the first.
-<complete-example>
-<set-var array[]=\"0\n1\n2\n3\">
-<array-reverse array>
-<get-var-once array[]>
+"Directly modify the values of <var arrayvar> making the first element be\n\
+the last, and the last be the first.\n\
+<complete-example>\n\
+<set-var array[]=\"0\n1\n2\n3\">\n\
+<array-reverse array>\n\
+<get-var-once array[]>\n\
 </complete-example>")
 {
   char *array_var = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -496,36 +496,36 @@ the last, and the last be the first.
 
 DEFMACRO (pf_foreach, elementvar arrayvar
 	  &key start=x end=x step=x iter=var no-copy=true,
-"Perform <var body> with <var elementvar> bound to successive memebers
-of <var arrayvar>, starting with the element at <var start> (default
-0), and ending at <var end> (default <example code><array-size
-ARRAYVAR></example>), advancing by <var step> (default 1).
-
-The <code>foreach</code> command is the basic array looping device in
-<Meta-HTML>.  It is guaranteed to iterate over each element that you
-specify, whether that element is the empty string or not.
-
-If <var no-copy=true> is specified, the array is not copied before
-iteration, so that changes that you make to the array take place
-immediately, during the execution of the surrounding <tag foreach>.
-
-Starting with the simple array:
-<set-var example::array[]=\"0\\n1\\n2\\n3\\n4\\n5\\n6\\n7\\n8\\n9\">
-<example>
-<set-var example::array[]=\"0\\n1\\n2\\n3\\n4\\n5\\n6\\n7\\n8\\n9\">
-</example>
-
-we can print out the odd numbers of this array by using values for
-both <var start> and <var step>:
-
-<complete-example>
-<foreach x example::array start=1 step=2> <get-var-once x>, </foreach>
-</complete-example>
-
-or, we can produce a \"countdown\" with a negative value for <var step>:
-
-<complete-example>
-<foreach x example::array step=-1> <get-var-once x>, </foreach> BOOM!
+"Perform <var body> with <var elementvar> bound to successive memebers\n\
+of <var arrayvar>, starting with the element at <var start> (default\n\
+0), and ending at <var end> (default <example code><array-size\n\
+ARRAYVAR></example>), advancing by <var step> (default 1).\n\
+\n\
+The <code>foreach</code> command is the basic array looping device in\n\
+<Meta-HTML>.  It is guaranteed to iterate over each element that you\n\
+specify, whether that element is the empty string or not.\n\
+\n\
+If <var no-copy=true> is specified, the array is not copied before\n\
+iteration, so that changes that you make to the array take place\n\
+immediately, during the execution of the surrounding <tag foreach>.\n\
+\n\
+Starting with the simple array:\n\
+<set-var example::array[]=\"0\\n1\\n2\\n3\\n4\\n5\\n6\\n7\\n8\\n9\">\n\
+<example>\n\
+<set-var example::array[]=\"0\\n1\\n2\\n3\\n4\\n5\\n6\\n7\\n8\\n9\">\n\
+</example>\n\
+\n\
+we can print out the odd numbers of this array by using values for\n\
+both <var start> and <var step>:\n\
+\n\
+<complete-example>\n\
+<foreach x example::array start=1 step=2> <get-var-once x>, </foreach>\n\
+</complete-example>\n\
+\n\
+or, we can produce a \"countdown\" with a negative value for <var step>:\n\
+\n\
+<complete-example>\n\
+<foreach x example::array step=-1> <get-var-once x>, </foreach> BOOM!\n\
 </complete-example>")
 {
   char *element_var = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -668,21 +668,21 @@ or, we can produce a \"countdown\" with a negative value for <var step>:
 }
 
 DEFUN (pf_array_concat, receiver &rest contributors...,
-"Appends the contents of each <var contributor> array to the 
-end of <var receiver>.
-
-Both <var receiver> and each <var contributor> are variable names whose
-values are treated as arrays.
-
-For a single <var contributor>, <code>array-concat</code>
-could have been defined as:
-
-<example>
-<defsubst array-concat dest-name source-name>
-  <foreach item <get-var-once source-name>>
-     <array-append <get-var-once item> <get-var-once dest-name>>
-  </foreach>
-</defsubst>
+"Appends the contents of each <var contributor> array to the \n\
+end of <var receiver>.\n\
+\n\
+Both <var receiver> and each <var contributor> are variable names whose\n\
+values are treated as arrays.\n\
+\n\
+For a single <var contributor>, <code>array-concat</code>\n\
+could have been defined as:\n\
+\n\
+<example>\n\
+<defsubst array-concat dest-name source-name>\n\
+  <foreach item <get-var-once source-name>>\n\
+     <array-append <get-var-once item> <get-var-once dest-name>>\n\
+  </foreach>\n\
+</defsubst>\n\
 </example>")
 {
   char *arrayname = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -804,98 +804,98 @@ sort_with_function (const void *item1, const void *item2)
 
 DEFUN (pf_sort, arrayvar &optional sort-fun &key caseless=true
        sortorder=[ascending|descending] numeric=true,
-"Sort the contents of the array <var arrayvar>.
-
-The elements are sorted in place -- this function has no return value.
-
-If <var caseless=true> is given, then the comparison of the elements of
-the array is done without regards to case.
-
-If <var sortorder=reverse> is given, then the results are returned in
-descending order, instead of ascending order.  The default is to order
-the elements in ascending order.
-
-If <var numeric=true> is given, then the elements of <var arrayvar>
-are treated as numeric entities, whether they are or not.  The default
-is to treat the elements as character strings, which can have
-unexpected results when sorting numeric quantities (\"11\" is less
-then \"2\" when sorting alphabetically!)
-
-Finally, you may supply a sorting function, whose name is passed as
-<var sort-fun>.  This function will be called on each element just
-before comparison, and the results of that function will be used for
-the comparison instead of the element itself.  This allows you to
-create a collating sort, or to sort on complex weighting features, or
-anything else that you can conceive of.
-
-Examples:
-
-Given the array:
-<unset-var array>
-<set-var array[0] = 1
-         array[1] = 2
-         array[3] = 3
-         array[4] = 4
-         array[5] = 20>
-<example>
-<set-var array[0] = 1
-         array[1] = 2
-         array[3] = 3
-         array[4] = 4
-         array[5] = 20>
-</example>
-then,
-
-<complete-example-global>
-<sort array>
-<foreach x array> <get-var-once x> </foreach>
-</complete-example-global>
-while
-<complete-example-global>
-<sort array numeric=true>
-<foreach x array> <get-var-once x> </foreach>
-</complete-example-global>
-
-Sorting strings:
-<complete-example-global>
-<set-var array[]=\"a\\nb\\nc\\nd\\ne\\nf\\nA\\nB\\nC\\nD\\nE\\nF\">
-<sort array sortorder=descending>
-<foreach x array> <get-var-once x> </foreach>
-</complete-example-global>
-
-Without regards to case:
-<complete-example-global>
-<sort array caseless=true>
-<foreach x array> <get-var-once x> </foreach>
-</complete-example-global>
-
-Finally, here is an example which sorts a list
-of words based upon the percentage of vowels
-present in each word, using a sort function
-which calculates that value for each string:
-
-<complete-example>
-<defun vowel-percentage string>
-  <set-var x =
-    <subst-in-string <downcase <get-var-once string>> \"([^aeiou])\" \"\">>
-  <percent <string-length <get-var-once x>>
-           <string-length <get-var-once string>>>
-</defun>
-.blank
-<set-var words[]=
-  <prog
-    Brian
-    Fox
-    sorts
-    elegant
-    strings
-    beautifully>>
-.blank
-<sort words vowel-percentage numeric=true sortorder=descending>
-.blank
-<foreach word words>
-  <get-var-once word> (<vowel-percentage <get-var-once word>>)<br>
-</foreach>
+"Sort the contents of the array <var arrayvar>.\n\
+\n\
+The elements are sorted in place -- this function has no return value.\n\
+\n\
+If <var caseless=true> is given, then the comparison of the elements of\n\
+the array is done without regards to case.\n\
+\n\
+If <var sortorder=reverse> is given, then the results are returned in\n\
+descending order, instead of ascending order.  The default is to order\n\
+the elements in ascending order.\n\
+\n\
+If <var numeric=true> is given, then the elements of <var arrayvar>\n\
+are treated as numeric entities, whether they are or not.  The default\n\
+is to treat the elements as character strings, which can have\n\
+unexpected results when sorting numeric quantities (\"11\" is less\n\
+then \"2\" when sorting alphabetically!)\n\
+\n\
+Finally, you may supply a sorting function, whose name is passed as\n\
+<var sort-fun>.  This function will be called on each element just\n\
+before comparison, and the results of that function will be used for\n\
+the comparison instead of the element itself.  This allows you to\n\
+create a collating sort, or to sort on complex weighting features, or\n\
+anything else that you can conceive of.\n\
+\n\
+Examples:\n\
+\n\
+Given the array:\n\
+<unset-var array>\n\
+<set-var array[0] = 1\n\
+         array[1] = 2\n\
+         array[3] = 3\n\
+         array[4] = 4\n\
+         array[5] = 20>\n\
+<example>\n\
+<set-var array[0] = 1\n\
+         array[1] = 2\n\
+         array[3] = 3\n\
+         array[4] = 4\n\
+         array[5] = 20>\n\
+</example>\n\
+then,\n\
+\n\
+<complete-example-global>\n\
+<sort array>\n\
+<foreach x array> <get-var-once x> </foreach>\n\
+</complete-example-global>\n\
+while\n\
+<complete-example-global>\n\
+<sort array numeric=true>\n\
+<foreach x array> <get-var-once x> </foreach>\n\
+</complete-example-global>\n\
+\n\
+Sorting strings:\n\
+<complete-example-global>\n\
+<set-var array[]=\"a\\nb\\nc\\nd\\ne\\nf\\nA\\nB\\nC\\nD\\nE\\nF\">\n\
+<sort array sortorder=descending>\n\
+<foreach x array> <get-var-once x> </foreach>\n\
+</complete-example-global>\n\
+\n\
+Without regards to case:\n\
+<complete-example-global>\n\
+<sort array caseless=true>\n\
+<foreach x array> <get-var-once x> </foreach>\n\
+</complete-example-global>\n\
+\n\
+Finally, here is an example which sorts a list\n\
+of words based upon the percentage of vowels\n\
+present in each word, using a sort function\n\
+which calculates that value for each string:\n\
+\n\
+<complete-example>\n\
+<defun vowel-percentage string>\n\
+  <set-var x =\n\
+    <subst-in-string <downcase <get-var-once string>> \"([^aeiou])\" \"\">>\n\
+  <percent <string-length <get-var-once x>>\n\
+           <string-length <get-var-once string>>>\n\
+</defun>\n\
+.blank\n\
+<set-var words[]=\n\
+  <prog\n\
+    Brian\n\
+    Fox\n\
+    sorts\n\
+    elegant\n\
+    strings\n\
+    beautifully>>\n\
+.blank\n\
+<sort words vowel-percentage numeric=true sortorder=descending>\n\
+.blank\n\
+<foreach word words>\n\
+  <get-var-once word> (<vowel-percentage <get-var-once word>>)<br>\n\
+</foreach>\n\
 </complete-example>")
 {
   char *sortvar = mhtml_evaluate_string (get_positional_arg (vars, 0));

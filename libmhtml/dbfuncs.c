@@ -57,23 +57,23 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_db_functions)
 DEFINE_SECTION (DATABASE-COMMANDS, database; long-term storage, 
-"<meta-html> contains commands for performing operations on a
-database. A database created by <meta-html> contains <i>records</i>
-stored by <i>key</i>, where each record consists of a set of
-<i>name/value</i> pairs.
-
-There is a single command for specifying which database you will be
-operating on: <funref database-commands with-open-database>.  All of
-the remaining database commands only have an effect when executed
-within the scope of this function.
-
-<funref \"database commands\" database-query> is the command used to
-perform queries on a database, or to simply select a range of records
-to operate on.
-
-Functions which load, store, or delete a record as a single atomic
-operation, return the string <code>\"true\"</code> when they succeed,
-and store an error message in <funref Language-Operators
+"<meta-html> contains commands for performing operations on a\n\
+database. A database created by <meta-html> contains <i>records</i>\n\
+stored by <i>key</i>, where each record consists of a set of\n\
+<i>name/value</i> pairs.\n\
+\n\
+There is a single command for specifying which database you will be\n\
+operating on: <funref database-commands with-open-database>.  All of\n\
+the remaining database commands only have an effect when executed\n\
+within the scope of this function.\n\
+\n\
+<funref \"database commands\" database-query> is the command used to\n\
+perform queries on a database, or to simply select a range of records\n\
+to operate on.\n\
+\n\
+Functions which load, store, or delete a record as a single atomic\n\
+operation, return the string <code>\"true\"</code> when they succeed,\n\
+and store an error message in <funref Language-Operators\n\
 SYSTEM-ERROR-OUTPUT> when they do not.", "")
 
 static long
@@ -212,29 +212,29 @@ unlock_database (char *dbname, int *lock, DBFILE *db)
 }
 
 DEFMACRO (pf_with_open_database, dbvar dbname &key mode=open-mode,
-"Create an environment in which other database commands can be given.
-First, the database referenced by <var dbname> is locked and opened in
-the mode specified by <var open-mode>, and the resultant database
-handle is bound to the variable named by <var dbvar>.  Then, the <var
-body> code is executed.  Finally, the database is closed, and further
-references to <var dbvar> are meaningless.
-
-Please note that the file name specified by <var dbname> should be a
-full pathname; it is not relative to Web space in any way.
-
-<var open-mode> should evaluate to one of the following:
-
-<ul>
-  <li> <var reader><br>
-The caller wishes only to have read access to the specified database.
-
-<li> <var writer><br>
-The caller wishes to have both read and write access to the specified
-database.
-
-<li> <var write-create><br>
-The caller wishes both read and write access to the specified
-database.  If the database does not exist, it is created.
+"Create an environment in which other database commands can be given.\n\
+First, the database referenced by <var dbname> is locked and opened in\n\
+the mode specified by <var open-mode>, and the resultant database\n\
+handle is bound to the variable named by <var dbvar>.  Then, the <var\n\
+body> code is executed.  Finally, the database is closed, and further\n\
+references to <var dbvar> are meaningless.\n\
+\n\
+Please note that the file name specified by <var dbname> should be a\n\
+full pathname; it is not relative to Web space in any way.\n\
+\n\
+<var open-mode> should evaluate to one of the following:\n\
+\n\
+<ul>\n\
+  <li> <var reader><br>\n\
+The caller wishes only to have read access to the specified database.\n\
+\n\
+<li> <var writer><br>\n\
+The caller wishes to have both read and write access to the specified\n\
+database.\n\
+\n\
+<li> <var write-create><br>\n\
+The caller wishes both read and write access to the specified\n\
+database.  If the database does not exist, it is created.\n\
 </ul>")
 {
   char *varname;
@@ -359,22 +359,22 @@ static char *varname = (char *)NULL;
 static int varname_size = 0;
 
 DEFUN (pf_database_load_record, dbvar key &key package=package-name,
-"Load the variables from the record specified by <var key> in the
-database referenced by <var dbvar>.  If <var package=package-name> is
-given, the record variables are stored into the specified package,
-instead of the current package.
-
-Upon success, this function returns the string <code>\"true\"</code>.
-
-<example>
-<with-open-database db /tmp/file.db mode=read>
-  <set-var loaded? = <database-load-record db <get-var name> package=foo>>
-</with-open-database>
-
-<when <get-var loaded?>>
-  The record was loaded successfully, and the
-  value of NAME is <get-var foo::name>.
-</when>
+"Load the variables from the record specified by <var key> in the\n\
+database referenced by <var dbvar>.  If <var package=package-name> is\n\
+given, the record variables are stored into the specified package,\n\
+instead of the current package.\n\
+\n\
+Upon success, this function returns the string <code>\"true\"</code>.\n\
+\n\
+<example>\n\
+<with-open-database db /tmp/file.db mode=read>\n\
+  <set-var loaded? = <database-load-record db <get-var name> package=foo>>\n\
+</with-open-database>\n\
+\n\
+<when <get-var loaded?>>\n\
+  The record was loaded successfully, and the\n\
+  value of NAME is <get-var foo::name>.\n\
+</when>\n\
 </example>")
 {
   char *prefix;
@@ -474,14 +474,14 @@ Upon success, this function returns the string <code>\"true\"</code>.
 }
 
 DEFUN (pf_database_delete_record, dbvar key,
-"Remove the record associated with <var key> from the database
-referenced by <var dbvar>.  This functions returns the string
-<code>true</code> upon success.
-
-<example>
-<with-open-database db /tmp/file.db mode=write>
-  <set-var deleted? = <database-delete-record db <get-var key>>>
-</with-open-database>
+"Remove the record associated with <var key> from the database\n\
+referenced by <var dbvar>.  This functions returns the string\n\
+<code>true</code> upon success.\n\
+\n\
+<example>\n\
+<with-open-database db /tmp/file.db mode=write>\n\
+  <set-var deleted? = <database-delete-record db <get-var key>>>\n\
+</with-open-database>\n\
 </example>")
 {
   DBFILE db;
@@ -509,25 +509,25 @@ referenced by <var dbvar>.  This functions returns the string
 
 DEFUN (pf_database_save_record, dbvar key &optional var... &key
        package=package-name,
-"Save the variables <var var1...varn> in the database referenced by
-<var dbvar> in the record specified by the key <var key>.  If <var
-package-name> is supplied, then the names of the variables written to
-the database are written as if they belonged to that package.
-
-Upon success, this function returns the string <code>true</code>.
-
-Also see <funref database-commands database-save-package>, and
-<funref database-commands database-load-record>.
-
-<example>
-<with-open-database db /tmp/file.db mode=write-create>
-  <set-var saved? =
-     <database-save-record db <get-var name> name age size>>
-</with-open-database>
-
-<when <get-var saved?>>
-  The record was stored successfully.
-</when>
+"Save the variables <var var1...varn> in the database referenced by\n\
+<var dbvar> in the record specified by the key <var key>.  If <var\n\
+package-name> is supplied, then the names of the variables written to\n\
+the database are written as if they belonged to that package.\n\
+\n\
+Upon success, this function returns the string <code>true</code>.\n\
+\n\
+Also see <funref database-commands database-save-package>, and\n\
+<funref database-commands database-load-record>.\n\
+\n\
+<example>\n\
+<with-open-database db /tmp/file.db mode=write-create>\n\
+  <set-var saved? =\n\
+     <database-save-record db <get-var name> name age size>>\n\
+</with-open-database>\n\
+\n\
+<when <get-var saved?>>\n\
+  The record was stored successfully.\n\
+</when>\n\
 </example>")
 {
   DBFILE db;
@@ -594,25 +594,25 @@ Also see <funref database-commands database-save-package>, and
 }
 
 DEFUN (pf_database_save_package, dbvar key package &key strip=true,
-"Save the variables from the package <var package> in the database
-referenced by <var dbvar> in the record specified by <var key>.
-
-If <var strip=true> is supplied, then the names of the variables
-written to the database have their package prefix removed as they are
-written.
-
-Upon success, this function returns the string <code>true</code>.
-
-<example>
-<set-var mykey=\"The Key\" foo::x=x foo::array[0]=val0 foo::array[1]=val1>
-<with-open-database db /tmp/file.db mode=write-create>
-  <database-save-package db <get-var mykey> foo strip=true>
-</with-open-database>
-</example>
-
-produces
-<example>
-true
+"Save the variables from the package <var package> in the database\n\
+referenced by <var dbvar> in the record specified by <var key>.\n\
+\n\
+If <var strip=true> is supplied, then the names of the variables\n\
+written to the database have their package prefix removed as they are\n\
+written.\n\
+\n\
+Upon success, this function returns the string <code>true</code>.\n\
+\n\
+<example>\n\
+<set-var mykey=\"The Key\" foo::x=x foo::array[0]=val0 foo::array[1]=val1>\n\
+<with-open-database db /tmp/file.db mode=write-create>\n\
+  <database-save-package db <get-var mykey> foo strip=true>\n\
+</with-open-database>\n\
+</example>\n\
+\n\
+produces\n\
+<example>\n\
+true\n\
 </example>")
 {
   DBFILE db;
@@ -706,10 +706,10 @@ true
 }
 
 DEFUN (pf_database_first_key, dbvar,
-"Return a string representing the \"first\" key found in the database
-referenced by <var dbvar>.  The key is suitable for input to any of
-the database functions which takes a key as input.  The order in which
-keys are returned appears random, but the return value is always a
+"Return a string representing the \"first\" key found in the database\n\
+referenced by <var dbvar>.  The key is suitable for input to any of\n\
+the database functions which takes a key as input.  The order in which\n\
+keys are returned appears random, but the return value is always a\n\
 suitable argument to <funref database-commands database-next-key>.")
 {
   DBFILE db = (DBFILE)0;
@@ -732,22 +732,22 @@ suitable argument to <funref database-commands database-next-key>.")
 }
 
 DEFUN (pf_database_next_key, dbvar after-key,
-"Return the \"next\" key in the database.  The key is found by looking
-at <var after-key>, which makes this function suitable for calling in
-a loop.  For example, the following code iterates over an entire
-database.
-
-<example>
-<with-open-database db /file.db mode=read>
-  <set-var key=<database-first-key db>>
-  <while <get-var key>>
-    <package-delete record>
-    <set-var loaded? =
-      <database-load-record db <get-var key> package=record>>
-    Key: <get-var key>, Name: <get-var record::name>
-    <set-var key = <database-next-key db <get-var key>>>
-  </while>
-</with-open-database>
+"Return the \"next\" key in the database.  The key is found by looking\n\
+at <var after-key>, which makes this function suitable for calling in\n\
+a loop.  For example, the following code iterates over an entire\n\
+database.\n\
+\n\
+<example>\n\
+<with-open-database db /file.db mode=read>\n\
+  <set-var key=<database-first-key db>>\n\
+  <while <get-var key>>\n\
+    <package-delete record>\n\
+    <set-var loaded? =\n\
+      <database-load-record db <get-var key> package=record>>\n\
+    Key: <get-var key>, Name: <get-var record::name>\n\
+    <set-var key = <database-next-key db <get-var key>>>\n\
+  </while>\n\
+</with-open-database>\n\
 </example>")
 {
   DBFILE db;
@@ -770,9 +770,9 @@ database.
 }
 
 DEFUN (pf_database_unique_key, dbvar &optional suggestion,
-"Return a key which is guaranteed to not already exist in the the
-database referenced by <var db>.  If <var suggestion> is supplied,
-that key is tried first, and then subsequent attempts are various
+"Return a key which is guaranteed to not already exist in the the\n\
+database referenced by <var db>.  If <var suggestion> is supplied,\n\
+that key is tried first, and then subsequent attempts are various\n\
 modifications to the suggestion.")
 {
   DBFILE db;
@@ -1019,66 +1019,66 @@ dbrec_callout (const void *arg1, const void *arg2)
 
 DEFUN (pf_database_query, dbvar expr &key format=fexpr keys=varname
        sort=field... sortorder=reverse,
-"Select records from the database referenced by <var dbvar>, based on
-<var expr>, perhaps sorting them based on the data in <var FIELD>s,
-and optionally formatting them with the <Meta-HTML> expression in <var
-fexpr>.
-
-Both <var expr> and <var fexpr> are evaluated with the fields of the
-database as the current package, so references to variables which are
-not part of the record structure must be fully qualified (i.e., by
-prefixing them with a package name. See <secref Packages> for more
-information.) If the result of evaluating <var expr> is not the empty
-string, then the record is selected for further processing by either
-<var format>, <var keys>, or to be returned in a  plain text list of
-keys. 
-
-The order of evaluation is as follows:
-
-First, the database is queried, and an internal list of selected
-records is created.  Then, if <var sort=field1,field2...> is present,
-the records are sorted using the values of the specified fields.  The
-order of the sort can be reversed by passed <var sortorder=reverse>. 
-
-Next, if <var format=fexpr> is present, <var fexpr> is executed for
-each record, in an environment where the current package consists of
-bindings for each field's name to each field's value, and the special
-binding of <code>key</code> to the key of that record.  Finally, if
-<var keys=varname> is present, <var varname> is the name of a variable
-into which the matched keys are stored as an array.
-
-The <var sort> parameters indicates which fields to sort the resultant
-keys on; the field names <var field1,field2...> are separated by
-commas.
-
-Examples:
-
-This simple query stores the key of every record in the database whose
-<b>name</b> field contains \"Fox\" into the variable named
-<b>dbkeys</b>:
-
-<example>
-<with-open-database db \"/www/data/employee.db\" mode=read>
-  <database-query db <match <get-var name> \"Fox\"> keys=dbkeys>
-</with-open-database>
-</example>
-
-This more complex query formats an alphabetical list of all the
-members of the database who are employed as carpenters, and are
-between the ages of 20 and 45, by creating links to a page which will
-(presumably) get a more detailed listing of the individual record:
-
-<example>
-<with-open-database db \"employee.db\" mode=read>
-  <database-query db sort=LastName
-    <and <match <get-var job> \"carpent\">
-         <gt age 20>
-         <lt age 45>>
-    format = <prog
-               <a href=\"detail-display.mhtml?<cgi-encode key>\">
-               <get-var LastName>, <get-var FirstName>
-               </a>: <get-var Job>, <get-var Age>>>
-</with-open-database>
+"Select records from the database referenced by <var dbvar>, based on\n\
+<var expr>, perhaps sorting them based on the data in <var FIELD>s,\n\
+and optionally formatting them with the <Meta-HTML> expression in <var\n\
+fexpr>.\n\
+\n\
+Both <var expr> and <var fexpr> are evaluated with the fields of the\n\
+database as the current package, so references to variables which are\n\
+not part of the record structure must be fully qualified (i.e., by\n\
+prefixing them with a package name. See <secref Packages> for more\n\
+information.) If the result of evaluating <var expr> is not the empty\n\
+string, then the record is selected for further processing by either\n\
+<var format>, <var keys>, or to be returned in a  plain text list of\n\
+keys. \n\
+\n\
+The order of evaluation is as follows:\n\
+\n\
+First, the database is queried, and an internal list of selected\n\
+records is created.  Then, if <var sort=field1,field2...> is present,\n\
+the records are sorted using the values of the specified fields.  The\n\
+order of the sort can be reversed by passed <var sortorder=reverse>. \n\
+\n\
+Next, if <var format=fexpr> is present, <var fexpr> is executed for\n\
+each record, in an environment where the current package consists of\n\
+bindings for each field's name to each field's value, and the special\n\
+binding of <code>key</code> to the key of that record.  Finally, if\n\
+<var keys=varname> is present, <var varname> is the name of a variable\n\
+into which the matched keys are stored as an array.\n\
+\n\
+The <var sort> parameters indicates which fields to sort the resultant\n\
+keys on; the field names <var field1,field2...> are separated by\n\
+commas.\n\
+\n\
+Examples:\n\
+\n\
+This simple query stores the key of every record in the database whose\n\
+<b>name</b> field contains \"Fox\" into the variable named\n\
+<b>dbkeys</b>:\n\
+\n\
+<example>\n\
+<with-open-database db \"/www/data/employee.db\" mode=read>\n\
+  <database-query db <match <get-var name> \"Fox\"> keys=dbkeys>\n\
+</with-open-database>\n\
+</example>\n\
+\n\
+This more complex query formats an alphabetical list of all the\n\
+members of the database who are employed as carpenters, and are\n\
+between the ages of 20 and 45, by creating links to a page which will\n\
+(presumably) get a more detailed listing of the individual record:\n\
+\n\
+<example>\n\
+<with-open-database db \"employee.db\" mode=read>\n\
+  <database-query db sort=LastName\n\
+    <and <match <get-var job> \"carpent\">\n\
+         <gt age 20>\n\
+         <lt age 45>>\n\
+    format = <prog\n\
+               <a href=\"detail-display.mhtml?<cgi-encode key>\">\n\
+               <get-var LastName>, <get-var FirstName>\n\
+               </a>: <get-var Job>, <get-var Age>>>\n\
+</with-open-database>\n\
 </example>")
 {
   DBFILE db = (DBFILE)0;

@@ -61,151 +61,151 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_macro_functions)
 DEFINE_SECTION (MACRO-COMMANDS, macros; functions; new operators, 
-"<meta-html> contains a powerful <i>macro</i> facility, which allows
-you to define your own commands.  Such commands are first-class
-objects in <meta-html>; they may even supersede the compiled in
-definitions.
-
-There are two types of macros that you can define.  One type is a
-<i>complex-tag</i>; it consists of an opening tag, a body, and a
-closing tag.  The other type is a <i>simple-tag</i>; it only has an
-opening tag.
-
-You create a macro by using one of the macro-defining commands.  In
-the body of the definition, special keywords can be placed, which
-affect what is produced when the macro is invoked.  As a macro writer,
-you have logical access to the arguments passed to the macro in the
-opening tag, and for complex-tags, you have access to the body which
+"<meta-html> contains a powerful <i>macro</i> facility, which allows\n\
+you to define your own commands.  Such commands are first-class\n\
+objects in <meta-html>; they may even supersede the compiled in\n\
+definitions.\n\
+\n\
+There are two types of macros that you can define.  One type is a\n\
+<i>complex-tag</i>; it consists of an opening tag, a body, and a\n\
+closing tag.  The other type is a <i>simple-tag</i>; it only has an\n\
+opening tag.\n\
+\n\
+You create a macro by using one of the macro-defining commands.  In\n\
+the body of the definition, special keywords can be placed, which\n\
+affect what is produced when the macro is invoked.  As a macro writer,\n\
+you have logical access to the arguments passed to the macro in the\n\
+opening tag, and for complex-tags, you have access to the body which\n\
 appears between the opening and closing tags.  ",
 
-"In the opening tag of the macro defining command, several special
-<i>meta-arguments</i> may be used to affect the binding method used at
-invocation time to bind the passed parameters to the formal arguments.
-
-<ul> <li> <b>&optional</b><br> Indicates that the following named
-parameter is optional, and does not have to be supplied.  While at
-this time Meta-HTML does not complain if there are missing arguments
-at invocation time, it is likely that the byte-compiler will require
-function calls to match the formal parameters of the defined function.
-
-<example>
-<defun func x &optional y> <get-var x>, <get-var y> </defun>
-</example>
-
-<li> <b>&key</b><br> Indicates that the following named parameters
-will be bound by the caller placing the name of the parameter followed
-by an equals sign, and the value of that parameter in the opening tag
-of the function call.  Thus, keyword arguments may appear in any order
-in the calling function.  Here is an example of defining a tag called
-<tag image> which will add the width and hieght if they are not
-already present:
-
-<example>
-<defun image &key src width height>
-  <if <or <not <get-var width>>
-	  <not <get-var height>>>
-      <find-image-xy <get-var src> width height>>
-  <img src=\"<get-var src>\" width=<get-var width> height=<get-var height>>
-</defun>
-</example>
-
-<li> <b>&rest</b><br> Gobbles up any remaining arguments to the
-function, collecting them in the named parameter which follows the
-<i>&rest</i>.  The arguments may be gathered into a single string, or
-into an array, with one argument per slot.  This is controlled by
-writing the formal parameter name either with or without sqaure
-braces: (i.e., <code>foo[]</code> or <code>foo</code>).
-
-<example>
-<defun func req-arg &rest rest-args[]>
-  <ol>
-    <foreach x rest-args>
-      <li> <get-var x> </li>
-    </foreach>
-  </ol>
-</defun>
-</example>
-
-<li> <b>&body</b><br> Causes the following named parameter to be bound
-to the body of the invoked function or macro.  For <tag defun> and
-<tag defsubst>, this is all of the material which appeared in the
-opening tag, while for <tag defmacro> and <tag defweakmacro>, this is
-all of the material that appeared between the opening and closing
-tags.
-
-<example>
-<defmacro with-debugging-output &body body>
-  <with-open-stream debug-stream /tmp/debug-output mode=append>
-    <stream-put debug-stream <get-var body>>
-  </with-open-stream>
-</defmacro>
-</example>
-
-<li> <b>&unevalled</b><br> Modifies the binding rule of a formal
-parameter such that the material which is bound is not evaluated
-before the binding takes place.  This is almost equivalent to using
-the <b>%0</b> ... <b>%9</b>, or <b>%body</b> textual substitutions,
-but the arguments are bound to variables instead of pure textual
-substitution.  Here is how one might write a function which takes an
-expression, and produces the expression and the evaluation of the
-expression as output:
-
-<example>
-<defun debug-expr &body &unevalled qbody &body body>
-  <get-var-once qbody> EVALS TO: <get-var-once body>
-</defun>
-</example>
-
-Such an invocation might look like:
-<example>
-  <set-var x=4 y=5>
-  <debug-expr <add x y>>
-</example>
-
-which would produce:
-<example>
-  <add x y> EVALS TO: 9
-</example>
-</ul>
-
-Here is a ridiculous function, which uses all of the special
-meta-parameters:
-<example>
-<defsubst func req &optional opt &key k1 &unevalled k2 &body b &rest args[]>
-   REQ: <get-var-once req>,
-   OPT: <get-var-once opt>
-    K1: <get-var-once k1>
-    K2: <get-var-once k2>
-  BODY: <get-var-once b>
-  REST: <foreach arg args><get-var-once arg> </foreach>
-</defsubst>
-</example>
-
-And, here are examples of calling that function:
-
-Example 1:
-<example>
-<set-var key-1-arg=key-1>
-<func required k2=\"Unevalled\" opt-arg k1=<get-var key-1-arg> rest0 rest1>
-   REQ: required,
-   OPT: opt-arg
-    K1: key-1
-    K2: Unevalled
-  BODY: required k2=\"Unevalled\" opt-arg k1=key-1 rest0 rest1
-  REST: rest0 rest1
-</example>
-Example 2:
-<example>
-<func k2=<get-var k1> required rest0 rest1>
-   REQ: required,
-   OPT: rest0
-    K1: 
-    K2: <get-var k1>
-  BODY: k2= required rest0 rest1
-  REST: rest1
-</example>
-
-Notice how in the second example, our optional parameter <b>opt</b>
+"In the opening tag of the macro defining command, several special\n\
+<i>meta-arguments</i> may be used to affect the binding method used at\n\
+invocation time to bind the passed parameters to the formal arguments.\n\
+\n\
+<ul> <li> <b>&optional</b><br> Indicates that the following named\n\
+parameter is optional, and does not have to be supplied.  While at\n\
+this time Meta-HTML does not complain if there are missing arguments\n\
+at invocation time, it is likely that the byte-compiler will require\n\
+function calls to match the formal parameters of the defined function.\n\
+\n\
+<example>\n\
+<defun func x &optional y> <get-var x>, <get-var y> </defun>\n\
+</example>\n\
+\n\
+<li> <b>&key</b><br> Indicates that the following named parameters\n\
+will be bound by the caller placing the name of the parameter followed\n\
+by an equals sign, and the value of that parameter in the opening tag\n\
+of the function call.  Thus, keyword arguments may appear in any order\n\
+in the calling function.  Here is an example of defining a tag called\n\
+<tag image> which will add the width and hieght if they are not\n\
+already present:\n\
+\n\
+<example>\n\
+<defun image &key src width height>\n\
+  <if <or <not <get-var width>>\n\
+	  <not <get-var height>>>\n\
+      <find-image-xy <get-var src> width height>>\n\
+  <img src=\"<get-var src>\" width=<get-var width> height=<get-var height>>\n\
+</defun>\n\
+</example>\n\
+\n\
+<li> <b>&rest</b><br> Gobbles up any remaining arguments to the\n\
+function, collecting them in the named parameter which follows the\n\
+<i>&rest</i>.  The arguments may be gathered into a single string, or\n\
+into an array, with one argument per slot.  This is controlled by\n\
+writing the formal parameter name either with or without sqaure\n\
+braces: (i.e., <code>foo[]</code> or <code>foo</code>).\n\
+\n\
+<example>\n\
+<defun func req-arg &rest rest-args[]>\n\
+  <ol>\n\
+    <foreach x rest-args>\n\
+      <li> <get-var x> </li>\n\
+    </foreach>\n\
+  </ol>\n\
+</defun>\n\
+</example>\n\
+\n\
+<li> <b>&body</b><br> Causes the following named parameter to be bound\n\
+to the body of the invoked function or macro.  For <tag defun> and\n\
+<tag defsubst>, this is all of the material which appeared in the\n\
+opening tag, while for <tag defmacro> and <tag defweakmacro>, this is\n\
+all of the material that appeared between the opening and closing\n\
+tags.\n\
+\n\
+<example>\n\
+<defmacro with-debugging-output &body body>\n\
+  <with-open-stream debug-stream /tmp/debug-output mode=append>\n\
+    <stream-put debug-stream <get-var body>>\n\
+  </with-open-stream>\n\
+</defmacro>\n\
+</example>\n\
+\n\
+<li> <b>&unevalled</b><br> Modifies the binding rule of a formal\n\
+parameter such that the material which is bound is not evaluated\n\
+before the binding takes place.  This is almost equivalent to using\n\
+the <b>%0</b> ... <b>%9</b>, or <b>%body</b> textual substitutions,\n\
+but the arguments are bound to variables instead of pure textual\n\
+substitution.  Here is how one might write a function which takes an\n\
+expression, and produces the expression and the evaluation of the\n\
+expression as output:\n\
+\n\
+<example>\n\
+<defun debug-expr &body &unevalled qbody &body body>\n\
+  <get-var-once qbody> EVALS TO: <get-var-once body>\n\
+</defun>\n\
+</example>\n\
+\n\
+Such an invocation might look like:\n\
+<example>\n\
+  <set-var x=4 y=5>\n\
+  <debug-expr <add x y>>\n\
+</example>\n\
+\n\
+which would produce:\n\
+<example>\n\
+  <add x y> EVALS TO: 9\n\
+</example>\n\
+</ul>\n\
+\n\
+Here is a ridiculous function, which uses all of the special\n\
+meta-parameters:\n\
+<example>\n\
+<defsubst func req &optional opt &key k1 &unevalled k2 &body b &rest args[]>\n\
+   REQ: <get-var-once req>,\n\
+   OPT: <get-var-once opt>\n\
+    K1: <get-var-once k1>\n\
+    K2: <get-var-once k2>\n\
+  BODY: <get-var-once b>\n\
+  REST: <foreach arg args><get-var-once arg> </foreach>\n\
+</defsubst>\n\
+</example>\n\
+\n\
+And, here are examples of calling that function:\n\
+\n\
+Example 1:\n\
+<example>\n\
+<set-var key-1-arg=key-1>\n\
+<func required k2=\"Unevalled\" opt-arg k1=<get-var key-1-arg> rest0 rest1>\n\
+   REQ: required,\n\
+   OPT: opt-arg\n\
+    K1: key-1\n\
+    K2: Unevalled\n\
+  BODY: required k2=\"Unevalled\" opt-arg k1=key-1 rest0 rest1\n\
+  REST: rest0 rest1\n\
+</example>\n\
+Example 2:\n\
+<example>\n\
+<func k2=<get-var k1> required rest0 rest1>\n\
+   REQ: required,\n\
+   OPT: rest0\n\
+    K1: \n\
+    K2: <get-var k1>\n\
+  BODY: k2= required rest0 rest1\n\
+  REST: rest1\n\
+</example>\n\
+\n\
+Notice how in the second example, our optional parameter <b>opt</b>\n\
 got bound to the second non-keyword argument <code>rest0</code>!")
 
 DEFMACROX (pf_defsubst, name &optional named-parameters &key
@@ -214,25 +214,25 @@ DEFMACROX (pf_defsubst, name &optional named-parameters &key
 
 DEFMACRO (pf_define_tag, name &optional named-parameters &key
 	  package=packname whitespace=delete,
-"Define <var name> as a simple tag.  Within <var body>, the values of
-<code>%0...%9</code> are defined to be the positional arguments that
-were found in the opening tag of the invocation, and
-<code>%body</code> is all of that material in a single string.
-
-If any <var named-parameter>s are supplied, the values that were
-passed in the opening tag are evaluated and bound to the named
-parameters.
-
-A keyword argument of <var package-name> wraps the entire body of the
-macro in an <funref packages in-package> statement.
-
-The keyword argument <var whitespace> can be set to the string
-<code>delete</code> to remove whitespace from the starts and ends of
-lines in the subst definition before it is stored.  This effectively
-concatenates all of the lines of the subst definition into a single
-long line.
-
-Also see <funref macro-commands define-function> and <funref
+"Define <var name> as a simple tag.  Within <var body>, the values of\n\
+<code>%0...%9</code> are defined to be the positional arguments that\n\
+were found in the opening tag of the invocation, and\n\
+<code>%body</code> is all of that material in a single string.\n\
+\n\
+If any <var named-parameter>s are supplied, the values that were\n\
+passed in the opening tag are evaluated and bound to the named\n\
+parameters.\n\
+\n\
+A keyword argument of <var package-name> wraps the entire body of the\n\
+macro in an <funref packages in-package> statement.\n\
+\n\
+The keyword argument <var whitespace> can be set to the string\n\
+<code>delete</code> to remove whitespace from the starts and ends of\n\
+lines in the subst definition before it is stored.  This effectively\n\
+concatenates all of the lines of the subst definition into a single\n\
+long line.\n\
+\n\
+Also see <funref macro-commands define-function> and <funref\n\
 macro-commands define-container>.")
 {
   char *temp = get_positional_arg (vars, 0);
@@ -252,40 +252,40 @@ DEFMACROX (pf_defmacro, name &optional named-parameters
 
 DEFMACRO (pf_define_container, name &optional named-parameters
 	  &key package=packname whitespace=delete,
- "Define <var name> as a complex tag. At invocation time, various
-substitutions are made within <var body>.  Specifically, if the text
-string is:
-
-<ul>
-<li><b>%0</b>,<b>%1</b>, and so on, upto <b>%9</b> are replaced
-with the exact text of the positional arguments that were found in
-the opening tag of the invocation
-
-<li><b>%attributes</b> is replaced by all of the arguments which
-appeared in the opening tag.
-
-<li><b>%body</b> is replaced with the exact text of the material
-that appeared between the opening and closing tags
-
-<li><b>%qbody</b> is similar to <b>%body</b>, but the string is
-first surrounded by double quotes, and double quote characters which
-appear in the string are escaped.
-
-<li><b>%xbody</b> is replaced with the evaluation of the material
-that appeared between the opening and closing tags
-</ul>
-
-If any <var named-parameter>s are supplied, the values that were
-passed in the opening tag are evaluated and bound to the named
-parameters.
-
-A keyword argument of <var package-name> wraps the entire body of the
-macro in an <funref packages in-package> statement.
-
-The keyword argument <var whitespace> can be set to the string
-<code>delete</code> to remove whitespace from the starts and ends of
-lines in the macro definition before it is stored.  This effectively
-concatenates all of the lines of the macro definition into a single
+ "Define <var name> as a complex tag. At invocation time, various\n\
+substitutions are made within <var body>.  Specifically, if the text\n\
+string is:\n\
+\n\
+<ul>\n\
+<li><b>%0</b>,<b>%1</b>, and so on, upto <b>%9</b> are replaced\n\
+with the exact text of the positional arguments that were found in\n\
+the opening tag of the invocation\n\
+\n\
+<li><b>%attributes</b> is replaced by all of the arguments which\n\
+appeared in the opening tag.\n\
+\n\
+<li><b>%body</b> is replaced with the exact text of the material\n\
+that appeared between the opening and closing tags\n\
+\n\
+<li><b>%qbody</b> is similar to <b>%body</b>, but the string is\n\
+first surrounded by double quotes, and double quote characters which\n\
+appear in the string are escaped.\n\
+\n\
+<li><b>%xbody</b> is replaced with the evaluation of the material\n\
+that appeared between the opening and closing tags\n\
+</ul>\n\
+\n\
+If any <var named-parameter>s are supplied, the values that were\n\
+passed in the opening tag are evaluated and bound to the named\n\
+parameters.\n\
+\n\
+A keyword argument of <var package-name> wraps the entire body of the\n\
+macro in an <funref packages in-package> statement.\n\
+\n\
+The keyword argument <var whitespace> can be set to the string\n\
+<code>delete</code> to remove whitespace from the starts and ends of\n\
+lines in the macro definition before it is stored.  This effectively\n\
+concatenates all of the lines of the macro definition into a single\n\
 long line.")
 {
   char *temp = get_positional_arg (vars, 0);
@@ -301,37 +301,37 @@ long line.")
 
 DEFMACRO (pf_defweakmacro, name  &optional named-parameters
 	  &key package=packname whitespace=delete,
-"<code>defweakmacro</code> is exactly like <funref macro-commands
-define-container>, with one exception: at invocation time, the closing
-tag does not have to be present -- in that case, the invocation is
-treated as if the definition were a <funref macro-commands defsubst>.
-
-This facility exists primarily to allow the redefinition of standard
-HTML constructs which allow the closing tag to be missing, and yet,
-still inexplicably operate correctly.
-
-For example, the <example code><p></example> tag is often used without
-its closing counterpart of <example code></p></example>.  If you
-wished to redefine <example code><p></example> to do something special
-when a closing tag was found, you might write the following
-definition:
-
-<example>
-<defweakmacro p>
-  <verbatim><P></verbatim>
-  <when %qbody> Look ma! %body See? </when>
-  <verbatim></P></verbatim>
-</defweakmacro>
-</example>
-
-then, a simple <example code><P></example> would produce
-<example code><P></P></example code>, while a complex invocation, such as:
-<example>
-<P> this is a list </P>
-</example>
-produces
-<example>
-  <P> Look ma!  this is a list See? </P>
+"<code>defweakmacro</code> is exactly like <funref macro-commands\n\
+define-container>, with one exception: at invocation time, the closing\n\
+tag does not have to be present -- in that case, the invocation is\n\
+treated as if the definition were a <funref macro-commands defsubst>.\n\
+\n\
+This facility exists primarily to allow the redefinition of standard\n\
+HTML constructs which allow the closing tag to be missing, and yet,\n\
+still inexplicably operate correctly.\n\
+\n\
+For example, the <example code><p></example> tag is often used without\n\
+its closing counterpart of <example code></p></example>.  If you\n\
+wished to redefine <example code><p></example> to do something special\n\
+when a closing tag was found, you might write the following\n\
+definition:\n\
+\n\
+<example>\n\
+<defweakmacro p>\n\
+  <verbatim><P></verbatim>\n\
+  <when %qbody> Look ma! %body See? </when>\n\
+  <verbatim></P></verbatim>\n\
+</defweakmacro>\n\
+</example>\n\
+\n\
+then, a simple <example code><P></example> would produce\n\
+<example code><P></P></example code>, while a complex invocation, such as:\n\
+<example>\n\
+<P> this is a list </P>\n\
+</example>\n\
+produces\n\
+<example>\n\
+  <P> Look ma!  this is a list See? </P>\n\
 </example>")
 {
   char *temp = get_positional_arg (vars, 0);
@@ -356,26 +356,26 @@ DEFMACROX (pf_defun, name  &optional named-parameters
 
 DEFMACRO (pf_define_function, name  &optional named-parameters
 	  &key package=packname whitespace=delete,
-"Define <var name> as a simple tag.
-
-The only differences between <funref macro-commands define-function>
-and <funref macro-commands define-tag> are:
-<ol>
-<li> The <i>whitespace=delete</i> option is assumed.
-<li> The <var named-parameter>s are evaluated in the context of the
-caller, not of the definition of the defun.
-<li> By default, a local package is wrapped around the invocation of
-the defined function.  This can be changed by the use of the <var
-package=packname> keyword.
-</ol>
-
-<example>
-<define-function factorial num>
-   <if <lt num 2> 1
-      <mul num <factorial <sub num 1>>>>
-</define-function>
-.blank
-<factorial 5> --> 120
+"Define <var name> as a simple tag.\n\
+\n\
+The only differences between <funref macro-commands define-function>\n\
+and <funref macro-commands define-tag> are:\n\
+<ol>\n\
+<li> The <i>whitespace=delete</i> option is assumed.\n\
+<li> The <var named-parameter>s are evaluated in the context of the\n\
+caller, not of the definition of the defun.\n\
+<li> By default, a local package is wrapped around the invocation of\n\
+the defined function.  This can be changed by the use of the <var\n\
+package=packname> keyword.\n\
+</ol>\n\
+\n\
+<example>\n\
+<define-function factorial num>\n\
+   <if <lt num 2> 1\n\
+      <mul num <factorial <sub num 1>>>>\n\
+</define-function>\n\
+.blank\n\
+<factorial 5> --> 120\n\
 </example>")
 {
   char *temp = get_positional_arg (vars, 0);
@@ -390,8 +390,8 @@ package=packname> keyword.
 }
 
 DEFUN (pf_undef, &optional name...,
-"Remove the definition of a user-defined <funref macros defun>,
-<funref macros defmacro> or <funref macros defsubst>.  For every <var
+"Remove the definition of a user-defined <funref macros defun>,\n\
+<funref macros defmacro> or <funref macros defsubst>.  For every <var\n\
 name> that has been defined in this way, the definition is removed.")
 {
   register int i;

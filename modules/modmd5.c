@@ -70,11 +70,11 @@ digest_to_string (unsigned char *digest)
 }
 
 DEFINE_SECTION (MD5-MODULE, message digest; MD5; unique key,
-"The functions in this module allow you to create an MD5 digest (i.e., a
+"The functions in this module allow you to create an MD5 digest (i.e., a\n\
 16 byte unique key) from the contents of a variable or file.", "")
 
 DEFUNX (md5::digest-var, var,
-"Create an MD5 digest from the contents of <var var> and return the 32
+"Create an MD5 digest from the contents of <var var> and return the 32\n\
 character hex representation of it.")
 
 static void
@@ -139,7 +139,7 @@ pf_md5digest_var (PFunArgs)
 }
 
 DEFUNX (md5::digest-string, string,
-"Create an MD5 digest from <var string>, and return the 32
+"Create an MD5 digest from <var string>, and return the 32\n\
 character hex representation of it.")
 
 static void

@@ -57,46 +57,46 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_package_functions)
 DEFINE_SECTION (PACKAGES, variables; module; package; group, 
-"<i>Packages</i> are repositories which contain symbols and their values.
-
-Each time a symbol is referenced, a package must first be found, and
-then the symbol may be found within that package. You indicate which
-package to look the symbol up in by supplying a package <i>prefix</i>.
-When the prefix is not supplied, the symbol is looked up in the
+"<i>Packages</i> are repositories which contain symbols and their values.\n\
+\n\
+Each time a symbol is referenced, a package must first be found, and\n\
+then the symbol may be found within that package. You indicate which\n\
+package to look the symbol up in by supplying a package <i>prefix</i>.\n\
+When the prefix is not supplied, the symbol is looked up in the\n\
 current package.",
-"For example, a full reference to the symbol <var bar> stored in the
-<var foo> package looks like: 
-
-<example>
-   FOO::BAR
-</example>
-
-There are very few commands specifically for dealing with packages,
-because most of the operations are performed implicitly, rather than
-explicitly.  To create a package, simply give the package name as part
-of the symbol, in the place where the symbol is normally used.
-
-<example>
-   <set-var foo::bar = \"Hello\">
-</example>
-
-This has the effect of creating the package <var foo> if it didn't
-already exist.
-
-The majority of the functions documented here perform package maintenance, as
-opposed to variable manipulation.  There are functions for querying a package
-about its contens, for deleting an entire package, for exporting and importing
-packages to and from sessions, for copying the contents of packages, and for
-converting packages from an internal representation to a printable
+"For example, a full reference to the symbol <var bar> stored in the\n\
+<var foo> package looks like: \n\
+\n\
+<example>\n\
+   FOO::BAR\n\
+</example>\n\
+\n\
+There are very few commands specifically for dealing with packages,\n\
+because most of the operations are performed implicitly, rather than\n\
+explicitly.  To create a package, simply give the package name as part\n\
+of the symbol, in the place where the symbol is normally used.\n\
+\n\
+<example>\n\
+   <set-var foo::bar = \"Hello\">\n\
+</example>\n\
+\n\
+This has the effect of creating the package <var foo> if it didn't\n\
+already exist.\n\
+\n\
+The majority of the functions documented here perform package maintenance, as\n\
+opposed to variable manipulation.  There are functions for querying a package\n\
+about its contens, for deleting an entire package, for exporting and importing\n\
+packages to and from sessions, for copying the contents of packages, and for\n\
+converting packages from an internal representation to a printable\n\
 representation, called an <i>alist</i>.")
 
 DEFUN (pf_package_names, ,
-"Return a newline separated list of all of the named packages
-which are currently defined.  Because the list is newline separated,
-the result can easily be assigned to an array variable:
-
-<example>
-<set-var all-packages[]=<package-names>>
+"Return a newline separated list of all of the named packages\n\
+which are currently defined.  Because the list is newline separated,\n\
+the result can easily be assigned to an array variable:\n\
+\n\
+<example>\n\
+<set-var all-packages[]=<package-names>>\n\
 </example>")
 {
   if (AllPackages)
@@ -116,20 +116,20 @@ the result can easily be assigned to an array variable:
 }
 
 DEFUN (pf_package_vars, &optional package-name &key strip=true,
-"Returns a newline separated list of the fully qualified variable
-names found in the package named by <var package-name>, or in the
-current package if <var package-name> is not given.  When <var
-strip=true> is supplied, the returned variable names have the package
-prefix stripped off, making them <i>not</i> fully qualified.  The
-names are not returned in any significant order.  Because the list is
-newline separated, the results can easily be assigned to an array
-variable:
-
-<complete-example>
-<set-var foo::bar=baz>
-<set-var foo::baz=bar>
-<set-var names[]=<package-vars foo>>
-<get-var names[1]>
+"Returns a newline separated list of the fully qualified variable\n\
+names found in the package named by <var package-name>, or in the\n\
+current package if <var package-name> is not given.  When <var\n\
+strip=true> is supplied, the returned variable names have the package\n\
+prefix stripped off, making them <i>not</i> fully qualified.  The\n\
+names are not returned in any significant order.  Because the list is\n\
+newline separated, the results can easily be assigned to an array\n\
+variable:\n\
+\n\
+<complete-example>\n\
+<set-var foo::bar=baz>\n\
+<set-var foo::baz=bar>\n\
+<set-var names[]=<package-vars foo>>\n\
+<get-var names[1]>\n\
 </complete-example>")
 {
   register int pos = 0;
@@ -207,7 +207,7 @@ variable:
 }
 
 DEFUN (pf_package_delete, &rest package-names...,
-"Remove the definition of the packages named by <var package-names>,
+"Remove the definition of the packages named by <var package-names>,\n\
 and all of the variables defined within them.")
 {
   char **names = get_vars_names (vars);
@@ -232,13 +232,13 @@ and all of the variables defined within them.")
 }
 
 DEFMACRO (pf_in_package, package-name,
-"Evaluate <var body> in an environment where variables which are not
-specifically prefixed with a package name are looked up and stored
-within <var package-name>.
-
-The special package name <code>\"local\"</code> creates an anonymous
-package within which to work.  The contents of local packages are only
-accessible within the expressions surrounded by the
+"Evaluate <var body> in an environment where variables which are not\n\
+specifically prefixed with a package name are looked up and stored\n\
+within <var package-name>.\n\
+\n\
+The special package name <code>\"local\"</code> creates an anonymous\n\
+package within which to work.  The contents of local packages are only\n\
+accessible within the expressions surrounded by the\n\
 <code>in-package</code> operator.")
 {
   char *packname;
@@ -287,7 +287,7 @@ accessible within the expressions surrounded by the
 }
 
 DEFMACRO (pf_with_local_package, ,
-"Shorthand for <example code><in-package local> <i>body</i>
+"Shorthand for <example code><in-package local> <i>body</i>\n\
 </in-package></example>")
 {
   int jump_again = 0;

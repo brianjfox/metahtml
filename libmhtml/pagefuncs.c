@@ -112,40 +112,40 @@ static PFunDesc func_table[] =
 
 PACKAGE_INITIALIZER (initialize_pagefunc_functions)
 
-DEFINE_SECTION (PAGE-VARIABLES, , "Several variables are predefined by
-<meta-html>, and made available to the page writer.  In addition to
-the contents of the Unix environment (which includes the server-side
-variables <varref ENV::SERVER_NAME>, <varref ENV::PATH_INFO>, etc.)
-variables describing the location of the current document in various
-ways are also defined.  ", "The following short list is a quick look
-at typical values of the most commonly referenced page variables.
-
-When the URL is ``<i><get-var mhtml::full-url></i>'', the following
-variables are set to:
-
-<defun showvar var>
-  <tr>
-    <td align=right> <varref <upcase <get-var var>>>: </td>
-    <td align=left>
-      <i><get-var <get-var var>></i><br>
-    </td>
-  </tr>
-</defun>
-
-<table>
-  <showvar mhtml::path-info>
-  <showvar mhtml::http-to-host>
-  <showvar mhtml::current-doc>
-  <showvar mhtml::include-prefix>
-  <showvar mhtml::relative-prefix>
-  <showvar mhtml::location>
-  <showvar mhtml::location-sans-sid>
-  <showvar mhtml::full-url>
-  <showvar mhtml::full-url-sans-sid>
-  <showvar mhtml::url-to-dir>
-  <showvar mhtml::url-to-dir-sans-sid>
-  <showvar mhtml::http-prefix>
-  <showvar mhtml::http-prefix-sans-sid>
+DEFINE_SECTION (PAGE-VARIABLES, , "Several variables are predefined by \
+<meta-html>, and made available to the page writer.  In addition to \
+the contents of the Unix environment (which includes the server-side \
+variables <varref ENV::SERVER_NAME>, <varref ENV::PATH_INFO>, etc.) \
+variables describing the location of the current document in various \
+ways are also defined.  ", "The following short list is a quick look \
+at typical values of the most commonly referenced page variables. \
+\n\
+When the URL is ``<i><get-var mhtml::full-url></i>'', the following \
+variables are set to: \
+\n\
+<defun showvar var>\n\
+  <tr>\n\
+    <td align=right> <varref <upcase <get-var var>>>: </td>\n\
+    <td align=left>\n\
+      <i><get-var <get-var var>></i><br>\n\
+    </td>\n\
+  </tr>\n\
+</defun>\n\
+\n\
+<table>\n\
+  <showvar mhtml::path-info>\n\
+  <showvar mhtml::http-to-host>\n\
+  <showvar mhtml::current-doc>\n\
+  <showvar mhtml::include-prefix>\n\
+  <showvar mhtml::relative-prefix>\n\
+  <showvar mhtml::location>\n\
+  <showvar mhtml::location-sans-sid>\n\
+  <showvar mhtml::full-url>\n\
+  <showvar mhtml::full-url-sans-sid>\n\
+  <showvar mhtml::url-to-dir>\n\
+  <showvar mhtml::url-to-dir-sans-sid>\n\
+  <showvar mhtml::http-prefix>\n\
+  <showvar mhtml::http-prefix-sans-sid>\n\
 </table>")
 
 DOC_SECTION (ARITHMETIC-OPERATORS)
@@ -165,17 +165,17 @@ random_seed (void)
 }
 
 DEFUN (pf_randomize, &optional seed,
-"Sets the pseudo-random number generator seed to <var seed>.  The next
-call to <funref arithmetic-operators random> uses this seed value to
-find the next pseudo-random number.  There is no return value.
-
-Examples:
-<example>
-  <randomize 10>
-  <random 100> --> 28
-  <random 100> --> 15
-  <randomize 10>
-  <random 100> --> 28
+"Sets the pseudo-random number generator seed to <var seed>.  The next "
+"call to <funref arithmetic-operators random> uses this seed value to "
+"find the next pseudo-random number.  There is no return value. "
+"\n\
+Examples:\n\
+<example>\n\
+  <randomize 10>\n\
+  <random 100> --> 28\n\
+  <random 100> --> 15\n\
+  <randomize 10>\n\
+  <random 100> --> 28\n\
 </example>")
 {
   unsigned long seed = random_seed ();
@@ -214,19 +214,19 @@ pf_random_internal (int max_value)
 }
 
 DEFUN (pf_random, arg,
-"Returns a pseudo-random number between 0 and <var arg> -1.  The
-distribution is pretty good; calling <example code><random
-2></example> returns 0 50% of the time, and 1 the other 50%.
-
-Examples:
-<example>
-  <random 100> --> 87
-  <random 100> --> 44
-
-  <b>I'm thinking of a number between 1 and 10:</b>
-  <set-var guess = <add 1 <random 10>>>
-</example>
-
+"Returns a pseudo-random number between 0 and <var arg> -1.  The "
+"distribution is pretty good; calling <example code><random "
+"2></example> returns 0 50% of the time, and 1 the other 50%. "
+"\n\
+Examples:\n\
+<example>\n\
+  <random 100> --> 87\n\
+  <random 100> --> 44\n\
+\n\
+  <b>I'm thinking of a number between 1 and 10:</b>\n\
+  <set-var guess = <add 1 <random 10>>>\n\
+</example>\n\
+\n\
 Also see <funref arithmetic-operators randomize>.")
 {
   char *max_arg = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -238,37 +238,37 @@ Also see <funref arithmetic-operators randomize>.")
 }
 
 DEFINE_SECTION (LANGUAGE-OPERATORS, self-modif; language;
-self-referential, "<Meta-HTML> provides various functions and
-variables which are used to operate on or within the language
-environment itself, rather than within the application environment.
+self-referential, "<Meta-HTML> provides various functions and "
+"variables which are used to operate on or within the language "
+"environment itself, rather than within the application environment. "
+"\n"
+"Such constructs make it possible to create self-modifying code, to "
+"change the way in which a builtin function operates, and other such "
+"language dependent features.", "")
 
-Such constructs make it possible to create self-modifying code, to
-change the way in which a builtin function operates, and other such
-language dependent features.", "")
+DEFVAR (MHTML::INHIBIT-COMMENT-PARSING, "When this variable is set to "
+"a non-empty value, the triple semi-colon comment feature is disabled. "
+"\n"
+"You may need this for complex applications where you are deliberately "
+"shipping the source of a <meta-html> document to the client.")
 
-DEFVAR (MHTML::INHIBIT-COMMENT-PARSING, "When this variable is set to
-a non-empty value, the triple semi-colon comment feature is disabled.
-
-You may need this for complex applications where you are deliberately
-shipping the source of a <meta-html> document to the client.")
-
-DEFVAR (MHTML::VERSION, "Contains the version identification of the
-currently running interpreter.  This variable is available whereever
-the interpreter is running, including the <meta-html> server, Engine,
-and in <code>mdb</code>.
-
-<complete-example>
-<get-var mhtml::version>
+DEFVAR (MHTML::VERSION, "Contains the version identification of the "
+"currently running interpreter.  This variable is available whereever "
+"the interpreter is running, including the <meta-html> server, Engine, "
+"and in <code>mdb</code>."
+"\n\
+<complete-example>\n\
+<get-var mhtml::version>\n\
 </complete-example>")
 
 
 DEFUN (pf_make_identifier, &optional limit &key alphabet,
-"Create an identifier that is <var limit> characters in length.
-<var limit> defaults to 16 if not specified.
-The identifier characters are taken from the string variable
-<var mi::alphabet>, unless passed in from keyword argument
-<var alphabet>.  If there is neither a passed in alphabet, nor
-a value for <var mi::alphabet>, then the alphabet defaults to
+"Create an identifier that is <var limit> characters in length. "
+"<var limit> defaults to 16 if not specified. "
+"The identifier characters are taken from the string variable "
+"<var mi::alphabet>, unless passed in from keyword argument "
+"<var alphabet>.  If there is neither a passed in alphabet, nor "
+"a value for <var mi::alphabet>, then the alphabet defaults to "
 uppercase letters and numbers excluding \"I\", \"O\", zero, and one.")
 {
   char *limit_arg = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -288,23 +288,23 @@ uppercase letters and numbers excluding \"I\", \"O\", zero, and one.")
 }
 
 DEFMACRO (pf_comment, ,
-"Simply discard the <var body>.  No processing is done, and no output
-is produced.
-
-A shorthand for commenting source on a single line exists; when the
-sequence of 3 semicolon character is seen
-(<code>;</code><code>;;</code>), then the text from this sequence to 
-the end of the line inclusive is discarded.
-
-Example:<set-var mhtml::inhibit-comment-parsing=1>
-<example>
-<comment>
-  This text is simply ignored.
-
-  All of it.
-</comment>
-;;; So is this text, up to the end of the line.
-;; But NOT this line -- it only has two semi-colons on it.
+"Simply discard the <var body>.  No processing is done, and no output "
+"is produced."
+"\n\
+A shorthand for commenting source on a single line exists; when the\n\
+sequence of 3 semicolon character is seen\n\
+(<code>;</code><code>;;</code>), then the text from this sequence to\n\
+the end of the line inclusive is discarded.\n\
+\n\
+Example:<set-var mhtml::inhibit-comment-parsing=1>\n\
+<example>\n\
+<comment>\n\
+  This text is simply ignored.\n\
+\n\
+  All of it.\n\
+</comment>\n\
+;;; So is this text, up to the end of the line.\n\
+;; But NOT this line -- it only has two semi-colons on it.\n\
 </example><unset-var mhtml::inhibit-comment-parsing>")
 {
   /* Contents already deleted by caller. */
@@ -312,33 +312,34 @@ Example:<set-var mhtml::inhibit-comment-parsing=1>
 
 DEFINE_SECTION (PAGE-OPERATORS, page commands; page search; search;
 insert; modify page,
-"<meta-html> contains a few commands which
-operate on the entire <i>page</i> as it currently exists.
-
-You may find, modify, or delete text which has already been looked at by the interpreter, as well as text which hasn't yet been looked at.
-
-Most of the time, you won't need to use such commands.  They can make
-it hard for other people to understand the sequence of code in your
-page, and they can sometimes produce unexpected results which are
-difficult to debug because much of the information has been modified.
+"<meta-html> contains a few commands which\n\
+operate on the entire <i>page</i> as it currently exists.\n\
+\n\
+You may find, modify, or delete text which has already been looked at by\n\
+the interpreter, as well as text which hasn't yet been looked at. \n\
+\n\
+Most of the time, you won't need to use such commands.  They can make\n\
+it hard for other people to understand the sequence of code in your\n\
+page, and they can sometimes produce unexpected results which are\n\
+difficult to debug because much of the information has been modified.\n\
 ", "")
 
 static int include_recursive_calls = 0;
 
 DEFUN (pf_include, webpath &key alt=altcode verbatim=true,
-"Insert the contents of the file named by <var webpath> into the
-document at the point where the <code>include</code> form was read.
-If the keyword argument <var verbatim=true> is given, then the contents
-of the file are not executed, only inserted.  Otherwise, execution
-resumes at the point where the file was inserted.
-
-<var webpath> can be given as an absolute pathname, or a relative
-pathname.  If the path is relative, it is considered to be relative to
-the location of the document which contains the <code>include</code>
-form.  If the path given is not relative, it is appended to the
-directory found in <b>MHTML::INCLUDE-PREFIX</b>.
-
-If the named file could not be found on the server, and an <var alt=altcode>
+"Insert the contents of the file named by <var webpath> into the\n\
+document at the point where the <code>include</code> form was read.\n\
+If the keyword argument <var verbatim=true> is given, then the contents\n\
+of the file are not executed, only inserted.  Otherwise, execution\n\
+resumes at the point where the file was inserted.\n\
+\n\
+<var webpath> can be given as an absolute pathname, or a relative\n\
+pathname.  If the path is relative, it is considered to be relative to\n\
+the location of the document which contains the <code>include</code>\n\
+form.  If the path given is not relative, it is appended to the\n\
+directory found in <b>MHTML::INCLUDE-PREFIX</b>.\n\
+\n\
+If the named file could not be found on the server, and an <var alt=altcode>\n\
 value is given, then that value is placed into the page instead.")
 {
   int verbatim_p = var_present_p (vars, "VERBATIM");
@@ -421,11 +422,11 @@ value is given, then that value is placed into the page instead.")
 }
 
 DEFUN (pf_replace_page, webpath &key alt=altcode contents,
-"Replace the entire contents of the current page with the contents of
-the page named by <var webpath>.  You probably don't want to use this
-command, use <funref page-operator redirect> instead.  In that way, the
-URLs give a consistent view to the user.  The rules for which <var
-webpath> is chosen are identical to those for <funref page-operators
+"Replace the entire contents of the current page with the contents of\n\
+the page named by <var webpath>.  You probably don't want to use this\n\
+command, use <funref page-operator redirect> instead.  In that way, the\n\
+URLs give a consistent view to the user.  The rules for which <var\n\
+webpath> is chosen are identical to those for <funref page-operators\n\
 include>.")
 {
   PAGE *newpage = page_create_page ();
@@ -470,17 +471,17 @@ include>.")
 DOC_SECTION (PAGE-OPERATORS)
 
 DEFUN (pf_subst_in_page, this-string with-that,
-"Replaces all occurrences of <var this-string> with <var with-that> in the
-current page.  Both <var this-string> and <var with-that> are evaluated
-before the replacement is done.  <var this-string> can be any regular
-expression allowed by the POSIX extended regular expression matching.
-
-This command can be useful when included as part of a footer
-<code>include</code> file.  For example, you could replace all
-occurrences of <code>%name%</code> with a the value of the variable
-<code>FirstName</code> by writing:
-<example>
-  <subst-in-page %name% <get-var forms::FirstName>>
+"Replaces all occurrences of <var this-string> with <var with-that> in the\n\
+current page.  Both <var this-string> and <var with-that> are evaluated\n\
+before the replacement is done.  <var this-string> can be any regular\n\
+expression allowed by the POSIX extended regular expression matching.\n\
+\n\
+This command can be useful when included as part of a footer\n\
+<code>include</code> file.  For example, you could replace all\n\
+occurrences of <code>%name%</code> with a the value of the variable\n\
+<code>FirstName</code> by writing:\n\
+<example>\n\
+  <subst-in-page %name% <get-var forms::FirstName>>\n\
 </example>")
 {
   int arg = 0, done = 0;
@@ -564,28 +565,28 @@ pf_page_insert (PFunArgs)
 #endif /* NOT_AT_THIS_TIME */
 
 DEFUN (pf_redirect, url &key target,
-"Immediately return the HTTP <b>Location</b> directive with <var url>.
-This command is extremely useful in conjunction with <funref variables
-var-case>; in effect, that usage creates a dispatch table.
-
-When a <code>redirect</code> tag is seen, the current page is
-discarded, and the appropriate HTTP code is returned to the browser to
-cause an immediate redirection to the specified page.
-
-<var url> may be expressed in relative terms, in absolute terms, or as
-a complete URI specification.  For example, assume the current
-document is located at
-<example code>http://www.metahtml.com/subdir/doc.mhtml</example>, and
-the following redirections are seen:
-<example>
-  <redirect ../foo.mhtml>     --> http://www.metahtml.com/foo.mhtml
-  <redirect /bar/foo.mhtml>   --> http://www.metahtml.com/bar/foo.mhtml
-  <redirect http://www.bsdi.com> --> http://www.bsdi.com
-</example>
-
-If the keyword argument <var target=XXX> is supplied, it is the name of
-the browser window in which to display the new page.  If one is working
-with frames, this can be very useful: a target of \"_top\" removes all
+"Immediately return the HTTP <b>Location</b> directive with <var url>.\n\
+This command is extremely useful in conjunction with <funref variables\n\
+var-case>; in effect, that usage creates a dispatch table.\n\
+\n\
+When a <code>redirect</code> tag is seen, the current page is\n\
+discarded, and the appropriate HTTP code is returned to the browser to\n\
+cause an immediate redirection to the specified page.\n\
+\n\
+<var url> may be expressed in relative terms, in absolute terms, or as\n\
+a complete URI specification.  For example, assume the current\n\
+document is located at\n\
+<example code>http://www.metahtml.com/subdir/doc.mhtml</example>, and\n\
+the following redirections are seen:\n\
+<example>\n\
+  <redirect ../foo.mhtml>     --> http://www.metahtml.com/foo.mhtml\n\
+  <redirect /bar/foo.mhtml>   --> http://www.metahtml.com/bar/foo.mhtml\n\
+  <redirect http://www.bsdi.com> --> http://www.bsdi.com\n\
+</example>\n\
+\n\
+If the keyword argument <var target=XXX> is supplied, it is the name of\n\
+the browser window in which to display the new page.  If one is working\n\
+with frames, this can be very useful: a target of \"_top\" removes all\n\
 frames, a target of \"_new\" creates a new window, etc.")
 {
   PAGE *new_page;
@@ -699,22 +700,22 @@ frames, a target of \"_new\" creates a new window, etc.")
    Immediately sends this stuff down the line, but doesn't affect
    processesing or the current page. */
 DEFMACRO (pf_server_push, &key type=mime-type,
-"Writes the appropriate headers and HTTP information to the connected
-browser, along with the data that you specify.
-
-The functionality provided by this convenience function is available
-other ways, specifically through the use of <funref stream-operators
-with-open-stream> and the variable <varref *standard-output*>.
-
-<example>
-<server-push>
-  <html>
-  <head><title>Just a Moment, please</title></head>
-  <body>
-  <h3>Please wait a moment, we are searching the entire Web...</h3>
-  </body>
-  </html>
-</server-push>
+"Writes the appropriate headers and HTTP information to the connected\n\
+browser, along with the data that you specify.\n\
+\n\
+The functionality provided by this convenience function is available\n\
+other ways, specifically through the use of <funref stream-operators\n\
+with-open-stream> and the variable <varref *standard-output*>.\n\
+\n\
+<example>\n\
+<server-push>\n\
+  <html>\n\
+  <head><title>Just a Moment, please</title></head>\n\
+  <body>\n\
+  <h3>Please wait a moment, we are searching the entire Web...</h3>\n\
+  </body>\n\
+  </html>\n\
+</server-push>\n\
 </example>")
 {
   PAGE *text = (PAGE *)NULL;
@@ -801,28 +802,28 @@ html_quote_string (char *string)
 
 DEFINE_SECTION (DATES-AND-TIMES,
 		canonical date; time functions; clock; zone,
-"<Meta-HTML> provides a number of pre-defined functions for manipulating
-date and time objects.  Along with the primitive builtins of <tag date>
-and <tag time>, there are several functions defined with the prefix of
-<code>date</code> which can be used to parse dates, convert between time
-and date formats, format time strings in a variety of ways, and even
+"<Meta-HTML> provides a number of pre-defined functions for manipulating\n\
+date and time objects.  Along with the primitive builtins of <tag date>\n\
+and <tag time>, there are several functions defined with the prefix of\n\
+<code>date</code> which can be used to parse dates, convert between time\n\
+and date formats, format time strings in a variety of ways, and even\n\
 produce HTML-based calendars and the like.", "")
 
 DEFUN (pf_time, &optional date-string &key zone,
-"Returns the current local time, as measured in seconds since the
-epoch (the change from 23:59:59, December 31, 1969 to 00:00:00 Jan 1, 1970).
-
-If passed <var date-string>, <tag time> calls
-<funref DATES-AND-TIMES date::date-to-time> on that value instead.
-
-This is often useful as input to the <funref dates-and-times date>
-operator.  Here is how one might find out the printable date for the
-time 10 hours from now.
-
-<example>
-   <date> --> Wed Jul  3 17:14:53 1996
-   <date <add <time> <mul 60 60 10>>>
-          --> Thu Jul  4 03:14:57 1996
+"Returns the current local time, as measured in seconds since the\n\
+epoch (the change from 23:59:59, December 31, 1969 to 00:00:00 Jan 1, 1970).\n\
+\n\
+If passed <var date-string>, <tag time> calls\n\
+<funref DATES-AND-TIMES date::date-to-time> on that value instead.\n\
+\n\
+This is often useful as input to the <funref dates-and-times date>\n\
+operator.  Here is how one might find out the printable date for the\n\
+time 10 hours from now.\n\
+\n\
+<example>\n\
+   <date> --> Wed Jul  3 17:14:53 1996\n\
+   <date <add <time> <mul 60 60 10>>>\n\
+          --> Thu Jul  4 03:14:57 1996\n\
 </example>")
 {
   char *date_string = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -855,25 +856,25 @@ time 10 hours from now.
 }
 
 DEFUN (pf_date, &optional seconds-since-epoch &key gmt=true zone=ZONE,
-"Returns the date as a string of 24 characters.
-
-The output looks like <code><date></code>.
-
-Given the optional argument <var epoch-seconds>, this number is
-treated as the number of seconds since 12 midnight, December 31st,
-1969, and is converted into the current date.
-
-When the keyword argument <var gmt=true> is supplied, returns the date at
-the meridian (Greenwich Mean Time) in the same format as used by HTTP headers,
-such as the <b>Expires</b> header.
-
-Examples:
-<example>
-<date>                  --> Thu Nov 13 10:52:07 1997
-<date gmt=true>         --> Thu, 13 Nov 1997 18:52:07 GMT
-<date <add <time> 60>>  --> Thu Nov 13 10:53:07 1997
-</example>
-
+"Returns the date as a string of 24 characters.\n\
+\n\
+The output looks like <code><date></code>.\n\
+\n\
+Given the optional argument <var epoch-seconds>, this number is\n\
+treated as the number of seconds since 12 midnight, December 31st,\n\
+1969, and is converted into the current date.\n\
+\n\
+When the keyword argument <var gmt=true> is supplied, returns the date at\n\
+the meridian (Greenwich Mean Time) in the same format as used by HTTP\n\
+headers, such as the <b>Expires</b> header.\n\
+\n\
+Examples:\n\
+<example>\n\
+<date>                  --> Thu Nov 13 10:52:07 1997\n\
+<date gmt=true>         --> Thu, 13 Nov 1997 18:52:07 GMT\n\
+<date <add <time> 60>>  --> Thu Nov 13 10:53:07 1997\n\
+</example>\n\
+\n\
 Also see the <funref dates-and-times time> function.")
 {
   char *tstring = mhtml_evaluate_string (get_positional_arg (vars, 0));
@@ -946,7 +947,7 @@ Also see the <funref dates-and-times time> function.")
 
 DOC_SECTION (LANGUAGE-OPERATORS)
 DEFUN (pf_pid, ,
-"Returns the process ID of the currently executing Meta-HTML
+"Returns the process ID of the currently executing Meta-HTML\n\
 interpreter, on those systems which have process IDs.")
 {
   pid_t pid = getpid ();

@@ -55,26 +55,26 @@ MODULE_INITIALIZE ("example", ftab)
    functions that you declare with DEFUN, DEFMACRO, etc., will be documented
    in that section. */
 DEFINE_SECTION (EXAMPLE-MODULE, example-keywords; more keywords,
-"The functions in this module are simply here to demonstrate how to write
-new dynamically loadable modules for <Meta-HTML> for your own application
-needs, and don't really perform any services that couldn't be better 
-performed in other ways.  However, the <tag apropos> function in this
-module might be of use in an interactive Web page -- see <secref html-helpers>
-for more information, as well as reading the source code in
-<code>modules/example.c</code>.", "")
+"The functions in this module are simply here to demonstrate how to write\n\
+new dynamically loadable modules for <Meta-HTML> for your own application\n\
+needs, and don't really perform any services that couldn't be better \n\
+performed in other ways.  However, the <tag apropos> function in this\n\
+module might be of use in an interactive Web page -- see\n\
+<secref html-helpers> for more information, as well as reading\n\
+the source code in <code>modules/example.c</code>.", "")
 
 /* 5) Write the actual code which implements your functionality. */
 
 /* <apropos regexp> --> array of symbol names containing regexp. */
 
 DEFUN (pf_apropos, regexp,
-"Search through all <Meta-HTML> symbols for <var regexp>, and return a
-newline separated list of those symbols which match.
-
-Generally meant for interactive use.
-
-Note that this is simply a long documentation comment in the source, to
-demonstrate how to document new commands that you might write in a
+"Search through all <Meta-HTML> symbols for <var regexp>, and return a\n\
+newline separated list of those symbols which match.\n\
+\n\
+Generally meant for interactive use.\n\
+\n\
+Note that this is simply a long documentation comment in the source, to\n\
+demonstrate how to document new commands that you might write in a\n\
 <Meta-HTML> dynamically loadable module.")
 {
   char *regexp = mhtml_evaluate_string (get_positional_arg (vars, 0));

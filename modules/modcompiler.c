@@ -132,10 +132,10 @@ DEFINE_SECTION (COMPILER-MODULE, lisp;scheme;lists,
 "The functions in this module treat their arguments ...", "")
 
 #define COMPILE_AND_RUN_DOC_STRING \
-"Compile the code that is passed in <var code-string>.  Note that
-<var code-string> is not evaluated by the interpreter -- it is completely
-up to the compiler to do that.
-
+"Compile the code that is passed in <var code-string>.  Note that\n\
+<var code-string> is not evaluated by the interpreter -- it is completely\n\
+up to the compiler to do that.\n\
+\n\
 After the code is compiled, run it right away."
 DEFUNX (compiler::compiler-and-run, code-string, COMPILE_AND_RUN_DOC_STRING)
 DEFUN (pf_comp_run, code-string, COMPILE_AND_RUN_DOC_STRING)
@@ -155,10 +155,10 @@ DEFUN (pf_comp_run, code-string, COMPILE_AND_RUN_DOC_STRING)
 }
 
 #define COMPILE_FUNCTION_DOC_STRING \
-"Compile the function named by <var function-name>, and install the resultant
-compiled code in the function cell of <var function-name>.  This assumes that
-<var function-name> has already been defined by the interpreter, either through
-an explicit <tag defun>, or by having been loaded via <tag require> or
+"Compile the function named by <var function-name>, and install the resultant\n\
+compiled code in the function cell of <var function-name>.  This assumes that\n\
+<var function-name> has already been defined by the interpreter, either through\n\
+an explicit <tag defun>, or by having been loaded via <tag require> or\n\
 <tag %%load-package-file>"
 
 DEFUNX (compiler::compile-function, function-name, COMPILE_FUNCTION_DOC_STRING)
@@ -270,11 +270,11 @@ DEFUN (pf_comp_fun, function-name, COMPILE_FUNCTION_DOC_STRING)
 }
 
 #define COMPILE_DISASSEMBLE_DOC_STRING \
-"Compile the function named by <var function-name>, and install the resultant
-compiled code in the function cell of <var function-name>.  This assumes that
-<var function-name> has already been defined by the interpreter, either through
-an explicit <tag defun>, or by having been loaded via <tag require> or
-<tag %%load-package-file>"
+"Compile the function named by <var function-name>, and install the\n\
+resultant compiled code in the function cell of <var function-name>.\n\
+This assumes that <var function-name> has already been defined by the\n\
+interpreter, either through an explicit <tag defun>, or by having been\n\
+loaded via <tag require> or <tag %%load-package-file>"
 
 DEFUNX (compiler::disassemble, function-name, COMPILE_DISASSEMBLE_DOC_STRING)
 
@@ -334,7 +334,7 @@ DEFUN (pf_comp_ver, , COMPILER_VERSION_DOC_STRING)
 }
 
 #define COMPILER_INCLUDE_DOC_STRING \
-"Read the contents of the file named by <var filename>, and compile it,
+"Read the contents of the file named by <var filename>, and compile it,\n\
 and run the resultant compilation."
 DEFUN (pf_comp_inc, filename, COMPILER_INCLUDE_DOC_STRING)
 {
@@ -373,7 +373,7 @@ DEFUN (pf_comp_inc, filename, COMPILER_INCLUDE_DOC_STRING)
 
 
 #if defined (THIS_IS_A_COMMENT)
-
+/*
 (mdb) <comp-run "<defun sb x y><sub x y></defun>">
 ;; Name     : sb
 ;; Address  : 0x81a42f8
@@ -408,6 +408,7 @@ Machine Args[2]: 3, 3, 3
 Machine Result: 1
 (("XYZ" . "1")("ABC" . "10"))
 
+*/
 #endif /* THIS IS A COMMENT */
 
 

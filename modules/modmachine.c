@@ -298,19 +298,19 @@ mh_module_initialize (void)
 
 
 DEFINE_SECTION (MACHINE-MODULE, compiler; internals,
-"The <Meta-HTML> machine (implemented in modmachine.so) is the
-dynamically loadable code segment that implements the byte code engine 
-part of the compiler/engine suite.
-
-The user-visible functions in this module are simply for controlling
+"The <Meta-HTML> machine (implemented in modmachine.so) is the\n\
+dynamically loadable code segment that implements the byte code engine \n\
+part of the compiler/engine suite.\n\
+\n\
+The user-visible functions in this module are simply for controlling\n\
 and viewing the operation of the machine (if it is present).", "")
 
 DEFVAR (*MACHINE*::VERBOSE-DEBUGGING,
 	"Non-empty causes verboseness in the output of stepping through code")
 
 DEFVAR (*MACHINE*::PERFORMANCE-MONITOR-P,
-	"Non-empty means turn on the performance monitor -- this
- allows one to evaluate the performance of the machine as it executes
+	"Non-empty means turn on the performance monitor -- this\n\
+ allows one to evaluate the performance of the machine as it executes\n\
  a specific bit of code")
 
 DEFVAR (*MACHINE*::EXTERN-MONITOR-P,
@@ -324,7 +324,7 @@ DEFVAR (*MACHINE*::TRACE-P,
 DEFVAR (*MACHINE*::TRACE-DEPTH, "Don't trace past this depth...")
 
 DEFVAR (*MACHINE*::STEP-P,
-	"When non-empty, you must hit the spacebar before each
+	"When non-empty, you must hit the spacebar before each\n\
  instruction will be executed")
 
 DEFUNX (machine::version, ,

@@ -90,12 +90,21 @@ typedef struct
 #define ReqFunArgs HTTP_REQUEST *request, int fd
 
 typedef HTTP_RESULT *ReqFun (ReqFunArgs);
-
 typedef struct
 {
   char *name;
   ReqFun *handler;
 } METHOD_HANDLER;
+
+typedef char *GFunc (HTTP_RESULT *, char *);
+typedef struct
+{
+  char *mime_name;		/* The name of the header. */
+  GFunc *value_generator;	/* Function to get this value. */
+  int call_anyway;		/* Non-zero means always call this function. */
+} MIME_RESOLVER;
+
+
 
 extern char *http_readline (int fd);
 extern HTTP_REQUEST *http_read_request (int fd);

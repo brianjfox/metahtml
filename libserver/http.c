@@ -710,7 +710,7 @@ mr_date (HTTP_RESULT *result, char *mr_offset)
   return (http_date_format (ticks));
 }
 
-static char *
+char *
 mr_set_cookie (HTTP_RESULT *result, char *ignore)
 {
   char *answer = (char *)NULL;
@@ -827,7 +827,7 @@ mr_content_type (HTTP_RESULT *result, char *existing_type)
   return (existing_type);
 }
 
-static char *
+char *
 mr_expires (HTTP_RESULT *result, char *ignore)
 {
   char *answer = (char *)NULL;
@@ -868,7 +868,7 @@ mr_expires (HTTP_RESULT *result, char *ignore)
   return (answer);
 }
 
-static char *
+char *
 mr_last_modified (HTTP_RESULT *result, char *ignore)
 {
   char *answer = (char *)NULL;
@@ -895,7 +895,7 @@ mr_last_modified (HTTP_RESULT *result, char *ignore)
 /* This does two things.  First, it forces an existing location string to
    appear before the content length or type.  Second, it inserts the 
    protocol specification if it isn't present. */
-static char *
+char *
 mr_location (HTTP_RESULT *result, char *existing_location)
 {
   if ((existing_location != (char *)NULL) &&
@@ -951,7 +951,7 @@ mr_location (HTTP_RESULT *result, char *existing_location)
 
 /* We always say something about the fact that this is the Meta-HTML engine.
    Otherwise, it isn't directly obvious when connecting to a user's site. */
-static char *
+char *
 mr_engine (HTTP_RESULT *result, char *ignore)
 {
   return (sv_VersionString);
@@ -959,7 +959,7 @@ mr_engine (HTTP_RESULT *result, char *ignore)
 
 /* If the user has supplied a status, organize things so that this is the
    status returned. */
-static char *
+char *
 mr_status (HTTP_RESULT *result, char *status_text)
 {
   if (status_text != (char *)NULL)
@@ -1016,14 +1016,6 @@ mr_connection (HTTP_RESULT *result, char *existing_value)
 }
 
 #endif /* USE_KEEP_ALIVE */
-
-typedef char *GFunc (HTTP_RESULT *, char *);
-typedef struct
-{
-  char *mime_name;		/* The name of the header. */
-  GFunc *value_generator;	/* Function to get this value. */
-  int call_anyway;		/* Non-zero means always call this function. */
-} MIME_RESOLVER;
 
 /* For CALL_ANYWAY, a value of zero means only call the resolver function if
    this header was already present in the outgoing headers, a non-zero value

@@ -197,6 +197,7 @@ chmod a+r,go-w $RPM_BUILD_ROOT/usr/share/emacs/site-lisp/mhtml.el
 # Install template dir for /home/mhttpd.
 rm -rf $lib/metahtml/conf.template
 cp -r $root/server/conf $lib/metahtml/conf.template
+(cd $lib/metahtml/conf.template; rm -rf CVS)
 cp $root/engine/engine.conf $lib/metahtml/engine.conf.example
 cp $root/server/rc.mhttpd $lib/metahtml/rc.mhttpd
 chmod a+x $lib/metahtml/rc.mhttpd
@@ -344,6 +345,7 @@ exit 0
 /usr/lib/metahtml/mkbg
 /usr/lib/metahtml/mktrans
 /usr/lib/metahtml/thumbnail
+/usr/lib/metahtml/coloring-book
 /usr/lib/metahtml/recolor
 /usr/lib/metahtml/functions.db
 /usr/lib/metahtml/conf.template/mhttpd.conf

@@ -1,0 +1,131 @@
+;;; about-server.mhtml: -*- Meta-HTML -*-  Page describing server features.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Jan 22 03:04:25 1996.
+<set-var title="The Meta-HTML Web Server">
+<set-var mhtml::cacheable=true>
+<include header.mhtml>
+
+<layout::page>
+
+<ptext>
+The <meta-html> Web Server is a full featured Web Server with
+<meta-html> built right into it!  This means direct access to database
+functionality, dynamically built pages, and full programming language
+facilities are available at all times, and are executed quickly and
+efficiently. 
+
+<h3>Features of our Web Server include:</h3>
+
+<ul>
+  <li> <b>Comprehensive Logging</b>
+  <li> <b>Programmability</b>
+  <li> <b>Basic WWW Authorization</b>
+  <li> <b>Access Restriction by Method and Host</b>
+  <li> <b>Path Translation</b>
+  <li> <b>User-definable Result Pages</b>
+  <li> <b>CGI Execution Specification</b>
+  <li> <b>Automatic Header Detection and Clean-up</b>
+  <li> <b>HTTP Cookie Support</b>
+</ul>
+
+<center>
+  <img src="/images/half-rrainbowline.gif">
+</center>
+<p>
+<ul>
+  <li> <b>Comprehensive Logging</b>
+  <ul>
+    <li> Access logs in Common Log Format means that
+    <a href="http://union.ncsa.uiuc.edu/HyperNews/get/www/log-analyzers.html">
+      existing Log Analyzers</a> work perfectly.
+    <li> Extensive Debug logs help you to closely trace the operations
+    of your server.
+    <li> Performance logging shows how quickly the <meta-html> server
+    is responding to your user's requests.
+    <li> Error logging aids you when your new CGI doesn't work.
+    <li> User Agent logging is provided for compatibility with other
+    servers, but is unnecessary with a <meta-html> server (see
+    <a href="/browser-stats.mhtml">a list of browser statistics</a>
+    being tracked dynamically for each connection; this is done with
+    10 lines of <meta-html>).
+    <li> Referrer logging helps you to see who is pointing at your
+    site!  Internal links, and links to graphics are not logged by
+    default, so you get a more concise list.
+  </ul>
+
+  <li> <b>Programmability</b>
+  <ul>
+    Because our server has <meta-html> built directly into it, you can
+    use that language to change the behavior of the server directly!
+    For example, redirecting a document request can be done based on
+    any criteria of the requester that you desire.
+  </ul>
+
+  <li> <b>Basic WWW Authorization</b>
+  <ul>
+    Pop up a dialog box on the client browser requesting username and
+    password information automatically!  Simply place a user-specific
+    password file in the directories that you wish protected in this
+    way.  Support for <b>.htaccess</b> is under development.
+  </ul>
+
+  <li> <b>Access Restriction by Method and Host</b>
+  <ul>
+    Control who gets to access what!  Perhaps you wish to allow only
+    your local host to <code>POST</code> to <code>foo.mhtml</code>,
+    but are willing to allow all <code>*.edu</code> hosts to
+    <code>GET</code> that document.  No problem.
+  </ul>
+
+  <li> <b>Path Translation</b>
+  <ul>
+    Arbitrarily change the server-side URL to whatever makes sense for
+    your site!  The client still sees the original URL.
+  </ul>
+
+  <li> <b>User-definable Result Pages</b>
+  <ul>
+    Each page access which results in an error looks up a known page
+    to return.  Write new pages yourself, use our provided pages, or
+    have the server return a default message.
+  </ul>
+
+  <li> <b>CGI Execution Specification</b>
+  <ul>
+    Specify which documents are executable, by directory, by suffix,
+    or by exact document name.
+  </ul>
+
+  <li> <b>Automatic Header Detection and Clean-up</b>
+  <ul>
+    Your <code>nph</code> and regular CGI scripts work seamlessly!
+    The <meta-html> server automatically determines which headers are
+    missing, fills in those that are not present, and returns a
+    set of document headers that are completely HTTP/1.0 compliant.
+    You can even place HTTP headers at the top of your HTML pages,
+    without writing any programs or using arcane syntax!
+
+    <when <match <get-var env::http_user_agent> "(Mozilla|Explorer)">>
+      <a href="<get-var mhtml::url-to-dir>/refresh-example.mhtml">
+	Doing a <code>Refresh</code> operation has never been simpler!
+      </a>
+    </when>
+  </ul>
+
+  <li> <b>HTTP Cookie Support</b>
+  <ul>
+    Of course, since <meta-html> is designed to build comprehensive
+    Web applications, a statefull session is a must.  Our server
+    automatically provides HTTP Cookie support, and passes that
+    information to <meta-html> and CGI documents alike.
+  </ul>
+</ul>
+
+</ptext>
+    
+</layout::page>
+
+<include footer.mhtml>
+
+

@@ -1,0 +1,18 @@
+;;; base-increment.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sat Oct 26 22:19:31 1996.
+
+Result: 2: <set-var x=1><increment x><get-var x>
+Result: 2: <set-var x=-1><increment x by=3><get-var x>
+Result: 2: <set-var x=3><increment x by=-5><get-var x>
+Result: 3: <set-var x=3><increment x by=0><get-var x>
+Result: 8.02: <set-var x=3><increment x by=5.02><get-var x>
+Result: -2.02: <set-var x=3><increment x by=-5.02><get-var x>
+Result: -8.02: <set-var x=-3><increment x by=-5.02><get-var x>
+Result: 8.07: <set-var x=3.05><increment x by=5.02><get-var x>
+Result: -1.97: <set-var x=3.05><increment x by=-5.02><get-var x>
+Result: -8.07: <set-var x=-3.05><increment x by=-5.02><get-var x>
+Result: 3.03: <set-var x=3.03><increment x by=-0><get-var x>
+Result: 0: <set-var x=3.03><increment x by=-3.03><get-var x>
+Result: 0: <set-var x=0><increment x by=0><get-var x>

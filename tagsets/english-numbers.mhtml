@@ -1,0 +1,227 @@
+;;; english-numbers.mhtml: -*- Meta-HTML -*- 
+;;; Display a number in English text.
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Tue Sep 26 01:51:58 1995.
+;;;
+;;; Revamped to handles very large numbers: Sun Dec 22 08:53:23 1996
+
+<set-var counter::under-20-names[] =
+  "Zero\nOne\nTwo\nThree\nFour\nFive\nSix\nSeven\nEight\nNine\nTen
+   Eleven\nTwelve\nThirteen\nFourteen\nFifteen\nSixteen\nSeventeen
+   Eighteen\nNineteen">
+
+<set-var counter::under-20th-names[] =
+  "Zeroith\nFirst\nSecond\nThird\nFourth\nFifth\nSixth\nSeventh\nEighth
+   Ninth\nTenth\nEleventh\nTwelfth\nThirteenth\nFourteenth\nFifteenth
+   Sixteenth\nSeventeenth\nEighteenth\nNineteenth">
+
+<set-var counter::tens-names[] =
+  "None\nTen\nTwenty\nThirty\nForty\nFifty\nSixty\nSeventy\nEighty\nNinety">
+
+<set-var counter::tenths-names[] =
+  "None\nTenth\nTwentieth\nThirtieth\nFortieth\nFiftieth
+   Sixtieth\nSeventieth\nEightieth\nNinetieth">
+
+<set-var counter::place-names[] =
+  "IGNORE
+   Hundred
+   Thousand
+   Million
+   Billion
+   Trillion
+   Quadrillion
+   Quintillion
+   Sextillion
+   Septillion
+   Octagillion
+   Jillion
+   Googal">
+
+<set-var counter::deutsch-place-names[] =
+  "IGNORE
+   Hundert
+   Tausend
+   Million
+   Billion
+   Trillion
+   Quadrillion
+   Quintillion
+   Sextillion
+   Septillion
+   Octagillion
+   Jillion
+   Googal">
+
+<defun digits-to-english value>
+  <set-var digits[]=<subst-in-string <get-var-once value> "(.)" "\\1\n">>
+  <foreach digit digits>
+    <concat " " <get-var counter::under-20-names[digit]>>
+  </foreach>
+</defun>
+
+<defun under-100-to-english value>
+  <defvar value 0>
+  <if <lt value 20>
+      <set-var result=<get-var counter::under-20-names[value]>>
+    <concat
+      <set-var
+	tens=<div value 10>
+	value=<mod value 10>
+	result = <get-var counter::tens-names[tens]>>
+      <if <not <eq value 0>>
+	  <set-var result =
+	    <concat "<get-var result>-"
+		    "<get-var counter::under-20-names[value]>">>>>>
+  <get-var result>
+</defun>
+
+<defun under-100-to-englith value>
+  <if <lt value 20>
+      <set-var result=<get-var counter::under-20th-names[value]>>
+    <concat
+      <set-var
+	tens=<div value 10>
+	value=<mod value 10>
+	result = <get-var counter::tens-names[tens]>>
+      <if <not <eq value 0>>
+	  <set-var result =
+	    <concat "<get-var result>-"
+		    "<get-var counter::under-20th-names[value]>">>
+	<set-var
+	  result = <get-var counter::tenths-names[tens]>>>>>
+  <get-var result>
+</defun>
+
+<defun under-1000-to-english value>
+  <if <lt value 100>
+      <under-100-to-english <get-var value>>
+    <concat
+      <concat <under-100-to-english <substring <get-var value> 0 1>>
+	      " Hundred">
+      <set-var value=<substring <get-var value> 1>>
+      <if <gt value 0>
+	  <concat " and " <under-100-to-english <get-var value>>>>>>
+</defun>
+
+<defun under-1000-to-englith value>
+  <if <lt value 100>
+      <under-100-to-englith <get-var value>>
+    <concat <under-100-to-english <substring <get-var value> 0 1>>
+	    " Hundred"
+	    <set-var value=<substring <get-var value> 1>>
+	    <if <gt value 0>
+		<concat " and " <under-100-to-englith <get-var value>>>
+	      th>>>
+</defun>
+
+<defun number-to-english value>
+  ;;; DOC_SECTION (MISCELLANEOUS-TAGS)
+  ;;; Take the numeric value of VALUE and produce an English representation
+  ;;; of it.  For example:
+  ;;; <complete-example>
+  ;;; <number-to-english 232>
+  ;;; </complete-example>
+  <set-var orig-radix = <set-output-radix 10>>
+  <subst-in-var value "[ \t\r\n,]+" "">
+  <when <match <get-var-once value> "\\.">>
+    <set-var decimals =
+      <subst-in-string <get-var-once value> "(.*)(\\.)(.*$)" "\\3">>
+    <subst-in-var value "\\..*$" "">
+  </when>
+  <set-var places=<match <get-var value> "^[0-9]+$" action=length>>
+  <if <lt places 4>
+      <array-append <under-1000-to-english <get-var value>> result>>
+  <when <not <get-var result>>>
+    <set-var pad=<mul <div <add places 2> 3> 3>>
+    <set-var value=<pad <get-var value> <get-var pad> align=right>>
+    ;;; Break into chunks of three.
+    <set-var chunks[] = <subst-in-string <get-var value> "(...)" "\\1\n">>
+    <set-var i=0 groups=<array-size chunks> limit=<get-var groups>>
+    <while <get-var chunks[i]>>
+      <if <gt chunks[i] 0>
+	  <set-var last-member=<get-var i>>>
+      <increment i>
+    </while>
+    <set-var i=0>
+    <while <get-var chunks[i]>>
+      <when <gt chunks[i] 0>>
+	<if <not <get-var chunks[<add i 1>]>>
+	    <array-append 
+	     <concat <if <and <get-var result> <lt chunks[i] 100>> "and ">
+		     <under-1000-to-english <get-var chunks[i]>>>
+	     result>
+	  <array-append
+	   <concat "<under-1000-to-english <get-var chunks[i]>> "
+		   <get-var counter::place-names[groups]>>
+	   result>>
+      </when>
+      <increment i>
+      <decrement groups>
+    </while>
+  </when>
+  <set-var final=<subst-in-string <get-var result[]> "^ " "" "[ \t\r\n]+" " ">>
+  <if <get-var-once decimals>
+      <set-var final =
+	<concat <get-var-once final>
+		" point"
+		<digits-to-english <get-var-once decimals>>>>>
+  <get-var-once final>
+  <set-var orig-radix = <set-output-radix <get-var-once orig-radix>>>
+</defun>
+
+<defun number-to-englith value>
+  ;;; DOC_SECTION (MISCELLANEOUS-TAGS)
+  ;;; Take the numeric value of VALUE and produce an English representation
+  ;;; of it as a counting value.  For example:
+  ;;; 232 --> Two Hundred and Thirty-Second.
+  <set-var orig-radix = <set-output-radix 10>>
+  <subst-in-var value "[ \t\r\n,]+" "">
+  <when <match <get-var-once value> "\\.">>
+    <set-var decimals =
+      <subst-in-string <get-var-once value> "(.*)(\\.)(.*$)" "\\3">>
+    <subst-in-var value "\\..*$" "">
+  </when>
+  <set-var places=<match <get-var value> "^[0-9]+$" action=length>>
+  <if <lt places 4>
+      <set-var result=<under-1000-to-englith <get-var value>>>>
+  <when <not <get-var result>>>
+    <set-var pad=<mul <div <add places 2> 3> 3>>
+    <set-var value=<pad <get-var value> <get-var pad> align=right>>
+    ;;; Break into chunks of three.
+    <set-var chunks[] = <subst-in-string <get-var value> "(...)" "\\1\n">>
+    <set-var i=0 groups=<array-size chunks> limit=<get-var groups>>
+    <while <get-var chunks[i]>>
+      <if <gt chunks[i] 0>
+        <set-var last-member=<get-var i>>>
+      <increment i>
+    </while>
+    <set-var i=0>
+    <while <get-var chunks[i]>>
+      <when <gt chunks[i] 0>>
+	<if <not <get-var chunks[<add i 1>]>>
+	   <set-var result =
+		 <concat <get-var result> " "
+			 <if <and <get-var result> <lt chunks[i] 100>> "and ">
+			 <if <eq <add i 1> limit>
+			     <under-1000-to-englith <get-var chunks[i]>>
+			   <under-1000-to-english <get-var chunks[i]>>>>>
+	  <set-var result =
+		   <concat <get-var result>
+			   " <under-1000-to-english <get-var chunks[i]>> "
+			   <get-var counter::place-names[groups]>
+			   ;;; "th"
+			   >>>
+      </when>
+      <increment i>
+      <decrement groups>
+    </while>
+  </when>
+  <set-var final=<subst-in-string <get-var result> "^ " "" "[ \t\r\n]+" " ">>
+  <if <get-var-once decimals>
+      <set-var final =
+	<concat <get-var-once final>
+		" point"
+		<digits-to-english <get-var-once decimals>>>>>
+  <get-var-once final>
+  <set-var orig-radix = <set-output-radix <get-var-once orig-radix>>>
+</defun>

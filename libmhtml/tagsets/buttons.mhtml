@@ -1,0 +1,87 @@
+;;; buttons.mhtml: -*- Meta-HTML -*-  Dynamically create small button images.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Mar 15 10:40:39 1997.
+<set-var buttons::images-webpath = /images/buttons>
+<set-var buttons::base-button-image = japonesque-button.gif>
+<set-var buttons::halign = Right buttons::valign=Center>
+<set-var buttons::fontname = Times-BoldItalic buttons::font-size=14>
+<set-var buttons::italic-fontname = Times-BoldItalic>
+<set-var buttons::font-color = Black>
+
+<defun buttons::base-button-image-file>
+  <concat <get-var-once mhtml::include-prefix>
+	  <site::system-prefix>
+	  /images/base-images
+	  /buttons/<get-var-once buttons::base-button-image>>
+</defun>
+
+<defun buttons::create-button output-file image-text italic?>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Create a "button" image in <var output-file> using <var image-text>.
+  ;;; The base image is taken from
+  ;;; <code>BUTTONS::BASE-BUTTON-IMAGE</code>, which is
+  ;;; the basename of the image file, and is looked for in
+  ;;; <site::system-prefix>/images/base-images/buttons.
+  ;;; Other parameters, including HALIGN, VALIGN, FONT, FONT-SIZE, and
+  ;;; FONT-COLOR are taken from their values in the BUTTONS package.
+  <if <not <file-exists
+	    <concat
+	     <get-var-once mhtml::include-prefix>
+	     <get-var-once buttons::images-webpath>>>>
+      <make-directories
+       <concat <get-var-once mhtml::include-prefix>
+	       <get-var-once buttons::images-webpath>>>>
+  <set-var x-y[] =
+    <cgi-exec gifq <buttons::base-button-image-file> width height>>
+  <set-var the-file =
+    <image-builder::make-text-gif
+     <get-var-once image-text>
+     <get-var-once buttons::halign> <get-var-once buttons::valign>
+     <get-var-once x-y[0]> <get-var-once x-y[1]>
+     <if <get-var-once italic?>
+	 <get-var-once buttons::italic-fontname>
+       <get-var-once buttons::fontname>>
+     <get-var-once buttons::font-size>
+     <get-var-once buttons::font-color>
+     <buttons::base-button-image-file>>>
+  <cgi-exec
+   composite --retrans <if <get-var-once rotation>
+			   "-r <get-var-once rotation>">
+   <buttons::base-button-image-file> <get-var-once the-file>
+   "><get-var-once output-file>" errors=errors>
+  <cgi-exec rm -f <get-var-once the-file>>
+  <when <get-var-once errors>>
+    <page-debug Errors from composite: <get-var-once errors>>
+  </when>
+</defun>
+
+<defun button link image-text italic?>
+  <set-var image-name =
+    <downcase <concat <subst-in-string <get-var-once image-text>
+				       "[~`!@#$%^&*()|']" ""
+				       "^[ \t\r\n]+" ""
+				       "[ \t\r\n]+$" ""
+				       "[ -<>?/]" "_">
+		      <if <get-var-once italic?>
+			  -buttoni -button>>>>
+  <set-var image-file = <concat <get-var-once mhtml::include-prefix>
+				<get-var-once buttons::images-webpath>
+				/<get-var-once image-name>.gif>>
+
+  <if <not <file-exists <get-var-once image-file>>>
+      <buttons::create-button <get-var-once image-file>
+			      <get-var-once image-text>>>
+  <layout::left-border>
+    <a href="<get-var-once link>">
+      <img src="<concat <get-var-once buttons::images-webpath>
+		       /<get-var-once image-name>.gif>"
+	   border=0  alt="<get-var-once image-text>">
+    </a>
+    <p>
+  </layout::left-border>
+</defun>
+
+<defun buttoni link image-text>
+  <button <get-var-once link> <get-var-once image-text> true>
+</defun>

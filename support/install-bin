@@ -1,0 +1,228 @@
+#!/bin/sh
+# -*- Bash -*-
+# Install the binaries from the distribution.
+#
+set -e
+
+if echo '\c' | grep -s c >/dev/null 2>&1
+then
+   ECHO_N="echo -n"
+   ECHO_C=""
+else
+   ECHO_N="echo"
+   ECHO_C='\c'
+fi
+
+# Here is the default:
+if [ "${bindir}" = "" ]; then bindir="/www/bin"; fi
+
+# Get the name of a directory to install binaries in.
+echo ""
+echo "This script installs the Meta-HTML binaries for you, in the location"
+echo "that you specify. "
+if [ "$CALLED_FROM_Install" = "true" ]; then
+   echo "";
+else
+   echo "";
+   echo "Once the binaries are installed, you may type"
+   echo ""
+   echo "        \`./install-site'"
+   echo ""
+   echo "to install the server or engine, release notes, applications, and"
+   echo "tagsets that came with your distribution."
+   echo ""
+fi
+echo "We would like to install the binaries that came with your distribution"
+echo "in a directory by themselves.  After installation is complete, you"
+echo "should add this directory to the end of your PATH variable.  You"
+echo "may install the binaries anywhere that you would like, but why not"
+echo "install in a separate directory first, and then move them later?"
+echo ""
+echo "Where would you like the server, engine, and utility binaries to be"
+echo "installed?"
+${ECHO_N} "(Path, without trailing slash) default: [${bindir}] ${ECHO_C}"
+read temp
+if [ "$temp" = "" ]; then temp="${bindir}"; fi
+bindir="$temp"
+
+# Make the install directory if it does not already exist.
+set `echo ${bindir} | sed -e 's@/@ @g'`
+fullpath=/
+for dir in $*; do
+   if [ ! -d ${fullpath}${dir} ]; then
+      echo "   mkdir ${fullpath}${dir}"
+      mkdir ${fullpath}${dir}
+   fi
+   fullpath=${fullpath}${dir}/
+done
+
+# Okay, now install everything.
+if [ -d Utilities ]; then
+   echo "  Installing the utility programs into ${bindir}"
+   doneone=
+   ${ECHO_N} "    ${ECHO_C}"
+   for srcfile in Utilities/*; do
+      stem=`echo $srcfile | sed -e 's@.*/@@'`
+      destfile=$bindir/$stem
+      if [ "$doneone" ]; then
+	 ${ECHO_N} ", ${ECHO_C}"
+      else
+	 doneone=true
+      fi
+      ${ECHO_N} "${stem}${ECHO_C}"
+      cp $srcfile $destfile
+      if [ ! -r $destfile ]; then
+	 echo "   Unable to create the file \"$destfile!\""
+	 echo "The install was aborted."
+	 echo ""
+	 exit 5
+      fi
+   done
+   echo "."
+else
+   if [ -d utilities ]; then
+      echo "  Installing the utility programs into ${bindir}"
+      doneone=
+      ${ECHO_N} "    ${ECHO_C}"
+      for srcfile in utilities/imagemap/imagemap \
+	 utilities/start-servers utilities/stop-servers \
+	 utilities/strip-tags/strip-tags; do
+	 stem=`echo $srcfile | sed -e 's@.*/@@'`
+	 destfile=$bindir/$stem
+	 if [ "$doneone" ]; then
+	    ${ECHO_N} ", ${ECHO_C}"
+	 else
+	    doneone=true
+	 fi
+	 ${ECHO_N} "${stem}${ECHO_C}"
+	 cp $srcfile $destfile
+	 if [ ! -r $destfile ]; then
+	    echo "   Unable to create the file \"$destfile!\""
+	    echo "The install was aborted."
+	    echo ""
+	    exit 5
+	 fi
+      done
+      (cd utilities;
+      for file in mkapi mklib show-doc.mhc mail-filter.mhc; do
+	 cat $file | sed -e "s@/www/bin@${bindir}@g" >${bindir}/$file
+	 chmod a+rx ${bindir}/$file
+      done)
+      echo "."
+   fi
+   if [ -d dbutils ]; then
+      echo "  Installing the database utility programs into ${bindir}"
+      doneone=
+      ${ECHO_N} "    ${ECHO_C}"
+      for srcfile in dbutils/dbcreate dbutils/dbdelete dbutils/dbdump \
+	 dbutils/dbget dbutils/dbpack; do
+	 stem=`echo $srcfile | sed -e 's@.*/@@'`
+	 destfile=$bindir/$stem
+	 if [ "$doneone" ]; then
+	    ${ECHO_N} ", ${ECHO_C}"
+	 else
+	    doneone=true
+	 fi
+	 ${ECHO_N} "${stem}${ECHO_C}"
+	 cp $srcfile $destfile
+	 if [ ! -r $destfile ]; then
+	    echo "   Unable to create the file \"$destfile!\""
+	    echo "The install was aborted."
+	    echo ""
+	    exit 5
+	 fi
+      done
+      echo "."
+   fi
+   if [ -d sessions ]; then
+      echo "  Installing the session utility programs into ${bindir}"
+      doneone=
+      ${ECHO_N} "    ${ECHO_C}"
+      for srcfile in \
+	 sessions/binary-session sessions/create-session \
+	 sessions/delete-session sessions/gc-database \
+	 sessions/get-session-var sessions/set-session-var \
+	 sessions/list-sessions sessions/reap-sessions \
+	 sessions/set-session-var sessions/set-session-timeout; do
+	 stem=`echo $srcfile | sed -e 's@.*/@@'`
+	 destfile=$bindir/$stem
+	 if [ "$doneone" ]; then
+	    ${ECHO_N} ", ${ECHO_C}"
+	 else
+	    doneone=true
+	 fi
+	 ${ECHO_N} "${stem}${ECHO_C}"
+	 cp $srcfile $destfile
+	 if [ ! -r $destfile ]; then
+	    echo "   Unable to create the file \"$destfile!\""
+	    echo "The install was aborted."
+	    echo ""
+	    exit 5
+	 fi
+      done
+      echo "."
+   fi
+fi
+
+# Install the Server if it is present.
+if [ -d server ]; then
+   echo "  Installing the Meta-HTML Web Server (mhttpd) into ${bindir}"
+   cp server/mhttpd ${bindir}/
+fi
+
+# Install the Engine if it is present.
+if [ -d engine ]; then
+   echo "  Installing the Meta-HTML CGI Engine (engine) into ${bindir}";
+   cp engine/engine ${bindir}/;
+   if [ -r engine/ispengine ]; then
+      echo "  Installing the ISP Engine (ispengine) into ${bindir}";
+      cp engine/ispengine ${bindir}/
+   fi
+   if [ -r engine/fcgi-engine ]; then
+      echo "  Installing the FastCGI Engine (fcgi-engine) into ${bindir}";
+      cp engine/fcgi-engine ${bindir}/fcgi-engine;
+   fi
+   if [ ! -r ${bindir}/engine.conf ]; then
+      echo "  Installing a default conf file for the CGI Engine into ${bindir}"
+      cp engine/engine.conf ${bindir}/
+   fi
+fi
+
+# Install the Processor if it is present.
+if [ -d mhc ]; then
+   echo "  Installing the Standalone Processor (mhc) into ${bindir}"
+   cp mhc/mhc ${bindir}/
+fi
+
+# Install the Debugger if it is present.
+if [ -d mdb ]; then
+   echo "  Installing the Debugger (mdb) into ${bindir}"
+   cp mdb/mdb ${bindir}/
+fi
+
+# Install the modules if they are present.
+if [ -f modules/example.so ]; then
+   echo "  Installing the Meta-HTML Dynamic Modules into ${bindir}"
+   cp modules/*.so ${bindir}/
+fi
+
+if [ "$CALLED_FROM_Install" = "" ]; then
+   echo ""
+   echo "Done installing the binaries that came with this package."
+   echo ""
+   echo "The Meta-HTML binaries have been installed for you, under the"
+   echo "directory ${bindir}."
+   echo ""
+   echo "To install a small self-contained Web site containing the"
+   echo "release notes, applications, and tagsets that came with your"
+   echo " distribution, please type:"
+   echo ""
+   echo "        \`./install-site'"
+   echo ""
+   echo " To report a bug with the installation or tools, please send E-Mail"
+   echo " to \`bug-metahtml@metahtml.com'.  And, don't hesitate to join our"
+   echo " online user's groups -- just surf to http://www.metahtml.com for"
+   echo " details!"
+   echo ""
+   exit 0
+fi

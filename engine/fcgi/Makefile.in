@@ -1,0 +1,65 @@
+#
+#  Makefile for FastCGI development kit
+#
+#  Open Market, Inc.
+#
+#  $Id: Makefile.in,v 1.1 2001/10/28 15:29:29 bfox Exp $
+#
+SHELL = @BASH_SHELL@
+O =     @O@
+L =     @L@
+
+#
+exec_prefix   = @exec_prefix@
+prefix        = @prefix@
+common_prefix = @common_prefix@
+CVS_TAG =       @CVS_TAG@
+EXPORT_DIR = $(prefix)/build
+PROTO_DIR = ../proto
+BIN_DIR       = $(exec_prefix)/bin
+LIB_DIR       = $(prefix)/lib
+LINC_DIR      = $(prefix)/include
+COMMON_DIR    = $(common_prefix)
+INC_DIR       = $(common_prefix)/include
+DOC_DIR       = $(common_prefix)/doc
+MAN_DIR       = $(common_prefix)/man
+MAN1_DIR      = $(MAN_DIR)/man1
+MAN3_DIR      = $(MAN_DIR)/man3
+RANLIB        = @RANLIB@
+
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+INSTALL_DATA	= @INSTALL_DATA@
+
+TARGET_DIRS = $(BIN_DIR) $(LIB_DIR) $(COMMON_DIR) $(INC_DIR) $(MAN_DIR) \
+              $(MAN1_DIR) $(MAN3_DIR) $(LINC_DIR) $(EXPORT_DIR)
+
+LINKS =
+
+all:
+	(cd libfcgi; make all)
+
+reconfig: clean
+	uname -rs >config.uname
+	./configure
+
+Makefile: Makefile.in
+	(cd ../..; ./config.status)
+
+clean:
+	if [ -f libfcgi/Makefile ]; then (cd libfcgi; make clean); fi
+	rm -f *.a *.so *.o core errs *.E a.out
+	rm -f config.cache config.log config.status config.uname
+
+realclean: clean
+	if [ -f libfcgi/Makefile ]; then (cd libfcgi; make realclean); fi
+	rm -f Makefile *~ \#* 
+
+distclean: realclean
+	if [ -f libfcgi/Makefile ]; then (cd libfcgi; make distclean); fi
+
+#	rm -rf CVS
+# 	(cd cgi-fcgi; make clean)
+#	(cd examples; make clean)
+
+# ----------------------------------------------------------------------------

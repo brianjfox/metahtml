@@ -1,0 +1,54 @@
+;;; makedoc.mhtml: -*- Meta-HTML -*-  Build functions.db.packed from fundocs.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Aug 26 12:31:44 1997.
+
+<defun bootstrap::make-documentation filename>
+  <set-var all-funcs[]=<package-vars *user-functions* strip=true>>
+  <sort all-funcs>
+  <with-open-stream p <get-var filename> mode=write-create>
+    <stream-put p "DOC_SECTION (MISCELLANEOUS-TAGS)\n">
+    <foreach fun all-funcs>
+      <when <%%function-documentation <get-var fun>>>
+	<set-var args[]= <%%function-arguments <get-var fun>>>
+	<set-var type[]=<alist-get-var
+			 <symbol-info *user-functions*::<get-var-once fun>>
+			 TYPE>>
+	<subst-in-var type "USER " "">
+	<set-var doc = <%%function-documentation <get-var fun>>>
+	<subst-in-var doc "\"" "\\\"">
+
+	;;; See if this starts a new documentation section.
+	<if <match <get-var-once doc> "^[ \t\n]*DOC_SECTION">
+	    <prog
+	      <set-var doc-section =
+		<match <get-var-once doc> "^[^\n]+" action=extract>>
+	      <subst-in-var doc "^[^\n]+\n" "">
+	      <subst-in-var doc-section "^[ \t]+" "">>
+	  <set-var doc-section="DOC_SECTION (MISCELLANEOUS-TAGS)">>
+
+	<stream-put p "<get-var-once doc-section>\n">
+
+	<var-case
+	  type=DEFUN	<set-var class=DEFUN>
+	  type=SUBST	<set-var class=DEFUN>
+	  type=MACRO	<set-var class=DEFMACRO>>
+
+	;;; Put the opening line in the powerstrip-api.c file.
+	<stream-put p "<get-var class> (pf_">
+	<stream-put p "<subst-in-string <downcase <get-var fun>> - _>, ">
+
+	;;; Put the args.
+	<foreach arg args>
+	  <stream-put p " <get-var arg>">
+	</foreach>
+	<stream-put p ",\n">
+
+	;;; Put the documentation.
+	<stream-put p "\"<get-var-once doc>\"">
+	<stream-put p ")\n">
+
+      </when>
+    </foreach>
+  </with-open-stream>
+</defun>

@@ -1,0 +1,34 @@
+;;; navigation.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Apr 15 11:31:38 1998.
+<when <and <get-var gsql-pro>
+	   <match <get-var layout::layout> "bordered-left">>>
+  <layout::left-border>
+    <tab-menu ../ "Back to Top"></tab-menu>
+    <p>
+    <tab-menu welcome.mhtml "Generic SQL">
+    Set Params: select.mhtml
+    Select Table: welcome.mhtml
+    Create DB: create-database.mhtml
+    Delete DB: delete-database.mhtml
+    Describe Table: describe-table.mhtml
+    SQL Query: query-database.mhtml
+    </tab-menu>
+  </layout::left-border>
+</when>
+
+<when <not <get-var gsql-pro>>>
+  <p>
+  <center>
+  [ <i><a href="select.mhtml">Select Driver/DSN Params</a></i> ]
+  [ <i><a href="welcome.mhtml">Select Table</a></i> ]
+  <br>
+  [ <i><a href="create-database.mhtml">Create New DB</a></i> ]
+  [ <i><a href="delete-database.mhtml">Delete Existing DB</a></i> ] 
+  [ <i><a href="describe-table.mhtml">Describe Table</a></i> ]
+  [ <i><a href="query-database.mhtml">Execute Query</a></i> ]
+  </center>
+  <p>
+</when>
+

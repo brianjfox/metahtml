@@ -1,0 +1,17 @@
+;;; view-file.mhtml: -*- Meta-HTML -*-  File which views a file.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jul  5 11:40:53 1996.
+<set-var title="Source Code Viewer">
+<include header.mhtml>
+
+<layout::page>
+<center>
+  <h2>Source: <get-var env::path_info> </h2>
+</center>
+<pre>
+<source-of <get-var env::path_info> true>
+</pre>
+</layout::page>
+
+<include footer.mhtml>

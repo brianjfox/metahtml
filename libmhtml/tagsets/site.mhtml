@@ -1,0 +1,82 @@
+;;; site.mhtml: -*- Meta-HTML -*-  Site macros and functions for IBIS.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 29 08:10:59 1996.
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu Oct 24 12:38:37 1996.
+
+<defun site::image name>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Returns the full web-relative pathname of the image named by <var name>.
+  ;;;
+  ;;; <example>
+  ;;; <site::image foo> --> /System/images/site/foo.gif
+  ;;; </example>
+  <if <not <match <get-var name> "^http" caseless=true>>
+      "<site::system-prefix>/images/site/<get-var name>.gif"
+    <get-var name>>
+</defun>
+
+<defun site::image-file url>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Return the full pathname of the file representing the image in <var url>.
+  <subst-in-var url "^.*//[^/]+" "" "\"" "">
+  <get-var-once mhtml::include-prefix url>
+</defun>
+
+<defun site::body-value tag>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; <example code><site::body-value text> --> text="#000000"</example>
+  ;;; or nothing.
+  <if <get-var site::<get-var tag>>
+      <prog <get-var tag>="<get-var site::<get-var tag>>">>
+</defun>
+
+;;; <site::admin-body-value text> --> text="#000000" or nothing.
+<defun site::admin-body-value tag>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; <example code><site::admin-body-value text> --> text="#000000"</example>
+  ;;; or nothing.
+  <if <get-var site::admin-<get-var tag>>
+      <prog <get-var tag>="<get-var site::admin-<get-var tag>>">>
+</defun>
+
+<defun site::dynamic-bg basename border-width lrgb rrgb force? srgb>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Dynamically create a background image with the given parameters,
+  ;;; if one does not already exist.  Returns the full URL of the image.
+  <defvar lrgb 688897>
+  <defvar rrgb EEE8AA>
+  <subst-in-var lrgb "#" "">
+  <subst-in-var rrgb "#" "">
+  <subst-in-var srgb "#" "">
+  <set-var path = <concat <or <get-var site::backgrounds-webpath>
+			      /images/backgrounds>
+                          /<get-var basename>-
+                          <get-var lrgb>-<get-var rrgb>-
+                          <if <get-var srgb> "<get-var srgb>-">
+                          <get-var border-width>.gif>>
+  <set-var file = <get-var mhtml::include-prefix path>>
+  ;;; If the file doesn't exist, make it.
+  <if <or <get-var force?>
+          <not <file-exists <get-var file>>>>
+      <concat
+	<set-var dir =
+	  <subst-in-string <get-var file> <dir::basename <get-var file>> "">>
+	<make-directories <get-var dir> a+rwx>
+	<cgi-exec mkbg -lw <get-var border-width>
+		  -lrgb <get-var lrgb> -rrgb <get-var rrgb>
+		  <if <get-var srgb> "-srgb <get-var srgb>">
+		  "> <get-var file>">>>
+  <get-var path>
+</defun>
+
+<defun site::initialize>
+  <set-var spack=<package-to-alist site>>
+  <ibis::package-get Site>
+  <session-import site site>
+  <alist-to-package <get-var spack> site>
+  <ibis::site-values-changed>
+  <if <not <get-var site::inhibit-preview>> <ibis::handle-preview>>
+  <defvar site::timeout 200>
+  <set-session-timeout <get-var site::timeout>>
+</defun>

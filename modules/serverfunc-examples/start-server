@@ -1,0 +1,13 @@
+#!/www/bin/mhc
+;;; -*- Meta-HTML -*-
+<set-var mhc::explicit-output-only = true>
+<set-var x = <load-module ../serverfuncs.so>>
+<require ./tagsets/server>
+<defvar server::server-port 2005>
+<set-var server::server-host=nirvana.datawave.net>
+<set-var info = <server::make-server hostname=<get-var server::server-host>
+		 server::connection-handler <get-var server::server-port>>>
+<package-delete server-info>
+<alist-to-package <get-var info> server-info>
+<cgi-exec (cd <get-var mhtml::include-prefix>;
+	   echo '<package-vars server-info strip=true>' ">server.pid")>

@@ -1,0 +1,8 @@
+;;; base-cgi-decode.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 16:15:51 1996.
+
+Result: "Encode this string, NOW !!": <cgi-decode "VAR1=Encode+this+string%2C+NOW+%21%21"><get-var var1>
+Result: "I want to encode this string for passing in thru pathinfo to a cgi, simple and straight forward.": <cgi-decode "PATHINFO1=I+want+to+encode+this+string+for+passing+in+thru+pathinfo+to+a+cgi%2C+simple+and+straight+forward."><get-var pathinfo1>
+Result: "Send Email07/974111111111111111": <cgi-decode CC=4111111111111111&ACTION=Send+Email&CC-EXP=07%2F97><get-var action cc-exp cc>

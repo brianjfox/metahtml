@@ -1,0 +1,6 @@
+;;; base-database-first-key.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 02:57:24 1996.
+
+Result: key0001: <with-open-database db test.db mode=write-create><set-var result=<database-save-record db key0001 db>><set-var result=<database-save-record db key00012 db>><set-var first-key=<database-first-key db>></with-open-database><get-var first-key><cgi-exec "/bin/rm test.db">

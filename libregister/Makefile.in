@@ -1,0 +1,168 @@
+# Makefile.in: -*- Text -*-  Source for configure to make a Makefile from.
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+#
+# You should have received a copy of the UAI Free Software License
+# along with this program; if you have not, you may obtain one by
+# writing to:
+#
+# Universal Access Inc.
+# 129 El Paseo Court
+# Santa Barbara, CA
+# 93101
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+REGEX_IN= @REGEX_IN@
+GDBM_IN = @GDBM_IN@
+prefix	= @prefix@
+OS_LIBS	= @OS_LIBS@
+exec_prefix = @exec_prefix@
+
+bindir	= $(exec_prefix)/bin
+libdir	= $(exec_prefix)/lib
+incdir	= $(prefix)/include
+
+#
+RM = rm -f
+LN = ln
+CP = cp
+MV = mv
+AR = ar
+RANLIB = @RANLIB@
+MKDIR = mkdir
+TAR = tar
+
+#
+# ALL_SUBDIRS is the list of all of the subdirectories within which we
+# would like to run various `make's, or ".", which means that there
+# are no subdirectories.
+ALL_SUBDIRS = .
+
+VERSION = 1.0
+DISTNAME = libregister-$(VERSION)
+WEBBASEDIR = @WEBBASEDIR@
+
+CC = gcc
+# PROFILE_FLAGS = -pg
+# OPTIMIZE_FLAGS = -O69
+DEBUG_FLAGS = -g $(PROFILE_FLAGS)
+GCC_WARN = -Wall -Wstrict-prototypes -Wshadow
+CFLAGS = $(GCC_WARN) $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(DEFS)
+LDFLAGS = $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS)
+LIBRARIES = $(LIBPATHS) $(REQUIRED_LIBS)
+INCLUDES =  @EXTRAINC@ -I. -I$(LIBDIR)
+
+.c.o:
+	@echo Compiling $@ from $<
+	@$(CC) $(CFLAGS) $(INCLUDES) -I.. -c $<
+
+LIB_CSRC = register.c 
+LIB_HSRC = register.h
+LIB_OBJS = register.o
+
+TARGET_LIB = libregister.a
+TEST_PROGS = make_key check_key
+TEST_OBJS  = make_key.o check_key.o
+
+LIBDIR = ../libutils
+LIBPATHS = -L$(LIBDIR)bprintf -L$(LIBDIR)xmalloc
+
+TARGETS = $(TARGET_LIB) $(TEST_PROGS)
+
+all: $(TARGETS)
+
+$(TARGET_LIB): $(LIB_OBJS)
+	$(RM) $@
+	$(AR) cq $@ $(LIB_OBJS)
+	if [ "$(RANLIB)" ]; then $(RANLIB) $@; fi
+
+install:
+	@echo "This library is never installed."
+
+make_key.o: register.h
+check_key.o: register.h
+
+make_key: make_key.o $(TARGET_LIB)
+	$(CC) $(LDFLAGS) -o make_key make_key.o $(TARGET_LIB) $(OS_LIBS)
+
+check_key: check_key.o $(TARGET_LIB)
+	$(CC) $(LDFLAGS) -o check_key check_key.o $(TARGET_LIB) $(OS_LIBS)
+
+tags TAGS: FORCE
+	etags *.c *.h
+
+clean: FORCE
+	$(RM) *.o *.a $(TARGETS) TAGS
+
+distclean realclean: clean
+	$(RM) *.o *core* *~ DISTFILES *.bak *.gz foo *\#* Makefile
+
+dist: DISTFILES
+	$(RM) -rf $(DISTNAME)
+	$(MKDIR) $(DISTNAME)
+	for d in `find $(ALL_SUBDIRS) -type d -print`; do \
+	  if [ "$$d" != "." -a "$$d" != "./$(DISTNAME)" ]; then \
+	    mkdir $(DISTNAME)/$$d; \
+	  fi \
+	done
+	for f in `cat DISTFILES`; do \
+	  $(LN) $(srcdir)/$$f $(DISTNAME)/$$f || \
+		{ echo copying $$f; cp -p $(srcdir)/$$f $(DISTNAME)/$$f ; } \
+	done
+	(cd $(DISTNAME); $(MAKE) $(MFLAGS) distclean)
+	$(TAR) chvf - $(DISTNAME) | gzip >$(DISTNAME).tar.gz
+	$(RM) -rf $(DISTNAME)
+
+# Gets rid of most of the unwanted files.  Verify manually (if necessary)
+# that this produces a list of all the files desired in the distribution. 
+DISTFILES: FORCE
+	$(RM) -rf $(DISTNAME)
+	(cd $(srcdir); find . ! -type d -print) \
+	| sed  '/\/RCS\//d; \
+	       /\/EMACS-BACKUPS\//d; \
+	       /\.tar.*/d; \
+	       /~$$/d; /\.o$$/d; \
+	       /\/config\.status$$/d; \
+	       /\/.*\.BAK$$/d; \
+	       /\/TAGS$$/d; \
+	       /\/core$$/d; \
+	       /\/[a-z]*\.core$$/d; \
+	       /\/core\.[a-z]*$$/d; \
+	       /\/a.out$$/d; \
+	       /\/=/d; \
+	       /\/conftest\.c$$/d; \
+	       /\/DISTFILES$$/d; \
+	       /\/xact\/xact$$/d; \
+	       /\.toc$$/d; \
+	       /\.aux$$/d; /\.log$$/d; \
+	       /\.cps$$/d; /\.cp$$/d; \
+	       /\.fns$$/d; /\.fn$$/d; \
+	       /\.tps$$/d; /\.tp$$/d; \
+	       /\.vrs$$/d; /\.vr$$/d; \
+	       /\.pgs$$/d; /\.pg$$/d; \
+	       /\.kys$$/d; /\.ky$$/d; \
+	       s/^.\///; /^\.$$/d;' \
+	| sort | uniq > DISTFILES
+
+
+FORCE:

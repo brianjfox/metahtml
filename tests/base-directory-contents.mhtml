@@ -1,0 +1,7 @@
+;;; base-directory-contents.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 15:26:01 1996.
+
+Result: "(("BASE-DIRECTORY-CONTENTS.MHTML" . "((\"TYPE\" . \"FILE\")(\"CREATED\" \"10\" \"31\" \"96\" \"15\" \"34\" \"05\")(\"READ\" \"10\" \"31\" \"96\" \"15\" \"30\" \"26\")(\"FULL-NAME\" . \"./base-directory-contents.mhtml\")(\"SIZE\" . \"747\")(\"CREATOR\" . \"jarlath\")(\"NAME\" . \"base-directory-contents.mhtml\")(\"WRITTEN\" \"10\" \"31\" \"96\" \"15\" \"34\" \"05\"))"))": <directory-contents "./" matching="base-directory*">
+Result: "DIR::BASE-DIRECTORY-CONTENTS.MHTML": <directory-contents "./" dir matching="base-directory*"><package-vars dir>

@@ -1,0 +1,71 @@
+#!/bin/sh
+# -*- Bash -*-
+# Stop local Meta-HTML Web Servers from running.
+#
+
+dir=`echo $0 | sed -e 's@/[^/]*$@@'`
+if [ "$dir" = "" ]; then dir=`pwd`; fi
+PATH=$dir:$PATH:/usr/sbin
+export PATH
+export LD_LIBRARY_PATH
+LD_LIBRARY_PATH="`echo $dir | sed -e 's@/[^/]*$@@'`/lib:/lib:/usr/lib:$LD_LIBRARY_PATH"
+
+# List of hosts or web directories, one per line.
+# Each one gets its own copy of mhttpd (or Apache).
+LOCALSITES=$1
+
+dir=`echo $0 | sed -e 's@/[^/]*$@@'`
+if [ "$dir" = "" ]; then dir=`pwd`; fi
+
+if [ "$LOCALSITES" = "" ]; then
+   for dir in /etc/sysconfig /etc /usr/lib/metahtml /www/bin; do
+      if [ -f $dir/mhttpd -a ! -x $dir/mhttpd ]; then
+         LOCALSITES=$dir/mhttpd
+	 break;
+      elif [ -f $dir/MHTTPD ]; then
+	 LOCALSITES=$dir/MHTTPD
+	 break;
+      elif [ -f $dir/LOCAL-SITES ]; then
+	 LOCALSITES=$dir/LOCAL-SITES
+	 break;
+      fi
+   done
+fi
+
+if [ "$LOCALSITES" ]; then
+   MHTTPD_HOSTS=`cat $LOCALSITES 2>/dev/null`
+fi
+
+if [ "$MHTTPD_HOSTS" ]; then
+   for server in $MHTTPD_HOSTS; do
+      if [ -x /www/$server/stop-server ]; then
+         echo -n "Stopping $server..."
+         (cd /www/$server; ./stop-server)
+         echo  "done."
+      elif [ -f /www/$server/conf/mhttpd.pid ]; then
+         echo -n "Stopping $server..."
+         kill -TERM `cat /www/$server/conf/mhttpd.pid`;
+         rm -f /www/$server/conf/mhttpd.pid;
+         echo  "done."
+      elif [ -x $server/stop-server ]; then
+         echo -n "Stopping $server..."
+         (cd $server; ./stop-server)
+         echo  "done."
+      elif [ -f $server/conf/mhttpd.pid ]; then
+         echo -n "Stopping $server..."
+         kill -TERM `cat $server/conf/mhttpd.pid`;
+         rm -f $server/conf/mhttpd.pid;
+         echo  "done."
+      elif [ -f /www/$server/mhttpd/conf/mhttpd.pid ]; then
+         echo -n "Stopping $server..."
+         kill -TERM `cat /www/$server/mhttpd/conf/mhttpd.pid`;
+         rm -f /www/$server/mhttpd/conf/mhttpd.pid;
+         echo  "done."
+      elif [ -f $server/mhttpd/conf/mhttpd.pid ]; then
+         echo -n "Stopping $server..."
+         kill -TERM `cat $server/mhttpd/conf/mhttpd.pid`;
+         rm -f $server/mhttpd/conf/mhttpd.pid;
+         echo  "done."
+      fi
+   done
+fi

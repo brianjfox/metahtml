@@ -1,0 +1,55 @@
+;;; info.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Aug 17 08:38:57 1996.
+<set-var title="Information About QuickTalk">
+<include header.mhtml>
+
+<defmacro h0>
+  <font color="#D02020" size=+2>%body</font><br>
+</defmacro>
+
+<layout::page>
+  <br>
+  <plain-text>
+    <h0><quicktalk>, a <meta-html> Chat Room</h0>
+    How long does it take you to write a (admittedly weak) Chat Room in
+    the language of your choice?  At the urgings of
+    <b>Michael Ramsey</b>, <b>Dave Guzemann</b>, and <b>Lonnie
+    Sciambi</b>, and, after 2 hi-test thought lubricating libations, I
+    decided to show these fellows why I didn't want to write a Chat Room
+    which relied only on HTML.  So I spent 1 hour and 20 minutes
+    building <a href="<get-var mhtml::url-to-dir>/">this Chat Room</a>.
+
+    Mind you, those 80 minutes included listening to my days worth of
+    phone messages, making plans for the evening with my friend
+    <b>Erika</b>, reading my 6 hour backlog of E-Mail, and calling
+    <a href="http://www.ua.com/~hqm/">Henry Minsky</a> to get his feedback,
+    and to see if he knew the magic <b>"target="</b> name to get the
+    parent frame from a <b>POST</b>.  (He didn't know, but I looked it
+    up; it's <b>_parent</b>.... how about that?)
+
+    <h0>Room Construction</h0> I wrote the <b>welcome.mhtml page</b>
+    first, and then I wrote two macros.  Finally, I wrote the
+    <b>chat.mhtml</b> top level page, the <b>chatbox.mhtml</b> page,
+    and the <b>chathist.mhtml</b> window.  Then I filled in the end
+    time on the front page, ate pizza, and watched a movie with Erika.
+
+    There are about <b>60 lines of code</b> that implement the chat
+    mechanism in two simple macros.  <b><code>chat::add-to-history</code></b>
+    simply stores posted data in a database, keeping that database
+    shrunk down to about 100 entries, and
+    <b><code>chat::chat-history</code></b>
+    displays the <i>x</i> most recent entries in a table format.  Big deal.
+
+    <font size=-1>
+    <a href="http://www.ua.com/~bfox/">Brian J. Fox</a>
+    </font>
+
+    <a href="<get-var mhtml::url-to-dir>/">
+      <b>Back to <quicktalk></b>...
+    </a>
+  </plain-text>
+</layout::page>
+
+<include footer.mhtml>

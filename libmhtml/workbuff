@@ -1,0 +1,54 @@
+modfuncs.c:  pagefunc_set_variable ("mhtml::module-capable", "true");
+msqlfuncs.c:  pagefunc_set_variable ("msql::msql-error-message[]", "");
+msqlfuncs.c:  pagefunc_set_variable ("msql::recent-query", query);
+msqlfuncs.c:  pagefunc_set_variable ("msql::msql-error-message[]", "");
+mysqlfuncs.c:  pagefunc_set_variable ("mysql::mysql-error-message[]", "");
+mysqlfuncs.c:  pagefunc_set_variable ("mysql::recent-query", query);
+mysqlfuncs.c:  pagefunc_set_variable ("mysql::mysql-error-message[]", "");
+odbcfuncs.c:  pagefunc_set_variable ("odbc::odbc-error-message[]", "");
+odbcfuncs.c:  pagefunc_set_variable ("odbc::recent-query", query);
+pagefuncs.c:  char *alphabet = pagefunc_get_variable ("MI::ALPHABET");
+pagefuncs.c:      char *incpref = pagefunc_get_variable ("%%::incpref");
+pagefuncs.c:      char *relpref = pagefunc_get_variable ("%%::relpref");
+pagefuncs.c:      if (!incpref) incpref = pagefunc_get_variable ("mhtml::include-prefix");
+pagefuncs.c:      if (!relpref) relpref = pagefunc_get_variable ("mhtml::relative-prefix");
+pagefuncs.c:          pagefunc_set_variable ("mhtml::last-modification-time", digits);
+pagefuncs.c:                          pagefunc_set_variable ("%%::relpref", temp);
+pagefuncs.c:  char *protocol = pagefunc_get_variable ("env::server_protocol");
+pagefuncs.c:  char *protover = pagefunc_get_variable ("env::protocol_version");
+pagefuncs.c:      char *temp = pagefunc_get_variable ("mhtml::relative-prefix");
+pagefuncs.c:      bprintf (newarg, "%s", pagefunc_get_variable ("mhtml::http-prefix"));
+pagefuncs.c:      if (pagefunc_get_variable ("mhtml::unparsed-headers"))
+pagefuncs.c:          char *nph = pagefunc_get_variable ("mhtml::unparsed-headers");
+pagefuncs.c:          pagefunc_set_variable ("mhtml::server-pushed", "true");
+parser.c:      char *homedir = pagefunc_get_variable ("mhtml::~directory");
+parser.c:      if (pagefunc_get_variable ("isp::web-relative-pathnames"))
+parser.c:         char *incpref = pagefunc_get_variable ("%%::incpref");
+parser.c:         char *relpref = pagefunc_get_variable ("%%::relpref");
+parser.c:           incpref = pagefunc_get_variable ("mhtml::include-prefix");
+parser.c:           relpref = pagefunc_get_variable ("mhtml::relative-prefix");
+pgsqlfuncs.c:  pagefunc_set_variable ("pgsql::pgsql-error-message[]", "");
+pgsqlfuncs.c:  pagefunc_set_variable ("pgsql::recent-query", query);
+pgsqlfuncs.c:  pagefunc_set_variable ("pgsql::recent-query", query_string);
+pgsqlfuncs.c:  pagefunc_set_variable ("pgsql::recent-query", query_string);
+pgsqlfuncs.c:  pagefunc_set_variable ("pgsql::pgsql-error-message[]", "");
+pgsqlfuncs.c:      pagefunc_set_variable ("pgsql::recent-query", query_string);
+prims.c:          char *pre = pagefunc_get_variable ("mhtml::include-prefix");
+prims.c:          char *rel = pagefunc_get_variable ("mhtml::relative-prefix");
+require.c:  char *incpref = pagefunc_get_variable ("mhtml::include-prefix");
+require.c:  char *relpref = pagefunc_get_variable ("mhtml::relative-prefix");
+require.c:      pagefunc_set_variable ("mhtml::last-mmodification-time", digits);
+require.c:          char *incpref = pagefunc_get_variable ("%%::incpref");
+require.c:          char *relpref = pagefunc_get_variable ("%%::relpref");
+require.c:            incpref = pagefunc_get_variable ("mhtml::include-prefix");
+require.c:            relpref = pagefunc_get_variable ("mhtml::relative-prefix");
+require.c:                      pagefunc_set_variable ("%%::relpref", temp);
+rewriter.c:                     pagefunc_get_variable ("rewriter::rewrite-prefix");
+rewriter.c:                       pagefunc_get_variable ("mhtml::http-prefix");
+sessionfuncs.c:      pagefunc_set_variable ("DEFAULT::SID", (char *)sid);
+sessionfuncs.c:  pagefunc_set_variable ("mhttpd::session-database-file", session_db_file);
+streamfuncs.c:            ("env::path", pagefunc_get_variable ("mhtml::exec-path"));
+streamfuncs.c:    pagefunc_get_variable ("mhtml::minimum-data-transfer-rate");
+bfox@speedy$ 
+
+

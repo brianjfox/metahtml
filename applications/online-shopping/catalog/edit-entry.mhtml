@@ -1,0 +1,75 @@
+;;; edit-entry.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;; Copyright (c) 1995 Universal Access, Inc
+;;; Author: Brian J. Fox (bfox@ua.com) Tue Sep 12 11:32:20 1995.
+
+;;; Edit the entry of a specific item in the database.
+;;;
+;;; Passed in CLASS (name used to select the database), and KEY.
+;;;
+<set-var title="Modify Catalog Entry">
+<include header.mhtml>
+
+<if <get-var posted::class>
+    <set-session-var current-class=<get-var posted::class>>>
+<set-var class=<get-session-var current-class>>
+
+<when <get-var key>>
+  <with-open-database db <db-of-class <get-var class>>>
+    <set-var record-loaded=<database-load-record db <get-var key>>>
+  </with-open-database>
+</when>
+
+<subst-in-var Short-Description "\"" "&quot;">
+<subst-in-var Product-Name "\"" "&quot;">
+<subst-in-var Product-ID "\"" "&quot;">
+
+<hr>
+Current Class: <get-var class><br>
+Current Database: <match <db-of-class <get-var class>> <get-var mhtml::include-prefix>/ action=delete>
+<if <get-var record-loaded> <prog <br>Current Key: <get-var key>>>
+<hr>
+<p>
+<form method=POST action="<get-var mhtml::url-to-dir>/entry-action.mhtml">
+  <table>
+    <tr>
+      <td align=right>Class:</td>
+      <td><input name=Class value=""><br></td>
+    </tr>
+    <tr>
+      <td align=right>Product ID:</td>
+      <td><input name=Product-ID value=""><br></td>
+    </tr>
+    <tr>
+      <td align=right>Product Name:</td>
+      <td><input name=Product-Name value=""><br></td>
+    </tr>
+    <tr>
+      <td align=right>Unit Price:</td>
+      <td><input name=Unit-Price value=""><br></td>
+    </tr>
+    <tr>
+      <td align=right>Attributes:</td>
+      <td><input name=Attributes value="" size=45><br></td>
+    </tr>
+    <tr>
+      <td align=right>Short Description:</td>
+      <td><input name=Short-Description size=45 value=""><br></td>
+    </tr>
+    <tr>
+      <td align=right>Product Description:</td>
+      <td><textarea name="Product-Description" rows=5 cols=45><get-var Product-Description></textarea><br></td>
+    </tr>
+    <tr>
+      <td align=right>Information URL:</td>
+      <td><input name=Information-URL value="" size=45><br></td>
+    </tr>
+  </table>
+  <center>
+    <action-buttons "Add/Modify" "Remove" "Put Back and Get Next">
+  </center>
+</form>
+
+<font size=+2>B</font>ack to <a href="<get-var mhtml::url-to-dir>/">Catalog Maintenance</a>.<br>
+<set-form-input-values>
+<include footer.mhtml>

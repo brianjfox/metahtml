@@ -1,0 +1,67 @@
+;;; make-static.mhtml: -*- Meta-HTML -*-  Make HTML pages from the manual.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Jun 16 11:53:58 1997.
+
+<include mandefs.mhtml>
+
+<defsubst write-output>
+  <subst-in-var %1 "&amp;" "&" "&lt;" "<" "&gt;" ">" "\n[ \t\r\n]*\n" "\n\n">
+  <stream-put %0 <get-var-once %1>>
+</defsubst>
+
+;;; Start by formatting every function as its own page.
+<with-open-database db <metahtml::function-db> mode=read>
+  <database-query db true sort=key keys=static::functions>
+</with-open-database>
+
+<foreach static::fun static::functions>
+  <print Building <get-var static::fun>.html>
+  <set-var static::building-html = true>
+  <set-var posted::key = <get-var static::fun> key=<get-var static::fun>>
+  <set-var formatted = <include man-page.mhtml>>
+  <cleanup-whitespace formatted>
+  <with-open-stream static::s <thisdir>/<get-var static::fun>.html
+    mode=write-create>
+    <stream-put static::s
+		"<!- <get-var static::fun>.html: Created on <date> -->\n">
+    <stream-put static::s <get-var-once formatted>>
+  </with-open-stream>
+  <unset-var header-already-included>
+  <unset-var footer-already-included>
+  <unset-var mhtml::cacheable>
+  <layout::clear-contents>
+</foreach>
+
+;;; Continue by formatting every section as its own page.
+<with-open-database db <metahtml::section-db> mode=read>
+  <database-query db <not <string-eq <get-var-once funtype> variable>>
+    sort=key keys=static::sections>
+</with-open-database>
+
+<foreach static::sec static::sections>
+  <print Building <get-var static::sec>.html>
+  <set-var static::building-html = true>
+  <set-var posted::key = <get-var static::sec>
+	   key=<get-var static::sec>>
+  <set-var formatted = <include view-section.mhtml>>
+  <cleanup-whitespace formatted>
+  <with-open-stream static::s <thisdir>/<get-var static::sec>.html
+    mode=write-create>
+    <stream-put static::s
+		"<!- <get-var static::sec>.html: Created on <date> -->\n">
+    <stream-put static::s <get-var-once formatted>>
+  </with-open-stream>
+  <unset-var header-already-included>
+  <unset-var footer-already-included>
+  <unset-var mhtml::cacheable>
+  <layout::clear-contents>
+</foreach>
+
+<html>
+<body bgcolor=white>
+<DEBUGGING-OUTPUT>
+<SYSTEM-ERROR-OUTPUT>
+<h3> Done. </h3>
+</body>
+</html>

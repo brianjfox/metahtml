@@ -1,0 +1,372 @@
+;;; invoice-review.mhtml: -*- Meta-HTML -*-
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Sat Oct 21 14:07:12 1995.
+;;;
+<set-var title="Your Invoice">
+<include header.mhtml>
+<include tagsets/cart-substs.mhtml>
+<include tagsets/action-buttons.mhtml>
+
+<if <get-var posted::payment-type>
+    <session-export posted shipping>>
+
+<session-import shipping>
+
+;;; Make sure that they have entered everything that they need to...
+<set-var missing-field =
+  <var-case
+    shipping-name=""   "Ship To"
+    shipping-city=""   "City"
+    shipping-state=""  "State"
+    shipping-zip=""    "Zip Code">>
+
+<if <not <get-var missing-field>>
+    <if <not get-var shipping-street shipping-street-2>
+	<set-var missing-field = "Street Address">>>
+
+<when <get-var missing-field>>
+  <set-session-var session-message =
+    <prog
+      </b>
+      <plain-text first-char=<font size="+2">>
+      Remember, in order to ensure that you receive your items promptly,
+      we must have the most complete shipping information for you available.
+
+      Without a value for the <b><get-var missing-field></b> field below,
+      we cannot be certain that your items will reach you.
+
+      Please fill in the proper value for any unfinished fields, and click
+      on <b>Review Invoice</b> again.
+      </plain-text><b>>
+    missing-field = <get-var missing-field>>
+  <redirect "<get-var mhtml::url-to-dir>/shipping.mhtml">
+</when>
+
+<ul>
+  <p>
+  <table>
+    <tr>
+      <td align=center><font size=6><b>Ship To:</b></font></td>
+    </tr>
+  </table>
+
+<table>
+  <tr>
+    <td></td>
+    <td>
+      <font size="+1">
+      <b>
+        <get-var shipping-name><br>
+        <if <get-var shipping-street> <prog <get-var shipping-street><br>>>
+        <if <get-var shipping-street-2> <prog <get-var shipping-street-2><br>>>
+        <get-var shipping-city>, <get-var shipping-state><br>
+        <get-var shipping-zip><br>
+      </b>
+      </font>
+    </td>
+</table>
+</ul>
+
+<set-var shopping::show-product-id=true>
+<if <browser-supports-tables>
+    <include cart-display.mhtml>
+  <include cart-display-nt.mhtml>>
+
+;;; Calculate the tax, shipping, and grand totals.
+<calculate-tax-shipping-and-grand-total>
+
+<set-var pixel-spacing=275>
+
+<p>
+<table>
+  <tr>
+    <td width=<get-var pixel-spacing>></td><td></td>
+    <td align=right>
+      <font size="+1"><b>Subtotal of Ordered Items:</b></font>
+    </td>
+    <td align=right>
+      <font size="+1"><b><get-var total></b></font><br>
+    </td>
+  </tr>
+
+  ;;; Tell them how much the tax is if they have to pay tax.
+  <when <get-var tax>>
+    <tr>
+    <td width=<get-var pixel-spacing>></td><td></td>
+      <td align=right>
+	<font size="+1">
+	  <b>Plus <get-var tax-percent>%
+	     <get-var shipping-state> Sales Tax:
+	  </b>
+	</font>
+      </td>
+      <td align=right>
+	<font size="+1"><b><get-var tax></b></font><br>
+      </td>
+    </tr>
+  </when>
+
+  ;;; Tell them how much the shipping will cost.
+  <tr>
+    <td width=<get-var pixel-spacing>></td><td></td>
+    <td align=right>
+	<font size="+1"><b>Plus Shipping &amp; Handling:</b></font>
+      </td>
+      <td align=right>
+	<font size="+1"><b><get-var shipping-cost></b></font><br>
+      </td>
+    </tr>
+  </comment>
+
+  ;;; Put a horizontal line between the subtotals and the Grand Total.
+  <tr><td></td><td></td>
+  <td colspan=2><hr></td></tr>
+
+  ;;; Print the grand total.
+  <tr>
+    <td></td>
+    <td></td>
+    <td align=right><font size="+1"><b>Grand Total:</b></font></td>
+    <td align=right>
+      <font size="+1"><b>$<get-var grand-total></b></font><br>
+    </td>
+  </tr>
+</table>
+
+;;; Demographics request.
+<defsubst found-by-table>
+  <table>
+    <tr align=center>
+      <td><b>I found
+	<small-caps upper="+1" lower="+0">Online-Shopping</small-caps>
+      through:</b></td>
+    </tr>
+    <tr>
+      <td align=center>
+	<table border=1>
+	  <tr>
+	    <td align=center>
+	      <input type=radio name=found-site-by value="Television">
+	    </td>
+	    <td align=left>
+	      Television<br>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td align=center>
+	      <input type=radio name=found-site-by value="Newspaper/Magazine">
+	    </td>
+	    <td align=left>
+	      Newspaper/Magazine<br>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td align=center>
+	      <input type=radio name=found-site-by value="Internet">
+	    </td>
+	    <td align=left>
+	      Internet<br>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td align=center>
+	      <input type=radio name=found-site-by value="Friend">
+	    </td>
+	    <td align=left>
+	      Friend
+	    </td>
+	  </tr>
+	</table>
+      </td>
+    </tr>
+  </table>
+</defsubst>
+
+;;; If the user is able to submit via credit card, then supply a form
+;;; for them to fill out with the appropriate information, and a button
+;;; which points to the 
+;;; information
+;;;
+<when <string-eq <get-var payment-type> "Major Credit Card">>
+
+  ;;; Easier on the eyes...
+  <defsubst input-title whitespace=delete>
+    <td align=right><small-caps>%body</small-caps>:</td>
+  </defsubst>
+
+  ;;; Here follows the FORM which is used to post to the HTTPS server.
+  <form method=POST action="mail-purchase.mhtml">
+
+    <h3>Please enter your Credit Card information below.</h3>
+    <plain-text first-char=<font size="+2">>
+      Because you are using a browser capable of submitting
+      information with strong encryption, you are able to enter your
+      credit card information below, with the assurance of full RSA
+      security.
+
+      <b>This is a SAMPLE application, so please do NOT use your real
+      credit card number!</b>
+
+      Use of this method gaurantees a higher level of security than any
+      other payment method, even including a telephone call!
+
+      Please fill out the form carefully and accurately, and then click on
+      <b>Submit Securely</b>.
+
+      You may also place your order by phone call; our operators will be
+      glad to assist you in any way they can.  Our phone numbers are:
+    </plain-text>
+    <p>
+    <ul>
+      <table>
+	<tr>
+	  <td align=right><b>(805) 730-7775</b>:</td>
+	  <td>for calls originating within the US, and,<br></td>
+	</tr>
+	<tr>
+	  <td align=right><b>+1 (805) 730-7775</b>:</td>
+	  <td>for calls originating outside of the US.<br></td>
+	</tr>
+      </table>
+    </ul>
+    <p>
+
+<defsubst credit-card-table whitespace=delete>
+  <table border>
+    <tr>
+      <input-title Credit Card Type>
+      <td>
+	    ;;; We cannot remember any of the information in the form, as
+	    ;;; that would violate the security model.  So, we force the
+	    ;;; user to choose an appropriate card by randomly starting
+	    ;;; them out with MC.
+	<set-var credit-card-type="MasterCard">
+	<table-option credit-card-type "MasterCard"><br>
+	<table-option credit-card-type "Visa"><br>
+	<table-option credit-card-type "American Express"><br>
+      </td>
+    </tr>
+    <tr>
+      <input-title Name on Card>
+      <td><input name=Name-on-Card value="" size=25></td>
+    </tr>
+    <tr>
+      <input-title Card Number>
+      <td><input name=Account-Number value="" size=25></td>
+    </tr>
+    <tr>
+      <input-title Expiration Date>
+      <td><input name=Expiration-Date value="" size=10></td>
+    </tr>
+  </table>
+</defsubst>
+
+<center>
+<table>
+  <tr>
+    <td align=left><credit-card-table></td>
+    <td align=left><found-by-table></td>
+  </tr>
+</table>
+</center>
+
+<p>
+<center>
+  <input type=submit name=*action value="Submit Securely">
+</center>
+
+<defsubst hide><input type=hidden name=%0 value="<get-var %0>"></defsubst>
+
+    ;;; We are mailing this thing...
+    ;;;       mailto="bfox@ua.com"
+
+    <set-var
+      *mailto="orders@<get-var env::server_name>"
+      *mailfrom="online-shopping@<get-var env::server-name>"
+      *mailsubject="Purchase Request From Online-Shopping Web Page."
+      *smtphost="localhost">
+
+    <hide *mailto>
+    <hide *mailfrom>
+    <hide *mailsubject>
+    <hide *smtphost>
+
+    ;;; Here follow all of the hidden fields to pass along to Netscape.
+    <set-var purchase-subtotal=<get-var total>>
+    <set-var purchase-tax-percent=<get-var tax-percent>>
+    <set-var purchase-tax-amount=<get-var tax>>
+    <set-var purchase-grand-total=<get-var grand-total>>
+
+    <hide email>
+    <hide purchase-subtotal>
+    <hide purchase-tax-percent>
+    <hide purchase-tax-amount>
+    <hide purchase-grand-total>
+    <set-var cart-contents=<get-session-var shopping-cart>>
+    <subst-in-var cart-contents "\"" "" "<" "" ">" "">
+    <hide cart-contents>
+    <hide shipping-name>
+    <hide found-site-by>
+    <hide shipping-street>
+    <hide shipping-street-2>
+    <hide shipping-city>
+    <hide shipping-state>
+    <hide shipping-zip>
+  </form>
+</when>
+
+<when <not <string-eq <get-var payment-type> "Major Credit Card">>>
+<form method=POST action="invoice-formatted.mhtml">
+  <found-by-table>
+  <plain-text first-char=<font size="+2">>
+  You have elected to pay by <get-var payment-type>.
+
+  In order to pay this way, you should have a printed copy of your
+  invoice.  If your printer and browser combination supports the
+  printing of graphics, simply select <b>Print</b> from your browser
+  menu now.
+
+  If you have trouble printing this page, you might want to try
+  printing it <input type=submit name=button value="formatted text-only">.<br>
+  <i>After you follow this link and print the page, please select the
+  </i><b>Back</b><i> button on your browser to return here.</i>
+  </plain-text>
+</form>
+  <when <string-eq <get-var payment-type> "Check or Money Order">>
+    <plain-text first-char=<font size="+2">>
+    Please mail the printed invoice, along with your check or money
+    order for <b>$<get-var grand-total></b>, to:
+    </plain-text>
+    <p>
+    <ul>
+      <b>
+        Universal Access Inc.<br>
+        Attn: Marketing Dept.<br>
+        214B State St.<br>
+        Santa Barbara, CA<br>
+        93101<br>
+      </b>
+    </ul>
+    Or, fax us:<br>
+    <ul>
+      <b>
+      +1 (805) 730-7776<br>
+      Attn: UAI Marketing<br>
+      </b>
+    </ul>
+    <plain-text first-char=<font size="+2">>
+    If you have any questions at all, please call our Online
+    Merchandising staff:
+    </plain-text>
+  </when>
+
+  <plain-text first-char=<font size="+2">>
+  For calls from inside the US, please dial <b>(805) 730-7775</b>.<br>
+  For calls from outside the US, please dial <b>+1 (805) 730-7775</b>.
+  
+  Our operators are standing by, and will happily assist you with
+  any questions that you might have.
+  </plain-text>
+</when>
+<include footer.mhtml>

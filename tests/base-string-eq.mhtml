@@ -1,0 +1,14 @@
+;;; base-string-eq.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 01:33:39 1996.
+
+Result: true: <string-eq "This THAT" "This THAT">
+Result: : <string-eq "This THAT" "This THat">
+Result: true: <string-eq "  This THAT  " "  This THAT  ">
+Result: : <string-eq "  This THAT  " "  This THat  ">
+Result: : <string-eq "  This THAT  " "  This THat">
+Result: true: <string-eq "911 CALL" "911 CALL">
+Result: : <string-eq "911 CALL" "LOCAL CALL">
+Result: : <string-eq "911 CALL" "INTERNATIONAL CALL">
+

@@ -1,0 +1,175 @@
+;;; nsapi.mhtml: -*- Meta-HTML -*- Documentation for the NSAPI module.
+<set-var
+  title="Configuring for Netscape's NSAPI"
+  prev-page="netscape.mhtml" prev-title="Configuring Netscape"
+  next-page="serverconf.mhtml" next-title="Server Configuration">
+<include header.mhtml>
+<set-var mhtml::cacheable=true>
+
+<ptext>
+  A <a href=obj.conf>sample obj.conf</a> configuration has been supplied.
+
+  The file <a href=mhtml_nsapi.c><code>mhtml_nsapi.c</code></a> is an
+  NSAPI module which provides a clean and more flexible way to call
+  the <Meta-HTML> CGI Engine conveniently from the Netscape server.
+
+  The following features are provided by this module:
+
+  <ul>
+    <li> Configuration of the Netscape server to run only files which end in
+    .mhtml (or the file-suffix of your choice) through the CGI engine.
+
+    <li> Hiding of the location of the CGI Engine in your URL, so that
+    instead of needing to use a URL such as:
+    <example>
+      http://yourhost.com/cgi-bin/nph-engine/your/url.mhtml
+    </example>
+    you can use 
+    <example>
+      http://yourhost.com/your/url.mhtml
+    </example>
+
+    <li> Passing of the correct PATH-INFO information from your URL to the
+    <Meta-HTML> CGI Engine.
+
+    <li> Backward compatibility with older non-cookie compatible browsers,
+    for using session state features in the Meta-HTML Engine.
+  </ul>
+
+  <h4>Compiling The NSAPI Module</h4>
+
+  If you did not receive a compiled binary shared library file of the
+  NSAPI module, you will need to compile it. If you have the binary
+  already, skip this section.
+
+  <ol>
+    <li> Copy the nsapi-dist directory into the nsapi directory of your
+    Netscape server, typically ns-home/nsapi. (You can use "cp -r"
+    to recursively copy the whole nsapi-dist directory.)
+
+    <li> Edit the Makefile for your system, and type "make". 
+  </ol>
+
+  The way you do the final link to create a shared library varies
+  greatly on different Unix systems. Some hints are shown below:
+
+  <defmacro system-entry>
+    <tr valign=top>
+      <td align=right> %attributes </td>
+      <td align=left> %body</td>
+    </tr>
+  </defmacro>
+
+  <center>
+     <table width=95% border>
+      <tr>
+	<td colspan=2 align=center><b>Options for Linking</b></td>
+      </tr>
+      <tr>
+	<td align=right><b>System</b></td>
+	<td align=left> <b>Compile Options</b></td>
+      </tr>
+      <system-entry IRIX>
+      ld -shared t.o u.o -o test.so
+      </system-entry>
+
+      <system-entry SunOS>
+      ld -assert pure-text t.o u.o -o test.so
+      </system-entry>
+
+      <system-entry Solaris>
+      ld -G t.o u.o -o test.so
+      </system-entry>
+
+      <system-entry OSF/1>
+      ld -all -shared -expect_unresolved "*" t.o u.o -o test.so
+      </system-entry>
+
+      <system-entry HP-UX>
+      ld -b t.o u.o -o test.so<br>
+      When compiling your code, you must also
+      use the use the +z flag to the HP C compiler. 
+      </system-entry>
+
+      <system-entry AIX>
+      cc -bM:SRE -berok t.o u.o -o test.so -bE:ext.exp -lc<br>
+      The ext.exp file must be a text file with the name of a 
+      function that is externally accessible for each line. 
+      </system-entry>
+    </table>
+  </center>
+
+  <h4> Configuring Your Netscape Server's obj.conf File </h4>
+
+  Your Netscape Server has a directory of configuration files,
+  containing at least obj.conf and magnus.conf. It is typically
+  located in the directory ns-home/httpd-your-hostname/config
+
+  The <Meta-HTML> NSAPI module defines several new functions, which
+  you must add to your obj.conf file.
+
+  Let's assume you have set up your web server with the following
+  files in the following locations:
+
+  <b>A.</b> The mhtml_nsapi.so file is in /ns-home/nsapi/nsapi-dist/mhtml_nsapi.so:<br>
+  <b>B.</b> Your web server document root is in /www/docs<br>
+  <b>C.</b> Your Meta-HTML CGI Engine is in /www/docs/cgi-bin/nph-engine<br>
+
+  <ol>
+    <li> First, you must add a line which loads the mhtml_nsapi module
+    <example>
+      Init fn=load-modules shlib=/ns-home/nsapi/nsapi-dist/mhtml_nsapi.so funcs=handle-mhtml-sid,mhtml_fixup_path
+    </example>
+
+    <li> Find the definitions in the "default" object:
+   
+    Look for the line
+    <example>
+      <Object name="default">
+    </example>
+
+    Right after this, you should place a NameTrans call to handle_mhtml_sid:
+    <example>
+      NameTrans fn=handle-mhtml-sid 
+    </example>
+
+    <li> Your obj.conf will have several PathCheck directives. Find
+    the call to index-names:
+    <example>
+      PathCheck index-names ...    
+    </example>
+    and replace it with the lines
+    <example>
+      PathCheck index-names="index.html,home.html,index.mhtml,welcome.mhtml" fn="find-index" 
+      PathCheck fn=mhtml_fixup_path document-root=/www/docs engine=/www/cgi-bin/nph-engine ext=".mhtml" 
+    </example>
+
+    This will cause the following things to happen:
+
+    <ol>
+      <li> If you only specify a directory in a URL, the server will look for
+      files named index.html,home.html,index.mhtml, or welcome.mhtml.
+
+      <li> The Meta-HTML CGI Engine which is specified in the 'engine'
+      parameter will be run on the indicated file
+
+      <li> The 'document-root' portion of the physical (translated)
+      URL path will be stripped off, and the remainder will be passed
+      as the PATH-INFO CGI argument.
+    </ol>
+
+    <li> Finally, you <i>must</i> add the line
+    <example>
+      Service fn="send-cgi" type="magnus-internal/cgi"
+    </example>
+    as the first Service directive in your obj.conf default object
+    configuration.
+
+    <li> Restart your server, and it will run any file ending with
+    .mhtml through the <Meta-HTML> CGI Engine.
+  </ol>
+</ptext>
+
+<include footer.mhtml>
+
+

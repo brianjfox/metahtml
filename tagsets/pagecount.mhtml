@@ -1,0 +1,111 @@
+;;; pagecount.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu Aug 15 18:47:59 1996.
+
+<defun pagecount::pages-db>
+  <get-var mhtml::include-prefix>/page-counts.db
+</defun>
+
+<defun pagecount::digits-webpath>
+  <site::system-prefix>/images/digits
+</defun>
+
+<defun pagecount::digits-dirpath>
+  <get-var mhtml::include-prefix><pagecount::digits-webpath>
+</defun>
+
+<defun pagecount::digits-base-url>
+  <get-var mhtml::http-prefix><pagecount::digits-webpath>
+</defun>
+
+<defun pagecount::digit-url fontname digit>
+  <pagecount::digits-base-url>/<get-var fontname>/<get-var digit>.gif
+</defun>
+
+<defun pagecount::make-sample digit-font>
+  <set-var i=0>
+  <while <lt i 10>>
+    <img src="<pagecount::digit-url <get-var digit-font> <get-var i>>"
+	 align=absmiddle>
+    <increment i>
+  </while>
+</defun>
+
+<defun pagecount::available-fonts>
+  ;;; DOC_SECTION (PAGECOUNT-APPENDIX)
+  ;;; Return an array of the names of the fonts available on this system
+  ;;; for displaying digit counters.
+  <package-delete temp>
+  <directory-contents <pagecount::digits-dirpath> temp matching="^[^.]">
+  <set-var fonts[]=<package-vars temp>>
+  <sort fonts>
+  <set-var i=0 names[]="">
+  <while <get-var fonts[i]>>
+    <alist-to-package <get-var <get-var fonts[i]>> font>
+    <set-var names[i]=<get-var font::name>>
+    <increment i>
+  </while>
+  <get-var names[]>
+</defun>
+
+<defun count-this-page &optional key>
+  ;;; DOC_SECTION (PAGECOUNT-APPENDIX)
+  ;;; Add the current hit on this page to the pagecounter database, and
+  ;;; return the current number of hits.  The pagecounter database is
+  ;;; only accessed if this is the first time that this function is
+  ;;; called on this page.
+  ;;;
+  ;;; If <var key> is not supplied, it defaults to the web-relative
+  ;;; path to the current document.
+  ;;;
+  ;;; <example>
+  ;;;   <count-this-page> --> 2349
+  ;;; </example>
+  <when <not <get-var pagecount::hits>>>
+    <defvar key <get-var mhtml::relative-prefix>/<get-var mhtml::current-doc>>
+    <with-open-database db <pagecount::pages-db> mode=write-create>
+      <set-var x = <database-load-record db <get-var key> prefix=pagecount>>
+      <defvar pagecount::incept-time <time>>
+      <increment pagecount::hits>
+      <set-var x=<database-save-package db <get-var key> pagecount strip=true>>
+    </with-open-database>
+  </when>
+  <or <get-var pagecount::hits> 0>
+</defun>
+
+<defun pagecount::gif-counter fontname>
+  ;;; DOC_SECTION (PAGECOUNT-APPENDIX)
+  ;;; Produce a sequence of GIFS representing the number of times this
+  ;;; page has been accessed.  Implicitly calls count-this-page.
+  ;;; The gifs are rendered using the font specified in FONTNAME.
+  <set-var hits[]=<subst-in-string <count-this-page> "([0-9])" "\\1\n">>
+  <foreach digit hits>
+    <img src="<pagecount::digit-url <get-var fontname> <get-var digit>>"
+	 align=absmiddle>
+  </foreach>
+</defun>
+
+<defun pagecount::english-counter>
+  ;;; DOC_SECTION (PAGECOUNT-APPENDIX)
+  ;;; Produce an English text representation of the number of times
+  ;;; this page has been accessed.  Implicitly calls the function
+  ;;; <funref pagecount-appendix count-this-page>.
+  ;;; 
+  ;;; <example>
+  ;;; <pagecount::english-counter> --> One Thousand Two Hundred and Fifty
+  ;;; </example>
+  <number-to-english <count-this-page>>
+</defun>
+
+<defun pagecount::englith-counter>
+  ;;; DOC_SECTION (PAGECOUNT-APPENDIX)
+  ;;; Produce an English text representation of the number of times
+  ;;; this page has been accessed.  Implicitly calls the function
+  ;;; <funref pagecount-appendix count-this-page>.
+  ;;; 
+  ;;; <example>
+  ;;; <pagecount::english-counter> --> One Thousandth Two Hundred and Fiftieth
+  ;;; </example>
+  <number-to-englith <count-this-page>>
+</defun>

@@ -1,0 +1,64 @@
+;;; hiding.mhtml: Describes how to install Engine, kind of.
+<if <not <get-var files-are-included>>
+    <prog
+      <set-var
+        title="Installing the Engine"
+        prev-page="server-install.mhtml" prev-title="Server Install"
+        next-page="serverconf.mhtml"  next-title="Server Configuration">
+      <include header.mhtml>>
+  <prog
+   <h2>Installing the Engine</h2>>>
+
+<ptext>
+The <meta-html> Engine is the CGI program which actually interprets
+<meta-html> statements in your documents.
+
+The Engine gets the path of the page to process from the environment
+variable <var PATH_INFO>, which is also where it tries to find the
+value of the current session ID.  Thus, a full URL to a page full of
+<meta-html> commands stored in your Web documents directory as
+<code>"foo/bar.mhtml"</code> might look like:
+
+<example>
+  http://www.your-site.com/cgi-bin/nph-engine/foo/bar.mhtml
+</example>
+
+and, if a session ID were present in the URL,
+
+<example>
+  http://www.your-site.com/cgi-bin/nph-engine/73847837482/foo/bar.mhtml
+</example>
+
+Obviously, this URL is "ugly" in the sense that it is unlikely people
+browsing your Web site could remember it, or that it is something you
+would like to publish in a television commercial.  So, the goal is to
+make some reasonable URL, such as
+<code>http://www.your-site.com/foo/bar.mhtml</code> be the one that
+your viewers see.
+
+You handle this translation in the configuration files for your
+server, and the <a href="serverconf.mhtml">server specific
+sections</a> of this manual tell you how to do that for many of the
+popular servers.
+
+For example, let's say that you are building a hairy site for an
+organization called "Foo Industries."  The URL of Foo Industries is
+<code>http://www.foo.com</code>.  The Web administrator for Foo
+Industries sets up a translation for  <code>"/*"</code> to point to
+<code>"/cgi-bin/mhtml-engine/*"</code>.
+
+An URL such as "http://www.foo.com/index.html" causes the Engine to be
+run, with a <var PATH_INFO> value of <code>"/index.html."</code>  The
+engine reads in and interprets "index.html", and then returns that page.
+
+The <meta-html> Engine performs various translation on the path that
+it receives; in effect, it is a small and powerful server on its own.
+
+Prior to executing any page, the file <code>"engine.conf"</code> is
+executed.  Typically, this file is used to set up any globally known
+page variables, so that references to, for example, <var SITE-DIRECTORY>
+can be resolved readily within the document pages.
+</ptext>
+
+<if <not <get-var files-are-included>>
+    <include footer.mhtml>>

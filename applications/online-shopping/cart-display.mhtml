@@ -1,0 +1,77 @@
+;;; cart-display.mhtml: -*- Meta-HTML -*-
+;;;  <include> this to display the contents of the shopping cart.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Sat Oct 21 14:07:12 1995.
+;;;
+;;; You must have already included substs and cart-substs.
+
+<p>
+<read-cart>
+<cart-to-array contents>
+
+;;;
+;;; CONTENTS is now an array of shopping cart items, in the form:
+;;;
+;;;    ("Clothing::C119" 3 SIZE=XXL COLOR=Black)
+;;;
+;;; Cycle through the elements, printing them in a table.
+;;; List the contents of the shopping cart by iterating over all of
+;;; the product ID variables stored therein.
+
+<when <get-var contents[0]>>
+  <set-var i=0 total=0 num-items=0 names[]=<package-vars cart>>
+  <center>
+    <table border=1>
+      <tr>
+	<table-header Quantity>
+	<if <get-var shopping::show-product-id>
+	    <table-header Prod. ID>>
+	<table-header Item Name>
+	<table-header Unit Price>
+	<table-header Product Description/Remarks>
+	<table-header Total><br>
+      </tr>
+      <while <get-var contents[i]>>
+	<breakout-contents contents[i]>
+	<load-item>
+	;;; Okay.  CLASS, KEY, QUANTITY, and INFO have been set
+	;;; up, and the info about this item has been loaded.  Display
+	;;; a row if this item has a quantity greater than 0.
+	<set-var mhtml::decimal-places=2>
+	<set-var real-price=<mul quantity unit-price>>
+	<tr>
+	  <td align=center><get-var quantity></td>
+	  <if <get-var shopping::show-product-id>
+	      <prog <td align=center><get-var product-id></td>>>
+	  <td align=left><get-var product-name></td>
+	  <td align=right><get-var unit-price></td>
+	  <td align=center><or <get-var info> &nbsp;></td>
+	  <td align=right><get-var real-price></td>
+	</tr>
+	<set-var total=<add total real-price>>
+	<unset-var mhtml::decimal-places>
+	<set-var num-items=<add <get-var num-items> <get-var quantity>>>
+	<increment i>
+      </while>
+      <tr>
+	<td align=center></td>
+	<if <get-var shopping::show-product-id>
+	    <prog <td align=center></td>>>
+	<td align=left></td>
+	<td align=right></td>
+	<td align=center></td>
+	<td align=right></td>
+      </tr>
+      <tr>
+	<td align=center><b><get-var num-items></b></td>
+	<if <get-var shopping::show-product-id>
+	    <prog <td align=center>&nbsp;</td>>>
+	<td align=left>&nbsp;</td>
+	<td align=right>&nbsp;</td>
+	<td align=center>&nbsp;</td>
+	<td align=right><b>$<get-var total></b></td>
+      </tr>
+    </table>
+  </center>
+</when>

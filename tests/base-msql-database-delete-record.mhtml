@@ -1,0 +1,6 @@
+;;; base-msql-database-delete-record.mhtml: -*- Meta-HTML -*-DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 17:38:32 1996.
+
+Result: truetrue: <set-var name="Delete" phone="805-730-7775"><msql::with-open-database db database=test host=localhost><msql::database-save-record db <get-var name> name phone table=test keyname=name><msql::database-delete-record db <get-var name> table=test keyname=name></msql::with-open-database>

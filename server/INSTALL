@@ -1,0 +1,400 @@
+#!/bin/sh
+#
+# This install script creates a web site running the
+# Meta-HTML Server.
+#
+gobackup=no
+# This must be run from within the Server directory.
+if [ ! -f ./mhttpd ]; then
+   if [ -d server ]; then
+      cd server
+      gobackup=yes
+   else
+      echo ""
+      echo "You must run this script from the Server directory of"
+      echo "your distribution."
+      echo ""
+      exit
+   fi
+fi
+
+# Set defaults for installation.
+otherserver=no
+webroot=/usr/www
+ docdir=/usr/www/docs
+ bindir=/usr/www/bin
+confdir=/usr/www/conf
+ logdir=/usr/www/logs
+server_port=80
+server_host=`hostname`
+
+echo "Please answer the following questions to the best of your ability."
+echo ""
+echo "You will be asked to confirm just before the server is installed."
+echo ""
+echo "When you are asked a question, the default answer is displayed at"
+echo "the end of the question enclosed in square brackets (\"[\" and \"]\")."
+echo "If you are installing your first Web server, we suggest that you"
+echo "simply accept the defaults as shown, by pressing the RETURN key."
+echo "Otherwise, type in your answer to the question, and then press RETURN."
+echo ""
+
+# Step 1: Do they already have another server installed?
+echo "This install program is used to do a quick install of the Meta-HTML"
+echo "Web Server.  If you already have an existing Web server, you may still"
+echo "install the Meta-HTML server, either with its own document root, or"
+echo "to serve your existing pages."
+echo ""
+echo "Do you already have another Web server installed?"
+echo -n "     (\"yes\" or \"no\") default: [$otherserver] "
+read reply
+if [ "$reply" != "$otherserver" ]; then
+   if [ "$reply" = "" ]; then
+      reply="$otherserver"
+   fi
+
+   if [ "$reply" = "yes" -o "$reply" = "YES" ]; then
+      otherserver="yes"
+   else
+      otherserver="no"
+   fi
+fi
+
+# Step 1.5: Get the name to which this server should answer.
+echo ""
+echo "The Server will listen for HTTP requests under a specific name."
+echo "The name that you select should be a fully qualified host name,"
+echo "and should already exist."
+echo ""
+echo "Under what name should the Server listen for HTTP requests?"
+echo -n "     (A fully qualified hostname) default: [$server_host] "
+read reply
+if [ "$reply" = "" ]; then
+   reply="$server_host"
+fi
+server_host="$reply"
+
+# Step 2: Get the name of the directory where Web documents are stored.
+echo ""
+if [ "$otherserver" = "yes" ]; then
+   # Quickly get a server port to run this server on.
+   echo ""
+   echo "If you are planning on making the Meta-HTML Server your main"
+   echo "Web server, you should set the port number to \"80\". However,"
+   echo "if you are just experimenting with the Meta-HTML Server, a"
+   echo "good choice for the port number is \"8080\"."
+   echo ""
+   echo "On which port would you like the Meta-HTML Server to listen?"
+   echo -n "     (a number, such as 80, or 8080) default: [$server_port] "
+   read reply
+   if [ "$reply" = "" ]; then
+      reply=$server_port
+   fi
+   server_port=$reply
+   echo ""
+   echo "Where are the documents for your Web site installed?"
+else
+   echo ""
+   echo "Where would you like to put the documents for your Web site?"
+fi
+echo -n "     (path, without trailing slash) default: [$docdir] "
+read reply
+if [ "$reply" = "" ]; then
+   reply="$docdir"
+fi
+docdir="$reply"
+
+# Step 2.5: Create a default for remaining variables from docdir.
+# Only do this if we haven't read defaults from the .config file.
+basedir=`echo $docdir | sed -e 's@[^/]*$@@'`
+webroot=`echo $basedir | sed -e 's@/$@@'`
+bindir="$webroot/bin"
+confdir="$webroot/conf"
+logdir="$webroot/logs"
+
+# Step 3: Get the name of a directory to install binaries in.
+echo ""
+echo "We would like to install the binaries that came with your distribution"
+echo "in a directory by themselves.  After installation is complete, you"
+echo "should add this directory to the end of your PATH variable.  You"
+echo "may install the binaries anywhere that you would like, but why not"
+echo "install in a separate directory first, and then move them later?"
+echo ""
+echo "Where would you like the server and utility binaries to be installed?"
+echo -n "     (path, without trailing slash) default: [$bindir] "
+read reply
+if [ "$reply" = "" ]; then
+   reply="$bindir"
+fi
+bindir="$reply"
+
+# Step 4: Get the name of a directory to install the configuration file in.
+echo ""
+echo "The Meta-HTML Server will need to read a configuration file when it"
+echo "starts up.  If you start running the server from the directory "
+echo "$webroot, and the configuration file is in $confdir, the Server "
+echo "will find the configuration file automatically.  Otherwise, you "
+echo "will have to give \"mhttpd\" the \"--config\" option to tell it"
+echo "where the configuration file is installed."
+echo ""
+echo "Where would you like the server configuration files to go?"
+echo -n "     (path, without trailing slash) default: [$confdir] "
+read reply
+if [ "$reply" = "" ]; then
+   reply="$confdir"
+fi
+confdir="$reply"
+
+# Step 5: Confirm that all of the directories are correct.
+doinstall=yes
+echo ""
+echo "We are ready to install the server and utilities.  Here is the"
+echo "list of directories that will be created if they do not exist,"
+echo "and the locations where things will be installed:"
+echo ""
+echo "   $bindir --"
+echo "       mhttpd (the server)"
+echo "       list-sessions, delete-session, reap-sessions,"
+echo "       set-session-timeout, get-session-var, set-session-var,"
+echo "       and gc-database (the session utility programs)"
+echo "       dbdump, dbpack, and dbcreate (the database utility programs)"
+echo "       strip-tags (generic utility program), imagemap, webmail, and"
+echo "       mklib (create quick loading package files)"
+echo ""
+echo "   $confdir --"
+echo "       mhttpd.conf (the server configuration file)"
+echo "       mhttpd-pages, mhttpd-pages/Results (editable result pages)"
+echo ""
+echo "   $docdir --"
+echo "       Documentation (the full documentation for Meta-HTML)"
+echo ""
+echo "Are you ready to install the Server using these values?"
+echo -n "     (\"yes\" or \"no\") default: [$doinstall] "
+read reply
+if [ "$reply" != "$doinstall" ]; then
+   if [ "$reply" = "" ]; then
+      reply="$doinstall"
+   fi
+
+   if [ "$reply" = "yes" -o "$reply" = "YES" ]; then
+      doinstall="yes"
+   else
+      doinstall="no"
+   fi
+fi
+
+# Step 6: Install, or quit.
+if [ "$doinstall" != "yes" ]; then
+   echo ""
+   echo "Okay, I won't do the install."
+   echo ""
+   echo "You can come back anytime and do this install again."
+   echo "In the meantime, have a nice day!"
+   ceho ""
+   exit
+fi
+
+echo ""
+echo "Installing..."
+
+# 6.1: Make bindir if not present.
+if [ ! -d $bindir ]; then
+   echo "  Creating $bindir "
+   if ! mkdir $bindir 2>/dev/null >/dev/null; then
+      if ! mkdir -p $bindir 2>/dev/null >/dev/null; then
+	 echo "   Unable to create the directory \"$bindir\"!"
+	 echo "The install was aborted."
+	 echo ""
+	 exit
+      fi
+   fi
+   chmod a+rx $bindir
+fi
+
+# 6.2: Make confdir if not present.
+if [ ! -d $confdir ]; then
+   echo "  Creating $confdir "
+   if ! mkdir $confdir 2>/dev/null >/dev/null; then
+      if ! mkdir -p $confdir 2>/dev/null >/dev/null; then
+	 echo "   Unable to create the directory \"$confdir\"!"
+	 echo "The install was aborted."
+	 echo ""
+	 exit
+      fi
+   fi
+   chmod a+x $confdir
+fi
+
+# # 6.25: Make confdir/admin if not present.
+# if [ ! -d $confdir/admin ]; then
+#    echo "  Creating $confdir/admin "
+#    if ! mkdir $confdir/admin 2>/dev/null >/dev/null; then
+#       if ! mkdir -p $confdir/admin 2>/dev/null >/dev/null; then
+# 	 echo "   Unable to create the directory \"$confdir/admin\"!"
+# 	 echo "The install was aborted."
+# 	 echo ""
+# 	 exit
+#       fi
+#    fi
+#    chmod a+x $confdir/admin
+# fi
+
+# 6.3: Make docdir if not present.
+if [ ! -d $docdir ]; then
+   echo "  Creating $docdir "
+   if ! mkdir $docdir 2>/dev/null >/dev/null; then
+      if ! mkdir -p $docdir 2>/dev/null >/dev/null; then
+	 echo "   Unable to create the directory \"$docdir\"!"
+	 echo "The install was aborted."
+	 echo ""
+	 exit
+      fi
+   fi
+   chmod a+rx $docdir
+fi
+
+if [ ! -d $docdir/cgi-bin ]; then
+   echo "  Creating $docdir/cgi-bin "
+   if ! mkdir $docdir/cgi-bin 2>/dev/null >/dev/null; then
+      if ! mkdir -p $docdir/cgi-bin 2>/dev/null >/dev/null; then
+	 echo "   Unable to create the directory \"$docdir/cgi-bin\"!"
+	 echo "   The install will continue anyway."
+	 echo ""
+	 exit
+      fi
+   fi
+fi
+
+# 6.3: Make logdir if not present.
+if [ ! -d $logdir ]; then
+   echo "  Creating $logdir "
+   if ! mkdir $logdir 2>/dev/null >/dev/null; then
+      if ! mkdir -p $logdir 2>/dev/null >/dev/null; then
+	 echo "   Unable to create the directory \"$logdir\"!"
+	 echo "The install was aborted."
+	 echo ""
+	 exit
+      fi
+   fi
+   chmod a+rx $logdir
+fi
+
+# 6.4: Install into bindir.
+echo "  Installing in $bindir"
+echo "    mhttpd"
+if ! cp mhttpd $bindir/; then
+   echo ""
+   echo "   Unable to create the file \"$bindir/mhttpd!\""
+   echo "The install was aborted."
+   echo ""
+   exit
+fi
+
+# 6.41: Link to imagemap and engine from cgi-bin.
+if [ -d $docdir/cgi-bin ]; then
+   chmod a+rx $docdir/cgi-bin 2>/dev/null
+   ln -s $bindir/imagemap $docdir/cgi-bin/imagemap
+fi
+
+if [ -d ../Utilities ]; then
+   echo "  Installing the utility programs into $bindir"
+   doneone=
+   echo -n "    "
+   for file in ../Utilities/*; do
+      pretty_file=`echo $file | sed -e 's@.*/@@'`
+      if [ "$doneone" ]; then
+	 echo -n ", "
+      else
+	 doneone=true
+      fi
+      echo -n "$pretty_file"
+      if ! cp $file $bindir/; then
+	 echo "   Unable to create the file \"$bindir/$file!\""
+	 echo "The install was aborted."
+	 echo ""
+	 exit
+      fi
+   done
+   echo "."
+fi
+
+# 6.5: Install into confdir.
+echo "  Installing in $confdir"
+cat mhttpd.conf | \
+   sed -e "s@<get-var mhtml::server-root>/docs@$docdir@g" \
+       -e "s@<get-var mhtml::server-root>/logs@$logdir@g" \
+       -e "s@<get-var mhtml::server-root>/mhttpd-pages@$confdir/mhttpd-pages@g" \
+       -e "s@www.myhost.com@$server_host@g" \
+       -e "s@80@$server_port@g" >temp.conf
+if [ -f $confdir/mhttpd.conf ]; then
+   echo -n "    Saving old configuration file..."
+   cp $confdir/mhttpd.conf $confdir/mhttpd.conf.BAK
+   echo "done"
+fi
+
+if ! cp temp.conf $confdir/mhttpd.conf; then
+   echo "   Unable to create the file \"$confdir/mhttpd.conf!\""
+   echo "The install was aborted."
+   echo ""
+   exit
+else
+   rm -f temp.conf
+fi
+
+if ! cp local.conf $confdir/local.conf; then
+   echo "   Unable to create the file \"$confdir/local.conf!\""
+   echo "The install was aborted."
+   echo ""
+   exit
+fi
+
+# # Install the server administration files.
+# if ! cp -r admin $confdir/; then
+#    echo "   Unable to install the server administration files."
+#    echo "    Specifically, the files in \"$confdir/admin.\""
+#    echo "The install will continue, but you will have to administrate"
+#    echo "the server by directly editing the \"$confdir/mhttpd.conf\" file."
+#    echo ""
+# fi
+
+if [ -d $confdir/mhttpd-pages ]; then
+   echo "    Skipping $confdir/mhttpd-pages: directory exists."
+else
+   cp -r mhttpd-pages $confdir/
+fi
+
+# 6.6: Copy over the documentation.
+if [ -d ../doc ]; then
+   if [ -d $docdir/Documentation ]; then
+      echo "  Skipping Documentation: $docdir/Documentation already exists."
+   else
+      echo "  Installing the Meta-HTML documentation..."
+      cp -r ../doc $docdir/Documentation
+   fi
+fi
+
+if [ "$gobackup" = "yes" ]; then
+   cd ..
+fi
+
+echo ""
+echo "                      CONGRATULATIONS!"
+echo ""
+echo "You have sucessfully installed the Meta-HTML Server and"
+echo " Utilties, and are ready to start your server."
+echo ""
+echo "To do so:"
+echo ""
+echo "    $bindir/mhttpd --config $confdir/mhttpd.conf"
+echo ""
+echo "Then get the Meta-HTML Documentation in your browser with this URL:"
+echo ""
+if [ "$server_port" != 80 ]; then
+   echo "    http://$server_host:$server_port/Documentation"
+else
+   echo "    http://$server_host/Documentation"
+fi
+echo ""
+echo "Happy WebMastering!"
+echo ""
+exit

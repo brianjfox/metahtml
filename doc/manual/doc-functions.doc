@@ -1,0 +1,30 @@
+Write your function definitions with ;;; comments as the first part of the
+function.  Meta-HTML now is capable of storing the first non-code part
+of the function as documentation strings in the running binary.
+
+The functions <%%function-documentation fun> and
+<%%function-arguments fun> can be used to extract the documentation
+and arguments respectively.
+
+There is no mechanism for storing the documentation strings
+permanently in the binary, or in the library files, as this would make
+Meta-HTML too big (in the former case) and the library files
+incompatible between earlier versions and new versions (in the latter
+case).
+
+I have documented the public functions in tagsets/* and
+powerstrip-tags/* for the latest documentation -- there is a switch
+that you can turn on in the bootstrap.mhtml file that causes a texinfo
+formatted file of functions and documentation to be dumped out and
+copied to the ../docs/manual directory.
+
+Here is an example of a documented function:
+
+<defun foo bar baz &rest args[]>
+  ;;; Frob the BAR with BAZ optionally appending
+  ;;; ARGS.
+  ;;;
+  ;;; Example:
+  ;;;   <foo "this" <get-var that> and some "more args" here.
+  ;;;   --> this-frobbed that-frobbed-and-some-more args-here
+</defun>

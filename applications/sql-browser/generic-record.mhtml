@@ -1,0 +1,49 @@
+;;; generic-record.mhtml: -*- Meta-HTML -*-  Add/Edit/Delete a record.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 21 08:20:58 1997.
+
+<defun min x y>
+  <if <lt <get-var x> <get-var y>> <get-var x> <get-var y>>
+</defun>
+
+<include header.mhtml>
+
+<set-var columns[]=<gsql::database-columns>>
+<gsql::with-open-database>
+<foreach field columns>
+  <set-var fields[i] =
+    <sql::database-column-info db <get-var gsql::database-table>
+			       <get-var field>>>
+  <increment i>
+</foreach>
+</gsql::with-open-database>
+
+<layout::page>
+  ;;; Create a table for editing this record.
+  <form method=post action="<thisdoc>">
+    <center>
+      <table>
+	<foreach field fields>
+	  <package-delete temp>
+	  <alist-to-package <get-var field> temp>
+	  <tr>
+	    <td align=right> <b> <capitalize <get-var temp::name>> </b> </td>
+	    <td align=left>
+	      <input type=text name="<get-var temp::name>"
+		     <when <get-var temp::length>>
+		     size=<min <get-var temp::length> 60>
+		     maxlength=<get-var temp::length>
+		     </when>
+		     <if <get-var posted::<get-var temp::name>>
+			 <prog value="<get-var posted::<get-var temp::name>>">>><if <gt temp::length 60> "+++">
+	    </td>
+	  </tr>
+	</foreach>
+      </table>
+    </center>
+  </form>
+
+</layout::page>
+<include footer.mhtml>
+

@@ -1,0 +1,12 @@
+;;; base-database-query.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 03:07:21 1996.
+
+Result: "key0001
+key0002
+key0003": <with-open-database db test.db mode=write-create><set-var result=<database-save-record db key0001 db>><set-var result=<database-save-record db key0002 db>><set-var result=<database-save-record db key0003 db>><database-query db true keys=dbkeys></with-open-database><cgi-exec "/bin/rm test.db"><get-var dbkeys[]>
+Result: "key0001
+key0002
+key0003": <with-open-database db test.db mode=write-create><set-var result=<database-save-record db key0001 db>><set-var result=<database-save-record db key0002 db>><set-var result=<database-save-record db key0003 db>><database-query db <string-eq <get-var db> <get-var default::db>> keys=dbkeys></with-open-database><cgi-exec "/bin/rm test.db"><get-var dbkeys[]>
+Result: " key0001: 5A3C0"" key0002: 5A3C0"" key0003: 5A3C0": <with-open-database db test.db mode=write-create><set-var result=<database-save-record db key0001 db>><set-var result=<database-save-record db key0002 db>><set-var result=<database-save-record db key0003 db>><database-query db <string-eq <get-var db> <get-var default::db>> format=<prog " <get-var key>: <get-var db>"> keys=dbkeys></with-open-database><cgi-exec "/bin/rm test.db">

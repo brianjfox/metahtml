@@ -1,0 +1,6 @@
+;;; base-encrypt.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 16:33:06 1996.
+
+Result: 808466f37b18b0213ec00ff0c214bb49: <set-var credit-card="4111000111666"><encrypt credit-card foobar><get-var credit-card>

@@ -1,0 +1,308 @@
+
+		       Meta-HTML RPM Release
+
+Version PACKVER of the Meta-HTML Web Language distribution is now
+available as an RPM for RedHat Linux from:
+
+	ftp://ftp.metahtml.com/pub/RPMS/metahtml-6.09.01-1.i386.rpm
+
+     ------------------------------------------------------------
+
+			     What is it?
+
+Meta-HTML is a programming language specifically designed for working
+within the World Wide Web environment.  Although it is a genuine
+programming language, suitable for large-scale symbolic manipulation,
+it provides the most commonly wanted Web functionality as built-in
+primitives, so you don't have to write them.  You can find out more
+about the theory of implementation in this white paper
+[http://www.metahtml.org/documentation/manifesto.html].
+
+Web pages are authored using HTML and Meta-HTML statements freely
+intermixed.  When a page is requested by a browser, the page is passed
+through the Meta-HTML interpreter, which dynamically processes any
+Meta-HTML statements to produce a final HTML page that is delivered
+to the browser.
+
+The RPM distribution provides several different interpreter options:
+
+	* A CGI engine which can be run by any Unix Web server,
+	* A FastCGI engine which can be run under FastCGI compliant servers,
+	* A full-featured Web server (mhttpd) with the interpreter built in,
+	* A standalone processor, much like Perl or Tcl, and
+	* An interactive debugger, with a feel similar to GDB (mdb)
+
+     ------------------------------------------------------------
+			Major Changes in 6.09
+
+	* New &attributes parameter specifier makes it easier and cleaner
+	  to write new language features.
+
+	* Better and cleaner database support for MySQL, mSQL, and ODBC.
+
+	* New module-based interface to the Thomas Boutell's GD library.
+	  See (image::*).
+
+	* Written from scratch flexible date parser which doesn't care
+	  about the year 2000 (unlike GNU getdate).
+
+	* Extra support for running Meta-HTML under Apache+mod_ssl.
+	  Not heavily documented.
+
+	* Support for Virtual Servers in mhttpd.  Using the *exact* same
+	  syntax as Apache (<VirtualServer foo.bar.com:8081>...</VirtualServer>
+	  you can have mhttpd listen on many IP/ports, change the document
+	  root directory on the fly dependent on the "Host:" header, and
+	  generally manage an infinite number of servers from a single
+	  mhttpd server.
+
+	* The session database can now be TCP based.  There is a TCP server
+	  shipped in the modules directory which can manage sessions.
+	  This means (among other things) that you can run many Meta-HTML
+	  servers in a "web farm" to distribute processing loads.
+
+	* Target to build an RPM under RedHat is now in place.
+
+     ------------------------------------------------------------
+			Major Changes in 6.07
+
+	* The disk containing my CVS repository (which contained
+	  detailed changelogs) died.  I'm just winging the changes
+	  here.
+
+	* Interface to "gnuplot" provides an intuitive and simple API
+	  for dynamically creating graphs and plots of data.
+
+	* New functions for manipulating association lists, including
+	  ALIST-PACKAGE-DELETE and ALIST-PACKAGE-NAMES.
+
+	* An annoying bug where mhttpd could dump core after serving pages
+	  has been fixed.
+
+	* The basic-auth package has been updated, and is now part of the
+	  standard distribution.
+
+	* Bug fixes to the SQL database interface now allow very large
+	  numbers of records to be manipulated (the bug was a memory leak
+	  which could cause MySQL or mSQL accesses to run out of memory).
+
+	* libserver/http.c (mhttpd_metahtml_engine): Set
+	  mhtml::last-modification-time based on the mod time of the
+	  document.  Similar changes to pagefuncs.c:include and
+	  require.c:require_search keep this value updated.  By the
+	  end of the page, the last modification time is correctly set
+	  to the most recent modification time of any page that was
+	  needed to build the current one.
+
+     ------------------------------------------------------------
+			Major Changes in 6.06
+
+	* The module system has been revamped and fortified.  Many new
+	  commands are available through the use of dynamically
+	  loaded modules, such as trigonometric math functions.
+
+	* Several new primitives, including <%%after-page-return>, <apply>,
+	  <%%read-sexp>, and <%%function-alist>.
+
+	* New commands for direct manipulation of the contents of
+	  association lists, including <alist-get-var>,
+	  <alist-set-var>, etc.
+
+	* New and improved SQL examples, such as the SQL-Rolodex,
+	  demonstrate our own tried and true methodology for building
+	  complex Web-based SQL database backed applications.
+
+	* The SQL database command sets are now only compiled as
+	  modules.  This keeps the size of the executable down, and
+	  has the added advantage of allowing one to "plugin" new
+	  database modules into an existing system.
+
+	* New SQL database convenience functions, such as
+	  <sql::standard-search-form>.  Please see the documentation
+	  for more details.
+
+	* Improvements to MDB, the Meta-HTML debugger.  Documentation
+	  can now be displayed by typing C-M-D while the cursor is
+	  within a function call -- C-M-A displays only the argument
+	  list, etc.  These commands are also available from within
+	  Emacs using Meta-HTML mode (implemented in elisp/mhtml.el).
+
+	* Various and sundry minor bug fixes.
+
+	* Better and more complete documentation.
+
+     ------------------------------------------------------------
+			Major Changes in 6.05
+
+	* An example SQL/Meta-HTML application which demonstrates how
+	  to create complete SQL-based Meta-HTML Web applications.
+	  This one is a Rolodex style application.
+
+	* tagsets/sql.mhtml: New functions generate generic search forms
+	  for specific SQL database tables.
+
+	* modfuncs.c (pf_load_module): Allow a different initialization
+	  function to called, instead of `module_initialize'.  When the
+	  keyword argument "initfunc" is given, this overrides the default
+	  of inhibiting initialization on some systems (linux,
+	  solaris, etc).
+
+	* parser.c (mhtml_execute_function): New definition keyword
+	  &unevalled causes arguments appearing to the right of it
+	  not be evalled before assignation.
+
+	* Compensations for Apache virtual servers running the engine.
+	  HTTP_HOST is now used to search for hostname.conf, and
+	  hostname-engine.conf.
+
+	* Improvements to the Meta-HTML debugger, "mdb".
+	  `list FUNCTION-NAME' finds and lists that function if defined
+	  in a loaded file.
+	  `break FUNCTION-NAME' sets a breakpoint at that function.
+	  Automatic loading and saving of command-line history.
+	  Breakpoints can be set for the start of execution of primitives,
+	  and built-ins.
+	  New command `apropos STRING' displays all symbols containing STRING.
+
+	* <dump-package ...> displays nicely in the debugger.
+
+	* <redirect ...> can now take an optional "target=window-spec"
+	  argument, making it trivial to work within sites built on
+	  complex framesets.
+
+	* New primitives, including: <neq>, <string-neq>, <unix::mkfifo>,
+	  <dir::dirname>, <dir::read-file>, <dir::write-file> and more.
+
+	* Optional auto-encryption of session data for those sensitive
+	  applications where the exposure of session information could
+	  comprise users personal information.  Any size key is
+	  supported, and the server can generate a large, random one
+	  for you.
+
+	* "configure" now works on more systems.  Various libraries are
+	  found more readily.
+
+	* Bug fixes.
+
+     ------------------------------------------------------------
+		 Meta-HTML Changes in 6.04
+
+	* FastCGI Engine works with the Apache Stronghold SSL Server.
+
+	* Included support for the mySQL database.
+
+	* Generic SQL database interface functions work with mSQL and mySQL.
+
+	* <base64encode> and <base64decode> both provided.
+
+	* Support for version 2.x of Eric Young's DES library.
+
+	* Automatic initialization function for libraries and <require>.
+
+	* An elusive bug in the Engine and FastCGI Engine which could
+	  allow extra characters to appear has been fixed
+
+	* Default settings in the server initialization files assume a
+	  greater need for security.
+
+	* Functions in the server initialization allow the setting
+	  of the user and group id under which the server will run.
+
+	* Numerous execution enhancements resulting in easier
+	  debugging and faster interpretation.
+
+	* Several functions have been rewritten as primitives,
+	  including string-length and file-exists.
+
+	* Rewrite of arithmetic and relational operators, allowing any
+	  number of arguments to be passed (e.g. <add 2 3 4 5> --> 14).
+
+	* Documentation revamped.  Functions written in Meta-HTML can now
+	  be documented at the time that you write them.
+
+	* New function declaration syntax allows keywords, optional
+	  arguments and variable numbers of arguments.  An example:
+
+	     <defun hairy-fun foo &optional bar &key this that &rest args[]>
+	       ...
+	     </defun>
+
+	  might be called as follows:
+
+	     <hairy-fun this=keyword foo-arg bar-arg these "are the" rest args>
+
+	  resulting in the bindings:
+		foo    --> foo-arg
+		bar    --> bar-arg
+		this   --> keyword
+		that   -->
+		args[] --> Array of "these" "are the" "rest" "args"
+
+	-----------------------------------------------------------
+			Meta-HTML Information
+
+	* All reported bugs have been fixed.  I'm happy to say that
+	  there just haven't been many bugs reported!
+
+	* The server is now able to perform DNS caching -- this should
+	  improve request response time for sites that have client name
+	  resolution turned on (the default).  It is controlled by
+	  a variable in the server config file.
+
+	* A new set of documented array operators, including:
+	  array-append, array-member, array-size, array-add-unique,
+	  array-shift, array-concat, foreach, and a new "sort"
+	  function.
+
+	* Complete support for mSQL 2.x as well as mSQL 1.x.  Many
+	  bugs were found and fixed in this code.
+
+	* Improvements to various functions, documentation for same.
+	  Specifically, cgi-exec, sort, with-open-stream, stream-get,
+	  page-debug, system-error-output, and debugging-output have
+	  all improved.
+
+	* Dynamically loaded modules allow C language extensions to be
+	  added to the running Meta-HTML interpreter.  Several useful
+	  examples are included.
+
+	* FastCGI support for all platforms now built automatically.
+
+	* Better configuration mechanism allows compilation on many
+	  more machine/OS's than before.
+
+	* Again, more and improved documentation.
+
+	* More control over cookie manipulation and session IDs.
+
+	* The ability to include binary representations of Meta-HTML
+	  source code directly in the compiled Engine, Server,
+	  Debugger, and Standalone Processor.  See libmhtml/bootstrap.mhtml.
+
+     ------------------------------------------------------------
+
+		      E-Mail Addresses and URLs
+
+Bug reports for Meta-HTML should be sent to bug-metahtml@metahtml.com.
+Bug reports for the documentation should be sent to bug-manual@metahtml.com.
+
+There is a user mailing list: metahtml-users@metahtml.com.  You can
+subscribe on the Web [http://www.metahtml.com/E-Mail/], or by
+sending mail to metahtml-users-request@metahtml.com.
+
+The various mailing lists are gatewayed to a news group:
+
+	news://news.metahtml.com/metahtml.users
+	news://news.metahtml.com/metahtml.wizards
+	news://news.metahtml.com/metahtml.bug.metahtml
+	news://news.metahtml.com/metahtml.bug.manual
+
+     ------------------------------------------------------------
+
+		       Authors and Maintenance
+
+Meta-HTML was designed and implemented by Brian J. Fox (bfox@ai.mit.edu).
+Meta-HTML version 5.09 is released under terms nearly identical to the
+GPL.  The code and utilities are maintained by Brian J. Fox.
+
+     ------------------------------------------------------------

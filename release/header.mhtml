@@ -1,0 +1,21 @@
+;;; header.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Jun 15 08:39:23 1997.
+<html>
+<body bgcolor="#FFFFFF" text="#000000" background=images/bg.gif>
+<table width=575>
+  <tr valign=top>
+    <td width=60 align=right>
+      <img src="images/dot_clear.gif" width=50 height=10>
+    </td>
+    <td width=<sub 575 60> align=left>
+      <center>
+	<concat <a href="/release/<get-var-once mhtml::version>/">
+		<img src=images/top-banner.gif border=0>
+		</a>>
+	<br>
+[ <a href="/">Home</a> ]
+[ <a href="/release/documentation">Reference</a> ]
+      </center>
+<p><br>

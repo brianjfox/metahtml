@@ -1,0 +1,70 @@
+/* bfox@ai.mit.edu
+
+   You initialize an output buffer with code like this:
+
+   OUTPUT_BUFFER *foo = bprintf_create_buffer ();
+
+   Then, you make fprintf calls with "bprintf" instead of "fprintf", and
+   with "foo" instead of "stdout".
+
+   bprintf (foo, "This is %s of %6.2f characters.", "string", 34.55);
+
+   Whenever you want the current output string, it is available in
+   foo->buffer.  The current length of that string is foo->bindex, and
+   the amount of space allocated so far is foo->bsize.
+
+   If/when you are completely done with FOO and its associated string,
+   you call bprintf_free_buffer (foo).
+
+   There is also a vbprintf () function, to be used when the variable
+   argument list has already been retrieved with va_start ().
+
+   See bprintf.h for a complete list of functionality.  You can insert
+   and delete among other things.
+
+   Examples: */
+
+#include <stdarg.h>
+#include "bprintf.h"
+
+static void
+print_error (int severity, char *format, va_list args)
+{
+   OUTPUT_BUFFER *message;
+ 
+   bprintf (message, "%s: %s" , progname_name, severity_string (severity));
+   vbprintf (message, format, args);
+
+   if (message->buffer[bindex - 1] != '\n')
+     bprintf (message, "\n");
+
+   fprintf (stderr, "%s", message);
+ }
+
+void
+fatal_error (char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  print_error (FATAL, format, args);
+  exit (1);
+}
+
+void
+non_fatal_error (char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  print_error (WARNING, format, args);
+}
+
+void
+file_system_error (char *filename)
+{
+  char *fs_error_message;
+
+  fs_error_message = strerror (errno);
+
+  non_fatal_error ("for %s: %s", filename, fs_error_message);
+}
+

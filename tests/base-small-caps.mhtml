@@ -1,0 +1,10 @@
+;;; base-small-caps.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 01:17:53 1996.
+
+
+Result: "<FONT SIZE="-1">THIS </FONT><FONT SIZE="+0">THAT TH</FONT><FONT SIZE="-1">ESE TH</FONT><FONT SIZE="+0">OS</FONT><FONT SIZE="-1">E</FONT>": <small-caps>this THAT THese thOSe</small-caps>
+Result: "<FONT SIZE="-1">THIS THAT THESE THOSE</FONT>": <small-caps>this that these those</small-caps>
+
+

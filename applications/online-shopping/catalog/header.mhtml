@@ -1,0 +1,95 @@
+;;; header.mhtml: -*- Meta-HTML -*-
+;;; 
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Tue Sep 12 09:48:46 1995.
+;;;
+;;; Generic header for the catalog stuff.
+<set-var
+  shopping::background-spec=<prog bgcolor="#faf8f8" text="#000000">
+  shopping::inhibit-logo=true>
+<html>
+<head> <title> <get-var title> </title> </head>
+<body bgcolor="#ffffff">
+
+<set-var shopping::dir =
+  <match <get-var mhtml::relative-prefix> "/catalog.*$" action=delete>>
+
+<include ../tagsets/session.mhtml>
+<include ../tagsets/action-buttons.mhtml>
+<set-var session-timeout = 200>
+<session::initialize <get-var session-timeout> timedout.mhtml>
+<include substs.mhtml>
+
+<html>
+<head>
+<title>OnLine Shopping: <get-var title></title>
+</head>
+
+<set-var shopping::background-spec = 
+  <or <get-var shopping::background-spec>
+      <prog
+	bgcolor="#ffffff" text="#000000" link="#ac0d14"
+	alink="#0b0d75" vlink="#AC0D14">>>
+
+<body <get-var shopping::background-spec>>
+
+<if <not <get-var shopping::inhibit-logo>>
+    <if <not <string-eq <get-var mhtml::current-doc> welcome.mhtml>>
+	<prog
+	  <set-var table-end-required=true>
+	  <table>
+	  <tr valign=center>
+	  <td>
+	  <concat <a href="<get-var mhtml::http-to-host>/">
+		  <img align=left hspace=10
+		       src="<concat <get-var mhtml::url-to-dir-sans-sid>
+				    /images/small-banner.gif>"
+		       alt="Small Company Logo" border=0></a>>
+	  </td>
+	  <td align=right>>
+      <prog
+	<center>
+	<img src="<get-var mhtml::url-to-dir-sans-sid>/images/banner.gif">
+	</center>>>>
+
+<p>
+<center>
+  <hr size=3 width=40%>
+  <small-caps upper=+2 lower=+1>
+    <a href="<get-var mhtml::http-prefix><get-var shopping::dir>/">
+      OnLine Shopping
+    </a>
+    <br>
+    <get-var title>
+  </small-caps>
+  <hr size=3 width=50%>
+</center>
+<if <get-var table-end-required>
+    <prog </td></tr></table>>>
+<br clear>
+
+<DEBUGGING-OUTPUT>
+
+<set-var error-message=<get-session-var error-message>>
+<set-var session-message=<get-session-var session-message>>
+<unset-session-var error-message session-message>
+
+<when <get-var error-message>>
+  <p>
+  <hr size=5>
+  <blink><i>Error:</i></blink>
+  <b><get-var error-message></b>
+  <hr size=5>
+  <p>
+  <unset-var error-message>
+</when>
+
+<when <get-var session-message>>
+  <p>
+  <hr size=5>
+  <blink><i>Notice:</i></blink>
+  <b><get-var session-message></b>
+  <hr size=5>
+  <p>
+  <unset-var session-message>
+</when>

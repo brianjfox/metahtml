@@ -1,0 +1,132 @@
+;;; navlayout.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jun 28 08:57:40 1996.
+<defsubst navlayout::initialize>
+  <when <match <get-var layout::navigation-buttons> horizontal>>
+    <defmacro button-layout whitespace=delete>
+      <layout::page>
+	%\body
+      </layout::page>
+    </defmacro>
+  </when>
+
+  <when <not <match <get-var layout::navigation-buttons> horizontal>>>
+    <defmacro button-layout whitespace=delete>
+      <layout::left-border>
+	%\body
+      </layout::left-border>
+    </defmacro>
+  </when>
+</defsubst>
+
+<defun linkup target string>
+  <if <not <string-eq <substring <get-var target> 0 4> "http" caseless=true>>
+      <if <not <string-eq <substring <get-var target> 0 1> "/">>
+	  <set-var target = <get-var mhtml::url-to-dir>/<get-var target>>
+	<set-var target = <get-var mhtml::http-prefix target>>>>
+  &nbsp;&nbsp;&nbsp;
+  <a href="<get-var target>">
+    <concat
+     <font color="<get-var site::admin-menu-font-color>">
+     <b><get-var string></b>
+     </font>
+     </a>>
+  <br>
+</defun>
+
+<defun nl::navtab link image-text left? italic? target image-args>
+  <set-var image-name =
+    <downcase <concat <subst-in-string <get-var image-text>
+				       "[~`!@#$%^&*()|']" ""
+				       "^[ \t\r\n]+" ""
+				       "[ \t\r\n]+$" ""
+				       "[ -<>?/]" "_">
+		      <if <get-var italic?>
+			  -tabi -tab>>>>
+  <set-var image-file = <concat <get-var mhtml::include-prefix>
+				<site::system-prefix>/images/tabs
+				/<get-var image-name>.gif>>
+  ;;; <set-var x=<get-file-properties <get-var image-file>>>
+  <if <not <file-exists <get-var image-file>>>
+      <tabs::create-tab <get-var image-file> <get-var image-text>>>
+
+  <if <get-var left?> <transparent-align width=<get-var left?> height=3>>
+  <a href="<get-var link>" <if <get-var target> "target=<get-var target>">>
+    <img src="<get-var tabs::images-webpath>/<get-var image-name>.gif"
+	 border=0 <get-var image-args> alt="<get-var image-text>">
+  </a>
+  <br>
+</defun>
+
+;;; How to do navigation in the system pages.
+<defun navigate-internal target string opener closer skip-br-p text? left?
+  image-args>
+  <if <not <string-eq <substring <get-var target> 0 4> "http" caseless=true>>
+      <if <not <string-eq <substring <get-var target> 0 1> "/">>
+	  <set-var target = <get-var mhtml::url-to-dir>/<get-var target>>
+	<set-var target = <get-var mhtml::http-prefix target>>>>
+  <when <get-var text?>>
+    <get-var opener>
+    <a href="<get-var target>">
+      <font color="<get-var site::admin-menu-font-color>">
+      <get-var string>
+      </font>
+    </a>
+    <get-var closer>
+  </when>
+  <when <not <get-var text?>>>
+    <nl::navtab <get-var target> <get-var string> <get-var left?>
+		"" "" <get-var image-args>>
+  </when>
+</defun>
+
+<defun navigate target string>
+  <if <match <get-var site::admin-layout> plain>
+      <navigate-internal <get-var target> <get-var string> " [" "] " t t>
+    <navigate-internal <get-var target> <get-var string> "" "" "" "" 10
+		       "vspace=1">>
+</defun>
+
+<defmacro system-menu title url-base &body body whitespace=delete>
+  <when <match <get-var site::admin-layout> plain>>
+    <layout::page>
+      <center>
+	<get-var-once body>
+      </center>
+    </layout::page>
+    <p>
+  </when>
+
+  <when <match <get-var site::admin-layout> "left">>
+    <layout::left-border>
+      <div align=left>
+      <set-var t=<package-to-alist tabs>>
+      <set-var tabs::base-tab-image=system_menu-tab.gif
+	tabs::font-size=13pt tabs::halign=Center>
+      <nl::navtab <or <get-var-once url-base>
+		      <get-var mhtml::url-to-dir>/>
+		  <get-var-once title>>
+      <alist-to-package <get-var t> tabs>
+      </div>
+      <get-var-once body>
+      <p>
+      <br>
+    </layout::left-border>
+  </when>
+
+  <when <match <get-var site::admin-layout> "right">>
+    <layout::right-border>
+      <set-var t=<package-to-alist tabs>>
+      <set-var tabs::base-tab-image=system_menu-tab.gif tabs::font-size=13pt>
+      <nl::navtab <or <get-var-once url-base>
+		      <get-var mhtml::url-to-dir>/> <get-var-once title> 0>
+      <alist-to-package <get-var t> tabs>
+      <get-var-once body>
+      <p>
+      <br>
+    </layout::right-border>
+  </when>
+</defmacro>
+
+

@@ -1,0 +1,10 @@
+;;; base-get-var.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 17:39:16 1996.
+
+Result: : <get-var tmp>
+Result: value1: <set-var var1="value1"><get-var var1>
+Result: value1: <set-var var1="value1"><get-var var1 var2>
+Result: value1value2: <set-var var1="value1" var2="value2"><get-var var1 var2>
+Result: value2: <set-var var2="value2"><get-var var1 var2>

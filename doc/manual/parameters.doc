@@ -1,0 +1,128 @@
+In the opening tag of the macro defining command, several special
+<i>meta-arguments</i> may be used to affect the binding method used at
+invocation time to bind the passed parameters to the formal
+arguments.
+
+<ul>
+<li> <b>&optional</b><br>
+Indicates that the following named parameter is optional, and does not
+have to be supplied.  While at this time Meta-HTML does not complain
+if there are missing arguments at invocation time, it is likely that
+the byte-compiler will require function calls to match the formal
+parameters of the defined function.
+<example>
+<defun func x &optional y> <get-var x>, <get-var y> </defun>
+</example>
+
+<li> <b>&key</b><br>
+Indicates that the following named parameters will be bound by the
+caller placing the name of the parameter followed by an equals sign,
+and the value of that parameter in the opening tag of the function
+call.  Thus, keyword arguments may appear in any order in the calling
+function.  Here is an example of defining a tag called <tag image> which
+will add the width and hieght if they are not already present:
+<example>
+<defun image &key src width height>
+  <if <or <not <get-var width>>
+	  <not <get-var height>>>
+      <find-image-xy <get-var src> width height>>
+  <img src="<get-var src>" width=<get-var width> height=<get-var height>>
+</defun>
+</example>
+
+<li> <b>&rest</b><br>
+Gobbles up any remaining arguments to the function, collecting them in
+the named parameter which follows the <i>&rest</i>.  The arguments
+may be gathered into a single string, or into an array, with one
+argument per slot.  This is controlled by writing the formal parameter
+name either with or without sqaure braces: (i.e., <code>foo[]</code>
+or <code>foo</code>).
+<example>
+<defun func req-arg &rest rest-args[]>
+  <ol>
+    <foreach x rest-args>
+      <li> <get-var x> </li>
+    </foreach>
+  </ol>
+</defun>
+</example>
+
+<li> <b>&body</b><br>
+Causes the following named parameter to be bound to the body of the
+invoked function or macro.  For <tag defun> and <tag defsubst>, this
+is all of the material which appeared in the opening tag, while for
+<tag defmacro> and <tag defweakmacro>, this is all of the material
+that appeared between the opening and closing tags.
+<example>
+<defmacro with-debugging-output &body body>
+  <with-open-stream debug-stream /tmp/debug-output mode=append>
+    <stream-put debug-stream <get-var body>>
+  </with-open-stream>
+</defmacro>
+</example>
+
+<li> <b>&unevalled</b><br>
+Modifies the binding rule of a formal parameter such that the material
+which is bound is not evaluated before the binding takes place.  This
+is almost equivalent to using the <b>%0</b> ... <b>%9</b>, or
+<b>%body</b> textual substitutions, but the arguments are bound to
+variables instead of pure textual substitution.  Here is how one might
+write a function which takes an expression, and produces the
+expression and the evaluation of the expression as output:
+<example>
+<defun debug-expr &body &unevalled qbody &body body>
+  <get-var-once qbody> EVALS TO: <get-var-once body>
+</defun>
+</example>
+
+Such an invocation might look like:
+<example>
+  <set-var x=4 y=5>
+  <debug-expr <add x y>>
+</example>
+
+which would produce:
+<example>
+  <add x y> EVALS TO: 9
+</example>
+</ul>
+
+Here is a ridiculous function, which uses all of the special
+meta-parameters:
+<example>
+<defsubst func req &optional opt &key k1 &unevalled k2 &body b &rest args[]>
+   REQ: <get-var-once req>,
+   OPT: <get-var-once opt>
+    K1: <get-var-once k1>
+    K2: <get-var-once k2>
+  BODY: <get-var-once b>
+  REST: <get-var-once args[]>
+</defsubst>
+</example>
+
+And, here are examples of calling that function:
+
+Example 1:
+<example>
+<set-var key-1-arg=key-1>
+<func required k2="Unevalled" k1=<get-var key-1-arg> rest0 rest1>
+   REQ: required,
+   OPT: rest0
+    K1: key-1
+    K2: Unevalled
+  BODY: required k2="Unevalled" k1=key-1 rest0 rest1
+  REST: rest1
+</example>
+Example 2:
+<example>
+<func k2=<get-var k1> required rest0 rest1>
+   REQ: required,
+   OPT: rest0
+    K1: 
+    K2: <get-var k1>
+  BODY: k2= required rest0 rest1
+  REST: rest1
+</example>
+
+Notice how in the second example, our optional parameter <b>opt</b> got
+bound to the second non-keyword argument <code>rest0</code>!

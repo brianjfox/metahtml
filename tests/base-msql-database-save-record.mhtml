@@ -1,0 +1,6 @@
+;;; base-msql-database-save-record.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 20:50:15 1996.
+
+Result: true: <set-var name="Jarlath" age=17 phone="(805) 7307775"><msql::with-open-database db database=test host=localhost><msql::database-save-record db <get-var name> name phone age table=test keyname=name></msql::with-open-database>

@@ -1,0 +1,396 @@
+;;; gsql.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Apr 26 11:32:09 1997.
+;;;
+;;; Functions for streamlining the gsql interface.
+;;;
+<defun gsql::dsn>
+  <concat
+   "HOST=" <or <get-var gsql::database-host> localhost>
+   ";DATABASE=" <or <get-var gsql::database>
+		    <if <string-eq <sql::get-database-type> pgsql>
+			template1
+		      test>>
+   <if <get-var gsql::database-username>
+       ";UID=<get-var gsql::database-username>">
+   <if <get-var gsql::database-password>
+       ";PWD=<get-var gsql::database-password>">
+   <if <and <string-eq <sql::get-database-type> ODBC>
+	    <get-var gsql::database-service-type>>
+       ";SVT=<get-var gsql::database-service-type>">>
+</defun>
+
+<defun gsql::create-database dbname>
+  <when <get-var dbname>>
+    <cgi-exec <sql::admin-prog> -q create <get-var dbname>
+	      errors=errors output=output>
+    <if <not <get-var errors>>
+	<prog
+	  <set-session-var gsql::database = <get-var dbname>>
+	  <set-var gsql::database = <get-var dbname>>
+	  true>
+      <page-debug MSQL Error: <get-var errors>>>
+  </when>
+</defun>
+
+<defun gsql::delete-database dbname>
+  <when <get-var dbname>>
+    <cgi-exec <sql::admin-prog> -q drop <get-var dbname>
+	      errors=errors output=output>
+    <if <not <get-var errors>>
+	true
+      <page-debug MSQL Info: <get-var errors>>>
+  </when>
+</defun>
+
+<defmacro gsql::with-open-database>
+  <sql::with-open-database db DSN="<gsql::dsn>">
+    %body
+  </sql::with-open-database>
+</defmacro>
+
+<defun gsql::database-tables database>
+  <set-var temp=<get-var gsql::database> gsql::database=<get-var database>>
+  <gsql::with-open-database>
+  <sql::database-tables db <get-var database>>
+  </gsql::with-open-database>
+  <set-var gsql::database=<get-var temp>>
+</defun>
+
+<defun gsql::database-columns>
+  <gsql::with-open-database>
+  <sql::database-columns db <get-var gsql::database-table>>
+  </gsql::with-open-database>
+</defun>
+
+;;;
+;;; Field definitions are stored in the session data before they are
+;;; used to create the table in the SQL database.  The following
+;;; functions are used to modify the session information, not the actual
+;;; SQL database.
+;;;
+;;; The structure of the data in the session is as follows:
+;;; 
+;;;   A single variable (GSQL::TFIELD-DATA) contains
+;;;   an array of a-lists which describe each field.
+;;;
+;;; You can manipulate the array members by name.
+
+<defsubst gsql::tfield-select-type whitespace=delete>
+  <select name=type>
+    <select-option type char>
+    <select-option type text>
+    <select-option type int>
+    <select-option type real>
+  </select>
+</defsubst>
+
+<defsubst gsql::tfield-select-size whitespace=delete>
+  <font size="3">
+  <input type=text name=size size=4 value="<get-var size>">
+  </font>
+</defsubst>
+
+<defsubst gsql::tfield-select-unique whitespace=delete>
+  <font size=3>
+  <select name="unique?">
+    <select-option unique? "&nbsp;">
+    <select-option unique? "Unique">
+  </select>
+  </font>
+</defsubst>
+
+<defsubst gsql::tfield-select-name whitespace=delete>
+  <font size=3>
+  <input type=text size=15 name=name value="<get-var name>">
+  </font>
+</defsubst>
+
+<defun gsql::tfield-get name>
+  <set-var data="">
+  <foreach alist gsql::tfield-data>
+    <package-delete tfield>
+    <alist-to-package <get-var alist> tfield>
+    <if <string-eq <get-var tfield::name> <get-var name>>
+	<set-var data=<get-var alist>>>
+  </foreach>
+  <get-var data>
+</defun>
+
+<defun gsql::tfield-display alist index deletable? modifiable?>
+  <package-delete tfield>
+  <alist-to-package <get-var alist> tfield>
+  <form method=post action=<thisdoc>>
+    <input type=hidden name=index value=<get-var index>>
+    <table width=530 bgcolor="#A080A0" cellspacing=0>
+      <tr>
+	<td align=left>
+	  &nbsp;&nbsp;
+	  <in-package tfield>
+	    <gsql::tfield-select-name>
+	    &nbsp;&nbsp;
+	    <gsql::tfield-select-type>
+	    &nbsp;&nbsp;
+	    <gsql::tfield-select-size>
+	    &nbsp;&nbsp;
+	    <gsql::tfield-select-unique>
+	    &nbsp;&nbsp;
+	  </in-package>
+	</td>
+	<td align=right width=160>
+	  &nbsp;&nbsp;
+	  <code>
+	  <when <get-var deletable?>>
+	    <input type=submit name=action value="Remove">
+	    &nbsp;&nbsp;
+	  </when>
+	  <when <get-var modifiable?>>
+	    <input type=submit name=action value="Modify">
+	    &nbsp;&nbsp;
+	  </when>
+	  <when <not <get-var deletable?>>>
+	    <input type=submit name=action value="Create">
+	    &nbsp;&nbsp;
+	  </when>
+	  </code>
+	</td>
+      </tr>
+    </table>
+  </form>
+</defun>
+
+<defun gsql::tfield-delete-by-name name>
+  <set-var i=0 temp[]="">
+  <foreach alist gsql::tfield-data>
+    <when <get-var alist>>
+      <package-delete tfield>
+      <alist-to-package <get-var alist> tfield>
+      <when <not <string-eq <get-var name> <get-var tfield::name>>>>
+	<set-var temp[i]=<get-var alist>>
+	<increment i>
+      </when>
+    </when>
+  </foreach>
+  <unset-session-var gsql::tfield-data>
+  <set-var gsql::tfield-data[] = <get-var temp[]>>
+  <session-export gsql gsql>
+</defun>
+
+<defun gsql::tfield-delete index>
+  <set-var i=0 j=0 temp[]="" limit=<array-size gsql::tfield-data>>
+  <while <lt i limit>>
+    <if <not <eq i index>>
+	<prog
+	  <set-var temp[j] = <get-var gsql::tfield-data[i]>>
+	  <increment j>>>
+    <increment i>
+  </while>
+  <unset-session-var gsql::tfield-data>
+  <set-var gsql::tfield-data[] = <get-var temp[]>>
+  <session-export gsql gsql>
+</defun>
+
+<defun gsql::tfield-modify index name type size unique?>
+  <package-delete tfield-replacement>
+  <alist-to-package <package-to-alist ""> tfield-replacement>
+  <unset-var tfield-replacement::index>
+  <set-var gsql::tfield-data[index] =
+    <package-to-alist tfield-replacement strip=t>>
+  <session-export gsql gsql>
+</defun>
+
+<defun gsql::tfield-add name type size unique?>
+  <gsql::tfield-delete <get-var name>>
+  <when <get-var name>>
+    <array-append <package-to-alist ""> gsql::tfield-data>
+    <session-export gsql gsql>
+  </when>
+</defun>
+
+;;;
+;;; Build an expression suitable for table creation from gsql::tfield-data.
+;;;
+<defun gsql::field-creation-string alist more?>
+  <alist-to-package <get-var alist> "">
+  <concat "<get-var name> <get-var type>"
+	  <if <get-var size> "(<get-var size>)">
+	  <if <get-var unique?> " not null">
+	  <if <get-var more?> ",">>
+</defun>
+	  
+<defun gsql::table-creation-string>
+  <concat "create table <get-var gsql::database>_fields ("
+	  <prog
+	    <set-var i=0>
+	    <foreach alist gsql::tfield-data>
+	    <increment i>
+	    <gsql::field-creation-string <get-var alist>
+					 <get-var gsql::tfield-data[i]>>
+	    </foreach>>
+	  ")">
+</defun>
+
+;;; Create an index in the current database for FIELD.
+<defun gsql::create-index field>
+</defun>
+
+;;; Create indices in the current database for all fields in
+;;; gsql::tfield-data which are specified as "unique".
+<defun gsql::make-indices>
+  <foreach field gsql::tfield-data>
+    <if <plist-get-prop field UNIQUE?>
+	<gsql::create-index <plist-get-prop field NAME>>>
+  </foreach>
+</defun>
+
+<defun gsql::select-engine varname>
+  <defvar varname database-type>
+  <if <match <get-var varname> "::">
+      <set-var dispname = <subst-in-string <get-var varname> "^[^:]+::" "">>
+    <set-var
+      dispname = <get-var varname>
+      varname = ^::<get-var varname>>>
+  <set-var value=<get-var-once <get-var-once varname>>>
+  <table width=350 bgcolor="#A080A0">
+    <tr>
+      <td align=left>
+	<font color="#000000">
+	<b>Database Engine Driver<br>
+	<select name=<get-var dispname>>
+	  <if <defined? msql::with-open-database>
+	      <option value="msql" <if <string-eq
+					<get-var-once value> "msql">
+				       "SELECTED">>mSQL</option>>
+	  <if <defined? mysql::with-open-database>
+	      <option value="mysql" <if <string-eq
+					 <get-var-once value> "mysql">
+					"SELECTED">>MySQL</option>>
+	  <if <defined? pgsql::with-open-database>
+	      <option value="pgsql" <if <string-eq
+					 <get-var-once value> "pgsql">
+					"SELECTED">>PostGres</option>>
+	  <if <defined? odbc::with-open-database>
+	      <option value="odbc" <if <string-eq
+					<get-var-once value> "odbc">
+				       "SELECTED">>ODBC</option>>
+	  <if <and <not <defined? odbc::with-open-database>
+			<defined? msql::with-open-database>
+			<defined? mysql::with-open-database>>>
+	      <concat 
+	       <option value="">
+	       "No DB Engines!"
+	       </option>>>
+	</select>
+	</font>
+      </td>
+    </tr>
+  </table>
+</defun>
+
+<defun gsql::display-database &key width bgcolor fgcolor vcolor size face>
+  <defvar size 2>
+  <defvar face Courier>
+  <defvar bgcolor #<color::hex-value CornSilk>>
+  <defvar fgcolor #<color::hex-value Black>>
+  <defvar width 400>
+  <a href="select.mhtml"> <i>Current Settings</i> </a> <br>
+  <table width=<get-var width>
+	 border=2
+	 bgcolor=<get-var bgcolor>
+	 fgcolor=<get-var fgcolor>>
+    <tr>
+      <td align=center>
+	<b><get-var gsql::database-type>:</b> 
+	<gsql::dsn>;table=<get-var gsql::database-table>
+      </td>
+    </tr>
+    <comment>
+    <tr>
+      <td align=center> <b>Current Database</b> </td>
+    </tr>
+    <tr>
+      <td align=center>
+	<table width=98% bgcolor=<get-var bgcolor> fgcolor=<get-var fgcolor>>
+	  <tr>
+	    <td align=right>
+	      <font face="<get-var face>" size="<get-var size>">
+	      <b>Driver:</b>
+	      </font>
+	    </td>
+	    <td align=left>
+	      <font color="<or <get-var vcolor> <get-var fgcolor>>"
+		    face="<get-var face>" size="<get-var size>">
+	      <i><get-var gsql::database-type></i>
+	      </font>
+	    </td>
+	  </tr>
+
+	  <tr>
+	    <td align=right>
+	      <font face="<get-var face>" size="<get-var size>">
+	      <b>Host:</b>
+	      </font>
+	    </td>
+	    <td align=left>
+	      <font color="<or <get-var vcolor> <get-var fgcolor>>"
+		    face="<get-var face>" size="<get-var size>">
+	      <i><get-var gsql::database-host></i>
+	      </font>
+	    </td>
+	  </tr>
+
+	  <tr>
+	    <td align=right>
+	      <font face="<get-var face>" size="<get-var size>">
+	      <b>Database:</b>
+	      </font>
+	    </td>
+	    <td align=left>
+	      <font color="<or <get-var vcolor> <get-var fgcolor>>"
+		    face="<get-var face>" size="<get-var size>">
+	      <i><get-var gsql::database></i>
+	      </font>
+	    </td>
+	  </tr>
+
+	  <when <get-var gsql::database-table>>
+	    <tr>
+	      <td align=right>
+		<font face="<get-var face>" size="<get-var size>">
+		<b>Current Table:</b>
+		</font>
+	      </td>
+	      <td align=left>
+		<font color="<or <get-var vcolor> <get-var fgcolor>>"
+		      face="<get-var face>" size="<get-var size>">
+		<i><get-var gsql::database-table></i>
+		</font>
+	      </td>
+	    </tr>
+	  </when>
+	</table>
+      </td>
+    </tr>
+    </comment>
+  </table>
+</defun>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,25 @@
+;;; base-define-container.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 12:26:51 1996.
+
+Result: "Macro Definition Works": <define-container test-container>Macro Definition Works</define-container><test-container></test-container>
+Result: "Macro Definition Works:<br>Macro Body": <define-container test-container>Macro Definition Works:<br>%body</define-container><test-container>Macro Body</test-container>
+Result: "Macro Definition Works:   <br>   Macro Body": <define-container test-container>
+Macro Definition Works:   <br>   %body   
+</define-container><test-container>Macro Body</test-container>
+Result: "Macro Definition Works:   <br>   Macro Body": <define-container test-container whitespace=delete>
+Macro Definition Works:   <br>   %body   
+</define-container><test-container>Macro Body</test-container>
+Result: "Macro Definition Works:   <br>   Macro Body<br>Variables: value1 value2": <define-container test-container var1 var2 whitespace=delete>
+
+Macro Definition Works:   <br>   %body<br>
+
+Variables: <get-var var1> <get-var var2>   
+</define-container><test-container value1 value2>Macro Body</test-container>
+Result: "Macro Definition Works:   <br>   Macro Body<br>Variables: value1": <define-container test-container var1 var2 var3 whitespace=delete>
+
+Macro Definition Works:   <br>   %body<br>
+
+Variables: <get-var var1> <get-var var2>   
+</define-container><test-container value1 "">Macro Body</test-container>

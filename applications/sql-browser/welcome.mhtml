@@ -1,0 +1,70 @@
+;;; welcome.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Apr 26 11:30:29 1997.
+;;;
+;;; Get the names of the databases on the specified host.
+<set-var title="GSQL Database Browser">
+<set-var site::area = "GSQL Browser">
+<include header.mhtml>
+
+<layout::page>
+  <p>
+  <h3>Databases on host: `<get-var gsql::database-host>'</h3>
+
+  <when <get-var gsql::database-host>>
+    <set-var
+      databases[] = <sql::host-databases <get-var gsql::database-host>>
+      cell-width = <div 100 <array-size databases>>>
+    <set-var databases=SSI>
+
+    <when <sql::sql-error-message>>
+      ;;; Couldn't connect to the SQL database.  Start it?
+      <p>
+      <b>It appears as if your database server isn't running on
+      "<get-var gsql::database-host>".</b>
+      <p>
+      <when <and <string-eq <get-var *sql*::database-type> "msql" caseless=t>
+		 <string-eq <get-var gsql::database-host> localhost>>>
+	<b>Click <a href="start-database.mhtml">
+	<i>here to try starting it</i>.</a></b>
+      </when>
+    </when>
+    <when <not <sql::sql-error-message>>>
+      <when <not <get-var databases>>>
+	<tour::form>
+	<tour::form-input name=database dname="No Databases: Enter one now">
+	</tour::form>
+      </when>
+      <when <get-var databases>>
+	<table width=100% border>
+	  <tr valign=top>
+	    <foreach database databases>
+	      <td align=left width="<get-var cell-width>%">
+		<a href="select-database.mhtml?<cgi-encode database>">
+		  <b><code> <get-var database> </code></b>
+		</a>
+	      </td>
+	    </foreach>
+	  </tr>
+	  <tr valign=top>
+	    <foreach database databases>
+	      <set-var tables[] = <gsql::database-tables <get-var database>>>
+	      <td align=left>
+		<if <not <get-var tables[]>> &nbsp;>
+		<foreach table tables>
+		  &nbsp;&nbsp;
+		  <a href="describe-table.mhtml?<cgi-encode database table>">
+		    <i><code><get-var table></code></i>
+		  </a>
+		  <br>
+		</foreach>
+	      </td>
+	    </foreach>
+	  </tr>
+	</table>
+      </when>
+    </when>
+  </when>
+</layout::page>
+<include footer.mhtml>

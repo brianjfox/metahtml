@@ -1,0 +1,38 @@
+;;; tabs.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Jan 13 10:15:26 1997.
+
+<defun section-tab section image alt>
+  <set-var section=<upcase <subst-in-string <get-var section> " " "-">>>
+  <tab-of-section view-section.mhtml?<cgi-encode section> <get-var section>>
+</defun>
+
+<defun tab-of-section link section>
+  <set-var section = 
+    <capitalize <subst-in-string <get-var section> "[-_]" " ">>>
+  <subst-in-var section " Database " " ">
+  <set-var saved-params = <package-to-alist tabs>>
+  <set-var tabs::images-webpath=/images/documentation-tabs>
+  <set-var tabs::base-tab-image=thin_blue-tab.gif>
+  <set-var tabs::halign=Right>
+  <set-var tabs::valign=Center>
+  <set-var tabs::fontname=Helvetica>
+  <set-var tabs::font-size=9pt>
+  <set-var tabs::font-color=white>
+  <layout::left-border>
+    <transparent-align width=8 height=1>
+  </layout::left-border>
+  <tab <get-var link> <get-var section> "" _top>
+  <alist-to-package <get-var saved-params> tabs>
+</defun>
+
+<tab /documentation/ "Documentation">
+<tab /documentation/manual/ "Reference">
+<section::get-sections>
+<sort sections>
+<foreach section sections>
+  <section-tab <get-var section>>
+</foreach>
+<tab-of-section manual-index.mhtml "Function Index">
+

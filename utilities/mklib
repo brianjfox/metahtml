@@ -1,0 +1,189 @@
+#!/www/bin/mhc
+;;; mklib: -*- Meta-HTML -*- Build a binary package file from input.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Jul 21 11:27:07 1996.
+<set-var mhc::explicit-output-only=true>
+
+<set-var mhtml::include-prefix[] = <cgi-exec pwd>>
+
+<when <lt mhtml::version 3.95>>
+  <mhc::print
+   <concat "Sorry, but this version of Meta-HTML ("
+	   <get-var-once mhtml::version>
+	   ")\n"
+	   "is too old to build libararies,  You need "
+	   "version 3.95 or greater.\n">>
+  <mhc::exit 1>
+</when>
+
+<if <get-var-once ENV::MKLIB_COMPILER>
+    <set-var mklib::do-compile=true>>
+
+;;; Parse command line arguments.
+;;; They are simply the name of the output file, and the names of files
+;;; of Meta-HTML code to include, then write out.
+<set-var filenames[]="" output-file="" this-arg-is-output="">
+
+<foreach arg program-arguments start=1>
+  <if <get-var-once this-arg-is-output>
+      <set-var output-file=<get-var-once arg> this-arg-is-output="">
+    <if <or <string-eq <get-var-once arg> "-o">
+	    <string-eq <get-var-once arg> "--output">>
+	<set-var this-arg-is-output=true>
+      <if <string-eq <get-var-once arg> "--no-source">
+	  <set-var no-source-flag = true>
+	<if <string-eq <substring <get-var-once arg> 0 9> "--compile">
+	    <concat
+	     <set-var modcompiler = <substring <get-var-once arg> 10>>
+	     <set-var mklib::do-compile=true>>
+	  <array-append <get-var-once arg> filenames>>>>>
+</foreach>
+
+<if <not <get-var-once output-file>>
+    <prog
+      <mhc::print "You must specify an output file with `--output'.\n">
+      <break>>>
+
+<when <get-var-once mklib::do-compile>>
+  <defvar modcompiler modcompiler>
+  <if <not <load-module <get-var-once modcompiler>>>
+      <concat
+       <mhc::print <concat "Cannot compile any functions, because"
+			   " the compiler module couldn't be"
+			   " found!\n">>
+       <unset-var mklib::do-compile>>>
+</when>
+
+<copy-var *meta-html*::include *meta-html*::mhc-include>
+
+<set-var mklib::inclev = 0>
+
+<defsubst include f &optional verbatim &key &unevalled alt whitespace=delete>
+  <mhc::print
+   <concat <pad " " <mul 2 mklib::inclev> align=right>
+	   " Including <get-var-once f>\n">>
+  <increment mklib::inclev>
+  <mhc-include <get-var-once f> <get-var-once verbatim>
+	       alt=<or <get-var-once alt>
+		       <mhc::print " Failed!!\n">>>
+  <decrement mklib::inclev>
+</defsubst>
+
+<set-var mhtml::flag-newly-interned-symbols = t>
+<foreach fname filenames>
+  <if <string-eq <substring <get-var-once fname> 0 1> "/">
+      <set-var mhtml::include-prefix = "/">>
+  <include <get-var-once fname>>
+</foreach>
+<unset-var mhtml::flag-newly-interned-symbols>
+
+<undef include>
+
+;;; Get the name of every package.
+<set-var dump-packages[]=<package-names>>
+
+;;; Remove those which the user should not set in a library.
+<set-var skip-packages[] =
+  <prog
+    MKLIB
+    MODULES
+    *COMPILER*
+    *MACHINE*
+    COMPILER
+    MHTML
+    MHTTPD
+    DEFAULT
+    ENV
+    POSTED
+    TEMP
+    TMP
+    MHC
+    ISP
+    *PARSER*
+    %%
+    *META-HTML*>>
+
+<foreach p skip-packages>
+  <set-var i=<array-member <get-var-once p> dump-packages>>
+  <if <get-var-once i>
+      <array-shift -1 dump-packages start=<get-var-once i>>>
+</foreach>
+
+;;; Now, find packages with symbols that are flagged...
+<foreach p dump-packages>
+  <set-var vars[]=<package-vars <get-var-once p>>>
+  <foreach var vars>
+    <if <alist-get-var <symbol-info <get-var-once var>> flagged>
+	<concat
+	 <array-append <get-var-once p> dump-p>
+	 <break>>>
+  </foreach>
+</foreach>
+<set-var dump-packages[]=<get-var-once dump-p[]>>
+
+<defun mklib::next-char>
+  <set-var default::curchar =
+    <var-case
+      default::curchar = "+"	"|"
+      default::curchar = "|"	"/"
+      default::curchar = "/"	"-"
+      default::curchar = "-"	"\\"
+      default::curchar = "\\"	"|"
+      default			"+">>
+  <get-var-once default::curchar>
+</defun>
+
+;;; Compile functions in packages being dumped?
+<when <get-var-once mklib::do-compile>>
+  <set-var pass=1>
+  <while <lt pass 3>>
+    <mhc::print "Compiling Functions (Pass <get-var-once pass>):\n">
+    <mhc::print "-----------------------------------------------\n">
+    <foreach p dump-packages>
+      <set-var all-vars[]=<package-vars <get-var-once p>>>
+      <unset-var vars>
+      <mhc::print <pad <get-var-once p> 37 align=left>>
+      <mhc::print " Syms: ">
+      <foreach var all-vars>
+	<if <alist-get-var <symbol-info <get-var-once var>> flagged>
+	    <array-append <get-var-once var> vars>>
+      </foreach>
+      <mhc::print <pad <array-size vars> 3 pad-char=" ">>
+      <mhc::print " +">
+      <foreach var vars>
+	<mhc::print "<mklib::next-char>">
+	<compiler::compile-symbol <get-var-once var>>
+      </foreach>
+      <mhc::print "Done.\n">
+    </foreach>
+    <mhc::print "\n">
+    <increment pass>
+  </while>
+</when>
+
+;;; Show which packages are being dumped:
+<mhc::print "Dumping packages: ...">
+<foreach p dump-packages>
+  <if <char-offsets <get-var-once p> " ">
+      <mhc::print "\"<get-var-once p>\" ">
+    <mhc::print "<get-var-once p> ">>
+</foreach>
+<mhc::print "\n">
+
+<set-var num-written =
+  <apply %%write-package-file <get-var-once output-file>
+	 "FLAGGED=true"
+	 <if <get-var-once default::no-source-flag> "NO-SOURCE=true">
+	 <concat
+	  <foreach p dump-packages>
+	  <if <char-offsets <get-var-once p> " ">
+	      <concat "\"<get-var-once p>\" ">
+	    <concat "<get-var-once p> ">>
+	  </foreach>>>>
+
+<mhc::print
+ <concat "Wrote <get-var-once num-written> packages "
+	 "to <get-var-once output-file>.\n">>
+<mhc::print <debugging-output retrieve>>
+<mhc::print <system-error-output retrieve>>

@@ -1,0 +1,75 @@
+;;; modify-task.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Universal Access Inc.
+;;;  Author: Henry Minsky (hqm@ua.com) Fri Sep  6 16:50:54 1996.
+
+<set-var title="Modify Task">
+<include header.mhtml>
+<include tasks.mhtml>
+
+<require-tasks-login>
+
+<h1>Modify Task</h1>
+
+<b>Task Title:</b> <get-var task-name>
+
+<br>
+
+<when <or <match <get-var posted::action> "Modify">
+	  <match <get-var posted::action> "Delete">
+	  <match <get-var posted::action> "Cancel">>>
+
+  <if <match <get-var posted::action> "Modify" caseless=true>
+      <prog 
+	;;; merge previous values
+	<set-var tmp=<package-to-alist posted strip=true>>
+	;;; Loads vars into default package
+	<set-var result=<load-task <get-var task-name>>>
+	;;; merge in posted values
+	<alist-to-package <get-var tmp>>
+	<add-task <get-var task-name> 
+		  <get-var owner>
+		  <get-var priority>
+		  <get-var status>
+		  <get-var text>>
+	>
+    <if <match <get-var posted::action> "Delete" caseless=true>
+	<prog <set-session-var task-name=<get-var task-name>>
+	  <redirect "confirm-delete.mhtml">>
+	>>
+
+  <redirect "welcome.mhtml">
+
+</when>
+
+
+<defsubst edit-task name>
+  <if <load-task <get-var name>>
+      <prog
+	<form action="modify-task.mhtml" method=post>
+	<b>Name:</b> <get-var task-name><br>
+	<b>Created:</b> <date <get-var creation-time>><br>
+	<b>Owner</b> <input type=text name=owner value="<get-var owner>"><br>
+	<b>Priority:</b> <show-popup-priority <get-var priority>>
+	<p>
+	<b>Description:</b><br>
+	<textarea name="text" cols=48 rows=4><get-var text></textarea>
+	<p>
+	<b>Status:</b><br>
+	<textarea name="status" cols=48 rows=4><get-var status></textarea>
+	<br>
+	<input type=hidden name="task-name" value="<get-var task-name>">
+	<center>
+	<input type=submit name=action value="Modify">
+	<input type=submit name=action value="Delete">
+	<input type=submit name=action value="Cancel">
+	</center>
+	</form>
+	>>
+</defsubst>
+
+<edit-task <get-var task-name>>
+
+
+
+<include footer.mhtml>

@@ -1,0 +1,26 @@
+*** http_mime.c.~1~	Sat May  7 19:47:08 1994
+--- http_mime.c	Wed Sep 20 17:22:10 1995
+***************
+*** 7,12 ****
+--- 7,13 ----
+  
+  
+  #include "httpd.h"
++ #include "http_cookie.h"
+  
+  struct mime_ext {
+      char *ext;
+***************
+*** 391,396 ****
+--- 392,402 ----
+          }
+          if(!strcasecmp(w,"If-modified-since"))
+              strcpy(ims,l);
++ 
++ #if defined (HTTP_COOKIES)
++ 	if (strcasecmp (w, "Cookie") == 0)
++ 	  remember_cookie (l);
++ #endif /* HTTP_COOKIES */
+  
+          http2cgi(w);
+          if(in_headers_env) {

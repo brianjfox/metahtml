@@ -1,0 +1,133 @@
+;;; oracle.mhtml: -*- Meta-HTML -*-  How to do Oracle databases.
+;;;
+;;; Copyright (c) 2001 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Thu Mar 29 08:19:31 2001.
+<set-var title="Oracle">
+<include header.mhtml>
+<layout::page>
+  <plain-text>
+    <h3>Installing Meta-HTML/Oracle on Linux</h3>
+
+    Here follow the exact steps for installing an Oracle8i database
+    under Linux and connecting Meta-HTML to it through the use of the
+    OpenLink drivers:
+
+    <ol>
+      <li> Download the [<i>53MB!</i>] Oracle8i [<i>uncompressed!</i>] tarball
+      from:
+
+      <code>http://download-west.oracle.com/otn/linux/oracle8i/linux81701.tar</code>
+
+ clients RPM from
+      <a href="http://www.rpmfind.net/linux/rpm2html/search.php?query=PostGreSQL">http://www.rpmfind.net</a>.
+
+      <li> Download the PostgreSQL Server RPM from
+      <a href="http://www.rpmfind.net/linux/rpm2html/search.php?query=postgresql-server">http://www.rpmfind.net</a>.
+
+      <li> Download the OpenLink Request Broker from either
+           <a href="http://www.openlinksw.com">OpenLink's site</a>, or
+           from <a
+           href="ftp://ftp.metahtml.com/pub/OPENLINK/glibc21-openlink-rqb.tar.gz">
+           the Meta-HTML site</a>.
+
+      <li> Download the driver for PostGreSQL (this is called
+      pgr95_srv) from either <a
+      href="ftp://ftp.openlinksw.com/open40/l3adg95.taz">OpenLink's
+      site</a>, or from <a
+      href="ftp://ftp.metahtml.com/pub/OPENLINK/glibc21-postgres-driver-6.3.tar.gz">the
+      Meta-HTML site</a>.
+
+      <li> Create a user called "postgres":
+
+      <code>root@machine$<b> /usr/sbin/adduser postgres</b></code>
+
+      <li> Create a user called "openlink":
+
+      <code>root@machine$<b> /usr/sbin/adduser openlink</b></code>
+
+      <li> Install the PostGreSQL Client RPM:
+
+      <code>root@machine$<b> rpm -ivh postgresql-7.0.2-17.i386.rpm</b></code>
+
+      <li> Install the PostGreSQL Server RPM:
+
+      <code>root@machine$<b> rpm -ivh postgresql-server-7.0.2-17.i386.rpm</b></code>
+
+      <li> Start running the PostGreSQL Server:
+
+      <code>root@machine$<b> /etc/rc.d/init.d/postgresql start</b></code><br>
+      <code>Checking postgresql installation: no database files found.<br>
+      This database system will be initialized with username "postgres".<br>
+      This user will own all the data files and must also own the server process.<br>
+      Fixing permissions on pre-existing data directory /var/lib/pgsql/data<br>
+      Creating database system directory /var/lib/pgsql/data/base<br>
+      Creating database XLOG directory /var/lib/pgsql/data/pg_xlog<br>
+      Creating template database in /var/lib/pgsql/data/base/template1<br>
+      Creating global relations in /var/lib/pgsql/data/base<br>
+      Adding template1 database to pg_database<br>
+      <br>
+      Creating view pg_user.<br>
+      Creating view pg_rules.<br>
+      Creating view pg_views.<br>
+      Creating view pg_tables.<br>
+      Creating view pg_indexes.<br>
+      Loading pg_description.<br>
+      Vacuuming database.<br>
+      </code>
+
+      <li> Unpack the OpenLink stuff in /home/openlink:
+
+      <code>root@machine$<b> cp *.taz glibc21-*.tar.gz /home/openlink</b><br>
+      root@machine$<b> cd /home/openlink</b><br>
+      root@machine$<b> tar -zxf glibc21-openlink-rqb.tar.gz</b><br>
+      root@machine$<b> tar -zxf glibc21-postgres-driver-6.3.tar.gz</b></code>
+
+      <li> Copy <code>/home/openlink/bin/udbc.ini</code> to <code>/etc</code>
+
+      <code>root@machine$<b> cp bin/udbc.ini /etc/</b></code>
+
+      <li> Create a PostGreSQL database to work in:
+
+      <code>root@machine$<b> su -c 'createdb mydb' postgres</b></code>
+
+      <li> Test that your PostGres database is working:
+
+      <code>root@machine$<b> psql -U postgres mydb</b><br>
+      mydb=# <b>create table foo ( username varchar(16), email varchar(100), age int );</b><br>
+      CREATE<br>
+      mydb=# <b>insert into foo values ('bfox', 'bfox@metahtml.com', 41);</b><br>
+      INSERT 18923 1<br>
+      mydb# <b>select * from foo;</b><br>
+      username |       email       | age <br>
+      ----------+-------------------+-----<br>
+      bfox     | bfox@metahtml.com |  41<br>
+      (1 row)</code>
+
+      <li> Edit the file <code>/home/openlink/bin/oplrqb.ini</code> commenting
+      out the line <font face=fixed>OpsysLogin = Yes</font> in the
+      <code>generic_pgr95</code> section.
+
+      <li> Start the OpenLink Request Broker:
+
+      <code>root@machine$<b> /home/openlink/bin/oplrqb</b><code>
+
+      <li> Are you ready to rock?  Let's go:
+
+      <code>root@machine$ <b>mdb</b><br>
+      (mdb) <b>&lt;sql::set-database-type odbc&gt;</b><br>
+      (mdb)&nbsp;<b>&lt;set-var postgres::dsn="database=mydb;uid=postgres;dsn=dsn_postgres"&gt;</b><br>
+      (mdb)&nbsp;<b>&lt;sql::with-open-database&nbsp;db&nbsp;dsn=&lt;get-var-once&nbsp;postgres::dsn&gt;&gt;<br>
+        &lt;sql::database-query db true<br>
+        format=&lt;array-append&nbsp;&lt;package-to-alist&gt;&nbsp;^::results&gt;<br>
+        "select * from foo"&gt;<br>
+      &lt;/sql::with-open-database&gt;</b><br>
+      (mdb)<b> p results[]</b><br>
+      (("AGE"&nbsp;.&nbsp;"41")("USERNAME"&nbsp;.&nbsp;"bfox")("EMAIL"&nbsp;.&nbsp;"bfox@metahtml.com"))<br>
+      (mdb)<b> &lt;alist-get-var results[0] username&gt;</b><br>
+      bfox
+      </code>
+      <li> Write your application.
+    </ol>
+  </plain-text>
+</layout::page>
+<include footer.mhtml>

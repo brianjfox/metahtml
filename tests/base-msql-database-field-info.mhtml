@@ -1,0 +1,6 @@
+;;; base-msql-database-field-info.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 21:04:54 1996.
+
+Result: "((NAME . "name")(LENGTH . "10")(TYPE . "GSQL_CHAR")(IS_PRIMARY_KEY . "true")(IS_NOT_NULL . "true"))": <msql::with-open-database db database=test host=localhost><set-var table-vars[]=<msql::database-table-fields db test>><msql::database-field-info db test <get-var table-vars[0]>></msql::with-open-database>

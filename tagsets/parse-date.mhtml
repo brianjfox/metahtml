@@ -1,0 +1,230 @@
+;;; parse-date.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ua.com) Tue Nov  7 08:49:14 1995.
+
+;;; Relative difference between GMT and your timezone, in hours.
+;;; For example, PST is 8 hours behind GMT, so -8 is the right value
+;;; for California sites.
+<defvar *date*::tz-offset -8>
+
+;;; Don't forget about Daylight savings time.  Set this to non-zero if
+;;; you have daylight savings time where you are.
+<defvar *date*::daylight-savings-time? true>
+
+<defun parse-date-string string>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Populates the DATE package with the result of parsing DATE::DATE-STRING.
+  ;;; If STRING is passed, that string is used instead of DATE::DATE-STRING,
+  ;;; and should be the date in human readable format, just as
+  ;;; <funref language-operators date> returns.
+  <defvar string <get-var date::date-string>>
+  <defvar string <date>>
+  <defvar date::date-string <get-var string>>
+  <set-var
+    Jan=01 Feb=02 Mar=03 Apr=04 May=05 Jun=06
+    Jul=07 Aug=08 Sep=09 Oct=10 Nov=11 Dec=12>
+
+  <set-var temp=<get-var string>>
+  <subst-in-var temp "[\t\n ]+" "\n">
+  <set-var
+    date::components[]=<get-var temp>
+    date::weekday=<get-var date::components[0]>
+    date::month=<get-var date::components[1]>
+    date::day=<get-var date::components[2]>
+    date::cday=<if <lt date::day 10>
+		   "0<get-var date::day>"
+		 <get-var date::day>>
+    date::year=<get-var date::components[4]>
+    date::canon1 = <concat <get-var <get-var date::month>>/
+			   <get-var date::cday>/<get-var date::year>>
+    date::canon = <concat <get-var <get-var date::month>>/
+			  <get-var date::cday>/
+			  <match <get-var date::year> ^19 action=delete>>>
+</defun>
+
+;;; Months, arrayified by index.
+<set-var *date*::month-info[]=
+  <prog
+    <make-alist days=31 short-name=Jan long-name=January>
+    <make-alist days=28 short-name=Feb long-name=February leap=1>
+    <make-alist days=31 short-name=Mar long-name=March>
+    <make-alist days=30 short-name=Apr long-name=April>
+    <make-alist days=31 short-name=May long-name=May>
+    <make-alist days=30 short-name=Jun long-name=June>
+    <make-alist days=31 short-name=Jul long-name=July>
+    <make-alist days=31 short-name=Aug long-name=August>
+    <make-alist days=30 short-name=Sep long-name=September>
+    <make-alist days=31 short-name=Oct long-name=October>
+    <make-alist days=30 short-name=Nov long-name=November>
+    <make-alist days=31 short-name=Dec long-name=December>>>
+
+<set-var i=0 *date*::seconds-per-year = 0>
+<set-var *date*::seconds-per-day = <mul 60 <mul 60 24>>>
+<foreach entry *date*::month-info>
+  <package-delete temp>
+  <alist-to-package <get-var entry> temp>
+  <set-var temp::seconds=<mul *date*::seconds-per-day temp::days>>
+  <set-var entry = <package-to-alist temp strip=true>>
+  <set-var *date*::month-info[i] = <get-var entry>>
+  <set-var *date*::<get-var temp::short-name> = <get-var entry>>
+  <set-var *date*::<get-var temp::long-name> = <get-var entry>>
+  <array-append <get-var temp::long-name> *date*::long-month-names>
+  <array-append <get-var temp::short-name> *date*::short-month-names>
+  <increment *date*::seconds-per-year by=<get-var temp::seconds>>
+  <increment i>
+</foreach>
+
+<unset-var *date*::long-day-names *date*::short-day-names>
+<array-append Sunday *date*::long-day-names>
+<array-append Monday *date*::long-day-names>
+<array-append Tuesday *date*::long-day-names>
+<array-append Wednesday *date*::long-day-names>
+<array-append Thursday *date*::long-day-names>
+<array-append Friday *date*::long-day-names>
+<array-append Saturday *date*::long-day-names>
+
+<foreach day *date*::long-day-names>
+  <array-append <substring <get-var day> 0 3> *date*::short-day-names>
+</foreach>
+
+<defun date::is-leap-year? year>
+  <eq year <mul <div year 4> 4>>
+</defun>
+
+<defun date::seconds-since-epoch date-string>
+  <defvar date-string <date>>
+  <parse-date-string <get-var date-string>>
+  <set-var years-since-epoch = <sub date::year 1970>>
+
+  ;;;
+  ;;; Get the number of seconds up to the first second of this year.
+  ;;;
+  <set-var seconds-since-epoch =
+    <mul *date*::seconds-per-year years-since-epoch>>
+
+  ;;; Add in leap years, skipping the current year.
+  <if <gt years-since-epoch 2>
+      <increment seconds-since-epoch
+		 by=<mul <div years-since-epoch 4> *date*::seconds-per-day>>>
+
+  ;;; Add in the seconds used up till this month.
+  <set-var month-index=0>
+  <foreach entry *date*::month-info>
+    <unset-var leap>
+    <alist-to-package <get-var entry>>
+    <if <string-eq <get-var short-name> <get-var date::month> caseless=true>
+	<break>>
+    <if <get-var leap>
+	<increment seconds by=<get-var *date*::seconds-per-day>>>
+    <increment seconds-since-epoch by=<get-var seconds>>
+    <increment month-index>
+  </foreach>
+
+  ;;; Add in the time zone offset.
+  <set-var tz-diff = <mul -1 <mul *date*::tz-offset <mul 60 60>>>>
+  <increment seconds-since-epoch by=<get-var tz-diff>>
+
+  ;;; Correct for daylight savings time, if necessary.
+  <set-var dst-start=3 dst-end=8>
+  <if <and <get-var *date*::daylight-savings-time?>
+	   <gt dst-end month-index dst-start>>
+      <increment seconds-since-epoch by=<mul -60 60>>>
+
+  ;;; Add in the seconds used up this month, and return that.
+  <set-var hms[]=<subst-in-string <get-var date::components[3]> ":" "\n">>
+  <add seconds-since-epoch <mul hms[0] 60 60> <mul hms[1] 60>
+       hms[2] <mul *date*::seconds-per-day <sub date::day 1>>>
+</defun>
+
+<defun date::canonicalize date-string>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Return the canonical version of DATE-STRING, in the format
+  ;;; "MM/DD/YY HH:MM:SS".
+  ;;;
+  ;;; Example:
+  ;;; <complete-example>
+  ;;; <date::canonicalize <date>>
+  ;;; </complete-example>
+
+  ;;; Start by removing the day-of-week.
+  <foreach name *date*::short-day-names>
+    <subst-in-var date-string "<get-var name>[a-z]*" "">
+  </foreach>
+
+  ;;; Now get the month.
+  <set-var i=1>
+  <foreach name *date*::short-month-names>
+    <when <match <get-var date-string> "<get-var name>[a-z]*">>
+      <set-var month = <pad <get-var i> 2 pad-char="0">>
+      <subst-in-var date-string "<get-var name>[a-z]*" "">
+      <break>
+    </when>
+    <increment i>
+  </foreach>
+
+  ;;; Find out if there is a time specified, and extract it if so.
+  <set-var time-string = <match <get-var date-string>
+				"[0-9][0-9]:[0-9][0-9]:[0-9][0-9]"
+				action=extract>>
+  <subst-in-var date-string "[0-9][0-9]:[0-9][0-9]:[0-9][0-9]" "">
+  <subst-in-var date-string "-[0-9]+" "">
+
+  ;;; Get rid of all extraneous characters.
+  <subst-in-var date-string
+		"^[[:punct:]a-zA-Z \t\r\n]+" "" "[ \t\r\n]+$" ""
+		"[[:punct:]\t\r\n ]+" "/">
+
+  ;;; Convert YYYY to YY.
+  <subst-in-var date-string "(19)([0-9[0-9])" "\\2">
+
+  <set-var components[]=<subst-in-string <get-var date-string> "/" "\n">>
+  <if <lt <array-size components> 3>
+      <set-var
+	components[2] = <get-var components[1]>
+	components[1] = <get-var components[0]>
+	components[0] = <get-var month>>
+    <if <gt components[1] 12>
+	<set-var
+	  temp = <get-var components[1]>
+	  components[1] = <get-var components[0]>
+	  components[0] = <get-var temp>>>>
+
+  <concat <pad <get-var components[0]> 2 pad-char="0">/
+	  <pad <get-var components[1]> 2 pad-char="0">/
+	  <pad <get-var components[2]> 2 pad-char="0">
+	  " "
+	  <get-var time-string>>
+</defun>
+
+<defun date::seconds-in-month month>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Return the number of seconds in <var month>.
+  ;;; <var month> is the name of a month, such as "Apr" or "april".
+  <alist-to-package <get-var *date*::<get-var month>>>
+  <get-var seconds>
+</defun>
+
+<defun date::days-in-month month>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Return the number of days in <var month>.
+  ;;; <var month> is the name of a month, such as "Apr" or "april".
+  <alist-to-package <get-var *date*::<get-var month>>>
+  <get-var days>
+</defun>
+
+<defun date::short-month-name month>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Return the canonical short name of <var month>.
+  ;;; <var month> is the name of a month, such as "Apr" or "april".
+  <alist-to-package <get-var *date*::<get-var month>>>
+  <get-var short-name>
+</defun>
+
+<defun date::long-month-name month>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Return the canonical long name of <var month>.
+  ;;; <var month> is the name of a month, such as "Apr" or "april".
+  <alist-to-package <get-var *date*::<get-var month>>>
+  <get-var long-name>
+</defun>

@@ -1,0 +1,11 @@
+%package msql
+Summary: mSQL connectivity module for Meta-HTML.
+Group: Applications/WWW
+Requires: metahtml
+
+%description msql
+Using modmsql.so, you can enable the connection of Meta-HTML to mSQL
+databases, by simply saying <sql::set-datbase-type msql>.
+
+%files msql
+/usr/lib/metahtml/modmsql.so

@@ -1,0 +1,8 @@
+;;; base-or.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 15:48:39 1996.
+
+Result: 9: <or "" "9">
+Result: 9000: <set-var var1=9000><or <get-var var1> "default value">
+Result: "default value": <or <get-var var1> "default value">

@@ -1,0 +1,168 @@
+;;; create-fundoc.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Jul  1 11:01:30 1996.
+<set-var title="Edit Documentation Pointer">
+<include header.mhtml>
+
+<when <get-var-once posted::action>>
+  <if <string-eq <get-var-once posted::action> Cancel>
+      <redirect <get-var mhtml::url-to-dir>/function-index.mhtml>>
+
+  <when <string-eq <get-var-once posted::action> "Delete Definition">>
+    <set-var missing =
+      <var-case
+	name=""		Name
+	section=""	Section>>
+
+    <when <not <get-var missing>>>
+      <with-open-database db <metahtml::function-db> mode=write>
+	<set-var x =
+	  <database-delete-record db <upcase <get-var-once posted::name>>>>
+      </with-open-database>
+      <redirect <get-var mhtml::url-to-dir>/>
+    </when>
+  </when>
+
+  <when <string-eq <get-var-once posted::action> "Save Definition">>
+    <set-var missing =
+      <var-case
+	name=""		Name
+	section=""	Section>>
+
+    <when <not <get-var missing>>>
+      <copy-package raw-posted posted>
+      <unset-var posted::action>
+      <package-delete rec>
+      <alist-to-package <package-to-alist posted> rec>
+      <set-var rec::section=<downcase <get-var-once posted::section>>>
+      <set-var rec::req-args[] =
+	<subst-in-string <get-var-once rec::req-args> "[ \t,]+" "\n">>
+      <set-var rec::opt-args[] =
+	<subst-in-string <get-var-once rec::opt-args> "[ \t,]+" "\n">>
+      <set-var rec::key-args[] =
+	<subst-in-string <get-var-once rec::key-args> "[ \t,]+" "\n">>
+      <unset-var rec::key>
+      <with-open-database db <metahtml::function-db> mode=write-create>
+	<set-var x =
+	  <database-save-package db <upcase <get-var-once rec::name>>
+				 rec strip=t>>
+      </with-open-database>
+      <set-var key=<upcase <get-var-once rec::name>>>
+      <redirect <get-var mhtml::url-to-dir>/man-page.mhtml?<cgi-encode key>>
+    </when>
+  </when>
+
+  <when <string-eq <get-var-once posted::action> "Edit Definition">>
+  </when>
+</when>
+
+<if <and <get-var-once posted::key> <not <get-var-once posted::name>>>
+    <set-var
+      posted::name=<get-var-once posted::key>
+      name=<get-var-once posted::name>>>
+
+<when <get-var-once posted::name>>
+  <with-open-database db <metahtml::function-db> mode=read>
+    <set-var x =
+      <database-load-record db <upcase <get-var-once name>>>>
+  </with-open-database>
+</when>
+
+<center>
+<form method=post action="<thisdoc>">
+  <table>
+    <tr>
+      <td align=right> <b>Function Name:</b> </td>
+      <td align=left colspan=2>
+	<input type=text size=30 name=name value=<get-var-once name>>
+	<input type=submit name=action value="Edit Definition">
+      </td>
+    </tr>
+
+    <tr>
+      <td align=right> <b>Manual Section:</b> </td>
+      <td align=left colspan=2>
+	<set-var section=<capitalize <get-var-once section>>>
+	<select name=section>
+	  <with-open-database db <metahtml::section-db> mode=read>
+	    <database-query db true keys=keys>
+	  </with-open-database>
+	  <sort keys>
+	  <set-var i=0>
+	  <while <get-var keys[i]>>
+	    <select-option section <capitalize <get-var keys[i]>>>
+	    <increment i>
+	  </while>
+	</select>
+	<a href="create-section.mhtml"><b>New Section</b></a>
+      </td>
+    </tr>
+
+    <tr>
+      <td align=right> <b>Function Type:</b></td>
+      <td align=left colspan=2>
+	<concat <input type=radio name=funtype value=simple
+		       <if <or <not <get-var-once funtype>>
+			       <string-eq <get-var-once funtype> simple>> CHECKED>>
+		Simple>
+	<br>
+	<concat <input type=radio name=funtype value=complex
+		       <if <string-eq <get-var-once funtype> complex> CHECKED>>
+		Complex>
+	<br>
+	<concat <input type=radio name=funtype value=variable
+		       <if <string-eq <get-var-once funtype> variable> CHECKED>>
+		"Variable Reference">
+      </td>
+    </tr>
+
+    <tr>
+      <td align=right> <b> Search Keywords: </b> </td>
+      <td align=left colspan=2>
+	<input type=text size=60 name=keywords value="<get-var-once keywords>">
+      </td>
+    </tr>
+
+    <tr>
+      <td align=right> <b> Required Args: </b> </td>
+      <td align=left colspan=2>
+	<input type=text size=60 name=req-args
+	       value="<subst-in-string <get-var-once req-args[]> "\n" " ">">
+      </td>
+    </tr>
+
+    <tr>
+      <td align=right> <b> Optional Args: </b> </td>
+      <td align=left colspan=2>
+	<input type=text size=60 name=opt-args
+	       value="<subst-in-string <get-var-once opt-args[]> "\n" " ">">
+      </td>
+    </tr>
+
+    <tr>
+      <td align=right> <b> Keyword Args: </b> </td>
+      <td align=left colspan=2>
+	<input type=text size=60 name=key-args
+	       value="<subst-in-string <get-var-once key-args[]> "\n" " ">">
+      </td>
+    </tr>
+
+    <subst-in-var short-desc "&" "&amp;" "<" "&lt;" ">" "&gt;">
+    <tr>
+      <td align=right> <b>Description:</b> </td>
+      <td align=left colspan=2>
+	<concat <textarea name=short-desc rows=8 cols=60 WRAP="PHYSICAL">
+		<get-var-once short-desc>
+		</textarea>>
+      </td>
+    </tr>
+  </table>
+
+  <input type=submit name=action value="Save Definition">
+  <input type=submit name=action value="Delete Definition">
+  <input type=submit name=action value="Cancel">
+</form>
+</center>
+
+<include footer.mhtml>

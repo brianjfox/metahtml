@@ -1,0 +1,82 @@
+;;; welcome.mhtml: -*- Meta-HTML -*-  Utilities welcome page.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Feb  6 09:04:27 1996.
+;;;
+<set-var title="Meta-HTML Utility Programs">
+<include header.mhtml>
+
+<layout::page>
+  <ptext>
+    The following utilities are delivered with all <meta-html> products:
+
+    <h3> Image Utilities </h3>
+    <ul>
+      <li> <a href="imagemap.mhtml"><b>imagemap</b></a>:
+      A program which handles the server-side interpretation of clickable
+      images.
+    </ul>
+
+    <h3> Database Utilities </h3>
+    <ul>
+      <li> <a href="dbdump.mhtml"><b>dbdump</b></a>:
+      A program which prints out the contents of a <meta-html> database in
+      human-readable form.
+
+      <li> <a href="dbpack.mhtml"><b>dbpack</b></a>:
+      A program which converts a <meta-html> database from a binary format
+      to an ASCII representation, or from an ACSII representation to a
+      binary format.
+
+      <li> <a href="dbcreate.mhtml"><b>dbcreate</b></a>:
+      A program which creates a <meta-html> packed database from an ASCII
+      text file containing comma-separated fields.  This program uses a
+      <i>description file</i> to control the way in which the text file is
+      interpreted, and of the created database.
+    </ul>
+
+    <h3> Session Utilities </h3>
+    <ul>
+      <li> <a href="list-sessions.mhtml"><b>list-sessions</b></a>:
+      A program which displays the existing sessions in the session database.
+
+      <li> <a href="delete-session.mhtml"><b>delete-session</b></a>:
+      A program which allows you to manually delete an active session.
+
+      <li> <a href="set-session-timeout.mhtml"><b>set-session-timeout</b></a>:
+      A program which allows you to manually set the timeout for a
+      particular session directly from the command line.
+
+      <li> <a href="get-session-var.mhtml"><b>get-session-var</b></a>:
+      A program which returns the value of a variable for a specific session.
+
+      <li> <a href="set-session-var.mhtml"><b>set-session-var</b></a>:
+      A program which set the value of a variable for a specific session.
+
+      <li> <a href="gc-database.mhtml"><b>gc-database</b></a>:
+      A program which reorganizes the session database information, thus
+      reducing the amount of disk space that it uses.  This program should
+      be run periodically, depending on your site and usage.
+
+      <li> <a href="reap-sessions.mhtml"><b>reap-sessions</b></a>:
+      A program which immediately removes sessions which have timed out
+      from the session database.  This program is rarely used, since
+      reaping happens automatically whenever a new session is created.
+    </ul>
+
+    <h3> Miscellaneous Utilities </h3>
+    <ul>
+      <li> <a href="strip-tags.mhtml"><b>strip-tags</b></a>:
+      A program which filters out every HTML and <meta-html> tag from its
+      input.  Very useful in conjunction when creating search databases, or
+      to produce a text file from an HTML or <meta-html> input file.
+
+      <li> <a href="mklib.mhtml"><b>mklib</b></a>
+      A <Meta-HTML> script which creates a <i>library</i> file from a
+      number of input source files.
+    </ul>
+  </ptext>
+</layout::page>
+
+<include footer.mhtml>
+

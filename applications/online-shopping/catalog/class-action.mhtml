@@ -1,0 +1,57 @@
+;;; class-action.mhtml: -*- Meta-HTML -*-  Act on POSTED::ACTION.
+;;;
+;;; Copyright (c) 1995 Universal Access, Inc
+;;; Author: Brian J. Fox (bfox@ua.com) Tue Sep 12 09:44:54 1995.
+
+<include ../tagsets/session.mhtml>
+<session::initialize 200>
+
+<include substs.mhtml>
+<include ../macros/action-buttons.mhtml>
+
+;;; Using existing class or new class.
+<set-var class=<or <get-var new-class> <get-var posted::class>>>
+
+<defsubst add-class>
+  <with-open-database db <database classes> mode=<get-var dbwrite-create>>
+    <set-var database-filename=<db-of-class <get-var %0>>>
+    <database-save-record db <get-var %0> "%0" database-filename>
+    <with-open-database db1 <get-var database-filename>
+			mode=<get-var dbwrite-create>>
+      <set-var created=true>
+    </with-open-database>
+  </with-open-database>
+  <if <get-var created>
+      <set-session-var current-class=<get-var %0>>
+    <set-session-var error-message =
+      <prog The class "<get-var %0>" could not be created!>>
+</defsubst>
+
+<defsubst modify-class>
+  <with-open-database db <db-of-class <get-var %0>>
+		      mode=<get-var dbwrite-create>>
+      <set-var modifiable=true>
+  </with-open-database>
+  <set-session-var current-class=<get-var %0>>
+  <if <not <get-var modifiable>>
+      <set-session-var error-message =
+	<prog You don't have access to modify the class "<get-var %0>".>>>
+</defsubst>
+
+<defsubst del-class>
+  <with-open-database db <database classes> mode=<get-var dbwrite>>
+    <database-delete-record db <get-var %0>>
+  </with-open-database>
+</defsubst>
+
+<action-retrieve "Modify" "Create" "Delete" "Cancel">
+
+<var-case
+  action="Modify"	<prog
+			  <modify-class class>
+			  <redirect "view-class.mhtml?<cgi-encode class>">>
+  action="Create"	<add-class class>
+  action="Delete"	<del-class class>
+  action="Cancel"	<redirect "<get-var mhtml::url-to-dir>/../">>
+
+<redirect <get-var mhtml::url-to-dir>>

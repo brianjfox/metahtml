@@ -1,0 +1,52 @@
+;;; describe-table.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Apr 26 12:19:06 1997.
+;;;
+<set-var title="GSQL: Describe Table">
+<include header.mhtml>
+
+<if <not <get-var gsql::database-table>> <redirect welcome.mhtml>>
+
+<defun gsql::column-row db column>
+  <alist-to-package
+   <sql::database-column-info
+    db <get-var gsql::database-table> <get-var column>>
+   "">
+  <td align=left> <code> <get-var column> </code> </td>
+  <td align=right> <or <get-var length> &nbsp;> </td>
+  <td align=left> <or <get-var type> &nbsp;> </td>
+  <td align=center> <or <get-var is_unique> &nbsp;> </td>
+  <td align=center> <or <get-var is_nullable> &nbsp;> </td>
+</defun>
+
+<layout::page>
+  <p>
+  <set-var columns[]=<gsql::database-columns>>
+  <sort columns>
+  <center>
+    <a href="gather-fields.mhtml?action=snarf">
+      <b> Fields of
+      <font color="#FF00FF"><get-var gsql::database-table></font>: </b>
+    </a>
+    <p>
+    <table border>
+      <tr>
+	<td align=left> <i>Field</i> </td>
+	<td align=left> <i>Bytes</i> </td>
+	<td align=left> <i>Type</i> </td>
+	<td align=center> <i>Unique?</i> </td>
+	<td align=center> <i>Nullable?</i> </td>
+      </tr>
+      <gsql::with-open-database>
+      <foreach column columns>
+	<tr>
+	  <gsql::column-row <get-var db> <get-var column>>
+	</tr>
+      </foreach>
+      </gsql::with-open-database>
+    </table>
+  </center>
+  </plain-text>
+</layout::page>
+<include footer.mhtml>

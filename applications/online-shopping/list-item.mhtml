@@ -1,0 +1,76 @@
+;;; list-item.mhtml -*- Meta-HTML -*- Show the item in all its glory.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Fri Oct 20 21:40:53 1995
+;;;
+;;; You pass in CLASS and KEY.
+;;;
+<include tagsets/substs.mhtml>
+
+<with-open-database db <db-of-class <get-var class>>>
+  <set-var loaded = <database-load-record db <get-var key>>>
+</with-open-database>
+
+<set-var title="<get-var Product-Name>">
+<include header.mhtml>
+<include tagsets/cart-substs.mhtml>
+<include tagsets/image-substs.mhtml>
+
+<set-session-var class=<get-var class> key=<get-var key>>
+
+<p>
+<hr size=6 width=60%>
+<form method=POST action="<get-var mhtml::url-to-dir>/cart-add.mhtml">
+  <table>
+    <tr>
+      <td align=center>
+	<table>
+	  <tr>
+	    <td align=center>
+	      <b><small-caps><get-var product-name></small-caps></b><br>
+	      <a href="<jpeg-key>">
+	      <img src="<gif-key>" alt="Product Image" hspace=10 vspace=5></a>
+	    <br></td>
+	  </tr>
+	</table>
+      </td>
+      <td align=left>
+	<get-var product-description><br>
+      </td>
+    </tr>
+  </table>
+  <br>
+  <table>
+    <tr>
+      <td align=left>Quantity:</td>
+      <td><input name=quantity value="" size=5></td>
+      <parse-attributes>
+      <when <get-var attributes>>
+	<set-var i=0>
+	<while <lt i pa-index>>
+	  <set-var attribute-list[]=<get-var attributes[i]>>
+	  <td align=left><get-var attribute-list[0]>:</td>
+	  <td>
+	    <select name="attributes::<get-var attribute-list[0]>">
+	    <set-var j=1>
+	    <while <get-var attribute-list[j]>>
+	      <option> <get-var attribute-list[j]>
+	      <increment j>
+	    </while>
+	    </select>
+	    <br>
+	  </td>
+	  <increment i>
+	</while>
+      </when>
+    </tr>
+  </table>
+  Each Only <get-var unit-price>.
+  <p>
+  <center>
+    <input type=submit name=action value="Place in Cart">
+    <input type=submit name=action value="Continue Shopping">
+  </center>
+</form>
+<hr size=6 width=60%>
+<include footer.mhtml>

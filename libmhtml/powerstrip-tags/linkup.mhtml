@@ -1,0 +1,33 @@
+;;; linkup.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Nov  8 20:00:02 1996.
+<defsubst linkup target string>
+  <if <not <string-eq <substring <get-var target> 0 4> "http" caseless=true>>
+      <if <not <string-eq <substring <get-var target> 0 1> "/">>
+	  <set-var target = <get-var mhtml::url-to-dir>/<get-var target>>
+	<set-var target = <get-var mhtml::http-prefix target>>>>
+  &nbsp;&nbsp;&nbsp;
+  <a href="<get-var target>">
+    <concat
+     <font color="<get-var site::admin-menu-font-color>">
+     <b><get-var string></b>
+     </font>
+     </a>>
+  <br>
+</defsubst>
+
+;;; How to do navigation in the system pages.
+<defsubst navigate target string whitespace=delete>
+  <if <not <string-eq <substring <get-var target> 0 4> "http" caseless=true>>
+      <if <not <string-eq <substring <get-var target> 0 1> "/">>
+          <set-var target = <get-var mhtml::url-to-dir>/<get-var target>>
+        <set-var target = <get-var mhtml::http-prefix target>>>>
+  <concat
+   <a href="<get-var target>">
+   <font color="<get-var site::admin-menu-font-color>">
+   <get-var string>
+   </font>
+   </a>>
+  <br>
+</defsubst>

@@ -1,0 +1,10 @@
+;;; chatbox.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Aug 16 20:36:22 1996.
+
+<html>
+<body bgcolor="#ffffff">
+<include chatbox-internal.mhtml>
+</body>
+</html>

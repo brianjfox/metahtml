@@ -1,0 +1,23 @@
+;;; sitedefs.mhtml: -*- Meta-HTML -*-  Default site locations for POWERSTRIP.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 29 07:48:00 1996.
+
+;;; General definitions.
+<defsubst site::system-prefix></defsubst>
+
+<defsubst site::data-directory whitespace=delete>
+  <get-var mhtml::include-prefix>/../writable/data
+</defsubst>
+
+<defsubst site::system-data-directory whitespace=delete>
+  <site::data-directory>/system
+</defsubst>
+
+<defsubst site::allowed-hosts-file whitespace=delete>
+  <site::data-directory>/allowed-hosts
+</defsubst>
+
+<defsubst site::user-db whitespace=delete>
+  <site::system-data-directory>/user.db
+</defsubst>

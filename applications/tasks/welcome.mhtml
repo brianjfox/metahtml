@@ -1,0 +1,68 @@
+;;; welcome.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Universal Access Inc.
+;;;  Author: Henry Minsky (hqm@ua.com) Fri Sep  6 16:09:26 1996.
+
+<set-var title="Lab Task List">
+<include header.mhtml>
+<include tasks.mhtml>
+
+<h2>Lab Task List</h2>
+
+<plain-text>
+  Welcome to the Lab tasks page. This is an example of a group 
+  activity tracking application for a laboratory.
+
+  Each task is a record stored in a task database, using the
+  Meta-HTML built-in database functions. Forms to add, modify and
+  delete tasks are accessible from this page.
+
+  Listed below are tasks that are currently important for maintaining
+  the lab in a healthy state. You can add a new task, modify the
+  status,priority, or owner of an existing one, or (best option) 
+  delete a task when it is completed.  
+</plain-text>
+
+;;; Display control buttons for adding, viewing, and sorting task list.
+
+<table>
+  <tr>
+    <td>
+      <form method=post action="create-task.mhtml">
+	<input type=submit name="action"  value="Add New Task">
+      </form>
+    </td>
+    <td>
+      <form method=post action="<get-var mhtml::current-doc>">
+	<small-ball> View as <input type=submit name=view value=Table>
+	<input type=submit name=view value=List>
+
+	<small-ball> Sort by 
+	<input type=submit name=sortby value=Owner>
+	<input type=submit name=sortby value=Creation-Date>
+      </form>
+    </td>
+  </tr>
+</table>
+
+;;; Handle a change view-type command.
+<when <get-var posted::view>>
+  <set-session-var tasks::view=<get-var posted::view>>
+</when>
+
+;;; Handle a change to the sort key parameter.
+<when <get-var posted::sortby>>
+  <set-session-var tasks::sortby=<get-var posted::sortby>>
+</when>
+
+;;; Display the database as a table or list of tasks.
+<if <or <string-eq <get-var view> "Table">
+	<string-eq <get-session-var tasks::view> "Table">>
+    <if <string-eq <get-session-var tasks::sortby> "Owner">
+	<show-table-tasks-by-owner>
+      <show-table-tasks-by-creation>>
+  <if <string-eq <get-session-var tasks::sortby> "Owner">
+      <show-tasks-by-owner>
+    <show-tasks-by-creation>>>
+
+<include footer.mhtml>

@@ -1,0 +1,312 @@
+;;; dirfuns.mhtml: -*- Meta-HTML -*-  Directory manipulation functions.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Mar 27 07:59:07 1996.
+;;;
+
+<defun dir::handle-dots path>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Return <var path>, resolving any "./" or "../" found within.
+  ;;; Example:
+  ;;; <complete-example>
+  ;;; <dir::handle-dots /foo/bar/../baz/./../below-foo>
+  ;;; </complete-example>
+  <when <match <get-var-once path> "\\.">>
+    <if <string-eq <substring <get-var-once path> 0 1> "/">
+	<set-var prefix=/>>
+    <if <match <get-var-once path> "/$">
+	<set-var postfix=/>>
+    <set-var names[] = <subst-in-string <get-var-once path> "/" "\n">>
+    <set-var i=0 j=0 limit=<array-size names>>
+    <while <lt i limit>>
+      <if <string-neq <get-var-once names[i]> ".">
+	  <if <string-neq <get-var-once names[i]> "..">
+	      <concat
+	       <set-var result[j] = <get-var names[i]>>
+	       <increment j>>
+	    ;;; Handle "..".
+	    <if <gt j 0>
+		<concat
+		 <decrement j>
+		 <set-var result[j] = "">>>>>
+      <increment i>
+    </while>
+    ;;; Concatenate the resultant strings.
+    <set-var result[]=<get-var-once result[]>>
+    <set-var path = 
+      <concat
+       <if <get-var prefix>
+	   <concat />>
+       <foreach item result iter=i>
+       <get-var-once item>
+       <if <get-var-once result[<add i 1>]>
+	   <concat />>
+       </foreach>
+       <get-var postfix>>>
+  </when>
+  <get-var path>
+</defun>
+
+<defun dir::canonicalize-pathname path>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Make <var path> be absolute in the file system.
+  ;;;
+  ;;; If <var path> starts with a "/", then do nothing, otherwise, prefix
+  ;;; it with <varref mhtml::include-prefix> and
+  ;;; <varref mhtml::relative-prefix>.
+  ;;;
+  ;;; Given an empty <var path>, return the full path to the directory that
+  ;;; this page resides in.
+  ;;;
+  ;;; Example:
+  ;;; <complete-example>
+  ;;; <dir::canonicalize-pathname foo.mhtml>
+  ;;; </complete-example>
+  <defvar path <get-var mhtml::include-prefix mhtml::relative-prefix>>
+  <set-var path = <dir::handle-dots <get-var-once path>>>
+  <if <not <string-eq <substring <get-var path> 0 1> "/">>
+      <set-var path =
+	<get-var mhtml::include-prefix
+	  mhtml::relative-prefix>/<get-var path>>>
+  <get-var path>
+</defun>
+
+<defun make-directories path &optional mode-string>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Create all of the directories in <var path> (a fully qualified path to
+  ;;; a directory) if they are not already present.
+  <subst-in-var path "/" "\n">		;;; Split the path.
+  <set-var list[]=<get-var path> dir="">
+  <foreach component list>
+    <set-var dir=<get-var dir>/<get-var component>>
+    <if <not <file-exists <get-var dir>>>
+	<cgi-exec mkdir '<get-var dir>'>>
+  </foreach>
+  <if <get-var mode-string>
+      <cgi-exec chmod <get-var mode-string> '<get-var dir>'>>
+</defun>
+
+<defsubst file-prop var prop whitespace=delete>
+  <alist-get-var <get-var var> <get-var prop>>
+</defsubst>
+
+<defsubst directory-p var whitespace=delete>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Treat the argument <var var> as the name of a variable which contains
+  ;;; an alist produced by <funref file-operators get-file-properties> or
+  ;;; <funref file-operators directory-contents>, and return "true" if
+  ;;; the referenced file object is a directory, as opposed to a file.
+  <string-eq <alist-get-var <get-var var> TYPE> DIRECTORY>
+</defsubst>
+
+<defsubst directory-sorter whitespace=delete>
+  <set-var ds::t=%qbody>
+  <subst-in-var ds::t "^ +" "">
+  <file-prop "<get-var ds::t>" TYPE><file-prop "<get-var ds::t>" NAME>
+</defsubst>
+
+<defun touch-file file>
+  <with-open-stream stream <get-var file> mode=write-create>
+    true
+  </with-open-stream>
+</defun>
+
+<defun directories-in-dir dir &optional matching>
+  <set-var pack=<make-identifier 8>>
+  <package-delete <get-var pack>>
+  <defvar matching ".*">
+  <directory-contents <get-var dir> <get-var pack> matching=<get-var matching>>
+  <set-var i=0 dirs[]="" vars[]=<package-vars <get-var pack>>>
+  <sort vars>
+  <foreach _var vars>
+    <if <directory-p <get-var _var>>
+	<array-append <get-var <get-var _var>> dirs>>
+  </foreach>
+  <package-delete <get-var pack>>
+  <get-var dirs[]>
+</defun>
+
+<defun file-newer? file1 file2>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Return "true" if <var file1> has been written more recently than
+  ;;; <var file2>.
+  ;;;
+  ;;; Both <var file1> and <var file2> are fully qualified pathnames.
+  <alist-to-package <get-file-properties <get-var file1>>>
+  <set-var file1-time=<get-var written[6]>>
+  <unset-var written>
+  <alist-to-package <get-file-properties <get-var file2>>>
+  <gt file1-time written[6]>
+</defun>
+
+<defun path::find-executable basename>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Return the fully qualified path to the program which would be
+  ;;; executed by CGI-EXEC for BASENAME.
+  ;;;
+  ;;; Example:
+  ;;; <example>
+  ;;; <path::find-executable ls> --> /bin/ls
+  ;;; </example>
+  <set-var paths[]=<subst-in-string <get-var mhtml::exec-path> ":" "\n">>
+  <set-var i=0 result="">
+  <while <and <get-var paths[i]> <not <get-var result>>>>
+    <set-var info-alist =
+      <get-file-properties <get-var paths[i]>/<get-var basename>>>
+    <if <string-eq <plist-get-prop info-alist TYPE> EXECUTABLE>
+	<set-var result=<plist-get-prop info-alist FULL-NAME>>
+      <increment i>>
+  </while>
+  <get-var result>
+</defun>
+
+<defun dir::names-in-dir &optional dir type matching>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Return an array of the fully qualified pathnames in <var dir> which
+  ;;; are of type <var type> (either "<code>FILE</code>" or
+  ;;; "<code>DIRECTORY</code>") and which satisfy the regular
+  ;;; expression <var matching>.
+  ;;;
+  ;;; <var dir> defaults to the directory of the currently executing page.<br>
+  ;;; <var type> defaults to "<code>FILE</code>".<br>
+  ;;; <var matching> defaults to all possible filenames.
+  <defvar dir <thisdir>>
+  <set-var dir = <dir::canonicalize-pathname <get-var dir>>>
+  <defvar type FILE>
+  <defvar matching ".*">
+  <package-delete _names>
+  <directory-contents <get-var dir> _names matching=<get-var matching>>
+  <set-var names[]=<package-vars _names>>
+  <sort names>
+  <array-shift -2 names>
+  <foreach name names>
+    <if <string-eq <plist-get-prop <get-var name> TYPE> <get-var type>
+		   caseless=true>
+	<array-append <plist-get-prop <get-var name> FULL-NAME> results>>
+  </foreach>
+  <get-var results[]>
+</defun>
+
+<defun dir::dirnames-in-dir dir matching>
+  <dir::names-in-dir <get-var dir> DIRECTORY <get-var matching>>
+</defun>
+
+<defun dir::filenames-in-dir dir matching>
+  <dir::names-in-dir <get-var dir> FILE <get-var matching>>
+</defun>
+
+<defun directory? pathname>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Return "true" if <var pathname> is a directory, or "" if not.
+  <set-var pathname = <dir::canonicalize-pathname <get-var pathname>>>
+  <set-var alist=<get-file-properties <get-var pathname>>>
+  <directory-p alist>
+</defun>
+
+<defun dir::basename pathname>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Return the "basename" of <var pathname>.  This simply returns the last
+  ;;; component of <var pathname>.
+  ;;;
+  ;;; Example:
+  ;;; <complete-example>
+  ;;; <dir::basename /foo/bar/baz.dtd>
+  ;;; </complete-example>
+  <subst-in-string <get-var-once pathname> "(.*)(/)([^/]*$)" "\\3">
+</defun>
+
+<defun dir::dirname pathname>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Return the directory part of <var pathname>.  This simply
+  ;;; returns everything but the last component of <var pathname>.
+  ;;;
+  ;;; Example:
+  ;;; <complete-example>
+  ;;; <dir::dirname /foo/bar/baz.dtd>
+  ;;; </complete-example>
+  <set-var basename = <dir::basename <get-var-once pathname>>>
+  <set-var dirname =
+    <subst-in-string <get-var-once pathname> "/*<get-var-once basename>$" "">>
+  <if <not <get-var-once dirname>>
+      <if <string-eq <substring <get-var-once pathname> 0 1> />
+	  <set-var dirname = "/">
+	<set-var dirname = "./">>>
+  <get-var-once dirname>
+</defun>
+
+<defun dir::filename-extension filename>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Return the filename extension of <var filename>, without the leading
+  ;;; period.  Returns the empty string if <var filename> doesn't have an
+  ;;; extension.
+  ;;;
+  ;;; <example>
+  ;;; <dir::filename-extension /images/foo.gif>       --> gif
+  ;;; <dir::filename-extension /downloads/foo.tar.gz> --> gz
+  ;;; <dir::filename-extension /data/file>            -->
+  ;;; </example>
+  <when <match <get-var-once filename> "\\.[^.]+$">>
+    <set-var extension =
+      <subst-in-string <get-var-once filename> "(.*)(\\.)([^.]+$)" "\\3">>
+  </when>
+  <get-var extension>
+</defun>
+
+<defun dir::read-file filename &optional varname>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Read in the contents of the file named by FILENAME and return them.
+  ;;; If the optional variable <var varname> is given, it is the name of
+  ;;; a binary variable to receive the contents of the file.  In that case,
+  ;;; the word "true" is returned if the file was successfully read, or the
+  ;;; empty string otherwise.
+  ;;;
+  ;;; <example>
+  ;;; <dir::read-file /tmp/foo.gif gifdata> -->true
+  ;;; <set-var hosts[]=<dir::read-file /etc/hosts>>
+  ;;; </example>
+  <with-open-stream s <get-var-once filename> mode=read>
+    <set-var readable? = true>
+    <stream-get-contents s contents>
+  </with-open-stream>
+
+  <when <get-var-once varname>>
+    <if <get-var-once readable?>
+	<concat
+	 <parser::canonicalize-var varname>
+	 <copy-var contents <get-var-once varname>>>>
+    <return <get-var-once readable?>>
+  </when>
+
+  <coerce-var contents type=string>
+  <get-var-once contents>
+</defun>
+
+<defun dir::write-file filename varname>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Write the contents of the variable named by VARNAME to the file
+  ;;; named by FILENAME.  Returns "true" if the file was written, and
+  ;;; the empty string otherwise.
+  <when <get-var-once varname>>
+    <parser::canonicalize-var varname>
+    <copy-var <get-var-once varname> contents>
+    <coerce-var contents type=binary>
+
+    <with-open-stream s <get-var-once filename> mode=write-create>
+      <set-var writable? = true>
+      <stream-put-contents s contents>
+    </with-open-stream>
+  </when>
+  <get-var-once writable?>
+</defun>
+
+<defun dir::filename-sans-extension filename>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Return <var filename> without its extension part.
+  ;;; <complete-example>
+  ;;; <dir::filename-sans-extension /www/bin/foo.lib>
+  ;;; </complete-example>
+  <set-var ext = <dir::filename-extension <get-var-once filename>>>
+  <if <get-var-once ext>
+      <subst-in-var filename "\\.<get-var-once ext>$" "">>
+  <get-var-once filename>
+</defun>

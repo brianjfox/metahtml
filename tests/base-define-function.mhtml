@@ -1,0 +1,26 @@
+;;; base-define-function.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 15:17:12 1996.
+
+Result: "Define-Function Definition Works": <define-function test-define-function>Define-Function Definition Works</define-function><test-define-function>
+Result: "Define-Function Definition Works:<br>arg0": <define-function test-define-function>Define-Function Definition Works:<br>%0</define-function><test-define-function "arg0">
+Result: "Define-Function Definition Works:   <br>   arg0": <define-function test-define-function>
+Define-Function Definition Works:   <br>   %0 %1   
+</define-function><test-define-function arg0>
+Result: "Define-Function Definition Works:   <br>   arg0 value": <define-function test-define-function>
+Define-Function Definition Works:   <br>   %0 %1
+   
+</define-function><set-var var2=value><test-define-function arg0 <get-var var2>>
+Result: "Define-Function Definition Works:   <br>Variables: value1 value2": <define-function test-define-function var1 var2>
+
+Define-Function Definition Works:   <br>
+
+Variables: <get-var var1> <get-var var2>   
+</define-function><test-define-function value1 value2>
+Result: "Define-Function Definition Works:   <br>Variables: value1  value3": <define-function test-define-function var1 var2 var3>
+
+Define-Function Definition Works:   <br>
+
+Variables: <get-var var1> <get-var var2> <get-var var3>
+</define-function><test-define-function value1 "" value3>

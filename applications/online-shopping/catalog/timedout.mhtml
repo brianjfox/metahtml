@@ -1,0 +1,30 @@
+;;; timedout.mhtml: -*- Meta-HTML -*-  What to do when the session timed out.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep 10 08:29:54 1995.
+
+<get-var sid>
+<set-var title="Session Timed Out!" no-session-required="true">
+<include ../header.mhtml>
+<plain-text first-char="<font-size=+1>"><b>
+
+Your <i>session</i> has timed out.</b>
+
+If you wish to continue with <i><b>Online-Shopping</b></i>, you may,
+but please be aware that the information about your previous
+selections has been discarded.
+
+If you have saved the information about your selections in our
+database, you can get it back by re-entering your Username and
+Password on the <a href="../session.mhtml">Save/Restore Session</a> screen.
+
+Otherwise, you will have to <a href="<get-var
+mhtml::http-to-host shopping::dir>/">start over again</a> from scratch!
+
+Sessions time out after approximately <get-var session-timeout>
+minutes of inactivity.
+
+</plain-text>
+
+<include footer.mhtml>
+

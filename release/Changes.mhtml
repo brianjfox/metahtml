@@ -1,0 +1,104 @@
+;;; Changes.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Jun 15 08:56:24 1997.
+<set-var title="Recent Changes...">
+<include header.mhtml>
+
+<defmacro change>
+  <array-append "%attributes" contents>
+  <array-append %qbody descriptions>
+</defmacro>
+
+<defsubst show-changes>
+  <set-var i=0 limit=<div <array-size contents> 2>>
+  <center>
+    <table width=100%>
+      <tr valign=top>
+	<td align=left width=50%>
+	  <foreach title contents>
+	    <get-var i>: <a href="#ref-<get-var i>"><get-var title></a>
+	    <increment i>
+	    <if <eq i limit>
+		<prog </td> <td align=left width=50%>>>
+	  </foreach>
+	</td>
+      </tr>
+    </table>
+  </center>
+  <p>
+
+  <set-var i=0>
+  <foreach title contents>
+    <a name="#ref-<get-var i>"></a>
+    <b><get-var i>. <get-var title></b><br>
+    <ul>
+      <get-var descriptions[i]>
+    </ul>
+    <br>
+    <font size=-1><a href="#contents"><i>Back to top...</i></a></font>
+    <p><br>
+    <increment i>
+  </foreach>
+</defsubst>
+
+<change New &attributes parameter>
+A new &attributes parameter specifier makes it easier and cleaner
+to write new language features.
+</change>
+
+<change Better and cleaner database support for MySQL, mSQL, and ODBC.>
+</change>
+
+<change> New module-based interface to the Thomas Bruell's GD library.</change>
+
+<change New moddate module>
+Written from scratch flexible date parser which doesn't care
+about the year 2000 (unlike GNU getdate).
+</change>
+
+<change Meta-HTML + Apache + mod_ssl>
+Extra support for running Meta-HTML under Apache+mod_ssl.
+Not heavily documented.
+</change>
+
+<change Virtual Server Support>
+Support for Virtual Servers in mhttpd.  Using the <i>exact</i> same
+syntax as Apache (&lt;VirtualServer foo.bar.com:8081&gt;...&lt;/VirtualServer&gt;)
+you can have mhttpd listen on many IP/ports, change the document root
+directory on the fly dependent on the "Host:" header, and generally
+manage an infinite number of servers from a single mhttpd server.
+</change>
+
+<change TCP Based Sessions>
+The session database can now be TCP based.  There is a TCP server
+shipped in the modules directory which can manage sessions.
+
+This means (among other things) that you can run many Meta-HTML
+servers in a "web farm" to distribute processing loads.
+</change>
+ 
+<change Writing C language <Meta-HTML> Functions>
+You can now write C language to implement your own built-in
+<Meta-HTML> functions!  Such functions are first-class objects, and
+can manipulate the <Meta-HTML> environment directly, easily reset the
+parser pointer, manage hardware devices or talk on proprietery
+networks, or anything else that you can do in C.
+
+It works by supplying you with the necessary <Meta-HTML> header files
+and a binary library that you can link against.  Using our supplied
+Makefile provides you with a resultant <i>dynamically loadable</i>
+module, which can be loaded into the Server, Engine, or a single page
+with the
+<a href="/documentation/manual/man-page.mhtml?key=LOAD-MODULE">
+<code>&lt;load-module&gt;</code></a> function.
+
+See the <code>modules</code> directory of the distribution for more
+details.
+</change>
+
+<layout::page>
+<show-changes>
+</layout::page>
+<include footer.mhtml>
+

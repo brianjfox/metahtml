@@ -1,0 +1,23 @@
+;;; function-index.mhtml: -*- Meta-HTML -*-
+;;;
+<set-var title="Function Index">
+<include header.mhtml>
+<set-var mhtml::cacheable=true>
+
+<if <get-var-once posted::key>
+    <redirect <manpage-url <get-var key>>>>
+
+<with-open-database db <metahtml::function-db> mode=read>
+  <database-query db <string-neq <get-var-once funtype> variable> keys=funcs>
+</with-open-database>
+
+<set-var funcs[]=<downcase <get-var-once funcs[]>>>
+<sort funcs>
+
+<vertical-table funcs 3 <manpage-url>>
+
+<br>
+<a href="<varindex-url>">Variable Index</a>
+
+<include footer.mhtml>
+

@@ -1,0 +1,306 @@
+;;; texinfo.mhtml: -*- Meta-HTML -*- 
+;;;
+;;; Functions for formatting user manuals as texinfo documents.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Aug 14 18:14:48 1996.
+  
+;;; Handlers for common HTMLisms.
+<defmacro i>@i{%body}</defmacro>
+<defmacro b>@b{%body}</defmacro>
+<defsubst var>@var{%attributes}</defsubst>
+<defmacro code>@code{%body}</defmacro>
+<defsubst funref>@vref{%1}</defsubst>
+<defun url url><subst-in-string <get-var-once url> "@" "@@"></defun>
+<defun secref>
+  <prog @mref{<capitalize <subst-in-string %qbody
+					   "^[ \t\r\n]+" ""
+					   "[ \t\r\n]+$" ""
+					   "-" " ">>}>
+</defun>
+<defmacro dd>%body</defmacro>
+<defmacro font>%body</defmacro>
+<defsubst br>@*</defsubst> ;;; <concat "\n"></defsubst>
+<defsubst p><concat "\n\n"></defsubst>
+<defmacro emph>@i{%body}</defmacro>
+<defmacro strong>@b{%body}</defmacro>
+<defmacro small-caps>@sc{%body}</defmacro>
+<defmacro center>%body</defmacro>
+<defun tag tag>
+  <concat
+   <b>
+   "<"
+   <get-var-once tag>
+   ">"
+   </b>>
+</defun>
+
+<defmacro h1>
+@heading %body
+</defmacro>
+<defmacro h2>
+@subheading %body
+</defmacro>
+<defmacro h3>
+@subsubheading %body
+</defmacro>
+<defmacro h4>
+@b{%body}
+</defmacro>
+<defmacro a>%body</defmacro>
+<defmacro table>%body</defmacro>
+<defmacro tr>%body</defmacro>
+<defmacro td>
+%body
+</defmacro>
+<defmacro th>
+%body
+</defmacro>
+
+<defmacro ul>
+
+@itemize @bullet
+%body
+
+@end itemize
+</defmacro>
+
+<defmacro ol>
+
+@enumerate
+%body
+
+@end enumerate
+</defmacro>
+
+<defsubst li>
+@item 
+</defsubst>
+
+<defmacro pre>
+@example
+<subst-in-string %qbody "@" "@@" "\\{" "@{" "\\}" "@}">
+@end example
+</defmacro>
+
+<defmacro example code? &unevalled &body body package=local whitespace=delete>
+  <subst-in-var body "@" "@@" "\\{" "@{" "\\}" "@}">
+  <if <get-var-once code?>
+      <set-var result = @b{@code{<get-var-once body>}}>
+    <set-var result =
+<prog 
+@example
+@group
+<get-var-once body>
+@end group
+@end example
+>>>
+<get-var-once result>
+</defmacro>
+
+<defmacro complete-example &body &unevalled body package=local>
+@example<subst-in-var body "@" "@@" "\\{" "@{" "\\}" "@}">
+<get-var-once body>
+@end example
+  produces<set-var _x = <%%eval <get-var-once body>>><strings::trim _x>
+@example
+<get-var-once _x>
+@end example
+</defmacro>
+
+<defmacro complete-example-global &body &unevalled body>
+@example<subst-in-var body "@" "@@" "\\{" "@{" "\\}" "@}">
+<get-var-once body>
+@end example
+  produces<set-var _x = <%%eval <get-var-once body>>><strings::trim _x>
+@example
+<get-var-once _x>
+@end example
+</defmacro>
+
+<defmacro html-complete-example &unevalled &body body package=local>
+An example calling sequence:<subst-in-var body "@" "@@" "\\{" "@{" "\\}" "@}">
+@example
+<get-var-once body>
+@end example
+</defmacro>
+
+;;; Format a section header from SECTION.
+<defsubst texinfo-format-section-header>
+<set-var xx =
+  <capitalize <subst-in-string
+	       %qbody "^[ \t\r\n]+" "" "[ \t\r\n]+$" "" "-" " ">>>
+@node <get-var-once xx>
+@section <get-var-once xx>
+
+</defsubst>
+
+<defun texinfo-function-args pack>
+  <foreach _arg <get-var-once pack>::req-args> <get-var-once _arg> </foreach>
+
+  <when <get-var-once <get-var-once pack>::opt-args[0]>>
+    <concat "&optional ">
+    <foreach _arg <get-var-once pack>::opt-args>
+      <if <string-eq <get-var-once _arg> "...">
+	  "..."
+	" [<get-var-once _arg>] ">
+    </foreach>
+  </when>
+
+  <when <get-var-once <get-var pack>::key-args[0]>>
+    <concat "&key ">
+    <foreach _arg <get-var-once pack>::key-args>
+      <if <string-eq <get-var-once _arg> "...">
+	  "..."
+	" [<get-var-once _arg>] ">
+    </foreach>
+  </when>
+
+  <when <get-var <get-var-once pack>::rest-args>>
+    <concat "&rest <get-var-once <get-var-once pack>::rest-args>">
+  </when>
+</defun>
+
+;;; Pass the name of the package containing the function data.
+<defsubst texinfo-format-function>
+<concat
+ <subst-in-var function::short-desc "\\{" "@{" "\\}" "@}">
+ <subst-in-var function::short-desc "\r\n" "\n" "-->" "==&gt;">
+ <set-var _tff_result = <%%eval <get-var-once function::short-desc>>>
+ <subst-in-var _tff_result "\\.blank" "">>
+<when <string-neq <get-var-once function::funtype> "variable">>
+@deffn {@i{<capitalize <get-var-once function::funtype>> Tag}} {<get-var-once function::name>} <texinfo-function-args function>
+<get-var-once _tff_result>
+<subst-in-var function::long-desc "\r\n" "\n" "-->" "==&gt;">
+<concat <set-var _tff_result = <%%eval <get-var-once function::long-desc>>>
+	<subst-in-var _tff_result "\\.blank" "">
+	<get-var-once _tff_result>>
+@end deffn
+</when>
+<when <string-eq <get-var-once function::funtype> "variable">>
+@defvr {@i{Variable}} {<get-var-once function::name>}
+<get-var-once _tff_result>
+@end defvr
+</when>
+
+</defsubst>
+
+;;; Given an input section name, format the entire section as a texinfo
+;;; section in the printed user manual.  Write the section to a file
+;;; called SECTION-NAME.texi.
+<defun texinfo-format-section section pretty-name &key section-word>
+  <defvar section-word section>
+  <package-delete section>
+  <set-var section = <upcase <subst-in-string <get-var-once section> " " "-">>>
+  <with-open-database db <metahtml::section-db> mode=read>
+    <set-var x =
+      <database-load-record db <get-var-once section> prefix=section>>
+    <set-var section::name =
+      <capitalize <subst-in-string <get-var section::section> "-" " ">>>
+  </with-open-database>
+
+  ;;; Get the functions which belong to this section.
+  <set-var default::x=<get-var-once section>>
+  <with-open-database db <metahtml::function-db> mode=read>
+    <database-query db
+      <string-eq <get-var-once default::x> <upcase <get-var-once section>>>
+      keys=functions>
+  </with-open-database>
+
+  <comment>
+      <and
+       <string-eq <get-var-once default::x>
+		  <upcase <get-var-once section>>>
+       <not <string-eq <get-var-once funtype> variable>>>
+  </comment>
+
+  <if <get-var-once pretty-name>
+      <concat "\n@node <get-var-once section::name>"
+	      "\n@<get-var-once section-word> <get-var-once pretty-name>\n">
+    <texinfo-format-section-header <get-var-once section::name>>>
+
+  ;;; Insert the short section description.
+  <subst-in-var section::short-desc "\r\n" "\n" "-->" "==&gt;">
+  <%%eval <get-var-once section::short-desc>>
+
+  ;;; And the long description as well.
+  <subst-in-var section::long-desc "\r\n" "\n" "-->" "==&gt;">
+  <%%eval <get-var-once section::long-desc>>
+
+  ;;; Format each command in this section.
+  <set-var findex=0>
+  <sort functions>
+  <foreach function functions>
+    <package-delete function>
+    <with-open-database db <metahtml::function-db> mode=read>
+      <set-var x=<database-load-record db <get-var function> prefix=function>>
+    </with-open-database>
+    <texinfo-format-function function>
+  </foreach>
+</defun>
+
+<defsubst texinfo-write-header package=local>
+  <set-var %attributes>
+  <stream-put stream <prog
+\input texinfo.tex
+@tex
+\global\def\mref#1{\begingroup
+  \def\printednodename{\ignorespaces #1}%
+  \printednodename \space \turnoffactive \ii{(p.\tie\refx{#1-pg})}{}%
+\endgroup}
+\global\def\vref#1{\begingroup
+  \def\printednodename{\ignorespaces #1}%
+  \code{\printednodename} \space \turnoffactive \ii{(p.\tie\refx{#1-pg})}{}%
+\endgroup}
+\global\defaultparindent = 0pt
+\global\parindent = \defaultparindent
+@end tex
+
+@setfilename <get-var filename>
+@setchapternewpage odd
+@settitle <get-var title>
+@finalout
+
+@titlepage
+@title <get-var-once title>
+<set-var i=0>
+<while <get-var author[i]>>
+<set-var author[i] = <subst-in-string <get-var-once author[i]> "@" "@@">>
+@author <get-var author[i]>
+<increment i>
+</while>
+
+@page
+<subst-in-string <get-var description> "@" "@@">
+
+Published by Brian J. Fox.@*
+bfox@ai.mit.edu@*
+1740 Clearview Rd.@*
+Santa Barbara, CA 93101 USA
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by Brian J. Fox.
+
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1995, 2000 <get-var-once author[0]>
+@end titlepage
+<if <get-var draft>
+    <set-var footer-title="Draft">
+  <defvar footer-title "Meta-HTML Reference">>
+<defvar version 1.0>
+@iftex
+@everyfooting @i{<get-var footer-title> -- Version <get-var version>} @| @| Formatted on @today{}
+@end iftex>>
+</defsubst>
+

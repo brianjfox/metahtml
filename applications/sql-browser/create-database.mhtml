@@ -1,0 +1,26 @@
+;;; create-database.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu May 15 12:11:18 1997.
+<set-var title="Create New Database">
+<include header.mhtml>
+
+<when <string-eq <get-var posted::action> "Create Database">>
+  <if <gsql::create-database <get-var posted::new-database-name>>
+      <redirect gather-fields.mhtml>>
+</when>
+
+<if <string-eq <get-var posted::action> "Cancel">
+    <redirect welcome.mhtml>>
+
+<layout::page>
+  <center>
+    <tour::form>
+    <tour::form-input name=new-database-name>
+    <input type=submit name=action value="Create Database">
+    <input type=submit name=action value="Cancel">
+    </tour::form>
+  </center>
+</layout::page>
+
+<include footer.mhtml>

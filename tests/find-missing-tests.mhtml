@@ -1,0 +1,33 @@
+;;; find-missing-tests.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Nov  4 11:41:34 1996.
+<set-var allfuns[]=<downcase <package-vars *meta-html* strip=true>>>
+<set-var i=0 missing[]="" index=0>
+
+<while <get-var allfuns[i]>>
+  <set-var this-fun = <get-var allfuns[i]>>
+  <set-var found =
+    <include base-<subst-in-string <get-var this-fun> "::" "-">.mhtml
+	     verbatim alt="">>
+  <when <not <get-var-once found>>>
+    <set-var missing[index] = <get-var this-fun>>
+    <increment index>
+  </when>
+  <increment i>
+</while>
+
+<html>
+<body bgcolor="#FFFFFF">
+<set-var i=0>
+
+<h2> There were <get-var index> functions which didn't have tests.</h2>
+
+<while <get-var missing[i]>>
+  The function <b><get-var missing[i]></b> is missing a base test!<br>
+  <increment i>
+</while>
+
+</body>
+</html>
+

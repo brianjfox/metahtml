@@ -1,0 +1,13 @@
+;;; edit-record.mhtml: -*- Meta-HTML -*-  Add/Edit/Delete a record.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 21 08:20:58 1997.
+
+<defun thisdoc-title>
+  <capitalize
+   <subst-in-string <thisdoc> "(.*/)([^/]+)(\\.mhtml$)" "\\2" "[-_]+" " ">>
+</defun>
+
+<include header.mhtml>
+<include footer.mhtml>
+

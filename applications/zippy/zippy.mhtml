@@ -1,0 +1,40 @@
+;;; Zippy filter
+;;;
+;;;  Copyright (c) 1995, 1996 Henry Minsky.
+;;;  Author: Henry Minsky (hqm@ua.com)
+;;;  Changes: Jarlath O'Carroll (jarlath@oisin.com) Thu May  2 00:27:08 1996
+;;;  More Changes: Brian J. Fox (bfox@ua.com) Sun Jun 23 14:29:30 1996
+;;;  Even More Changes: Brian J. Fox (bfox@ua.com) Fri Aug 30 21:00:48 1996.
+;;;  Yet Even More Changes: Brian J. Fox (bfox@ua.com) Wed Nov 15 13:12:34 2000
+<require filter>
+<require zippy-filter>
+
+;;; Okay, filter the posted URL or PATH_INFO if there is one.
+<set-var url =  <or <get-var-once posted::url>
+		    <get-var-once env::path_info>>>
+<if <get-var-once url>
+    <filter::page-filter <get-var-once url> zippy::filter>>
+
+;;; Add the forms interface
+<hr>
+<h5>
+<a href="http://www.metahtml.com">Meta-HTML Active Filter</a>
+by <a href="mailto:hqm@ua.com">(hqm@ua.com)</a>
+<br><i>Quotes from various comic books and strips by Bill Griffith</i>
+<br>
+<when <get-var-once filter::explanation>>
+  <hr>
+  <get-var-once filter::explanation>
+  <hr>
+</when>
+<form method="post" action="<thisdoc>">
+  Enter URL:<INPUT NAME="posted-url" TYPE="text" VALUE=""
+		   MAXLENGTH="1024"SIZE="50">
+  <br>
+  <a href="<concat <get-var-once mhtml::http-to-host>
+		   <get-var-once mhtml::relative-prefix>/>">
+    Click Here To Exit The Filter
+  </a>
+</form>
+<br>
+</h5>

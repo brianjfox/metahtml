@@ -1,0 +1,39 @@
+;;; welcome.mhtml: -*- Meta-HTML -*-  Startup file for online shopping.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep 10 08:09:55 1995.
+
+<set-var title="Welcome">
+<include header.mhtml>
+<p>
+
+;;; Get the keys.
+<with-open-database db <database classes>>
+  <database-query db true keys=classes sort=class>
+</with-open-database>
+
+;;; Show the welcome message.
+<include welcome-message.mhtml>
+
+;;; List the various classes.
+<ul>
+  <if <get-var classes>
+      <prog
+	<font size="+1"><b>Please choose from among our:</b></font>
+	<p>
+	<ul>
+	<set-var i=0>
+	<while <get-var classes[i]>>
+	<set-var class=<get-var classes[i]>>
+	<li><a href="<get-var mhtml::url-to-dir>/list-class.mhtml?<cgi-encode class>">
+	<font size="+1"><b><get-var class></b></font>
+	</a>
+	<increment i>
+	</while>>
+    <prog <p>
+      <b>There are no products in the current catalog.  Please choose <i>
+      Maintenance</i> from the navigation bar below, and enter some.</b>>>
+</ul>
+<include footer.mhtml>
+
+

@@ -1,0 +1,7 @@
+;;; base-database-save-package.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 03:17:37 1996.
+
+Result: true: <set-var tmp::name="Jarlath O'Carroll" tmp::address="12 The Manse" tmp::city="Birmingham" tmp::postal="01224" tmp::country=England><with-open-database db test.db mode=write-create><database-save-package db key0001 TMP></with-open-database><cgi-exec "/bin/rm test.db">
+Result: true: <set-var tmp::name="Jarlath O'Carroll" tmp::address="12 The Manse" tmp::city="Birmingham" tmp::postal="01224" tmp::country=England><with-open-database db test.db mode=write-create><database-save-package db key0001 TMP strip=true></with-open-database><cgi-exec "/bin/rm test.db">

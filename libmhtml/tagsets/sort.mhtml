@@ -1,0 +1,38 @@
+;;; sort.mhtml: -*- Meta-HTML -*-  Extra functions for sorting.
+;;;
+;;; Copyright (c) 1999, 2001 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jan 22 12:24:00 1999.
+
+<defun _sort::correlated-sorter alist>
+  <alist-get-var alist key>
+</defun>
+
+<defun sort::correlated-sort keyarray &key caseless sortorder numeric
+  &rest correlated-arrays[]>
+  ;;; DOC_SECTION (ARRAYS)
+  ;;; Sort the <var correlated-arrays> based on the results of sorting
+  ;;; <var keyarray>.  Also see <funref arrays sort>.
+  <parser::canonicalize-var keyarray>
+  <foreach item <get-var-once keyarray> iter=i>
+    <array-append <make-alist index=<get-var-once i> key=<get-var-once item>>
+                  correlation-array>
+  </foreach>
+
+  <sort correlation-array _sort::correlated-sorter
+        caseless=<get-var-once caseless> sortorder=<get-var-once sortorder>
+        numeric=<get-var-once numeric>>
+
+  ;;; Now, place the other arrays in the same order as the sorted one.
+  <array-append <get-var-once keyarray> correlated-arrays>
+  <foreach array correlated-arrays>
+    <parser::canonicalize-var array>
+    <unset-var result-array>
+    <foreach alist correlation-array>
+      <set-var index=<alist-get-var alist index>>
+      <array-append <get-var-once <get-var-once array>[index]> result-array>
+    </foreach>
+    <unset-var <get-var-once array>>
+    <copy-var result-array <get-var-once array>>
+  </foreach>
+</defun>
+

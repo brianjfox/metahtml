@@ -1,0 +1,813 @@
+Tue Jan 23 22:02:40 1996  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/Makefile (CFLAGS-obstack.c): New variable.
+
+Mon Dec  4 12:10:28 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (__malloc_initialize): Renamed from initialize;
+	made global.
+	(malloc): Caller changed.
+	* malloc/realloc.c (realloc): Call __malloc_initialize if
+	necessary, before checking hook.
+	* malloc/malloc.h: Declare __malloc_initialize.
+
+Sat Dec  2 03:47:27 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (malloc): Do initialization here, before
+	checking the hook.
+	(_malloc_internal): Don't do it here.
+
+Thu Nov 23 18:06:48 1995  Richard Stallman  <rms@gnu.ai.mit.edu>
+
+	* malloc/malloc.c (_malloc_internal): Can't use
+	get_contiguous_space when the heap info table
+	will be growing.  Account for new contiguous space in _heaplimit.
+
+Tue Nov 21 14:12:13 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (align): Don't check contiguity and call abort.
+
+Mon Nov 20 16:19:15 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (align): Use abort instead of assert.
+
+Tue Nov 14 18:44:21 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/free.c (free): Moved null and aligned_blocks checks
+	inside _free_internal.
+
+Mon Nov 13 15:23:01 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (morecore): Fix inverted test in allocating new
+	info table.
+
+	* malloc/malloc.c (align): Fix assertion.
+
+	* malloc/malloc.c: Include assert.h.
+
+	* malloc/malloc.h [emacs] (emacs_loser_valloc): Macro removed.
+	(valloc): Protect decl with [! (_MALLOC_INTERNAL && emacs)].
+
+Fri Nov 10 14:15:21 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (align): Assert that space for alignment
+	adjustment is same original space.
+
+Fri Nov 10 13:51:30 1995  Richard Stallman  <rms@gnu.ai.mit.edu>
+
+	* malloc/malloc.c (get_contiguous_space): New function.
+	(morecore): Rewrite allocating new malloc info table.
+	(_malloc_internal): Use get_contiguous_space.
+
+Sat Oct 14 02:52:36 1995  Ulrich Drepper  <drepper@ipd.info.uni-karlsruhe.de>
+
+	* malloc/malloc.c (_malloc_internal): Performance fix.  Move
+	if statement out of loop.
+
+Wed Jul 26 02:00:29 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/memalign.c: Allocate (SIZE + ALIGNMENT - 1) and then trim
+ 	if possible.
+
+Mon Jun 12 13:15:45 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/Makefile (gmalloc-routines): Remove valloc.
+	(dist-routines): Add it here.
+
+	* malloc/malloc.h [_MALLOC_INTERNAL] [emacs] (valloc): #define to
+ 	emacs_loser_valloc to inhibit valloc declaration below.
+
+Fri Apr 14 15:53:46 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (register_heapinfo) [__GNUC__]: Use __inline__
+ 	in place of inline.
+
+Sun Apr  9 01:24:33 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/free.c [emacs] (__malloc_safe_bcopy): Define to safe_bcopy.
+	* malloc/realloc.c (__malloc_safe_bcopy): Undefine before defining.
+
+	* malloc/free.c (memmove, __malloc_safe_bcopy): Do include these
+ 	#ifdef emacs, but only #ifndef memmove.
+	* malloc/realloc.c [emacs] (__malloc_safe_bcopy): Just #define to
+ 	safe_bcopy.
+	(memmove): Define only if undefined.
+
+Sat Apr  8 00:40:59 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/free.c (__malloc_safe_bcopy, memmove): Don't define
+ 	#ifdef emacs.
+	* malloc/realloc.c: Likewise.
+
+	* malloc/free.c: Remove use of `assert'.
+
+	* malloc/realloc.c [! emacs] (safe_bcopy): Renamed to
+ 	__malloc_safe_bcopy; #define safe_bcopy.
+	* malloc/free.c: Cope with systems lacking `memmove'.
+	(_free_internal): Cast result of _malloc_internal.
+
+Wed Mar 29 11:26:48 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	More changes from Germano Caronni <caronni@tik.ethz.ch>:
+	* malloc/free.c: Relocate _heapinfo when that allows us to return
+ 	core to the system.
+
+	* malloc/malloc.c: Move #include <errno.h> outside #ifndef
+	_MALLOC_INTERNAL.
+
+Mon Mar 27 02:23:15 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c: Include errno.h.
+
+Thu Mar 23 22:03:44 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/realloc.c: Call _free_internal instead of free.
+
+Mon Mar 20 03:19:23 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (morecore): Save errno around call to
+ 	_realloc_internal.  Don't account for the additional new blocks of
+ 	the info table itself when choosing the new table size for the
+ 	first crack; if it succeeds, the new blocks will have been found
+ 	in existing free space already described by the existing info
+ 	table.
+
+Mon Mar 13 01:48:16 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/realloc.c (_realloc_internal): Call _malloc_internal in
+ 	place of malloc.
+
+Sun Mar 12 18:21:10 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.h (_malloc_internal, _realloc_internal): Declare these.
+	* malloc/realloc.c (_realloc_internal): Renamed from realloc;
+ 	don't use __realloc_hook.
+	(realloc): New function; call __realloc_hook ?: _realloc_internal.
+	* malloc/malloc.c (_malloc_internal): Renamed from malloc;
+	don't use __malloc_hook.
+	(malloc): New function; call __malloc_hook ?: _malloc_internal.
+	Changes from Germano Caronni <caronni@tik.ethz.ch>:
+	(initialize): Set up _heaplimit to cover the _heapinfo table.
+	(morecore_recursing): New static variable.
+	(morecore): If that is set, return null immediately.
+	When growing the info table, before getting new core from the
+ 	system for it, set morecore_recursing and try moving _heapinfo
+ 	with _realloc_internal.  When that fails and we get new core, set
+ 	_heaplimit to cover the core for the new _heapinfo table.
+	(register_heapinfo): New function.  Record the _heapinfo table's
+	own blocks in that table and in the statistics variables.
+	(initialize, _malloc_internal): Use it after allocating new table.
+
+Sun Mar  5 19:40:13 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (morecore): Fix last change to calculate by
+ 	blocks instead of bytes.
+
+Sun Feb 26 15:51:00 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	Changes from Germano Caronni <caronni@tik.ethz.ch>:
+	* malloc/malloc.c (morecore): Account in NEWSIZE for the
+ 	malloc_info structures for each new block.
+
+Sun Feb  5 17:59:53 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (__malloc_extra_blocks): New variable.
+	(malloc): When getting more core, get __malloc_extra_blocks extra;
+	put the new block at the end of the free list and let the next loop
+ 	iteration use the initial portion of it.
+	* malloc/free.c (_free_internal): Account for twice
+ 	__malloc_extra_blocks in deciding if we have so much extra memory
+ 	we should return it to the system.
+	* malloc/malloc.h (__malloc_extra_blocks): Declare it.
+	* posix/glob.c (prefix_array, glob_pattern_p): Remove gratuitous
+ 	const in parameter decl.
+
+Sun Jan 22 15:19:51 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/free.c (cfree): Define this function, with weak_alias if
+	available, otherwise a C function.
+	* malloc/Makefile (gmalloc-routines): Remove cfree.
+
+Sat Jan 21 08:08:58 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* setjmp/longjmp.c: Add weak aliases _longjmp, siglongjmp.
+	All code converted to use weak symbols, defined in the files which
+	define the real code (with the __ names, the non-__ names are weak).
+	All old symbol alias files removed.
+	Many files renamed to remove __ prefix since there is now just
+	the one file for both the __ and non-__ name for each function.
+	* libc-symbols.h: New file.
+	* set-hooks.h: Use libc-symbols.h macros for accessing symbol
+	sets.
+	* gnu-stabs.h: Prepend #error this file is obsolete.
+	* sysdeps/ieee754/ldexp.c: Add weak aliases scalb and __scalb.
+	* sysdeps/stub/__access.c: Renamed to access.c; added weak alias
+	access.
+	* sysdeps/unix/common/__access.S: Likewise.
+	* sysdeps/mach/hurd/__access.c: Likewise.
+	* sysdeps/stub/__adjtime.c: Renamed to adjtime.c; added weak alias
+	adjtime.
+	* sysdeps/unix/common/__adjtime.S: Likewise.
+	* sysdeps/mach/__adjtime.c: Likewise.
+	* sysdeps/mach/hurd/__adjtime.c: Likewise.
+	* sysdeps/stub/__brk.c: Renamed to brk.c; added weak alias brk.
+	* sysdeps/unix/bsd/sun/m68k/__brk.S: Likewise.
+	* sysdeps/unix/bsd/vax/__brk.S: Likewise.
+	* sysdeps/unix/bsd/hp/m68k/__brk.S: Likewise.
+	* sysdeps/unix/bsd/osf1/alpha/__brk.S: Likewise.
+	* sysdeps/unix/i386/__brk.S: Likewise.
+	* sysdeps/unix/sparc/__brk.S: Likewise.
+	* sysdeps/unix/mips/__brk.S: Likewise.
+	* sysdeps/mach/hurd/__brk.c: Likewise.
+	* sysdeps/standalone/__brk.c: Likewise.
+	* sysdeps/stub/__chdir.c: Renamed to chdir.c; added weak alias chdir.
+	* sysdeps/unix/__chdir.S: Likewise.
+	* sysdeps/mach/hurd/__chdir.c: Likewise.
+	* sysdeps/stub/__chmod.c: Renamed to chmod.c; added weak alias chmod.
+	* sysdeps/unix/__chmod.S: Likewise.
+	* sysdeps/mach/hurd/__chmod.c: Likewise.
+	* sysdeps/stub/__chown.c: Renamed to chown.c; added weak alias chown.
+	* sysdeps/unix/__chown.S: Likewise.
+	* sysdeps/mach/hurd/__chown.c: Likewise.
+	* sysdeps/stub/__close.c: Renamed to close.c; added weak alias close.
+	* sysdeps/unix/__close.S: Likewise.
+	* sysdeps/mach/hurd/__close.c: Likewise.
+	* sysdeps/standalone/__close.c: Likewise.
+	* sysdeps/generic/__copysign.c: Renamed to copysign.c; added weak
+	alias copysign.
+	* sysdeps/ieee754/__copysign.c: Likewise.
+	* sysdeps/alpha/__copysign.c: Likewise.
+	* sysdeps/ieee754/__drem.c: Renamed to drem.c; added weak alias drem.
+	* sysdeps/m68k/fpu/__drem.c: Likewise.
+	* sysdeps/stub/__drem.c: Likewise.
+	* sysdeps/posix/__dup.c: Renamed to dup.c; added weak alias dup.
+	* sysdeps/stub/__dup.c: Likewise.
+	* sysdeps/unix/__dup.S: Likewise.
+	* sysdeps/posix/__dup2.c: Renamed to dup2.c; added weak alias dup2.
+	* sysdeps/stub/__dup2.c: Likewise.
+	* sysdeps/unix/sysv/sysv4/__dup2.c: Likewise.
+	* sysdeps/unix/sysv/irix4/__dup2.c: Likewise.
+	* sysdeps/unix/common/__dup2.S: Likewise.
+	* sysdeps/mach/hurd/__dup2.c: Likewise.
+	* sysdeps/stub/__execve.c: Renamed to execve.c; added weak alias
+	execve.
+	* sysdeps/unix/__execve.S: Likewise.
+	* sysdeps/mach/hurd/__execve.c: Likewise.
+	* sysdeps/generic/__expm1.c: Renamed to expm1.c; added weak alias
+	expm1.
+	* sysdeps/m68k/fpu/__expm1.c: Likewise.
+	* sysdeps/stub/__fchmod.c: Renamed to fchmod.c; added weak alias
+	fchmod.
+	* sysdeps/unix/common/__fchmod.S: Likewise.
+	* sysdeps/mach/hurd/__fchmod.c: Likewise.
+	* sysdeps/stub/__fchown.c: Renamed to fchown.c; added weak alias
+	fchown.
+	* sysdeps/unix/common/__fchown.S: Likewise.
+	* sysdeps/mach/hurd/__fchown.c: Likewise.
+	* sysdeps/stub/__fcntl.c: Renamed to fcntl.c; added weak alias fcntl.
+	* sysdeps/unix/__fcntl.S: Likewise.
+	* sysdeps/mach/hurd/__fcntl.c: Likewise.
+	* math/__finite.c: Renamed to finite.c; added weak alias finite.
+	* sysdeps/posix/__flock.c: Renamed to flock.c; added weak alias flock.
+	* sysdeps/stub/__flock.c: Likewise.
+	* sysdeps/unix/bsd/__flock.S: Likewise.
+	* sysdeps/mach/hurd/__flock.c: Likewise.
+	* hurd/__fopenport.c: Renamed to fopenport.c; added weak alias
+	fopenport.
+	* sysdeps/stub/__fork.c: Renamed to fork.c; added weak alias fork.
+	* sysdeps/unix/__fork.S: Likewise.
+	* sysdeps/unix/bsd/osf1/alpha/__fork.S: Likewise.
+	* sysdeps/unix/i386/__fork.S: Likewise.
+	* sysdeps/unix/sparc/__fork.S: Likewise.
+	* sysdeps/unix/mips/__fork.S: Likewise.
+	* sysdeps/mach/hurd/__fork.c: Likewise.
+	* sysdeps/posix/__fpathcon.c: Renamed to fpathcon.c; added weak
+	alias fpathconf.
+	* sysdeps/stub/__fpathcon.c: Likewise.
+	* sysdeps/unix/sysv/irix4/__fpathcon.c: Likewise.
+	* sysdeps/stub/__fstat.c: Renamed to fstat.c; added weak alias fstat.
+	* sysdeps/unix/__fstat.S: Likewise.
+	* sysdeps/unix/sysv/sysv4/i386/__fstat.S: Likewise.
+	* sysdeps/mach/hurd/__fstat.c: Likewise.
+	* stdio/__getdelim.c: Renamed to getdelim.c; added weak alias
+	getdelim.
+	* sysdeps/stub/__getdents.c: Renamed to getdents.c; added weak
+	alias getdents.
+	* sysdeps/unix/__getdents.c: Likewise.
+	* sysdeps/unix/bsd/sun/__getdents.S: Likewise.
+	* sysdeps/unix/bsd/hp/m68k/__getdents.S: Likewise.
+	* sysdeps/unix/bsd/ultrix4/__getdents.S: Likewise.
+	* sysdeps/unix/bsd/bsd4.4/__getdents.S: Likewise.
+	* sysdeps/unix/bsd/osf1/alpha/__getdents.S: Likewise.
+	* sysdeps/unix/sysv/__getdents.c: Likewise.
+	* sysdeps/mach/hurd/__getdents.c: Likewise.
+	* hurd/__getdport.c: Renamed to getdport.c; added weak alias getdport.
+	* sysdeps/posix/__getdtsz.c: Renamed to getdtsz.c; added weak
+	alias getdtablesize.
+	* sysdeps/stub/__getdtsz.c: Likewise.
+	* sysdeps/unix/bsd/__getdtsz.S: Likewise.
+	* sysdeps/unix/sysv/sysv4/__getdtsz.c: Likewise.
+	* sysdeps/mach/hurd/__getdtsz.c: Likewise.
+	* sysdeps/stub/__getegid.c: Renamed to getegid.c; added weak alias
+	getegid.
+	* sysdeps/unix/__getegid.S: Likewise.
+	* sysdeps/mach/hurd/__getegid.c: Likewise.
+	* sysdeps/stub/__geteuid.c: Renamed to geteuid.c; added weak alias
+	geteuid.
+	* sysdeps/unix/__geteuid.S: Likewise.
+	* sysdeps/mach/hurd/__geteuid.c: Likewise.
+	* sysdeps/stub/__getgid.c: Renamed to getgid.c; added weak alias
+	getgid.
+	* sysdeps/unix/__getgid.S: Likewise.
+	* sysdeps/mach/hurd/__getgid.c: Likewise.
+	* sysdeps/stub/__getgrps.c: Renamed to getgroups.c; added weak
+	alias getgroups.
+	* sysdeps/unix/bsd/sequent/i386/__getgrps.S: Likewise.
+	* sysdeps/unix/sysv/sco3.2.4/__getgrps.c: Likewise.
+	* sysdeps/unix/sysv/irix4/__getgrps.c: Likewise.
+	* sysdeps/unix/common/__getgrps.S: Likewise.
+	* sysdeps/mach/hurd/__getgrps.c: Likewise.
+	* sysdeps/stub/__gethstnm.c: Renamed to gethostname.c; added weak
+	alias gethostname.
+	* sysdeps/unix/inet/__gethstnm.S: Likewise.
+	* sysdeps/unix/sysv/__gethstnm.c: Likewise.
+	* sysdeps/unix/sysv/sysv4/__gethstnm.c: Likewise.
+	* sysdeps/mach/hurd/__gethstnm.c: Likewise.
+	* sysdeps/stub/__getitmr.c: Renamed to getitimer.c; added weak
+	alias getitimer.
+	* sysdeps/unix/common/__getitmr.S: Likewise.
+	* sysdeps/mach/hurd/__getitmr.c: Likewise.
+	* stdio/__getline.c: Renamed to getline.c; added weak alias getline.
+	* sysdeps/posix/__getpgsz.c: Renamed to getpagesize.c; added weak
+	alias getpagesize.
+	* sysdeps/stub/__getpgsz.c: Likewise.
+	* sysdeps/unix/__getpgsz.c: Likewise.
+	* sysdeps/unix/bsd/__getpgsz.S: Likewise.
+	* sysdeps/unix/sysv/sysv4/__getpgsz.c: Likewise.
+	* sysdeps/mach/__getpgsz.c: Likewise.
+	* sysdeps/stub/__getpid.c: Renamed to getpid.c; added weak alias
+	getpid.
+	* sysdeps/unix/__getpid.S: Likewise.
+	* sysdeps/mach/hurd/__getpid.c: Likewise.
+	* sysdeps/stub/__getppid.c: Renamed to getppid.c; added weak alias
+	getppid.
+	* sysdeps/unix/__getppid.S: Likewise.
+	* sysdeps/mach/hurd/__getppid.c: Likewise.
+	* sysdeps/posix/__gettod.c: Renamed to gettimeofday.c; added weak
+	alias gettimeofday.
+	* sysdeps/stub/__gettod.c: Likewise.
+	* sysdeps/unix/sysv/irix4/__gettod.c: Likewise.
+	* sysdeps/unix/common/__gettod.S: Likewise.
+	* sysdeps/mach/__gettod.c: Likewise.
+	* sysdeps/stub/__getuid.c: Renamed to getuid.c; added weak alias
+	getuid.
+	* sysdeps/unix/__getuid.S: Likewise.
+	* sysdeps/mach/hurd/__getuid.c: Likewise.
+	* sysdeps/generic/__infnan.c: Renamed to infnan.c; added weak
+	alias infnan.
+	* sysdeps/ieee754/__infnan.c: Likewise.
+	* sysdeps/vax/__infnan.c: Likewise.
+	* sysdeps/stub/__ioctl.c: Renamed to ioctl.c; added weak alias ioctl.
+	* sysdeps/unix/__ioctl.S: Likewise.
+	* sysdeps/mach/hurd/__ioctl.c: Likewise.
+	* sysdeps/posix/__isatty.c: Renamed to isatty.c; added weak alias
+	isatty.
+	* sysdeps/stub/__isatty.c: Likewise.
+	* sysdeps/unix/bsd/__isatty.c: Likewise.
+	* sysdeps/mach/hurd/__isatty.c: Likewise.
+	* sysdeps/ieee754/__isinf.c: Renamed to isinf.c; added weak alias
+	isinf.
+	* sysdeps/m68k/fpu/__isinf.c: Likewise.
+	* sysdeps/stub/__isinf.c: Likewise.
+	* sysdeps/generic/__isnan.c: Renamed to isnan.c; added weak alias
+	isnan.
+	* sysdeps/ieee754/__isnan.c: Likewise.
+	* sysdeps/m68k/fpu/__isnan.c: Likewise.
+	* sysdeps/stub/__kill.c: Renamed to kill.c; added weak alias kill.
+	* sysdeps/unix/__kill.S: Likewise.
+	* sysdeps/mach/hurd/__kill.c: Likewise.
+	* sysdeps/stub/__link.c: Renamed to link.c; added weak alias link.
+	* sysdeps/unix/__link.S: Likewise.
+	* sysdeps/mach/hurd/__link.c: Likewise.
+	* sysdeps/ieee754/__logb.c: Renamed to logb.c; added weak alias logb.
+	* sysdeps/m68k/fpu/__logb.c: Likewise.
+	* sysdeps/stub/__logb.c: Likewise.
+	* sysdeps/stub/__lseek.c: Renamed to lseek.c; added weak alias lseek.
+	* sysdeps/unix/__lseek.S: Likewise.
+	* sysdeps/mach/hurd/__lseek.c: Likewise.
+	* sysdeps/generic/__lstat.c: Renamed to lstat.c; added weak alias
+	lstat.
+	* sysdeps/stub/__lstat.c: Likewise.
+	* sysdeps/unix/sysv/sysv4/i386/__lstat.S: Likewise.
+	* sysdeps/unix/common/__lstat.S: Likewise.
+	* sysdeps/mach/hurd/__lstat.c: Likewise.
+	* sysdeps/generic/__memccpy.c: Renamed to memccpy.c; added weak
+	alias memccpy.
+	* sysdeps/vax/__memccpy.c: Likewise.
+	* sysdeps/stub/__mkdir.c: Renamed to mkdir.c; added weak alias mkdir.
+	* sysdeps/unix/sysv/__mkdir.c: Likewise.
+	* sysdeps/unix/common/__mkdir.S: Likewise.
+	* sysdeps/mach/hurd/__mkdir.c: Likewise.
+	* sysdeps/stub/__mknod.c: Renamed to mknod.c; added weak alias mknod.
+	* sysdeps/unix/__mknod.S: Likewise.
+	* sysdeps/unix/sysv/sysv4/i386/__mknod.S: Likewise.
+	* sysdeps/mach/hurd/__mknod.c: Likewise.
+	* mach/__msg.c: Renamed to msg.c; added weak alias mach_msg.
+	* mach/__msgserver.c: Renamed to msgserver.c; added weak alias
+	mach_msg_server.
+	* sysdeps/stub/__open.c: Renamed to open.c; added weak alias open.
+	* sysdeps/unix/__open.S: Likewise.
+	* sysdeps/mach/hurd/__open.c: Likewise.
+	* sysdeps/standalone/__open.c: Likewise.
+	* sysdeps/stub/__pathconf.c: Renamed to pathconf.c; added weak
+	alias pathconf.
+	* sysdeps/unix/sysv/sco3.2.4/__pathconf.S: Likewise.
+	* sysdeps/unix/sysv/irix4/__pathconf.c: Likewise.
+	* hurd/__pid2task.c: Renamed to pid2task.c; added weak alias pid2task.
+	* sysdeps/stub/__pipe.c: Renamed to pipe.c; added weak alias pipe.
+	* sysdeps/unix/bsd/vax/__pipe.S: Likewise.
+	* sysdeps/unix/bsd/m68k/__pipe.S: Likewise.
+	* sysdeps/unix/bsd/osf1/alpha/__pipe.S: Likewise.
+	* sysdeps/unix/i386/__pipe.S: Likewise.
+	* sysdeps/unix/sparc/__pipe.S: Likewise.
+	* sysdeps/unix/mips/__pipe.S: Likewise.
+	* sysdeps/mach/hurd/__pipe.c: Likewise.
+	* stdlib/__random.c: Renamed to random.c; added weak alias random.
+	* sysdeps/stub/__read.c: Renamed to read.c; added weak alias read.
+	* sysdeps/unix/__read.S: Likewise.
+	* sysdeps/mach/hurd/__read.c: Likewise.
+	* sysdeps/standalone/__read.c: Likewise.
+	* sysdeps/stub/__readlink.c: Renamed to readlink.c; added weak
+	alias readlink.
+	* sysdeps/unix/common/__readlink.S: Likewise.
+	* sysdeps/mach/hurd/__readlink.c: Likewise.
+	* sysdeps/generic/__rint.c: Renamed to rint.c; added weak alias rint.
+	* sysdeps/m68k/fpu/__rint.c: Likewise.
+	* sysdeps/stub/__rmdir.c: Renamed to rmdir.c; added weak alias rmdir.
+	* sysdeps/unix/sysv/__rmdir.c: Likewise.
+	* sysdeps/unix/common/__rmdir.S: Likewise.
+	* sysdeps/mach/hurd/__rmdir.c: Likewise.
+	* sysdeps/generic/__sbrk.c: Renamed to sbrk.c; added weak alias sbrk.
+	* sysdeps/stub/__sbrk.c: Likewise.
+	* sysdeps/mach/hurd/__sbrk.c: Likewise.
+	* math/__scalb.c: Renamed to scalb.c; added weak alias scalb.
+	* sysdeps/stub/__select.c: Renamed to select.c; added weak alias
+	select.
+	* sysdeps/unix/common/__select.S: Likewise.
+	* sysdeps/mach/hurd/__select.c: Likewise.
+	* hurd/__setauth.c: Renamed to setauth.c; added weak alias setauth.
+	* sysdeps/stub/__setgid.c: Renamed to setgid.c; added weak alias
+	setgid.
+	* sysdeps/unix/__setgid.S: Likewise.
+	* sysdeps/unix/bsd/__setgid.c: Likewise.
+	* sysdeps/mach/hurd/__setgid.c: Likewise.
+	* sysdeps/stub/__setitmr.c: Renamed to setitmr.c; added weak alias
+	setitmr
+	* sysdeps/unix/common/__setitmr.S: Likewise.
+	* sysdeps/mach/hurd/__setitmr.c: Likewise.
+	* sysdeps/stub/__setpgrp.c: Renamed to setpgrp.c; added weak alias
+	setpgrp
+	* sysdeps/unix/sysv/sysv4/__setpgrp.c: Likewise.
+	* sysdeps/unix/sysv/sco3.2.4/__setpgrp.c: Likewise.
+	* sysdeps/unix/sysv/irix4/__setpgrp.S: Likewise.
+	* sysdeps/unix/common/__setpgrp.S: Likewise.
+	* sysdeps/mach/hurd/__setpgrp.c: Likewise.
+	* sysdeps/stub/__setregid.c: Renamed to setregid.c; added weak
+	alias setregid.
+	* sysdeps/unix/common/__setregid.S: Likewise.
+	* sysdeps/mach/hurd/__setregid.c: Likewise.
+	* sysdeps/stub/__setreuid.c: Renamed to setreuid.c; added weak
+	alias setreuid.
+	* sysdeps/unix/common/__setreuid.S: Likewise.
+	* sysdeps/mach/hurd/__setreuid.c: Likewise.
+	* sysdeps/stub/__setsid.c: Renamed to setsid.c; added weak alias
+	setsid.
+	* sysdeps/unix/bsd/__setsid.c: Likewise.
+	* sysdeps/unix/bsd/sun/sunos4/__setsid.S: Likewise.
+	* sysdeps/unix/bsd/ultrix4/__setsid.S: Likewise.
+	* sysdeps/unix/bsd/bsd4.4/__setsid.S: Likewise.
+	* sysdeps/unix/sysv/linux/__setsid.S: Likewise.
+	* sysdeps/unix/sysv/sysv4/__setsid.c: Likewise.
+	* sysdeps/unix/sysv/sco3.2.4/__setsid.c: Likewise.
+	* sysdeps/mach/hurd/__setsid.c: Likewise.
+	* sysdeps/stub/__settod.c: Renamed to settod.c; added weak alias
+	settimeofday.
+	* sysdeps/unix/bsd/__settod.S: Likewise.
+	* sysdeps/unix/sysv/__settod.c: Likewise.
+	* sysdeps/mach/hurd/__settod.c: Likewise.
+	* sysdeps/stub/__setuid.c: Renamed to setuid.c; added weak alias
+	setuid.
+	* sysdeps/unix/__setuid.S: Likewise.
+	* sysdeps/unix/bsd/__setuid.c: Likewise.
+	* sysdeps/mach/hurd/__setuid.c: Likewise.
+	* sysdeps/posix/__sigblock.c: Renamed to sigblock.c; added weak
+	alias sigblock.
+	* sysdeps/stub/__sigblock.c: Likewise.
+	* sysdeps/unix/bsd/__sigblock.S: Likewise.
+	* sysdeps/unix/bsd/bsd4.4/__sigblock.c: Likewise.
+	* sysdeps/unix/bsd/osf1/alpha/__sigblock.S: Likewise.
+	* sysdeps/posix/__sigpause.c: Renamed to sigpause.c; added weak
+	alias sigpause.
+	* sysdeps/stub/__sigpause.c: Likewise.
+	* sysdeps/unix/bsd/__sigpause.S: Likewise.
+	* sysdeps/unix/bsd/osf1/alpha/__sigpause.S: Likewise.
+	* sysdeps/stub/__sigproc.c: Renamed to sigprocmask.c; added weak
+	alias sigprocmask.
+	* sysdeps/unix/bsd/__sigproc.c: Likewise.
+	* sysdeps/unix/sysv/sysv4/__sigproc.S: Likewise.
+	* sysdeps/unix/sysv/sco3.2.4/__sigproc.S: Likewise.
+	* sysdeps/mach/hurd/__sigproc.c: Likewise.
+	* sysdeps/stub/__sigret.c: Renamed to sigreturn.c; added weak
+	alias sigreturn.
+	* sysdeps/unix/bsd/sun/__sigret.S: Likewise.
+	* sysdeps/unix/sysv/i386/__sigret.S: Likewise.
+	* sysdeps/unix/sysv/irix4/__sigret.S: Likewise.
+	* sysdeps/unix/i386/__sigret.S: Likewise.
+	* sysdeps/unix/mips/__sigret.S: Likewise.
+	* sysdeps/mach/hurd/i386/__sigret.c: Likewise.
+	* sysdeps/mach/hurd/alpha/__sigret.c: Likewise.
+	* sysdeps/mach/hurd/mips/__sigret.c: Likewise.
+	* sysdeps/posix/__sigvec.c: Renamed to sigvec.c; added weak alias
+	sigvec.
+	* sysdeps/stub/__sigvec.c: Likewise.
+	* sysdeps/unix/bsd/__sigvec.S: Likewise.
+	* sysdeps/unix/bsd/sun/__sigvec.S: Likewise.
+	* sysdeps/unix/bsd/sequent/i386/__sigvec.S: Likewise.
+	* sysdeps/unix/bsd/ultrix4/mips/__sigvec.S: Likewise.
+	* sysdeps/unix/bsd/bsd4.4/__sigvec.c: Likewise.
+	* sysdeps/unix/bsd/osf1/alpha/__sigvec.S: Likewise.
+	* sysdeps/stub/__stat.c: Renamed to stat.c; added weak alias stat.
+	* sysdeps/unix/__stat.S: Likewise.
+	* sysdeps/unix/sysv/sysv4/i386/__stat.S: Likewise.
+	* sysdeps/mach/hurd/__stat.c: Likewise.
+	* sysdeps/generic/__stpncpy.c: Renamed to stpncpy.c; added weak
+	alias stpncpy.
+	* sysdeps/stub/__symlink.c: Renamed to symlink.c; added weak alias
+	symlink.
+	* sysdeps/unix/common/__symlink.S: Likewise.
+	* sysdeps/mach/hurd/__symlink.c: Likewise.
+	* sysdeps/posix/__sysconf.c: Renamed to sysconf.c; added weak
+	alias sysconf.
+	* sysdeps/stub/__sysconf.c: Likewise.
+	* sysdeps/unix/bsd/ultrix4/__sysconf.c: Likewise.
+	* sysdeps/unix/sysv/sysv4/__sysconf.c: Likewise.
+	* sysdeps/unix/sysv/sco3.2.4/__sysconf.S: Likewise.
+	* sysdeps/unix/sysv/irix4/__sysconf.c: Likewise.
+	* hurd/__task2pid.c: Renamed to task2pid.c; added weak alias task2pid.
+	* sysdeps/stub/__times.c: Renamed to times.c; added weak alias times.
+	* sysdeps/unix/bsd/__times.c: Likewise.
+	* sysdeps/unix/sysv/__times.S: Likewise.
+	* time/__tzset.c: Renamed to tzset.c; added weak alias tzset.
+	* sysdeps/stub/__umask.c: Renamed to umask.c; added weak alias umask.
+	* sysdeps/unix/__umask.S: Likewise.
+	* sysdeps/mach/hurd/__umask.c: Likewise.
+	* sysdeps/stub/__unlink.c: Renamed to unlink.c; added weak alias
+	unlink.
+	* sysdeps/unix/__unlink.S: Likewise.
+	* sysdeps/mach/hurd/__unlink.c: Likewise.
+	* sysdeps/stub/__utimes.c: Renamed to utimes.c; added weak alias
+	utimes.
+	* sysdeps/unix/bsd/__utimes.S: Likewise.
+	* sysdeps/unix/sysv/sysv4/solaris2/__utimes.S: Likewise.
+	* sysdeps/mach/hurd/__utimes.c: Likewise.
+	* sysdeps/generic/__vfork.c: Renamed to vfork.c; added weak alias
+	vfork.
+	* sysdeps/unix/bsd/sun/m68k/__vfork.S: Likewise.
+	* sysdeps/unix/bsd/vax/__vfork.S: Likewise.
+	* sysdeps/unix/bsd/i386/__vfork.S: Likewise.
+	* sysdeps/unix/bsd/hp/m68k/__vfork.S: Likewise.
+	* sysdeps/unix/bsd/ultrix4/mips/__vfork.S: Likewise.
+	* sysdeps/unix/sysv/sysv4/i386/__vfork.S: Likewise.
+	* sysdeps/unix/sparc/__vfork.S: Likewise.
+	* stdio/__vfscanf.c: Renamed to vfscanf.c; added weak alias vfscanf.
+	* stdio/__vsscanf.c: Renamed to vsscanf.c; added weak alias vsscanf.
+	* sysdeps/posix/__wait.c: Renamed to wait.c; added weak alias wait.
+	* sysdeps/stub/__wait.c: Likewise.
+	* sysdeps/unix/bsd/sony/newsos4/__wait.c: Likewise.
+	* sysdeps/unix/bsd/sun/sunos4/__wait.c: Likewise.
+	* sysdeps/unix/bsd/sun/sunos3/m68k/__wait.S: Likewise.
+	* sysdeps/unix/bsd/vax/__wait.S: Likewise.
+	* sysdeps/unix/bsd/m68k/__wait.S: Likewise.
+	* sysdeps/unix/bsd/bsd4.4/__wait.c: Likewise.
+	* sysdeps/unix/sysv/i386/linux/__wait.S: Likewise.
+	* sysdeps/unix/sysv/irix4/__wait.S: Likewise.
+	* sysdeps/unix/i386/__wait.S: Likewise.
+	* sysdeps/unix/mips/__wait.S: Likewise.
+	* sysdeps/posix/__wait3.c: Renamed to wait3.c; added weak alias wait3.
+	* sysdeps/stub/__wait3.c: Likewise.
+	* sysdeps/unix/bsd/sony/newsos4/__wait3.c: Likewise.
+	* sysdeps/unix/bsd/sun/sunos4/__wait3.c: Likewise.
+	* sysdeps/unix/bsd/vax/__wait3.S: Likewise.
+	* sysdeps/unix/bsd/i386/__wait3.S: Likewise.
+	* sysdeps/unix/bsd/hp/m68k/__wait3.S: Likewise.
+	* sysdeps/unix/bsd/ultrix4/__wait3.S: Likewise.
+	* sysdeps/unix/bsd/bsd4.4/__wait3.c: Likewise.
+	* sysdeps/unix/sysv/irix4/__wait3.S: Likewise.
+	* sysdeps/stub/__wait4.c: Renamed to wait4.c; added weak alias wait4.
+	* sysdeps/unix/bsd/sony/newsos4/__wait4.c: Likewise.
+	* sysdeps/unix/bsd/sun/sunos4/__wait4.c: Likewise.
+	* sysdeps/unix/bsd/bsd4.4/__wait4.S: Likewise.
+	* sysdeps/unix/bsd/osf1/alpha/__wait4.S: Likewise.
+	* sysdeps/unix/sysv/linux/__wait4.S: Likewise.
+	* sysdeps/mach/hurd/__wait4.c: Likewise.
+	* sysdeps/stub/__waitpid.c: Renamed to waitpid.c; added weak alias
+	waitpid.
+	* sysdeps/unix/bsd/sun/sunos4/__waitpid.c: Likewise.
+	* sysdeps/unix/bsd/ultrix4/__waitpid.S: Likewise.
+	* sysdeps/unix/bsd/bsd4.4/__waitpid.c: Likewise.
+	* sysdeps/unix/bsd/osf1/alpha/__waitpid.c: Likewise.
+	* sysdeps/unix/sysv/linux/__waitpid.S: Likewise.
+	* sysdeps/unix/sysv/sysv4/__waitpid.c: Likewise.
+	* sysdeps/unix/sysv/sco3.2.4/__waitpid.S: Likewise.
+	* sysdeps/unix/sysv/irix4/__waitpid.c: Likewise.
+	* sysdeps/stub/__write.c: Renamed to write.c; added weak alias write.
+	* sysdeps/unix/__write.S: Likewise.
+	* sysdeps/mach/hurd/__write.c: Likewise.
+	* sysdeps/standalone/__write.c: Likewise.
+	* sysdeps/stub/__tcgetatr.c: Renamed to tcgetattr.c; added weak
+	alias tcgetattr.
+	* sysdeps/unix/bsd/__tcgetatr.c: Likewise.
+	* sysdeps/unix/bsd/sun/sunos4/__tcgetatr.c: Likewise.
+	* sysdeps/unix/bsd/bsd4.4/__tcgetatr.c: Likewise.
+	* sysdeps/unix/sysv/__tcgetatr.c: Likewise.
+	* sysdeps/stub/__sigact.c: Renamed to sigaction.c; added weak
+	alias sigaction.
+	* sysdeps/unix/bsd/__sigact.c: Likewise.
+	* sysdeps/unix/sysv/__sigact.c: Likewise.
+	* sysdeps/unix/sysv/sysv4/__sigact.c: Likewise.
+	* sysdeps/unix/sysv/sco3.2.4/__sigact.S: Likewise.
+	* sysdeps/mach/hurd/__sigact.c: Likewise.
+	* sysdeps/posix/__sigstmsk.c: Renamed to sigsetmask.c; added weak
+	alias sigsetmask.
+	* sysdeps/stub/__sigstmsk.c: Likewise.
+	* sysdeps/unix/bsd/__sigstmsk.S: Likewise.
+	* sysdeps/unix/bsd/bsd4.4/__sigstmsk.c: Likewise.
+	* sysdeps/unix/bsd/osf1/alpha/__sigstmsk.S: Likewise.
+	* sysdeps/stub/__getrusag.c: Renamed to getrusage.c; added weak
+	alias getrusage.
+	* sysdeps/unix/sysv/irix4/__getrusag.c: Likewise.
+	* sysdeps/unix/common/__getrusag.S: Likewise.
+	* hurd/task2pid.c: File removed.
+	* hurd/setauth.c: File removed.
+	* hurd/pid2task.c: File removed.
+	* hurd/hurdsyms.c: File removed.
+	* hurd/getdport.c: File removed.
+	* hurd/fopenport.c: File removed.
+	* mach/thread-sym.c: File removed.
+	* mach/spin-syms.c: File removed.
+	* mach/msgserver_t.c: File removed.
+	* mach/msgserver.c: File removed.
+	* mach/msg.c: File removed.
+	* mach/mig_syms.c: File removed.
+	* malloc/mcheck-init.c: File removed.
+	* malloc/cfree.c: File removed.
+	* io/flock.c: File removed.
+	* io/write.c: File removed.
+	* io/unlink.c: File removed.
+	* io/umask.c: File removed.
+	* io/symlink.c: File removed.
+	* io/rmdir.c: File removed.
+	* io/readlink.c: File removed.
+	* io/read.c: File removed.
+	* io/pipe.c: File removed.
+	* io/open.c: File removed.
+	* io/mkdir.c: File removed.
+	* io/lstat.c: File removed.
+	* io/lseek.c: File removed.
+	* io/link.c: File removed.
+	* io/isatty.c: File removed.
+	* io/stat.c: File removed.
+	* io/fstat.c: File removed.
+	* io/fchown.c: File removed.
+	* io/fchmod.c: File removed.
+	* io/dup2.c: File removed.
+	* io/dup.c: File removed.
+	* io/close.c: File removed.
+	* io/fcntl.c: File removed.
+	* io/chmod.c: File removed.
+	* io/chdir.c: File removed.
+	* io/access.c: File removed.
+	* io/chown.c: File removed.
+	* time/tzset.c: File removed.
+	* time/timelocal.c: File removed.
+	* time/syms-time.c: File removed.
+	* time/settod.c: File removed.
+	* time/setitmr.c: File removed.
+	* time/gettod.c: File removed.
+	* time/getitmr.c: File removed.
+	* time/adjtime.c: File removed.
+	* termios/tcgetattr.c: File removed.
+	* string/stpncpy.c: File removed.
+	* string/rindex.c: File removed.
+	* string/memccpy.c: File removed.
+	* string/index.c: File removed.
+	* string/bcmp.c: File removed.
+	* stdlib/srand.c: File removed.
+	* stdlib/random.c: File removed.
+	* stdio/vsscanf.c: File removed.
+	* stdio/vfscanf.c: File removed.
+	* stdio/syms-stdio.c: File removed.
+	* stdio/remove.c: File removed.
+	* stdio/getline.c: File removed.
+	* stdio/getdelim.c: File removed.
+	* signal/ssignal.c: File removed.
+	* signal/sigvec.c: File removed.
+	* signal/sigsetmask.c: File removed.
+	* signal/sigret.c: File removed.
+	* signal/sigproc.c: File removed.
+	* signal/sigpause.c: File removed.
+	* signal/sigblock.c: File removed.
+	* signal/sigaction.c: File removed.
+	* signal/kill.c: File removed.
+	* signal/gsignal.c: File removed.
+	* setjmp/siglongjmp.c: File removed.
+	* setjmp/_longjmp.c: File removed.
+	* resource/getrusage.c: File removed.
+	* posix/waitpid.c: File removed.
+	* posix/wait4.c: File removed.
+	* posix/wait3.c: File removed.
+	* posix/wait.c: File removed.
+	* posix/times.c: File removed.
+	* posix/sysconf.c: File removed.
+	* posix/setuid.c: File removed.
+	* posix/setsid.c: File removed.
+	* posix/setpgrp.c: File removed.
+	* posix/setpgid.c: File removed.
+	* posix/setgid.c: File removed.
+	* posix/pathconf.c: File removed.
+	* posix/getuid.c: File removed.
+	* posix/getppid.c: File removed.
+	* posix/getpid.c: File removed.
+	* posix/getgrps.c: File removed.
+	* posix/getgid.c: File removed.
+	* posix/geteuid.c: File removed.
+	* posix/getegid.c: File removed.
+	* posix/fpathcon.c: File removed.
+	* posix/fork.c: File removed.
+	* posix/execve.c: File removed.
+	* posix/environ.c: File removed.
+	* misc/utimes.c: File removed.
+	* misc/setreuid.c: File removed.
+	* misc/setregid.c: File removed.
+	* misc/select.c: File removed.
+	* misc/sbrk.c: File removed.
+	* misc/mknod.c: File removed.
+	* misc/ioctl.c: File removed.
+	* misc/getpgsz.c: File removed.
+	* misc/gethstnm.c: File removed.
+	* misc/getdtsz.c: File removed.
+	* misc/data_start.c: File removed.
+	* misc/brk.c: File removed.
+	* math/scalb.c: File removed.
+	* math/rint.c: File removed.
+	* math/logb.c: File removed.
+	* math/isnan.c: File removed.
+	* math/isinf.c: File removed.
+	* math/infnan.c: File removed.
+	* math/finite.c: File removed.
+	* math/expm1.c: File removed.
+	* math/drem.c: File removed.
+	* math/copysign.c: File removed.
+	* math/__scalb.c: File removed.
+	* dirent/getdents.c: File removed.
+
+Thu Jan 19 02:20:04 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/mcheck-init.c: Remove GNU ld hacks.
+	(__malloc_initialize_hook): Initialize this hook to turn_on_mcheck.
+	* malloc/malloc.c (__malloc_initialize_hook): New hook variable.
+	(initialize): Call the hook if set.
+	* malloc/malloc.h: Use __malloc_{size,ptrdiff}_t in prototypes.
+	(__malloc_initialize_hook): Declare new hook variable.
+
+Mon Jan 16 16:16:55 1995  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (malloc): Fix 1-off in previous change.
+
+Sun Jan 15 06:56:47 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/malloc.c (malloc): Fix typos in RMS's change.
+
+	* malloc/Makefile (dist-routines): Add malloc-find.
+	* malloc/malloc.h (malloc_find_object_address): Declare it.
+	* malloc/malloc-find.c: New file.
+
+	* malloc/malloc.h (__malloc_ptrdiff_t): New macro, defined a la
+        __malloc_size_t.
+	(malloc_info): Use that type for member `busy.info.size'.
+
+Wed Jan 11 00:07:10 1995  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* malloc/malloc.h (malloc_info): Change usage of .busy.info.size.
+
+	* malloc/malloc.c (malloc): For a multi-block object, store a
+	negative number into the busy.info.size of all but the first block.
+
+Tue Jan 10 05:53:50 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* malloc/memalign.c (__memalign_hook): New variable.
+	(memalign): Call it if set.
+	* malloc/malloc.h (__memalign_hook): Declare new variable.
+
+
+Find older changes in OChangeLog.

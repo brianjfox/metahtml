@@ -1,0 +1,18 @@
+;;; base-stream-get-contents.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 19:15:24 1996.
+
+Result: "
+
+Test file for Stream commands.  
+Used to test the following commands:
+
+stream-get
+stream-get-contents
+stream-put
+stream-put-contents
+stream-readable
+stream-shutdown
+stream-writable
+with-open-stream": <with-open-stream stream base-stream-test.mhtml type=file mode=read><stream-get-contents stream stream-var></with-open-stream><coerce-var stream-var type=string><get-var stream-var>

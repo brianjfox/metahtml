@@ -1,0 +1,26 @@
+;;; strip-tags.mhtml: -*- Meta-HTML -*-  Man Page for
+;;; strip-tags utility.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 11:56:29 1996.
+;;;
+<set-var title="strip-tags: Meta-HTML Utility">
+<include header.mhtml>
+
+<layout::page>
+  <h3> Remove HTML and <meta-html> Tags from Input </h3>
+  <ptext>
+    <synopsis strip-tags [filename...]>
+
+    <code>strip-tags</code> removes all HTML and <meta-html> tags from its
+    input stream, and produces an output stream of what remains.  If 
+    <var filename> arguments are given, <code>strip-tags</code> reads
+    from those input files, and creates a new output file for each one
+    called <code><var filename>-stripped</code>.  Otherwise, strip-tags
+    reads from the standard-input and writes to the standard-output.
+
+    This is a very useful utility when creating indices for a search
+    engine.
+  </ptext>
+</layout::page>
+<include footer.mhtml>

@@ -1,0 +1,6 @@
+;;; base-sessions-of-key.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 14:31:27 1996.
+
+Result: "Session Active: sessions of key working.": <set-var mhttpd::session-database-file="/tmp/test-sessions.db"><set-var anonymous=anonymous><create-session anonymous allow-multiple><set-session-var tmp="Session Active"><get-session-var tmp><set-var sids[]=<sessions-of-key "anonymous">><if <eq <get-var SID> <get-var sids[0]>> ": sessions of key working."><delete-session <get-var SID>><unset-var SID>

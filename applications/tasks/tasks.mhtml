@@ -1,0 +1,172 @@
+;;; tasks.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Universal Access Inc.
+;;;  Author: Henry Minsky (hqm@ua.com) Fri Sep  6 16:12:17 1996.
+
+;;; Define the pathname to the task gdbm database.
+<set-var tasks::task-db =
+  <get-var mhtml::include-prefix mhtml::relative-prefix>/tasks.db>
+
+;;; Utility to display a popup menu of task priority, based
+;;; on the value of the page variable 'priority'.
+<defun show-popup-priority priority>
+  <select name=priority>
+    <option <if <string-eq <get-var priority> "High"> selected>>High
+    <option <if <string-eq <get-var priority> "Medium"> selected>>Medium
+    <option <if <string-eq <get-var priority> "Low"> selected>>Low
+  </select>
+</defun>
+
+;;; Highlights high priority tags in red.
+<defun highlight-priority str>
+  <if <string-eq <get-var str> "High">
+      <prog <font color=red>High</font>>
+    <get-var str>>
+</defun>
+
+;;; In the db, a task contains the fields
+;;; ( creation-time, owner, text, task-name, priority, status )
+;;;
+;;; This routine formats a task as some rows in a table.
+;;;
+;;; It assumes that the record for a task has been loaded from
+;;; the database using database-load-record, and that the page
+;;; variables are set to their correct values for this record.
+;;;
+<defsubst format-task-as-table>
+  <form action="modify-task.mhtml" method=post>
+    <tr>
+      <td rowspan=3>
+	<input type=submit name=action value="Change"><br>
+	<input type=submit name=action value="Delete">
+      </td>
+      <td rowspan=3>
+	<get-var task-name>
+	<input type=hidden name=task-name value="<get-var task-name>">
+      </td>
+      <td><date <get-var creation-time>></td>
+      <td><get-var owner></td> 
+      <th>
+      <highlight-priority <get-var priority>>
+      </th>
+    </tr>
+    
+    <tr>
+      <td colspan=3>
+	<subst-in-string <get-var text> "\n\n" "<p>" "\n" " <br> ">
+      </td>
+    </tr>
+    
+    ;;; status line
+    <tr><td colspan=3><b>Status: <get-var status></b></td>
+    </tr>
+    
+    </tr>
+  </form>
+</defsubst>
+
+;;; This routine does a database-query using the creation date
+;;; as the sort key.
+<defun show-table-tasks-by-creation>
+  <with-open-database tdb <get-var tasks::task-db> MODE=READER>
+    <table border=1>
+      <tr>
+	<th width=10>Modify<th width=20%>Name<th>Created<th>Owner<th>Priority
+      </tr>
+    <database-query tdb true sort=creation-time
+      format=<format-task-as-table>>
+    </table>
+  </with-open-database>
+</defun>
+
+;;; Do a database-query using the owner field as the sort key.
+<defun show-table-tasks-by-owner>
+  <with-open-database tdb <get-var tasks::task-db> MODE=READER>
+    <table border=1>
+      <tr>
+	<th width=10>Modify<th width=20%>Name<th>Created<th>Owner<th>Priority
+      </tr>
+    <database-query tdb true sort=owner,creation-time
+      format=<format-task-as-table>>
+    </table>
+  </with-open-database>
+</defun>
+
+
+;;; This routine formats a task as a <DL> list item.
+<defsubst show-task-list-format>
+  <form action="modify-task.mhtml" method=post>
+    <dt>
+    <b>Task:</b> <get-var task-name><br>
+    <dd> 
+    <b>created:</b> <i><date <get-var creation-time>></i> 
+    <b>owner:</b> </i><get-var owner></i>
+    <b>priority</b>: <highlight-priority <get-var priority>>
+    <br>
+    <subst-in-string <get-var text> "\n\n" "<p>" "\n" " <br> ">
+    <p>
+    <b>Status: <get-var status></b>
+    
+    <br><input type=submit name=action value="Change">
+    <input type=submit name=action value="Delete">
+    <input type=hidden name=task-name value="<get-var task-name>">
+    <br>
+  </form>
+</defsubst>
+
+;;; Displays the tasks in the database in a list format,
+;;; sorted by creation date.
+<defun show-tasks-by-creation>
+  <with-open-database tdb <get-var tasks::task-db> MODE=READER>
+    <dl>
+    <database-query tdb true sort=creation-time
+      format=<prog 
+	       <show-task-list-format>
+	       >>
+    <p>
+    </dl>
+  </with-open-database>
+</defun>
+
+<defun show-tasks-by-owner>
+  <with-open-database tdb <get-var tasks::task-db> MODE=READER>
+    <dl>
+    <database-query tdb true sort=owner,creation-time
+      format=<prog 
+	       <show-task-list-format>
+	       >>
+    <p>
+    </dl>
+  </with-open-database>
+</defun>
+
+
+;;; Add a task to the database.
+<defun add-task name owner priority status text>
+  <with-open-database tdb <get-var tasks::task-db> MODE=WRITE-CREATE>
+    <set-var creation-time=<time>>
+    <set-var task-name=<get-var name>>
+    <set-var done=<database-save-record tdb <get-var name> status task-name owner creation-time priority text>>
+  </with-open-database>
+</defun>
+
+;;; Loads a task from the database, keying on the task name.
+<defsubst load-task name>
+  <with-open-database tdb <get-var tasks::task-db> MODE=READER>
+    <database-load-record tdb <get-var name>>
+  </with-open-database>
+</defsubst>
+
+<defsubst delete-task name>
+  <with-open-database tdb <get-var tasks::task-db> MODE=WRITER>
+    <set-var result=<database-delete-record tdb <get-var name>>>
+  </with-open-database>
+</defsubst>
+
+
+;;; Uncomment the following two lines to enable a very simple password
+;;; session authentication for users to modify the task database.
+<defun require-tasks-login>
+;;;  <if <not <get-session-var tasks::username>>
+;;;      <redirect login.mhtml>>
+</defun>

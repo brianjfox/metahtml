@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# mkinit -- Given the names of some object files, produce a C source file
+#           which calls the initialization functions for each file.
+
+names="";
+for file in $@; do
+   cfile=`echo $file | sed -e 's/.o$/.c/'`;
+   ifunc=`grep 'PACKAGE_INITIALIZER[^_]' $cfile`;
+   ifunc=`echo "$ifunc" | sed -e 's/PACKAGE_INITIALIZER//g' -e 's/(//g' -e 's/)//g' -e 's/ //g'`;
+   if [ "$ifunc" ]; then
+      names="$names $ifunc"
+   fi
+done
+
+echo "/* Call initialization functions for Meta-HTML packages. */"
+echo ""
+echo "/* DO NOT EDIT! "
+echo "   This file is built automatically by $0, which is called by the"
+echo "   build process in Makefile.  Editing this file is a mistake, since"
+echo "   your changes surely will be lost. */"
+echo ""
+echo "#include \"symbols.h\""
+echo ""
+echo "#if defined (__cplusplus)"
+echo "extern \"C\" {"
+echo "#endif"
+
+for name in $names; do
+   echo "extern void $name (Package *package);"
+done
+
+echo ""
+echo "void"
+echo "initialize_external_functions (Package *package)"
+echo "{"
+
+for name in $names; do
+   echo "  $name (package);"
+done
+
+echo "}"
+
+echo "#if defined (__cplusplus)"
+echo "}"
+echo "#endif"
+
+

@@ -1,0 +1,22 @@
+;;; serverconf.mhtml: -*- Meta-HTML -*-
+;;; How to configure servers to use the engine.
+
+<if <not <get-var files-are-included>>
+    <prog
+      <set-var
+        title="Configuring the Server"
+        prev-page="hiding.mhtml" prev-title="Installing the Engine"
+        next-page="function-index.mhtml"  next-title="Function Index">
+      <include header.mhtml>>
+  <prog
+   <h2>Server Configuration</h2>>>
+<ul>
+   <li> <a href="apache.mhtml">Configuring the Apache server</a>
+   <li> <a href="ncsa.mhtml">Configuring the NCSA server</a>
+   <li> <a href="cern.mhtml">Configuring the CERN server</a>
+   <li> <a href="plexus.mhtml">Configuring the PLEXUS server</a>
+   <li> <a href="netscape.mhtml">Configuring the NetScape server</a>
+   <li> <a href="nsapi.mhtml">Configuring NetScape's NSAPI</a>
+</ul>
+<if <not <get-var files-are-included>>
+    <include footer.mhtml>>

@@ -1,0 +1,12 @@
+;;; base-package-names.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 01:51:18 1996.
+
+Result: "MHTML
+*META-HTML*
+*USER-FUNCTIONS*
+DEFAULT
+%%
+TMP
+WAKY": <set-var tmp::var1=value1 waky::scoob=snack mhtml::active=true><package-names>

@@ -1,0 +1,68 @@
+;;; rolodex-entry.mhtml: -*- Meta-HTML -*-  Show/Edit an entry in the Rolodex.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 27 22:13:09 1998.
+
+<set-var title="Create/Modify Entry">
+<include header.mhtml>
+
+<if <get-var-once posted::cancel>
+    <redirect welcome.mhtml>>
+
+;;; If we have an existing ENTRY_ID, then this page is editing
+;;; a user already in the database, or has just created the user,
+;;; which is basically the same for our purposes.
+<if <get-var-once posted::entry_id>
+    <set-var rolo::editing=true>>
+
+<when <get-var-once posted::create>>
+  <if <rolodex::modify-entry posted>
+      <internal-message Entry Saved.>
+    <internal-message Sorry: <sql::sql-error-message>>>
+</when>
+
+<when <get-var-once posted::delete>>
+  <if <rolodex::delete-entry <get-var-once posted::entry_id>>
+      <message Entry Deleted.>
+    <internal-message Sorry: <sql::sql-error-message>>>
+</when>
+
+<when <get-var-once posted::use-as-template>>
+  <set-var posted::entry_id = <make-identifier>>
+  <set-var posted::fname="" posted::mname="" rolo::editing="">
+  <copy-package posted default>
+  <internal-message Complete the new entry, and then click "Create Entry">
+</when>
+
+<if <get-var-once posted::entry_id>
+    <set-var loaded? =
+      <rolodex::load-entry <get-var posted::entry_id> default>>>
+
+;;; Default some fields here, for North American Californians.
+<defvar posted::ccode USA>
+<defvar posted::state CA>
+<defvar posted::hphone "(415) xxx-xxxx">
+<defvar posted::wphone "(408) xxx-xxxx">
+<defvar posted::fphone "(408) xxx-xxxx">
+<defvar posted::cphone "(415) xxx-xxxx">
+<defvar posted::city   "Palo Alto">
+
+<layout::page>
+  <form method=POST action=<thisdoc>>
+    <pre><rolodex::entry-form-fields default></pre>
+    <center>
+      <if <get-var rolo::editing>
+	  ;;; If in edit mode, then we are modifying the entry.
+	  <group
+	   <input type=submit name=create value="Modify Entry">
+	   <input type=submit name=use-as-template value="Use as Template">
+	   <input type=submit name=delete value="Delete Entry">>
+	;;; Otherwise, we are creating a new entry.
+	<input type=submit name=create value="Create Entry">>
+
+      <input type=submit name=cancel value="Cancel">
+    </center>
+  </form>
+</layout::page>
+
+<include footer.mhtml>

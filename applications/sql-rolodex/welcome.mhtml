@@ -1,0 +1,65 @@
+;;; welcome.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 27 21:21:03 1998.
+<set-var title="Welcome!">
+<include header.mhtml>
+
+<layout::page>
+  <plain-text>
+    Welcome to our simple SQL Rolodex application. This application serves
+    as an example of building an SQL-based <Meta-HTML> Web Application.
+
+    Most of the database work takes place in
+    <concat
+     <code>
+     <thisdir>/
+     <a href="view-source.mhtml?tagsets/rolodex.mhtml">
+     tagsets/rolodex.mhtml
+     </a>
+     </code>>;
+    this directory also contains the
+    <a href="view-source.mhtml?tagsets/rolodex.api">dynamically built API</a>
+    for the code, and the directory itself is a good place to start to
+    understand the structure of a typical <Meta-HTML> application.
+
+    ;;; Show our search form.
+    <center>
+      <sql::standard-search-form posted>
+    </center>
+
+    There are only a few pages in the entire application -- you can click
+    on the links below to view the <Meta-HTML> source of the referenced page.
+
+    <ul>
+      <li> <a href="view-source.mhtml?welcome.mhtml"><b>This Page</b></a><br>
+      This welcome document to the application explains a little bit about
+      how it works, and displays a small search form.
+
+      <li> <a href="view-source.mhtml?rolodex-initialize.mhtml">
+	<b>rolodex-initialize.mhtml</b>
+      </a><br>
+      This document allows privileged users to initialize the database.
+      You can find the password that you need in
+      <code>config/site.params</code>, which can only be viewed by those
+      people with physical access to the site.
+
+      <li> <a href="view-source.mhtml?rolodex-entry.mhtml">
+	<b>rolodex-entry.mhtml</b>
+	</a><br>
+      This page is where an entry can be created, deleted, or modified.
+      It is the target of the result of using the search form below.
+
+      <li> <a href="view-source.mhtml?rolodex-browse.mhtml">
+	<b>rolodex-browse.mhtml</b>
+	</a><br>
+      A relatively sophisticated interface for browsing a large number of
+      entries from an SQL database.  The workhorse for this page is in
+      <a href="view-source.mhtml?tagsets/browser.mhtml">
+	tagsets/browser.mhtml
+      </a>
+    </ul>
+  </plain-text>
+</layout::page>
+
+<include footer.mhtml>

@@ -1,0 +1,7 @@
+;;; base-package-delete.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 01:36:25 1996.
+
+Result: "Before: value1value2 After:": <set-var tmp::var1=value1 tmp::var2=value2>Before: <get-var tmp::var1 tmp::var2><package-delete tmp> After: <get-var tmp::var1 tmp::var2>
+Result: "Before: value1value2 scoooobbyyyshaaaggggyyy After: ": <set-var tmp::var1=value1 tmp::var2=value2><set-var waky::scoob=scoooobbyyy waky::shaggy=shaaaggggyyy>Before: <get-var tmp::var1 tmp::var2> <get-var waky::scoob waky::shaggy><package-delete tmp waky> After: <get-var tmp::var1 tmp::var2> <get-var waky::scoob waky::shaggy>

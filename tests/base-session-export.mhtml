@@ -1,0 +1,6 @@
+;;; base-session-export.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 14:28:04 1996.
+
+Result: "Session Active: Session export working.": <set-var mhttpd::session-database-file="/tmp/test-sessions.db"><set-var anonymous=anonymous><create-session anonymous allow-multiple><set-session-var tmp="Session Active"><get-session-var tmp><set-var tmp::var1=": Session " tmp::var2="export " tmp::var3="working."><session-export tmp session-tmp><get-session-var session-tmp::var1 session-tmp::var2 session-tmp::var3><delete-session <get-var SID>><unset-var SID>

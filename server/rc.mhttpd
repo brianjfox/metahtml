@@ -1,0 +1,94 @@
+#!/bin/sh
+#
+# Startup script for the Meta-HTML Web Server
+#
+# chkconfig:   2345 30 30
+# description: The Meta-HTML web server is a comprehensive environment for \
+#	       building dynamic web applications.  It can also be used as \
+#	       a standard web server, with comprehensive and flexible features.
+# processname: mhttpd
+# pidfile: /home/mhttpd/conf/mhttpd.pid
+# config: /home/mhttpd/conf/local.conf (or /etc/sysconfig/MHTTPD)
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+if [ -x /usr/bin/start-servers ]; then
+   for dir in /etc/sysconfig /etc /usr/lib/metahtml /www/bin; do
+      if [ -f $dir/mhttpd ]; then
+         LOCALSITES=$dir/mhttpd
+	 break;
+      elif [ -f $dir/MHTTPD ]; then
+	 LOCALSITES=$dir/MHTTPD
+	 break;
+      elif [ -f $dir/LOCAL-SITES ]; then
+	 LOCALSITES=$dir/LOCAL-SITES
+	 break;
+      fi
+   done
+fi
+
+# See how we were called.
+case "$1" in
+  start)
+     if [ "$LOCALSITES" ]; then
+	echo -n "Starting Servers ($LOCALSITES): "
+	/usr/bin/start-servers $LOCALSITES
+	started=true
+     elif [ -f /home/mhttpd/conf/mhttpd.conf ]; then
+	echo -n "Starting mhttpd (/home/mhttpd/conf/mhttpd.conf): "
+	daemon mhttpd --config /home/mhttpd/conf/mhttpd.conf
+	started=true
+     fi
+     if [ "$started" ]; then
+	echo
+	touch /var/lock/subsys/mhttpd
+     fi
+     ;;
+  stop)
+     if [ "$LOCALSITES" ]; then
+	echo -n "Shutting down mhttpd ($LOCALSITES): "
+	/usr/bin/stop-servers $LOCALSITES
+	stopped=true
+     elif [ -f /home/mhttpd/conf/mhttpd.conf ]; then
+	echo -n "Shutting down mhttpd (/home/mhttpd/conf/mhttpd.conf): "
+	killproc mhttpd
+	stopped=true
+     fi
+     echo
+     rm -f /var/lock/subsys/mhttpd
+     rm -f /var/run/mhttpd.pid
+     ;;
+  which)
+     if [ "$LOCALSITES" ]; then
+	startupfile=`cat $LOCALSITES`;
+     elif [ -f /home/mhttpd/conf/mhttpd.conf ]; then
+	startupfile=/home/mhttpd/conf/mhttpd.conf
+	LOCALSITES=/home/mhttpd/conf
+     else
+	echo "There is no startup file for Meta-HTML services!"
+     fi
+     if [ "$startupfile" ]; then
+	echo "Meta-HTML services are run for the servers found in "
+	echo "${LOCALSITES}.  Those servers are "
+	echo "${startupfile}."
+     fi
+     ;;
+  status)
+	status mhttpd
+	;;
+  restart)
+	$0 stop
+	$0 start
+	;;
+  reload)
+	echo -n "Reloading mhttpd: "
+	killproc mhttpd -HUP
+	echo
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|reload|status}"
+	exit 1
+esac
+
+exit 0

@@ -1,0 +1,160 @@
+;;; session.mhtml: -*- Meta-HTML -*-
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 29 08:10:02 1996.
+;;;
+;;; The tag <session::initialize> creates or resumes a session for the
+;;; current user.  To use this tag, you should place the following in
+;;; a file which is executed for each page fetch:
+;;;
+;;;     <require session>
+;;;	<session::initialize>
+;;;
+<defun session::initialize &optional timeout timeout-page>
+  ;;; DOC_SECTION (SESSION-OPERATORS)
+  ;;; Create or resume a session for the currently connected browser.
+  ;;; <var timeout> is the length of time this session should stick around
+  ;;; in the session database expressed in minutes; it defaults to 200.
+  ;;;
+  ;;; If the variable <code>SESSION::INHIBIT-SESSION</code> is
+  ;;; non-empty, then no session processing is done.
+  ;;;
+  ;;; If the session has timed out, (detected by the browser passing in a SID
+  ;;; which doesn't exist in the session database), then a new session is
+  ;;; created using that SID, and the variable <var session::restarted> is
+  ;;; set to "true".
+  ;;;
+  ;;; If a new session had to be created, either because the browser had
+  ;;; a SID which was timed out, or because the browser didn't have a SID,
+  ;;; then the variable <var session::new-arrival> is set to "true".
+  ;;;
+  ;;; If you supply <var timeout-page>, and the session was timed out,
+  ;;; then the browser is redirected to <var timeout-page>, and the
+  ;;; session is not instantiated in the session database (although the
+  ;;; aforementioned variables are still set).
+  <defvar timeout 200>
+  <defvar sess-db <or <get-var-once mhttpd::session-database-file>
+		      /tmp/sessions.db>>
+  <set-var mhtml::sid-prefix="/">
+  <set-var mhtml::permanent-cookies=true>
+  <set-var sid=<get-var-once default::sid>>
+  <set-session-timeout <get-var-once timeout>>
+  <if <not <get-var-once session::inhibit-session>>
+      <require-session
+       missing = <concat
+		  <set-var session::new-arrival=true>
+		  <set-var anonymous=anonymous>
+		  <create-session anonymous allow-multiple>
+		  <set-session-timeout <get-var-once timeout>>
+		  <set-session-var client=<get-var-once env::remote_host>>
+		  <set-session-var user-agent=<get-var-once env::http_user_agent>>
+		  <when <not <get-var-once mhtml::cookie-compatible>>>
+		   <if <match <get-var-once env::http_user_agent> "lynx"
+			      caseless=t>
+		       <concat
+			<set-session-var
+			  siteprefs::layout = plain
+			  siteprefs::admin-layout = plain
+			  siteprefs::left-border = 0
+			  siteprefs::admin-left-border = 0>
+			<set-var
+			  siteprefs::layout = plain
+			  siteprefs::admin-layout = plain
+			  siteprefs::left-border = 0
+			  siteprefs::admin-left-border = 0>>>
+		   <redirect <concat
+			      <get-var-once mhtml::http-to-host>/
+			      <get-var-once default::sid mhtml::location>>>
+		   </when>>
+
+       timeout = <concat
+		   <set-var session::new-arrival=true>
+		   <set-var session::restarted=true>
+		   <if <get-var-once timeout-page>
+		       <redirect <get-var-once timeout-page>>>
+		   <package-delete temp>
+		   <set-var
+		     default::sid=<get-var-once sid>
+		     info = <make-alist client=<get-var-once env::remote_ost>>>
+		   <set-session-data <get-var-once info> <get-var-once sid>>>>>
+</defun>
+
+<defun session::reset-cookie>
+  ;;; DOC_SECTION (SESSION-OPERATORS)
+  ;;; Place this at the end of a page which is supposed to timeout the
+  ;;; user's session.  It sends the browser a Set-Cookie header which
+  ;;; makes the cookie go away.
+  <set-var mhtml::sid-prefix="/">
+  <set-var default::sid="">
+  <unset-var mhtml::permanent-cookies>
+</defun>
+
+<defun session::display-session-data sid>
+  ;;; DOC_SECTION (SESSION-OPERATORS)
+  ;;; Produces HTML output suitable for placing in a page which
+  ;;; details the contents of session associated with <var sid>.
+  ;;; This can be useful for debugging, especially when creating
+  ;;; websites which rely heavily on session information for handling
+  ;;; such things as page layout, etc.
+  <defvar sid <get-var-once default::sid>>
+  <session::initialize>
+  <set-session-var foo=bar>
+  <set-var alist=<get-session-data>>
+  <set-var names[]=<alist-package-vars alist>>
+  <set-var packs[]=<alist-package-names alist>>
+  <sort packs>
+  <sort names>
+  <h3>For session ID: <get-var-once sid>:</h3>
+  <foreach pack packs>
+    <h4>Session Package <get-var-once pack>:</h4>
+    <unset-var temp>
+    <foreach var names copy=true>
+      <if <match <get-var-once var> "^<get-var-once pack>::">
+	  <concat
+	   <array-delete-index <array-member <get-var-once var> names> names>
+	   <array-append <get-var-once var> temp>>>
+    </foreach>
+    <ul>
+      <foreach var temp>
+	<li> <b><get-var-once var></b>:
+	<unset-var value>
+	<set-var value=<alist-get-var alist <get-var-once var>[]>>
+	<coerce-var value type=array>
+	<when <gt <array-size value> 1>>
+	  <ol>
+	    <foreach val value>
+	      <li> <u><get-var-once val></u>
+	    </foreach>
+	  </ol>
+	</when>
+	<when <not <gt <array-size value> 1>>>
+	  <u><get-var-once value></u>
+	</when>
+      </foreach>
+    </ul>
+    <p>
+  </foreach>
+
+  ;;; Now do the final package.
+  <when <gt <array-size names> 1>>
+    <h4> Packageless variables in Session <get-var-once sid>:</h4>
+    <ul>
+      <foreach var names>
+	<li> <b><get-var-once var></b>:
+	<unset-var value>
+	<set-var value=<alist-get-var alist <get-var-once var>[]>>
+	<coerce-var value type=array>
+	<when <gt <array-size value> 1>>
+	  <ol>
+	    <foreach val value>
+	      <li> <u><get-var-once val></u>
+	    </foreach>
+	  </ol>
+	</when>
+	<when <not <gt <array-size value> 1>>>
+	  <u><get-var-once value></u>
+	</when>
+      </foreach>
+    </ul>
+  </when>
+</defun>

@@ -1,0 +1,140 @@
+
+   Compiling and Installing Meta-HTML From the Source Distribution
+
+
+       -----------------------------------------------------------
+       |  INSTRUCTIONS FOR WIZARDS                               |
+       |                                                         |
+       |  You need gdbm.					 |
+       |                                                         |
+       |  If you have MySQL or mSQL installed, modules enabling  |
+       |  access to those databases will automatically be built. |
+       |                                                         |
+       |  If you have the "libdes" library, functions which can  |
+       |  use triple DES encryption will automatically be built. |
+       |                                                         |
+       |  "make install" installs the binaries into "/www/bin".  |
+       |                                                         |
+       |  "./install-site" creates the release Web site (prompts)|
+       |                                                         |
+       -----------------------------------------------------------
+
+Instructions for normal people:
+
+    I) WHAT YOU NEED:
+
+	1) THE SOURCE CODE TO THE META-HTML DISTRIBUTION.
+
+	This file looks like `metahtml-M.mm.tar.gz', where "M" is the
+	major release number, and "mm" is the minor release number.  The
+	"tar.gz" part means that this is a gzipped Unix tape archive
+	file -- it unpacks into a directory called `metahtml-M.mm' when
+	you issue the command:
+
+		gzip -d < metahtml-M.mm.tar.gz | tar -xf -
+
+
+	2) AN INSTALLED VERSION OF GCC, 2.0 OR GREATER.
+	
+	It is conceivable that you can compile the sources without GCC,
+	but not only will it require some modifications to `Makefile.in',
+	but is somewhat undesirable as well, since GCC produces
+	excellent code.
+
+
+	3) A COMPILED VERSION OF GDBM, THE GNU DBM SYSTEM.
+
+	If you are using a free version of Unix, such as the Hurd,
+	Linux, NetBSD, FreeBSD, and so on, chances are that you already
+	have this library installed on your system.  Otherwise, you will
+	have to get a distribution and compile it.  The canonical
+	location of the distribution is at prep.ai.mit.edu in /pub/gnu.
+	Try
+
+		ftp://prep.ai.mit.edu/pub/gnu/gdbm-1.7.3.tar.gz
+
+	If you collect the source, (because you don't already have
+	copies of `libgdbm.a' and `gdbm.h') yet you don't wish to
+	install the library or headers, then simply place the
+	distribution "next to" the Meta-HTML distribution.  For example,
+	if you have placed the Meta-HTML source in "~/src/metahtml-5.09/",
+	then you would place the GDBM source in "~src/gdbm-1.7.4/".
+	Read the `INSTALL' file that came with the GDBM distribution to
+	see how to compile it, and compile it first.
+
+
+	4) If you would like to use the additional MSQL database
+	   interface, you will need a copy of MSQL as well.  There are
+	   many places on the net that you can obtain a distribution
+	   from -- the author's release is at ftp://ftp.bond.edu.au, and
+	   you can obtain a recent release from us, at
+
+		ftp://ftp.metahtml.com/pub/helpers/msql-1.0.14.tar.gz
+
+
+	5) If you would like to use the additional triple-DES encryption
+	   enhancement with your version of Meta-HTML, you will need to
+	   obtain Eric Young's DES library.  If you are located within
+	   the domain of the United States, you may FTP a version of this
+	   library from us, at:
+
+		ftp://ftp.metahtml.com/pub/helpers/libdes.tar.gz
+
+
+	4) If you would like to use the additional mySQL database
+	   interface, you will need a copy of mySQL as well.  
+	   The author's release is at ftp://ftp.tcx.se, and
+	   you can obtain a recent release from us, at
+
+		ftp://ftp.metahtml.com/pub/helpers/mysql-V.vv.tgz
+
+    II) CONFIGURING THE RELEASE:
+
+	RUN `./configure', PERHAPS WITH OPTIONAL ARGUMENTS.
+
+	The very first thing to do is to configure the source to compile
+	on your particular platform.  If you have a relatively popular
+	Unix box, you can expect Meta-HTML to compile cleanly and
+	smoothly on it.
+
+	If you are not using any special options, simply type
+
+		./configure
+
+	You may wish to give your version of Meta-HTML the ability to
+	use additional enhancements, such as the MSQL database, or
+	triple-DES encryption.  In order to do so, make sure that you
+	have the related package already, and then run `./configure'.
+
+	If you have installed a component in an unusual place, such as
+	/main/db/mysql/*, then you can tell the Meta-HTML configure
+	command where the needed library is:
+
+	   ./configure --with-msqllib=/main/db/mysql/lib/libmysqlclient.so
+
+    III) COMPILE THE SOFTWARE:
+
+	Type "make".
+
+
+    IV)  INSTALL THE SOFTWARE:
+
+	Type "make install".
+
+	By default, "make install" will install the server, CGI engine,
+	standalone processor (mhc), the debugger, and a host of useful
+	utility programs in `/www/bin', and dynamic modules in `/www/lib'.
+	We have found this to be very convenient.  If you would like to
+	install Meta-HTML into a different directory, you have to tell
+	the Makefile where that different directory is.  You do this by
+	passing "bindir=/my/path" to the `make install' command:
+
+		make install bindir=/usr/local/meta-html
+
+    V)   INSTALL THE META-HTML DOCUMENTATION AND TUTORIALS
+
+	Type "./install-site", and follow the instructions.
+
+	This will install all of the Meta-HTML documentation and
+	release notes under the	directory that you specify, and
+	can configure and install the Meta-HTML Server or CGI Engine.

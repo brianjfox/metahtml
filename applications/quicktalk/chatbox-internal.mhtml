@@ -1,0 +1,33 @@
+;;; chatbox-internal.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Aug 24 12:12:35 1996.
+<session-import chat chat>
+<require tagsets/quicktalk>
+<chat::initialize>
+
+<if <not <get-var chat::rows>> <set-var chat::rows=1>>
+<if <not <get-var chat::cols>> <set-var chat::cols=50>>
+
+<center>
+  <h3>Enter text, and press "Tell 'em"...</h3>
+  <p>
+  <form method=post action="<get-var mhtml::url-to-dir>/chat.mhtml"
+	target=_parent>
+    <if <eq chat::rows 1>
+	<input type=text size=<get-var chat::cols> name=chat-input value="">
+      <concat <textarea rows=<get-var chat::rows> cols=<get-var chat::cols> WRAP="PHYSICAL" name=chat-input>
+	      </textarea>>>
+    <br>
+    <concat
+     <a href="options.mhtml" target="_parent">
+     <img src="images/option-button.gif" align=top border=0>
+     </a>
+     <input type=image name=action src="images/tellem.gif"
+	    align=top value="Tell 'em" border=0>
+     <a href="welcome.mhtml" target="_parent">
+     <img src="images/back-button.gif" align=top border=0>
+     </a>>
+  </form>
+</center>
+

@@ -1,0 +1,115 @@
+<set-var title="Regex - Overview">
+<include header.mhtml>
+<layout::page>
+Go to the first, previous, <A HREF="regex_2.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+<P><HR><P>
+
+<P>
+@paragraphindent 2
+
+</P>
+
+<P>
+Copyright (C) 1992 Free Software Foundation.
+
+</P>
+<P>
+Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+</P>
+<P>
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that the
+section entitled "GNU General Public License" is included exactly as
+in the original, and provided that the entire resulting derived work is
+distributed under the terms of a permission notice identical to this
+one.
+
+</P>
+<P>
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that the section entitled "GNU General Public License" may be
+included in a translation approved by the Free Software Foundation
+instead of in the original English.
+
+</P>
+
+
+
+<H1><A NAME="SEC1" HREF="welcome.mhtml#TOC1">Overview</A></H1>
+
+<P>
+A <STRONG>regular expression</STRONG> (or <STRONG>regexp</STRONG>, or <STRONG>pattern</STRONG>) is a text
+string that describes some (mathematical) set of strings.  A regexp
+<VAR>r</VAR> <STRONG>matches</STRONG> a string <VAR>s</VAR> if <VAR>s</VAR> is in the set of
+strings described by <VAR>r</VAR>.
+
+</P>
+<P>
+Using the Regex library, you can:
+
+</P>
+
+<UL>
+
+<LI>
+
+see if a string matches a specified pattern as a whole, and 
+
+<LI>
+
+search within a string for a substring matching a specified pattern.
+
+</UL>
+
+<P>
+Some regular expressions match only one string, i.e., the set they
+describe has only one member.  For example, the regular expression
+<SAMP>`foo'</SAMP> matches the string <SAMP>`foo'</SAMP> and no others.  Other regular
+expressions match more than one string, i.e., the set they describe has
+more than one member.  For example, the regular expression <SAMP>`f*'</SAMP>
+matches the set of strings made up of any number (including zero) of
+<SAMP>`f'</SAMP>s.  As you can see, some characters in regular expressions match
+themselves (such as <SAMP>`f'</SAMP>) and some don't (such as <SAMP>`*'</SAMP>); the
+ones that don't match themselves instead let you specify patterns that
+describe many different strings.
+
+</P>
+<P>
+To either match or search for a regular expression with the Regex
+library functions, you must first compile it with a Regex pattern
+compiling function.  A <STRONG>compiled pattern</STRONG> is a regular expression
+converted to the internal format used by the library functions.  Once
+you've compiled a pattern, you can use it for matching or searching any
+number of times.
+
+</P>
+<P>
+The Regex library consists of two source files: <TT>`regex.h'</TT> and
+<TT>`regex.c'</TT>.  
+<A NAME="IDX1"></A>
+<A NAME="IDX2"></A>
+Regex provides three groups of functions with which you can operate on
+regular expressions.  One group--the GNU group--is more powerful
+but not completely compatible with the other two, namely the POSIX
+and Berkeley UNIX groups; its interface was designed specifically
+for GNU.  The other groups have the same interfaces as do the
+regular expression functions in POSIX and Berkeley
+UNIX.
+
+</P>
+<P>
+We wrote this chapter with programmers in mind, not users of
+programs--such as Emacs--that use Regex.  We describe the Regex
+library in its entirety, not how to write regular expressions that a
+particular program understands.
+
+</P>
+
+<P><HR><P>
+Go to the first, previous, <A HREF="regex_2.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+</layout::page>
+<include footer.mhtml>

@@ -1,0 +1,25 @@
+;;; make-identifier.mhtml: -*- Meta-HTML -*-  Create random identifiers.
+
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Jan 13 18:27:32 1996.
+
+;;; Create an identifier that is ARG characters in length.
+<set-var mi::alphabet[] =
+  "A\nB\nC\nD\nE\nF\nG\nH\nJ\nK\n2\n3\n4\n5\n6\n7\n8\n9\nM\n
+   N\nP\nQ\nR\nS\nT\nU\nV\nW\nX\nY\nZ\n9\n8\n7\n6\n5\n4\n3\n2">
+
+<defun make-identifier limit>
+  ;;; DOC_SECTION (MISCELLANEOUS-TAGS)
+  ;;; Create an identifier that is <var limit> characters in length.
+  ;;; The identifier characters are taken from the array MI::ALPHABET.
+  ;;; MI::ALPHABET defaults to uppercase letters and numbers excluding
+  ;;; "I", "O", zero, and one.
+  <defvar limit 16>
+  <set-var i=0 identifier="">
+  <while <lt i limit>>
+    <set-var identifier = <concat <get-var identifier>
+				  <get-var mi::alphabet[<random 36>]>>>
+    <increment i>
+  </while>
+  <get-var identifier>
+</defun>

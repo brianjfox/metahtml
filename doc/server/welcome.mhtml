@@ -1,0 +1,18 @@
+;;; welcome.mhtml: -*- Meta-HTML -*-  Server User Manual.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 12:59:41 1996.
+;;;
+<set-var title="Server Reference Guide">
+<include header.mhtml>
+<layout::page>
+<h2>Documentation In Progess...</h2>
+<ptext>
+<synopsis mhttpd [--config path-to-config-file] [--debug]>
+
+Learn about <meta-html>, and then read the source of the
+<code>mhttpd.conf</code> file.  I should probably just include that
+source here...
+</ptext>
+</layout::page>
+<include footer.mhtml>

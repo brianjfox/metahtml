@@ -1,0 +1,6 @@
+;;; base-undef.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 21:10:56 1996.
+
+Result: "Before: TEST undef defsubst After: <test-undef>": <defsubst test-undef>TEST undef defsubst</defsubst>Before: <test-undef><undef test-undef> After: <test-undef>

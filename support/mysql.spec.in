@@ -1,0 +1,12 @@
+%package mysql
+Summary: MySQL connectivity module for Meta-HTML.
+Group: Applications/WWW
+Requires: metahtml
+
+%description mysql
+Using modmysql.so, you can enable the connection of Meta-HTML to MySQL
+databases, by simply saying <sql::set-datbase-type mysql>.
+
+%files mysql
+/usr/lib/metahtml/modmysql.so
+/usr/lib/metahtml/modmysqlper.so

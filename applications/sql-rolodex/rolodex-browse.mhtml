@@ -1,0 +1,52 @@
+;;; rolodex-browse.mhtml: -*- Meta-HTML -*-  Browse the Rolodex table.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 27 22:52:55 1998.
+<set-var title="Rolodex Browser">
+<include header.mhtml>
+<require browser>
+
+<session-import browser browser>
+<set-var
+  browser::keyfield=entry_id
+  browser::dsn=<rolodex::dsn>
+  browser::table=<rolodex::rolo-table>
+  browser::editor=rolodex-entry.mhtml
+  browser::summary-fields = <concat "lname:16:left:edit-link entry_id"
+				    ";fname:16:left:edit-link entry_id"
+				    ";hphone:14:left:edit-link entry_id"
+				    ";email:20:left:mail-link email">>
+<defvar browser::order-by "ORDER BY lname">
+<session-export browser browser>
+
+<layout::page>
+  <browser::standard-browser-page <get-var-once posted::start-char>>
+  <p>
+  <when <gt browser-window::count <mul 2 browser-window::window-length>>>
+    <center>
+      <table>
+	<tr>
+	  <set-var alphabet[] =
+	    <concat "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM\n"
+		    "N\nO\nP\nQ\nR\nS\nT\nU\nV\nW\nX\nY\nZ">>
+	  <foreach letter alphabet>
+	    <td>
+	      <concat <a href="<thisdoc>?start-char=<get-var letter>">
+		      <get-var letter>
+		      </a>>
+	    </td>
+	  </foreach>
+	</tr>
+      </table>
+    </center>
+    <p>
+  </when>
+
+  ;;; Show our search form, but a little bit smaller.
+  <center>
+    <sql::standard-search-form posted fsize=-1>
+  </center>
+
+</layout::page>
+
+<include footer.mhtml>

@@ -1,0 +1,387 @@
+# -*- Text -*- mode is probably right for RPM spec files.
+#
+# RPM "spec" file for Meta-HTML.
+# Copyright (C) 1999, Brian J. Fox (bfox@ai.mit.edu)
+# Author: Brian J. Fox (bfox@ai.mit.ed) Tue Aug 17 11:48:59 1999
+#
+Vendor:       Brian J. Fox, Santa Barbara, CA
+Distribution: Meta-HTML PACKVER (i386)
+Name:	      metahtml
+Release:      RPMREL
+Copyright:    1995 - 2000, Brian J. Fox (bfox@ai.mit.edu)
+Group:	      Applications/WWW
+Provides:     mhttpd mhc mdb engine
+Requires:     /bin/sh
+AutoReqProv:  no
+URL:	      http://www.metahtml.org
+Packager:     bfox@metahtml.com
+Version:      PACKVER.SUBVER
+Summary:      A programming language for building Web applications
+Source:	      ftp.metahtml.com:/pub/GNU/DISTNAME.tgz
+Buildroot:    /www/src/metahtml/BUILDROOT
+
+%description
+Meta-HTML is a programming language specifically designed for working
+within the World Wide Web environment.  Although it is a genuine
+programming language, suitable for large-scale symbolic manipulation,
+it provides the most commonly wanted Web functionality as built-in
+primitives, so you don't have to write them.  You can find out more
+about the theory of implementation in this white paper
+[http://www.metahtml.org/documentation/manifesto.html].
+
+Web pages are authored using HTML and Meta-HTML statements freely
+intermixed.  When a page is requested by a browser, the page is passed
+through the Meta-HTML interpreter, which dynamically processes any
+Meta-HTML statements to produce a final HTML page that is delivered
+to the browser.
+
+The source distribution provides several different interpreter options:
+
+	* A CGI engine which can be run by any Unix Web server,
+	* A FastCGI engine which can be run under FastCGI compliant servers,
+	* A full-featured Web server (mhttpd) with the interpreter built in,
+	* A standalone processor, much like Perl or Tcl, and
+	* An interactive debugger, with a feel similar to GDB (mdb)
+
+Meta-HTML was written by Brian J. Fox (bfox@ai.mit.edu), the author of Bash,
+among other things.
+
+%package modules
+Summary: Various run-time modules, excluding database access.
+Group: Applications/WWW
+Requires: metahtml
+AutoReqProv: no
+
+%description modules
+The Meta-HTML base programs are capable of loading new Meta-HTML
+primitives that have been written in C, as dynamically loaded modules.
+This package contains many of the modules that have already been
+written for you, including: extended math processing, such as <cos>
+and <arctan>; fancy directory indexing; a module for profiling your
+Meta-HTML code; a module for converting free form dates into seconds
+since Jan 1, 1970; a module for direct image manipulation using Bruell's gd
+library; a module for creating your own TCP/IP based servers; and
+others.  This package doesn't contain any SQL database connectivity --
+each database module comes in its own package.
+
+%package devel
+Summary: Development environment for building Meta-HTML modules.
+Group: Applications/WWW
+
+%description devel
+Meta-HTML is capable of being extended in many ways.  One extremely powerful
+way is to build new primitives in C or C++, and make them available to the
+Meta-HTML runtime in the form of modules.  This RPM contains everything you
+need to compile and install new homegrown modules for Meta-HTML.
+
+%prep
+if [ ! -d $RPM_BUILD_DIR/DISTNAME ]; then
+   (cd $RPM_BUILD_DIR; tar -zxf $RPM_SOURCE_DIR/DISTNAME.tgz)
+fi
+exit 0
+%build
+cd $RPM_BUILD_DIR/DISTNAME
+if [ ! -f ./Makefile ]; then
+ ./configure;
+fi
+make
+make RPM-RELEASE
+%install
+mkdir -p $RPM_BUILD_ROOT/usr/bin
+mkdir -p $RPM_BUILD_ROOT/usr/sbin
+mkdir -p $RPM_BUILD_ROOT/usr/lib
+mkdir -p $RPM_BUILD_ROOT/usr/lib/metahtml
+mkdir -p $RPM_BUILD_ROOT/usr/share/emacs/site-lisp
+mkdir -p $RPM_BUILD_ROOT/home/mhttpd
+sbin=$RPM_BUILD_ROOT/usr/sbin
+bin=$RPM_BUILD_ROOT/usr/bin
+lib=$RPM_BUILD_ROOT/usr/lib
+root=$RPM_BUILD_DIR/DISTNAME
+
+# Server binary
+cp $root/server/mhttpd $sbin/mhttpd
+chmod a+x,go-w $sbin/mhttpd
+strip $sbin/mhttpd
+
+# Engine binary
+cp $root/engine/engine $sbin/metahtml-engine
+chmod a+x,go-w $sbin/metahtml-engine
+strip $sbin/metahtml-engine
+
+# Fast-CGI Engine binary
+cp $root/engine/fcgi-engine $sbin/fcgi-engine
+chmod a+x,go-w $sbin/fcgi-engine
+strip $sbin/fcgi-engine
+
+# MHC binary
+cp $root/mhc/mhc $bin/mhc
+chmod a+x,go-w $bin/mhc
+strip $bin/mhc
+
+# MDB binary
+cp $root/mdb/mdb $bin/mdb
+chmod a+x,go-w $bin/mdb
+strip $bin/mdb
+
+# Other utilities are installed in /usr/lib/metahtml
+session_files="binary-session create-session delete-session list-sessions"
+session_files="$session_files reap-sessions set-session-timeout"
+session_files="$session_files session-data-test set-session-var"
+session_files="$session_files get-session-var gc-database"
+dbutil_files="dbpack dbdump dbdelete dbget dbcreate"
+libgd_files="abut composite gifq mkbg mktrans thumbnail recolor coloring-book"
+util_files="mkpass strip-tags"
+scripts="start-servers stop-servers mkapi mklib rollover-logs show-doc.mhc"
+scripts="$scripts gc-sessions mysql-user.mhc"
+lib_files="example.so directory.so logs.so parser.so timer.so profiler.so"
+lib_files="$lib_files elsewhen.so serverfuncs.so modperl.so csv.so"
+lib_files="$lib_files modmath.so modstat.so modimage.so moddate.so modecho.so"
+lib_files="$lib_files modsyslog.so modsession.so modmd5.so"
+lib_files="$lib_files modmachine.so modcompiler.so"
+lib_files="$lib_files session-server"
+
+db_module_files="modmysql.so modmysqlper.so modmsql.so modpodbc.so"
+db_module_files="$db_module_files modiodbc.so mododbc.so mododbcper.so"
+db_module_files="$db_module_files modsybaseodbc.so"
+
+for file in $session_files; do
+  cp $root/sessions/$file $lib/metahtml/$file
+  chmod a+x,go-w $lib/metahtml/$file
+  strip $lib/metahtml/$file
+done
+
+for file in $util_files; do
+  if [ -d $root/utilities/$file ]; then
+    cp $root/utilities/$file/$file $bin/$file
+  else
+    cp $root/utilities/$file $bin/$file
+  fi
+  chmod a+x,go-w $bin/$file
+  strip $bin/$file
+done
+
+for file in $dbutil_files; do
+  cp $root/dbutils/$file $lib/metahtml/$file
+  chmod a+x,go-w $lib/metahtml/$file
+  strip $lib/metahtml/$file
+done
+
+for file in $libgd_files; do
+  if [ -x $root/modules/libgd/$file ]; then
+    cp $root/modules/libgd/$file $lib/metahtml/$file
+    chmod a+x,go-w $lib/metahtml/$file
+    strip $lib/metahtml/$file
+ fi
+done
+
+for file in $scripts; do
+  cat $root/utilities/$file | sed -e 's@/www/bin@/usr/bin@g' >$bin/$file
+  chmod a+rx,go-w $bin/$file
+done
+
+for file in $lib_files; do
+  if [ -f $root/modules/$file ]; then
+    cp $root/modules/$file $lib/metahtml/
+  fi
+done
+
+# Install database module files, dependent on their presence.
+for file in $db_module_files; do
+   if [ -f $root/modules/$file ]; then
+      cp $root/modules/$file $lib/metahtml/
+   fi
+done
+
+# Meta-HTML mode for Emacs.
+cat $root/elisp/mhtml.el | sed -e 's@/www/bin@/usr/bin@' > $RPM_BUILD_ROOT/usr/share/emacs/site-lisp/mhtml.el
+chmod a+r,go-w $RPM_BUILD_ROOT/usr/share/emacs/site-lisp/mhtml.el
+
+# Install template dir for /home/mhttpd.
+rm -rf $lib/metahtml/conf.template
+cp -r $root/server/conf $lib/metahtml/conf.template
+cp $root/engine/engine.conf $lib/metahtml/engine.conf.example
+cp $root/server/rc.mhttpd $lib/metahtml/rc.mhttpd
+chmod a+x $lib/metahtml/rc.mhttpd
+
+cp $root/doc/manual/functions.db $lib/metahtml/functions.db
+cp $RPM_SOURCE_DIR/metahtml.ps $RPM_BUILD_DIR/
+cp $RPM_BUILD_DIR/DISTNAME/README $RPM_BUILD_DIR/
+cp $RPM_BUILD_DIR/DISTNAME/COPYING $RPM_BUILD_DIR/
+cp $RPM_BUILD_DIR/DISTNAME/ChangeLog $RPM_BUILD_DIR/
+cp $RPM_BUILD_DIR/DISTNAME/RPM-RELEASE $RPM_BUILD_DIR/
+
+cd ${RPM_BUILD_DIR}/DISTNAME
+tar -zhcf ../../RPMS/metahtml-examples.tar.gz applications
+rm -f BUILD/DISTNAME/release/documentation
+(cd BUILD/DISTNAME/release; ln -s ../doc ./documentation)
+tar -zhcf ../../RPMS/metahtml-docroot.tar.gz Welcome.mhtml release
+rm -rf $RPM_BUILD_DIR/DISTNAME/modules-devel
+cp -rp modules-ship modules-devel
+tar -zhcf $RPM_BUILD_ROOT/home/mhttpd/modules-devel.tar.gz modules-devel
+exit 0
+
+%post
+# Install /home/mhttpd if not present.
+[ -x /usr/sbin/groupadd ] && /usr/sbin/groupadd wwwadmin 2>/dev/null >/dev/null
+[ -x /usr/sbin/useradd ] && /usr/sbin/useradd mhttpd -c "Mr. Webber" -g wwwadmin -n 2>/dev/null >/dev/null
+userentry=`grep \^mhttpd /etc/passwd`
+homedir=`echo $userentry | (IFS=':'; read user pass uid gid gecos homedir shell; echo $homedir)`
+[ -d "$homedir" ] && chmod a+rx,g+w $homedir
+# We don't need no stinking desktop, do we?
+[ ! -z "$homedir" -a -d "$homedir/Desktop" ] && rm -rf $homedir/Desktop
+
+if [ ! -d $homedir/conf ]; then
+   cp -r $RPM_BUILD_ROOT/usr/lib/metahtml/conf.template $homedir/conf
+   chown -R mhttpd.wwwadmin $homedir/conf
+else
+   cp $RPM_BUILD_ROOT/usr/lib/metahtml/conf.template/local.conf $homedir/conf/local.conf.example
+   cp $RPM_BUILD_ROOT/usr/lib/metahtml/conf.template/mhttpd.conf $homedir/conf/mhttpd.conf.example
+   chown -R mhttpd.wwwadmin $homedir/conf/*.example
+fi
+
+if [ ! -d $homedir/writable ]; then
+   mkdir $homedir/writable;
+   chown -R mhttpd.wwwadmin $homedir/writable
+   chmod go-rwx $homedir/writable
+fi
+
+if [ ! -d $homedir/logs ]; then
+   mkdir $homedir/logs;
+   chown -R mhttpd.wwwadmin $homedir/logs
+fi
+
+if [ ! -d $homedir/docs ]; then
+   mkdir $homedir/docs;
+   chown -R mhttpd.wwwadmin $homedir/docs
+fi
+
+# Modify /usr/share/emacs/site-lisp/default.el to know about Meta-HTML mode.
+elispdir=/usr/share/emacs/site-lisp
+if [ -d $elispdir ]; then
+   if [ ! -f $elispdir/default.el ]; then
+     touch $elispdir/default.el
+     chmod a+r $elispdir/default.el
+   fi
+
+   mhtml_elisp_installed=`grep mhtml $elispdir/default.el`
+   if [ "$mhtml_elisp_installed" = "" ]; then
+     echo "(autoload 'meta-html-mode \"mhtml\" \"Edit files of Meta-HTML code.\" t)" >>$elispdir/default.el
+     echo "
+(if (assoc \"\\\\.mhtml\$\" auto-mode-alist)
+    (rplacd (assoc \"\\\\.mhtml\$\" auto-mode-alist) 'meta-html-mode)
+  (setq auto-mode-alist (cons '(\"\\\\.mhtml\$\" . meta-html-mode) auto-mode-alist)))" >>$elispdir/default.el
+   fi
+fi
+
+# Finally, install an mhttpd startup script in /etc/rc.d/init.d, and create
+# appropriate links to it from /etc/rc.d/rc3.d and /etc/rc.d/rc6.d
+if [ -f /etc/rc.d/init.d/mhttpd ]; then
+  mv /etc/rc.d/init.d/mhttpd /etc/rc.d/init.d/mhttpd.rpmsave
+fi
+
+cp $RPM_BUILD_ROOT/usr/lib/metahtml/rc.mhttpd /etc/rc.d/init.d/mhttpd
+chmod a+x /etc/rc.d/init.d/mhttpd
+
+if [ ! -x /etc/rc.d/rc3.d/S30mhttpd ]; then
+   (cd /etc/rc.d/rc3.d; rm -f S30mhttpd; ln -s ../init.d/mhttpd ./S30mhttpd)
+fi
+
+if [ ! -x /etc/rc.d/rc6.d/k30mhttpd ]; then
+   (cd /etc/rc.d/rc6.d; rm -f K30mhttpd; ln -s ../init.d/mhttpd ./K30mhttpd)
+fi
+
+# Now tell the user what we've done.
+echo ""
+echo "To start the Meta-HTML server (in /home/mhttpd) please use"
+echo ""
+echo "  '/etc/rc.d/init.d/mhttpd start'"
+echo ""
+echo "This happens automatically at boot time."
+echo ""
+
+%preun
+if [ -x /etc/rc.d/init.d/mhttpd -a "$(pidof mhttpd)" != "" ]; then
+   /etc/rc.d/init.d/mhttpd stop
+elif [ -x /usr/bin/killall ]; then
+   /usr/bin/killall mhttpd
+fi
+exit 0
+%postun
+rm -f /etc/rc.d/init.d/mhttpd
+rm -f /etc/rc3.d/S30mhttpd
+rm -f /etc/rc6.d/K30mhttpd
+rmdir /usr/lib/metahtml/conf.template
+rmdir /usr/lib/metahtml
+exit 0
+
+%post devel
+(cd /home/mhttpd; tar -zxf modules-devel.tar.gz)
+
+%files
+%doc README COPYING ChangeLog RPM-RELEASE metahtml.ps
+/usr/sbin/mhttpd
+/usr/bin/mhc
+/usr/bin/mdb
+/usr/bin/mysql-user.mhc
+/usr/sbin/metahtml-engine
+/usr/sbin/fcgi-engine
+/usr/lib/metahtml/binary-session
+/usr/lib/metahtml/create-session
+/usr/lib/metahtml/delete-session
+/usr/lib/metahtml/list-sessions
+/usr/lib/metahtml/reap-sessions
+/usr/lib/metahtml/set-session-timeout
+/usr/lib/metahtml/session-data-test
+/usr/lib/metahtml/set-session-var
+/usr/lib/metahtml/get-session-var
+/usr/lib/metahtml/gc-database
+/usr/lib/metahtml/dbpack
+/usr/lib/metahtml/dbdump
+/usr/lib/metahtml/dbdelete
+/usr/lib/metahtml/dbget
+/usr/lib/metahtml/dbcreate
+/usr/lib/metahtml/abut
+/usr/lib/metahtml/composite
+/usr/lib/metahtml/gifq
+/usr/lib/metahtml/mkbg
+/usr/lib/metahtml/mktrans
+/usr/lib/metahtml/thumbnail
+/usr/lib/metahtml/recolor
+/usr/lib/metahtml/functions.db
+/usr/lib/metahtml/conf.template/mhttpd.conf
+/usr/lib/metahtml/conf.template/local.conf
+/usr/lib/metahtml/engine.conf.example
+/usr/lib/metahtml/rc.mhttpd
+/usr/bin/mkpass
+/usr/bin/strip-tags
+/usr/bin/start-servers
+/usr/bin/stop-servers
+/usr/bin/mkapi
+/usr/bin/mklib
+/usr/bin/rollover-logs
+/usr/bin/gc-sessions
+/usr/bin/show-doc.mhc
+/usr/share/emacs/site-lisp/mhtml.el
+
+%files modules
+/usr/lib/metahtml/example.so
+/usr/lib/metahtml/directory.so
+/usr/lib/metahtml/logs.so
+/usr/lib/metahtml/parser.so
+/usr/lib/metahtml/timer.so
+/usr/lib/metahtml/profiler.so
+/usr/lib/metahtml/elsewhen.so
+/usr/lib/metahtml/serverfuncs.so
+/usr/lib/metahtml/csv.so
+/usr/lib/metahtml/modmath.so
+/usr/lib/metahtml/modstat.so
+/usr/lib/metahtml/modimage.so
+/usr/lib/metahtml/moddate.so
+/usr/lib/metahtml/modsession.so
+/usr/lib/metahtml/modmd5.so
+/usr/lib/metahtml/modecho.so
+/usr/lib/metahtml/modsyslog.so
+/usr/lib/metahtml/session-server
+
+%files devel
+/home/mhttpd/modules-devel.tar.gz

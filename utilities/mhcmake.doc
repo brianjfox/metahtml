@@ -1,0 +1,121 @@
+
+;;; $Id: mhcmake.doc,v 1.1 2001/10/28 15:34:26 bfox Exp $
+;;; Copyright (c) 1997, 1998 Richard Tietjen
+;;; Author: Richard Tietjen <rtietjen@connix.com> 
+
+mhcmake lets you run Meta-HTML code as you would LaTeX files, which is
+to say you can conveniently "require" a macro library to apply
+formatting to a document with custom Meta-HTML tags.
+
+Typically, you'd define a macro library and apply it with mhcmake to a
+number of documents that all use the same set of tags.  I, for
+instance, tagged some poems with a simple set of tags, and then wrote
+two macro libraries: poems2tex.mhtml and poems2html.mhtml so that I
+could format the poems in both LaTeX and in HTML without changing the
+coding in the poems.
+
+You can control where mhcmake looks for its macro libraries with the
+MHC_REQUIRE environment variable
+
+  MHC_REQUIRE=.:..:../tagsets:/var/www/tagsets
+
+for instance.  By default the program uses:
+
+  .:..:../tagsets:../macros:/var/www/tagsets:/var/www/macros
+
+which you can easily change in the script.  
+
+You'll also want to change the shebang (#!) to match the location of
+your mhc program.
+
+You can also control mhcmake's configuration from a ~/.mhcrc file,
+which can contain any valid Meta-HTML code.  Typically, though, you'd
+want to do things like
+
+<set-var mhtml::require-directories[]=<group
+.
+..
+../tagsets
+../macros
+/var/www/tagsets
+/var/www/macros>>
+
+Changes to mhtml::require-directories in .mhcrc take precedence over the environment variable MHC_REQUIRE.
+
+mhcmake program can take an option:
+
+   -r or --require  to require  file.[mhtml|src|lib] that most likely
+                    loads a set of Meta-HTML macro and variable definitions
+
+typical invocation might be:
+
+  mhcmake -r poems2tex  test.sgml
+or
+  mhcmake --require poems2tex test.sgml > new-poems.tex 
+
+Note: default, normal output goes to stdout.  You can easily redirect
+it into a file.  Error and information messages go to stderr.  Use
+<with-open-stream > and <stream-put> in special macros to get more
+sophisticated effects.
+
+Here's a piece of the poems2tex formatting library:
+
+	;;;!* poems container
+  <define-container poems>
+   <with-open-stream toc "toc.tmp"  type=file mode=write-create>
+    ;;; <poem-title> tag will write to toc with <stream-put toc ... >
+    ;;; everything else goes to stdout
+    \documentclass{poems}
+    
+    \title{\scshape Poems}
+    \author{\scshape Richard Tietjen}
+    \date{}
+    
+    \begin{document}
+    \maketitle
+    \newpage
+    
+    \begin{poems}
+    %body  ;;; all the poems in collection
+    
+  </with-open-stream> ;;; close toc at end of collection
+  ;;; and merge collected ToC back onto end of main document:
+  <with-open-stream toc "toc.tmp"  type=file mode=read>
+    \end{poems}
+    <stream-get toc stop-at="">
+    \end{document}
+  </with-open-stream>
+ </define-container>
+
+And here's  test.sgml, a sample tagged document ready to convert into 
+LaTeX or HTML, or whatever I want to write a set of macros for:
+
+        ;;;<require poems2tex> ;;; you can require here instead
+	<poems>
+	<poem when="71/10" where="Amherst">
+	<poem-title>Those lights</poem-title>
+
+	<verse>
+	<l>blah blah blah<\l>
+	</verse>
+	</poem>
+	</poems>
+
+
+mhcmake seemed necessary to me because of the webspace-oriented way
+that the <include> and <require> tags work.  So I aliased the
+originals and adjusted them to function in filespace in the normal way
+by manipulating mhtml::include-prefix.
+
+<require> is re-defined to set mhtml::include-prefix to each item in
+mhtml::require-directories[] in succession until the specified file
+is found.  It doesn't generate any error if it's not found.
+
+<include> has been changed to consider both relative and absolute file
+paths.  If the path is absolute, as indicated by a leading /, we set
+mhtml::include-prefix to "", that is, root.  Else, it's relative and
+we set it to . for current directory.  You're supposed to be able to
+set the ALT attribute just like the original.
+
+Be aware, this hasn't been exhaustively tested.  There will be a few
+flaws in the ointment, no doubt.

@@ -1,0 +1,212 @@
+;;; paper-substs.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1995 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Nov 27 18:30:47 1995.
+
+<set-var mhtml::cacheable=true>
+
+<defsubst footnote whitespace=delete>
+  <if <not <get-var fns[0]>>
+      <set-var fn-index=0 fns[]="">>
+  <set-var fns[fn-index]="%body">
+  <increment fn-index>
+  <a name="footback-<get-var fn-index>"></a>
+  (<a href="#footnote-<get-var fn-index>"><get-var fn-index></a>)
+</defsubst>
+
+<defsubst footnotes>
+  <set-var i = 0>
+  <when <lt i fn-index>>
+    <p><hr>
+    <table>
+      <while <lt i fn-index>>
+	<tr>
+	  <td align=right>
+	    <a name="footnote-<add i 1>"></a>
+	    <a href="#footback-<add i 1>">
+	      <font size=-1><b><add i 1>.</b></font>
+	    </a>
+	  </td>
+	  <td align=left><font size=-1><get-var fns[i]></font></td>
+	</tr>
+	<increment i>
+      </while>
+    </table>
+    <p>
+  </when>
+</defsubst>
+
+<defmacro ptext>
+  <plain-text first-char=<font size="+2"> nobr=true>
+    %body
+  </plain-text>
+  <p>
+</defmacro>
+
+<defmacro topic>
+  <br>
+  <small-caps upper="+1" other=+1 lower=+0>
+    <b>%0 %1 %2 %3 %4 %5 %6 %7 %8 %9</b>
+  </small-caps>
+  <br>
+  <hr width=30% align=left>
+  <ptext> %body </ptext>
+  <p>
+</defmacro>
+
+<defsubst subtopic>
+  <br>
+  <font size=+1>
+    <b>%0 %1 %2 %3 %4 %5 %6 %7 %8 %9</b>
+  </font>
+  <br>
+  <hr width=30% align=left>
+  <br>
+</defsubst>
+
+<defmacro section>
+  <if <not <get-var document::section-number>>
+      <set-var
+	document::section-number=0
+	document::toc[]="" document::toc-index=0>>
+
+  <if <gt document::subsubsection-number 0>
+      <prog
+	<set-var document::toc[document::toc-index] = "</ul>">
+	<increment document::toc-index>>>
+
+  <if <gt document::subsection-number 0>
+      <prog
+	<set-var document::toc[document::toc-index] = "</ul>">
+	<increment document::toc-index>>>
+
+  <set-var document::subsection-number=0 document::subsubsection-number=0>
+  <increment document::section-number>
+  <set-var document::section-name =
+    "<nbsp 2>%0 %1 %2 %3 %4 %5 %6 %7 %8 %9">
+  <set-var document::toc[document::toc-index] =
+    "<get-var document::section-number document::section-name>">
+  <p>
+  <br>
+  <font size="+2">
+    <a name="tag-<get-var document::section-number>">
+      <b><get-var document::toc[document::toc-index]></b>
+    </a>
+  </font>
+  <increment document::toc-index>
+  <br>
+  <hr width=30% align=left>
+  <plain-text first-char=<font size="+2"> nobr=true>
+    %body
+  </plain-text>
+
+  <if <gt document::subsubsection-number 0>
+      <prog
+	<set-var document::toc[document::toc-index] = "</ul>">
+	<increment document::toc-index>
+	<set-var document::subsubsection-number 0>>>
+
+  <if <gt document::subsection-number 0>
+      <prog
+	<set-var document::toc[document::toc-index] = "</ul>">
+	<increment document::toc-index>
+	<set-var document::subsection-number 0>>>
+</defmacro>
+
+<defun nbsp count>
+  <while <gt count 0>>
+    <prog &#160;>
+    <increment count by=-1>
+  </while>
+</defun>
+
+<defmacro subsection>
+  <if <gt document::subsubsection-number 0>
+      <prog
+	<set-var document::toc[document::toc-index] = "</ul>">
+	<increment document::toc-index>>>
+
+  <if <not <gt document::subsection-number 0>>
+      <prog
+	<set-var document::toc[document::toc-index] = "<ul>">
+	<increment document::toc-index>>>
+
+  <increment document::subsection-number>
+  <set-var document::subsubsection-number = 0>
+  <set-var document::subsection-name =
+    "<nbsp 2>%0 %1 %2 %3 %4 %5 %6 %7 %8 %9">
+  <set-var document::toc[document::toc-index] =
+    "<get-var document::section-number>.<get-var document::subsection-number document::subsection-name>">
+  <p>
+  <br>
+    <a name="tag-<get-var document::section-number>">
+      <font size="+1">
+      <b><get-var document::toc[document::toc-index]></b>
+      </font>
+    </a>
+  <increment document::toc-index>
+  <br>
+  <hr width=30% align=left>
+  <plain-text first-char=<font size="+2"> nobr=true>
+    %body
+  </plain-text>
+</defmacro>
+
+<defmacro subsubsection>
+  <if <not <gt document::subsubsection-number 0>>
+      <prog
+	<set-var document::toc[document::toc-index] = "<ul>">
+	<increment document::toc-index>>>
+
+  <increment document::subsubsection-number>
+  <set-var document::subsubsection-name=" %0 %1 %2 %3 %4 %5 %6 %7 %8 %9">
+  <set-var document::toc[document::toc-index] =
+    "<get-var document::section-number>.<get-var document::subsection-number>.<get-var document::subsubsection-number document::subsubsection-name>">
+  <p>
+  <br>
+    <a name="tag-<get-var document::section-number>">
+      <font size="+1">
+      <b><get-var document::toc[document::toc-index]></b>
+      </font>
+    </a>
+  <increment document::toc-index>
+  <br>
+  <hr width=30% align=left>
+  <plain-text first-char=<font size="+2"> nobr=true>
+    %body
+  </plain-text>
+</defmacro>
+
+<defsubst paper-title>
+  <font size="+2"> <b>%body</b> </font><br>
+</defsubst>
+
+<defsubst author>
+  <font size="+1"> <b>%body</b> </font><br>
+</defsubst>
+
+<defmacro abstract>
+  <ul>
+    <b>Abstract:</b>
+    <plain-text>
+      %body
+    </plain-text>
+  </ul>
+</defmacro>
+
+<defsubst set-toc>
+  <set-var TABLE_OF_CONTENTS="<get-var document::toc[]>">
+  <subst-in-var TABLE_OF_CONTENTS
+		"\n" "<br>\n"
+		"</ul><br>" "</ul>\n"
+		"<ul><br>" "<ul>\n">
+  <subst-in-page "<TABLE_OF_CONTENTS>"
+		 <prog
+		   <h2> Table of Contents </h2>
+		   <b><get-var TABLE_OF_CONTENTS></b>>>
+</defsubst>
+
+<defmacro example whitespace=delete>
+  <ifeq "%0" "code" "<set-var fmt=code>" "<set-var fmt=pre>">
+  <<get-var fmt>><verbatim quote>%body</verbatim></<get-var fmt>>
+</defmacro>

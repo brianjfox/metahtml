@@ -1,0 +1,73 @@
+;;; query-database.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Apr 26 13:54:53 1997.
+;;;
+<set-var title="GSQL: Database Query">
+<include header.mhtml>
+
+<forms::remember-form-data>
+
+<set-var columns[]=<gsql::database-columns>>
+
+<layout::page>
+  <ptext>
+
+    You may enter a standard SQL Query string here, based upon the database
+    and table that you are currently looking at.
+
+    For example:
+    <pre>
+    SELECT * FROM <or <get-var gsql::database-table> hotels>
+    </pre>
+
+<comment>
+    For less complex queries, you can use this form:
+
+    <sql::search-form-params
+     dsn=<gsql::dsn> table=<get-var gsql::database-table>
+     key=<gsql::first-non-nullable <get-var>>>
+</comment>
+
+
+    <defvar sql-query "SELECT * FROM <get-var gsql::database-table>">
+
+    <tour::form method=POST action=<thisdoc>>
+    <tour::form-input size=45 name=SQL-Query
+		      value="<get-var-once default::sql-query>">
+    <tour::form-input type=submit name=action value="Submit Query">
+    </tour::form>
+  </ptext>
+
+  <when <get-var sql-query>>
+    <table border>
+      <gsql::with-open-database>
+      <sql::database-query db true <get-var-once posted::sql-query>
+	format =
+	<prog
+	  <if <not <get-var default::mynames>>
+	      <prog
+		<set-var default::mynames[]=<package-vars>>
+		<sort mynames>
+		<tr>
+		<foreach _name default::mynames>
+		<td align=left>
+		<code><get-var _name></code>
+		</td>
+		</foreach>
+		</tr>>>
+	  <tr>
+	  <foreach _name default::mynames>
+	  <td align=left>
+	  <set-var v=<or <get-var-once <get-var _name>> &nbsp;>>
+	  <subst-in-var v "<" "&lt;" ">" "&gt;">
+	  <get-var-once v>
+	  </td>
+	  </foreach>
+	  </tr>>>
+      </gsql::with-open-database>
+    </table>
+    </pre>
+  </when>
+</layout::page>
+<include footer.mhtml>

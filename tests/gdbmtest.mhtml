@@ -1,0 +1,29 @@
+;;; gdbmtest.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Sep  3 18:38:02 1996.
+
+<html>
+<body>
+
+<set-var foo=bar bar=baz "This crazy variable"="this crazy value">
+<with-open-database dbvar /tmp/newdb.db mode=write-create>
+  <database-save-record dbvar "Brian J. Fox" foo bar baz "This crazy variable">
+  <database-load-record dbvar "Brian J. Fox" package=loaded>
+
+  The value of LOADED::FOO is <get-var LOADED::FOO> <br>
+  The value of loaded::bar is <get-var loaded::bar> <br>
+  The value of loaded::baz is <get-var loaded::baz> <br>
+  The value of "loaded::This crazy variable" is
+  <get-var "loaded::This crazy variable"> <br>
+
+  The list of keys in the database:
+  <ul>
+    <database-query db true format="<li> <get-var key>">
+  </ul>
+
+  The first key in the database is: <database-first-key db>
+</with-open-database>
+
+</body>
+</html>

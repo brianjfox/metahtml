@@ -1,0 +1,747 @@
+2001-01-28  Brian J. Fox  <bfox@ua.com>
+
+	* doc/manual/texinfo.mhtml (texinfo-format-function): Format
+	variables more in line with the way that functions are formatted.
+
+1999-03-25  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* mdb/commands.c (mdb_command_table): Add "pwd" to commands, make
+	"p" be an alias for "print".
+
+	* libserver/globals.c (mhtml_get_sid): Carefully get all cookies
+	from server, environment, and headers.  Remember each one
+	separately, thus allowing Meta-HTML cookies to co-exist peacefully
+	with non-Meta-HTML cookies.
+
+1998-09-24  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* mdb/mdb.c (initialize_mdb): Set the session database file if
+	--config is passed.
+
+	* mdb/commands.c (mdb_apropos): Print "Variable" in front of
+	variables.
+
+1998-06-23  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* engine/engine.c (initialize_engine): Add a default function to
+	be executed when a requested page isn't found.  Remove the
+	definition if the configuration file is found and executed.
+
+1998-06-09  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* mdb/mdbline.c (mdb_containing_defun): New interactive helper
+	command shows the function arguments of the containing defun.
+
+1998-05-25  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* mdb/mdb.c (initialize_mdb): If the current working directory
+	contains the string "/docs", then set mhtml::include-prefix and
+	mhtml::relative-prefix to standard web-space-like values.
+
+	* mdb/mdb.c (initialize_mdb): Set mhtml::require-directories to a
+	reasonable default.
+
+1998-05-21  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* modules/Makefile.in: Use ../libmhtml/createdoc to create a
+	functions.db.packed packed database here.
+
+1998-05-19  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Add `extern "C" { ... }' around headers and code if the compiler
+	being used is a C++ compiler.  This allows us to link with
+	randomly large libraries of C++ code, and to load them as modules.
+
+1998-05-18  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* configure.in (OS_LIBS): Check for frexp in -lm.
+
+	* libutils/Makefile.in ($(TARGET_LIB)): Set umask to 0 before
+	unpacking libraries, delete random file created on DEC OSF.
+
+1998-05-09    <bfox@roadshow.datawave.net>
+
+	* libserver/http.c (mhttpd_metahtml_engine): Set
+	mhtml::last-modification-time based on the mod time of the
+	document.  Similar changes to pagefuncs.c:include and
+	require.c:require_search keep this value updated.  By the end of
+	the page, the last modification time is correctly set to the most
+	recent modification time of any page that was needed to build the
+	current one.
+
+1998-04-14  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* engine/engine.c (find_config_locally): If the environment
+	variable HTTP_HOST is set, then search for a config file named
+	"hostname.conf" and "hostname-engine.conf" before searching for
+	"engine.conf".
+
+Fri Apr  3 19:27:54 1998  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* configure.in (CHECK_FUNCS): Check for mkfifo.
+
+Mon Oct 27 07:30:16 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/http.c (decompose_and_post): Rewrite from scratch.
+
+Wed Sep  3 16:43:40 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/http.c (mr_set_cookie): If the variable
+	MHTML::NEVER-SEND-COOKIES is set, *never* send the client a
+	cookie.
+
+Mon Aug 18 15:14:49 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/http.c (decompose_and_post): When enctype is
+	multipart/form-data, allow multiple values for the same variable
+	name, just as we do in the standard case.
+
+Fri Jul 11 11:36:31 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libutils/Makefile.in (RXDIR): Update rx to 1.5 release.
+
+Mon Nov 18 08:29:38 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* configure.in (DESLIB): Fix bug which prevented the finding of
+	`des.h' when --with-libdes=/foo/libdes.a was specified.
+
+	* configure.in (MSQLLIB): Fix bug which prevented the finding of
+	`msql.h' when --with-libmsql=/foo/libmsql.a was specified.
+
+	* configure.in (GDBMLIB): Fix bug which prevented the finding of
+	`gdbm.h' when --with-libmsql=/foo/libgdbm.a was specified.
+
+	* Makefile.in (PACKVER): Start of 5.02.
+
+Tue Nov 12 18:18:07 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/globals.c (cookie_eating_clients): Added 8 more
+	clients.
+
+Tue Oct 22 08:57:00 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* engine/engine.c (engine_make_request): Set REMOTE_USER and
+	REMOTE_IDENT from the environment.
+
+	* libserver/access.c (access_allowed_p): Use "remote-user" instead
+	of "authuser".
+
+	* libserver/http.c (mhttpd_build_environment): Change remote-user
+	to remote-ident.  Add REMOTE_IDENT to variable list, initialized
+	from mhtml::remote_ident.
+
+Mon Oct 14 13:34:17 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* engine/engine.c (process_request): Set MHTTPD-RECEIVED-HEADERS
+ 	package, and MHTTPD::METHOD, PROTOCOL, PROTOCOL-VERSION, LOCATION,
+ 	REQUESTER, and REQUESTER-ADDR in all cases, not just when
+ 	MHTTPD::PER-REQUEST-FUNCTION is set.
+
+	* server/server.c (loop_over_connections): Set MHTTPD-RECEIVED-HEADERS
+	package, and MHTTPD::METHOD, PROTOCOL, PROTOCOL-VERSION, LOCATION,
+	REQUESTER, and REQUESTER-ADDR in all cases, not just when
+	MHTTPD::PER-REQUEST-FUNCTION is set.
+
+Sat Oct 12 00:09:17 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/http.c (mhttpd_set_mhtml_variables): Two new variables
+	MHTML::PHYSICAL-PATH and MHTML::PHYSICAL-DIRECTORY now contain the
+	absolute path to the current document and containing directory.
+	MHTML::RELATIVE-PREFIX is set to the directory of the logical path
+	if the directory containing the document is not directly under the
+	document root.
+	(mhtml_read_content_from_fd): Set MHTML::BYTES-PER-SEC to our
+	computed transfer rate.  This is really only useful for the
+	server, I think.
+	(http_head_handler): Handle common case of no headers.
+
+Fri Oct 11 10:26:11 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* elisp/mhtml.el (mhtml-indent-region): Improvements now allow
+	this command to work.  On M-C-\ by default.
+
+Thu Oct 10 13:05:30 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* configure.in: Check for "getpwnam()".
+
+Thu Oct  3 09:35:40 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/http.c (mr_set_cookie): Send a set cookie command only
+	if the browser didn't pass the cookie in, or, if the browser did
+	pass the cookie in, if the variable mhtml::permanent-cookies is
+	not set.  Additionally, if the browser didn't pass the cookie in,
+	and mhtml::permanent-cookie is set, then give the cookie a timeout
+	value of Dec 29th, 1999.
+
+Wed Oct  2 02:36:47 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (codedist): Make a distribution of the code and
+	reference manual only, leaving out the applications and the
+	release directory.
+
+	* libserver/http.c (mhttpd_metahtml_engine): Added
+	mhtml::per-page-function which is similar to
+	mhtml::prologue-document, but requires less overhead.
+	Set the default in mhttpd.conf and engine.conf to make the posted
+	package innocuous.
+
+	* engine/engine.conf: (mhtml::per-page-function) Add default to
+	make posted data innocuous.
+
+	* libserver/http.c (mhttpd_metahtml_engine): Allow the function
+	assigned to the variable MHTML::PER-PAGE-FUNCTION to be called
+	just before processing any given page.
+
+	* configure.in (OS_NAME): Use $host_os to figure out if this is a
+	solaris system or not.  Correctly handle different version of
+	Solaris.
+
+	* mdb/readline/*.c: Include config.h if HAVE_CONFIG_H is defined.
+	* mdb/readline/Makefile.in: Add -I../.. to LOCAL_INCLUDES.
+
+	* elisp/mhtml.el: Add documentation on installation at the top of
+	the file.
+
+Mon Sep 30 09:16:21 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/globals.c (mhtml_get_sid): Make sure that the cookie
+	is for us by checking the tag.  Accept a mime-header of URL-Cookie
+	from the engine.
+
+	* engine/engine.c (initialize_engine): Default MHTML::DOCUMENT-ROOT
+	to the same thing as MHTML::INCLUDE-PREFIX.
+	(engine_make_request): Handle METAHTML_URL_COOKIE from servers with
+	modifications that provide that.  Ugh.
+
+Fri Sep 27 12:00:52 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* engine/engine.c (parse_program_args): Only error when given args
+	if there is no PATH_INFO variable in the environment.
+
+	* configure.in (DESLIB): Add $prefix/lib to search path.
+	* configure.in (MSQLLIB): Add $prefix/lib to search path.
+	* configure.in (GDBMLIB): Add $prefix/lib to search path.
+
+Mon Sep 23 20:16:50 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/globals.c (mhttpd_write): Check file descriptor for
+	exceptional condition before calling write() on those systems that
+	support select();
+
+Sun Sep 22 09:37:24 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* doc/manual/footer.mhtml: Display copyrights, add bug-manual mail
+	address.
+
+Sat Sep 21 20:05:18 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/http.c (mhttpd_fill_in_missing_headers): Don't delete
+	extra characters after the headers have been gobbled.
+
+Thu Sep 19 00:58:11 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 5.01.  Fix bugs as they are
+	reported.  (None so far!)
+
+Mon Sep 16 20:04:56 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 5.00! Welcome to the World.
+
+Sun Sep 15 09:20:53 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* engine/engine.c (initialize_engine): Try a little harder to get
+	the include-prefix right, and to find the config file.  Default
+	value of mhtml::require-directories if the user doesn't set it
+	herself.
+
+Thu Sep 12 10:35:59 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 4.9: Isolated session commands from
+	pagefuncs.c.  Enhancements to debugger.  Modifications to
+	Makefile.in.
+
+Mon Sep  9 12:16:42 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/http.c (mime_headers_from_string): Handle the case
+	where the entire document is indented excepot for the first line.
+	This caused the server to think that the document was one long
+	http header.  Ugh.
+
+Mon Sep  2 08:16:13 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 4.8: Added applications and tagsets to
+	release.  Complete version of active filtering, now looks like a
+	single tag to the user.  SYSV bug fixes for continuing a read ()
+	or select () after getting EINTR.  Ugh.  Implementation of
+	<require>.
+
+Fri Aug 23 11:09:06 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 4.6: Revamp build-download to reflect
+	code reorganization.
+
+Thu Aug 22 15:03:47 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 4.5: Extensive reorganization of the
+	source tree.
+
+Fri Aug 16 08:50:39 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 4.4: Nasty bugfix in pf_substring ().
+
+Tue Aug 13 13:15:14 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 4.3: Changes in libmhtml/Makefile.in
+	allow random external packages to be automatically initialized.
+
+Wed Aug  7 12:56:11 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 4.2: Changes to configure.in,
+	libutils/compat/qsort.c, libmhtml/pagefuncs.c.
+
+	* libutils/compat/qsort.c: New file implements quicksort algorithm
+	for those machines which have a broken one (Solaris/Sparc).
+
+	* configure.in (OS_LIBS): If compiling on Solaris, use qsort from
+	compatability library.
+
+Tue Aug  6 13:01:28 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 4.1: <encrypt>, <decrypt>, rewrite of
+	msqlfuncs.c, changes to configure.in, pagefuncs.c and Makefiles
+	for including cryptfuncs.o and libdes.a.
+	
+Wed Jul 31 09:35:39 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 4.0.
+	Move cgi-exec into its own file, and handle stderr, stdout, and
+	mhtml::exec-prefix.
+
+	* libserver/http.c (mhttpd_execute_cgi): Handle "nph" CGIs.
+
+Sun Jul 28 03:30:26 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): Add sources for Openlook ODBC, and
+	Minerva MSQL.  All Makefile.in modified.
+
+Fri Jul 26 17:30:11 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.97: Added "%attributes" as a macro
+	synonym for the open body of a macro or substitution.
+
+Tue Jul 23 15:17:25 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.96: Copyright strings are now
+	statically compiled into the code.  Timestamps on mhc, engine, and
+	mhttpd, but not on mdb.
+
+Mon Jul 22 12:28:31 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* engine: (new directory)
+	libserver: (new directory)
+	server: (massively modified)
+	Reorganization of code so that the engine and server can easily
+	share the same core library code.
+
+Sun Jul 21 11:12:41 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.95: New primitive functions implement
+	the reading and writing of raw package data.  You can get at the
+	contents of the package containing user-defined functions with the
+	package named *USER-FUNCTIONS*.
+
+	The Engine is now closely and tightly linked with the server.  The
+	old Engine is going to disappear by the next version.  Obviously,
+	the ability to load raw package data greatly speeds up the
+	operation of the Engine and the Server, or any Meta-HTML
+	applications.  We can now have pre-compiled libraries of Meta-HTML
+	code.
+	
+Sat Jul 20 17:38:05 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.94: DEFINE-TAG == defsubst,
+	DEFINE-CONTAINER == defmacro, DEFINE-FUNCTION == defun, %%READ and
+	%%EVAL, new primitive functions.
+
+Sun Jul 14 23:39:00 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.93: Mods to the administration system,
+	work in INSTALL scripts.
+
+Fri Jul 12 10:43:00 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.92: New documentation.  Bug fix in
+	imagemap.c.
+
+Mon Jul  8 12:14:38 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.91: Added NOLOWER keyword to
+	<plain-text>, modified server/conf/mhttpd.conf:<ptext>.
+
+Sat Jul  6 10:18:28 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.90: Bug fix to quoting fix.
+
+Fri Jul  5 14:07:49 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.89: Hairy changes limit when
+	backslashes are stripped from the input stream.  Don't ask, you
+	don't want to know!
+
+Thu Jul  4 00:27:00 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.88: Cleaner session locking.
+
+Tue Jul  2 19:35:37 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.87: Debugging output for get-var and
+	get-var-once.
+
+Sat Jun 29 09:18:07 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.86: Session database location can be
+	controlled by the server, addition of MSQL database stubs.
+
+Tue Jun 25 15:56:51 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.83: Large changes to server.c, start of
+	server administration pages.
+
+Tue Jun 18 08:03:48 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* (PACKVER): 3.82: HEAD now implemented to spec in the server.
+	Big Deal.
+	
+	* Makefile.in (PACKVER): 3.81: Bug fix release.  Better support
+	for Windows NT.
+
+Sat Jun 15 09:57:40 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.79: Added CHUNK-SIZE argument to
+	stream-get-contents.  We do downloading differently now.
+	Use select on systems which have it in <stream_writeable>.
+	<stream-shutdown> closes a socket stream.  Useful in conjunction
+	with *standard-input*.
+	
+Thu Jun 13 22:57:09 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.77:
+	(libmhtml: numerous files, server: numerous files) Consolidate
+	definitions of "whitespace" to include CR as well as LF.
+
+Wed Jun 12 16:58:32 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.76: 
+	* pagefuncs.c (pf_cgi_encode): Make sure that symbol names passed
+	in a package get the package name as part of the symbol.  Without
+	this, several existing packages will break.
+
+
+Tue Jun 11 02:24:34 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.75. Ports to Windows NT and HPUX 9.0.
+
+	* pagefuncs.c, session.c, session.h, http.c: Change all references
+	to `sid_t' to be `session_id_t'.  HPUX already has sid_t.
+
+	* Moved logic for file locking into defines LOCKFILE and UNLOCKFILE.
+	Affects files in libmhtml: session.c pagefuncs.c dbfuncs.c
+	streamfuncs.c.
+	
+Mon Jun 10 14:55:13 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.74. Default missing protocol in server.
+
+Sun Jun  9 12:02:43 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.73. New functions <copy-var>, and
+	<coerce-var>.  New SMTP to WWW gateway: utilities/webmail.
+	<subst-in-var> now evaluates its first argument.
+
+Fri Jun  7 17:50:13 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.72.  Fixed bug in arithmetic operators
+	called with too few args.
+
+Mon Jun  3 07:29:56 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 3.71.
+	Changes to cgi-encode and mdb.  <cgi-encode foo> now encodes all
+	of the values for FOO, not just the first one.
+	Fixed syntax-check bugs in interim version of mdb.
+
+Wed May 29 23:43:48 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 3.70.
+
+	* configure.in (OS_LIBS): Changes allow correct linking on the
+	horribly broken Solaris systems.
+
+Fri May 24 14:32:59 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): Version is now at 3.69.
+	Major change in server -- it no longer uses a FILE * for anything,
+	just the original file descriptor that it was given.
+	page_process_page can now do limited syntax checking.
+	mdb uses this feature to read multi-line statements.
+	<cgi-decode completed>
+	Makefiles now use $(exec-prefix)/bin for default install.
+	Configure does the right thing for Solaris.  Other files have
+	porting information changes.
+	
+Thu Apr 25 10:41:12 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.55. <match ..> enhancments.
+
+	* configure.in: --with-gnu-malloc and --with-regex default to "yes".
+
+Wed Apr 24 00:15:59 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.52. <date TICKS> now returns the string
+	representation of TICKS.
+
+Tue Apr 23 08:46:08 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.51.  Added support for compiling on the
+	SGI.
+
+Sun Apr 14 13:27:17 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (DEFS): Readonly variables now in libmhtml.  Server
+	logs exactly according to Common Logfile Format.  Ugh.
+
+Tue Mar 12 20:51:06 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): 3.43.  Hack in If-Modified-Since for java
+	applets only.  I really need a better solution for this.
+
+Sun Feb 11 12:21:59 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): New string functions make me make a new
+	package version (3.41).
+
+Fri Feb  9 10:49:33 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): Fixes to doc directory and new INSTALL
+	script warrent release 3.40.
+
+Wed Feb  7 13:07:10 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* src/imagemap.c: Revamp, use Referer to locate relative
+	directories, etc.
+
+	* Many changes to documentation.  Utilities now documented.
+	Documentation directory should be standalone loadable.
+
+	* build-download.in (files_Goodies): Include mhtml.el in the
+	Goodies directory.
+
+Tue Feb  6 03:52:04 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 3.39.  Better handling of various
+	systems.  File uploads now work.
+	* libmhtml/forms.c: Handle variables not of type STRING.
+	* libmhtml/symbols.c: Support variables of type FUNCTION or BINARY.
+	* libmhtml/pagefuncs.c: Support variables of type FUNCTION or BINARY.
+	* libmhtml/pagefuncs.c: New function <symbol-info symbol>
+	* libmhtml/streamfuncs.c: New functions <stream-get-contents> and
+	<stream-put-contents> allow for the creation and use of BINARY
+	type symbols.
+
+Sat Feb  3 10:52:33 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in: Added DOWNLOAD target.  Links with timestamp
+	library, checks timestamp on invocation.
+	(PACKVER): Now at 3.36.
+
+Wed Jan 31 22:06:46 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 3.35. Database functions separated
+	out, do not have to be built.  This is a percursor to adding
+	binary record databases.  Other changes since 3.31 are documented
+	in sub-directory ChangeLogs.
+
+Sat Dec  9 02:00:19 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at version 3.31.  Massive hacking to
+	remove various memory leaks and bugs.  Code is now pure.
+
+Mon Nov 27 11:33:57 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at version 3.29.  Changes to server
+	(see that ChangeLog).
+
+Fri Nov 24 09:36:43 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at version 3.28.
+	Server handles and understands jmore headers on input and output.
+	Correctly allows mhtml::cacheable to control caching of Meta-HTML
+	output.
+
+Tue Nov 14 02:32:33 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): 3.25 (mhttpd nearing completion.)
+
+Sat Nov 11 07:35:39 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): 3.24 (added database-unique-key).
+
+Fri Nov 10 13:22:36 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): 3.23.
+
+Sat Nov  4 09:15:44 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 3.22.
+	New Function: <package-delete packname...>.
+	Work on server commenced.  Server can now run as daemon.  Parser
+	not yet plugged in.
+
+Mon Oct 16 18:07:18 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* mdb/mdb.c (initialize_mdb): Try to load .mdb_init, .mdbinit, and
+	<include /globals.cfg>.
+
+Fri Oct 13 12:56:25 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 3.20.  New function
+	with-locked-session allows semaphore communication between
+	multiple Meta-HTML engine processes.
+
+Thu Oct 12 12:01:07 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 3.19: Changes to server-push allow
+	images to be pushed.
+
+	* mdb/commands.c (mdb_find_file): Use
+	pagefunc_canonicalize_file_name instead of our own version.
+
+Mon Oct  9 12:21:02 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): 3.17; Added <server-push> text </server-push>.
+	(PACKVER): 3.18; Bug fixes, modifications to allow "nph" stuff to
+	work.
+
+Mon Oct  2 01:46:28 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): 3.16.  Numerous additions to the
+	debugger, many cleanups and bug fixes.
+
+Sun Oct  1 00:02:43 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (mdb): New target builds the Meta-HTML debugger.
+	Now at version 3.15.
+
+Fri Sep 29 22:27:48 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+	
+	* Makefile.in (PACKVER): 3.14.  Added stream documentation.
+
+Fri Sep 29 09:27:48 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (src): Pass MHTML_VERSION_STRING to build.
+	(PACKVER): 3.13.  Added <stream-readable stream>.
+
+	* Makefile.in (PACKVER): Now at 3.12.
+
+Wed Sep 27 00:24:03 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): 3.11.  I just added with-open-stream,
+	stream-get and stream-put.  You can do TCP connections with the
+	following code: "<with-open-stream stream "wizard:80" type=tcp>..."
+
+Mon Sep 11 04:18:12 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Changes to libmhtml/pagefunc.c:read_sexp and pf_not force me to
+	make a new release.  Now at 3.4.
+	
+	* doc/manual/databases.mhtml (database-query): Update documention.
+
+	* Makefile.in (PACKVER): Now at 3.3.
+
+Sun Aug 27 18:08:34 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at version 3.1.
+
+Sat Aug 26 23:00:13 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): This is Meta-HTML version 3.0.
+	Parsing changed to allow readable constructs.  You no longer have
+	to quote your ass off when typing arguments to function calls.
+	Array references can now simply be the name of a variable, and
+	that variable is looked up to get the array reference value.
+
+	This means that:
+
+	   <set-var \"<get-var names[<get-var index>]>\"> = .... >
+
+	is now written as:
+
+	   <set-var <get-var names[index]> = ... >
+
+	and "if" statements are usable again:
+
+	   <if <get-var <get-var names[i]>>
+	       <set-var foo[i] = "<get-var names[i]> found">
+	     <set-var foo[i] = "<get-var names[i]> lost">>
+
+Fri Aug 25 17:22:45 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): This is Meta-HTML version 2.3
+
+	* examples/rolodex/rolodex.mhtml: Small rewrite.  Decrease the
+	number of files involved to just two: The display file and the
+	action file.
+
+Thu Aug 24 11:53:10 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* This is Meta-HTML version 2.1
+	
+	* Massive changes to libmhtml/pagefuncs.c, session_data.c,
+	forms.c, and new file symbols.c.  Rewrite of symbol storage
+	creates a package system.  Arrays fully operational in sessions
+	and in page variables.
+
+	Changes to sessions/*.c use new symbol format.
+	Minimal Changes to src/build-page.c.
+	Changes to form-echo.c, form-mail.c.
+
+	* Makefile.in (clean): Don't delete "foo*", just "foo\.*".
+
+Fri Aug 18 21:10:26 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 1.12.  Added GNU malloc.
+	Conditionally gets compiled if --with-gnu-malloc is given to
+	configure.
+
+Thu Aug 17 10:50:38 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in: Now at 1.9.
+	
+	* configure.in (GDBMLIB): Check for libgdbm.a and gdbm.h in the
+	usual places, and also in ../gdbm*.  Makefile.ins altered.
+
+Tue Aug 15 12:24:41 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* sessions (get-session-var.c, set-session-var.c): New progs.
+
+Mon Aug 14 10:52:56 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* doc/manual/: Rewrite using macros for documenting functions.
+
+Sun Aug 13 13:54:14 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 1.5.  Added user-definable
+	macros.
+
+Sat Aug 12 19:19:47 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at 1.4.  New Imagemap file, multiple
+	bug fixes to build-page.c.  No changes to backend code.  Minor
+	Makefile modifications.
+
+	Makefile.in (tags): Merged in Joe's changes.
+	
+Tue Aug  8 20:42:06 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (PACKVER): Now at version 1.2.
+

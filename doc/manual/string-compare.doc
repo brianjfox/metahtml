@@ -1,0 +1,29 @@
+There is a function in Meta-HTML called <string-compare x y> which
+returns a value of "greater", "equal", or "less" if X is greater than,
+equal to, or less than Y.
+
+This function is undocumented because I haven't lived with it long
+enough to see if it is useful, or if it requires additional arguments
+to be useful.  The function is written entirely in C, so it is fast,
+but it could have been defined in Meta-HTML by using the <sort> function:
+
+    <defun string-compare-1 x[0] x[1] caseless?>
+      <if <string-eq <get-var x[0]> <get-var x[1]>
+		     caseless=<get-var caseless?>>
+	  equal
+	<concat
+	  <set-var array[]=<get-var x[]>>
+	  <sort x caseless=<get-var caseless?>>
+	  <if <string-eq <get-var x[0]> <get-var array[0]>
+			 caseless=<get-var caseless?>>
+	      less
+	    greater>>>
+    </defun>
+
+Examples:
+
+	<string-compare "foo" "bar"> --> greater
+	<string-compare "bar" "foo"> --> less
+	<string-compare "foo" "FOO"> --> greater
+	<string-compare "foo" "foo"> --> equal
+	<string-compare "foo" "FOO" caseless=true> --> equal

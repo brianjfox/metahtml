@@ -1,0 +1,100 @@
+# Makefile.in: -*- Text -*-  Source for configure to make a Makefile from.
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+#
+# You should have received a copy of the UAI Free Software License
+# along with this program; if you have not, you may obtain one by
+# writing to:
+#
+# Universal Access Inc.
+# 129 El Paseo Court
+# Santa Barbara, CA
+# 93101
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+PDEFS	= @DEFS@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+REGEX_IN= @REGEX_IN@
+GDBMLIB = @GDBMLIB@
+GDBM_IN = @GDBM_IN@
+PLATFORM= @PLATFORM@
+EXE	= @EXE@
+OS_LIBS = @OS_LIBS@
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+bindir=$(exec_prefix)/bin
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+
+# You cannot compile with anything other than GNU C.
+CC		 = gcc $(GCC_WARN)
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+# OPTIMIZE_FLAGS	= -O69
+INCLUDE_FLAGS	= -I../.. @EXTRAINC@
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(INCLUDE_FLAGS)
+LDFLAGS		= $(DEBUG_FLAGS)
+
+OBJECTS		= regex.o
+TARGETS		= libregex.a
+
+.c.o:
+	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) $(DEFS) $(SERVER_DEF) $(SERVER_OPT) -c $<
+
+all:	$(TARGETS) $(SUBDIRS)
+
+libregex.a: $(OBJECTS)
+	$(RM) $@
+	$(AR) cq $@ $(OBJECTS)
+	if [ "$(RANLIB)" ]; then $(RANLIB) $@; fi
+
+Makefile: Makefile.in
+	(cd ../..; ./config.status)
+
+install:
+	@echo "To install the libregex.a library, type \"make install-libs\"."
+
+install-libs: libregex.a
+	$(INSTALL) libregex.a $(libdir)
+	for file in *.h; do \
+	  $(INSTALL) $$file $(incdir)/$$file; \
+	done
+
+clean-executables: FORCE
+	$(RM) $(TARGETS)
+
+clean: FORCE
+	$(RM) *.o *.a $(TARGETS) TAGS
+
+distclean realclean: clean
+	$(RM) *.o *core* *~ DISTFILES *.bak *.gz foo *\#* Makefile
+
+tags TAGS: FORCE
+	(cd ..; $(MAKE) $@)
+
+FORCE:

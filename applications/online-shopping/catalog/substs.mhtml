@@ -1,0 +1,36 @@
+;;; substs.mhtml: -*- Meta-HTML -*-
+;;; 
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Tue Sep 12 09:46:51 1995.
+;;;
+<include ../tagsets/substs.mhtml>
+
+<if <check-password password>
+    <set-var dbwrite=write dbwrite-create=write-create db-changeable=true>
+  <set-var dbwrite=read dbwrite-create=read>>
+
+;;; This code provides a clickable listing of the products in CLASS.
+;;; The listing is sorted by manufacturer.
+;;;
+<defsubst product-list>
+  <set-var products-listed=0>
+  <with-open-database db %0>
+    <table>
+      <database-query db true sort=Manufacturer
+	format =
+	<prog
+	  <increment default::products-listed>
+	  <tr>
+	    <td>
+	      <a href="<get-var mhtml::url-to-dir>/edit-entry.mhtml?<cgi-encode class key>">
+	        <get-var Product-Name>
+	      </a>
+	    </td>
+	    <td>[<i><get-var Product-ID></i>]</td>
+	    <td><get-var Unit-Price></td>
+	    <td><get-var Short-Description></td>
+	    <td><get-var Attributes></td>
+	  </tr>>>
+    </table>
+  </with-open-database>
+</defsubst>

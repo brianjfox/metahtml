@@ -1,0 +1,21 @@
+;;; zippy-filter.mhtml: -*- Meta-HTML -*-  Declare variables in zippy filter.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Aug 30 21:14:16 1996.
+<set-var
+  zippy::zippy-lines[] = <include zippy-lines.txt verbatim>
+  zippy::total-lines   = <array-size zippy::zippy-lines>>
+
+;;; Here is the function which produces quotes.
+<defun zippy::quote>
+  <get-var-once zippy::zippy-lines[<random <get-var-once zippy::total-lines>>]>
+</defun>
+
+;;; And here is the function which the filterer runs over.
+<defun zippy::filter var>
+  <parser::canonicalize-var var>
+  <subst-in-var <get-var-once var>
+		"(\\.[^.]+\\.[^.]+\\.[ \t\r\n]+)"
+		"\\1<verbatim><zippy::quote> </verbatim>">
+  <set-var <get-var-once var>=<%%eval <get-var-once <get-var-once var>>>>
+</defun>

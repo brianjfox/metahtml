@@ -1,0 +1,10 @@
+Sun Sep 17 10:37:35 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* list-sessions.c (main): Lisp Pretty Print info->data if it loks
+	like it is an alist.
+
+Tue Aug 15 12:24:07 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in: (PROGS) New targets: set-session-var
+	get-session-var.  New Progs.
+

@@ -1,0 +1,157 @@
+Tue Oct 22 08:55:31 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* server.c (loop_over_connections): Change "remote-user" to
+	"remote-ident".
+
+Mon Oct 14 13:32:48 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* server.c (loop_over_connections): Set MHTTPD-RECEIVED-HEADERS
+	package, and MHTTPD::METHOD, PROTOCOL, PROTOCOL-VERSION, LOCATION,
+	REQUESTER, and REQUESTER-ADDR in all cases, not just when
+	MHTTPD::PER-REQUEST-FUNCTION is set.
+	(MHTTPD_HTML_ADMINISTRATION): New define controls whether the
+	administration server port support code is compiled or not.  Now
+	OFF by default.
+
+Wed Oct  2 17:13:29 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* conf/mhttpd.conf: (mhtml::per-page-function) New variable is
+	similar to prologue-document, but requires less overhead.
+	Defaulted to make the posted data innocuous.
+
+Sun Jul 14 23:38:07 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (conf/mhttpd.conf): Boy, are there a lot of changes
+	in here!  Brand new administration system, for example.
+
+Fri Jul 12 13:15:33 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* http.c (mr_set_cookie): Return a Set-Cookie for every connection
+	which has a SID, even if we don't think that the browser supports
+	cookies.  This way, if the browser does support cookies, we get
+	the information when they give us the cookie back.
+
+	* globals.c (client_eats_cookies): New function tells whether the
+	client eats cookies or not. Called from
+	mhtml_check_cookie_compatible ().
+
+Tue Jun 25 15:55:12 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* server.c: Listen on more than one socket.  This was done to
+	allow a running server to administer itself, but it is also the
+	precursor to running virtual hosts from a single server.
+
+Tue Jun 18 19:16:06 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* http.c (http_head_handler): Implement to spec.
+
+Tue Jun 11 15:54:56 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* http.c (mr_set_cookie): Use `session_id_t' instead of `sid_t'.
+
+Mon Jun 10 14:54:39 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* http.c (http_parse_request): Default missing protocol or version
+	to "HTTP/1.0".
+
+Sat Apr 27 18:44:23 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* globals.c (mhtml_path_translate): Implement
+	mhtml::path-translate as a function.
+
+Thu Apr 25 00:46:55 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* server.c: Allow --servers NUM to specify the number of running
+	servers.  This improves throughput by some reasonable factor.
+
+Mon Apr 22 10:17:47 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* globals.c (mhtml_check_cookie_compatible): Add OmniWeb to list
+	of cookie supporting browsers.
+
+Sun Apr 14 13:25:07 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (SERVER_MINOR): Now at 1.7.
+
+	* http.c (http_handle_request): Log accesses after they have been
+	handled.  I don't really like this, but it is required by the
+	common logfile format, so who cares.  You can still do hairy
+	logging before the method handler is called via
+	mhttpd::per-request-function.
+
+Sun Mar 24 18:14:01 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* http.c (mhttpd_metahtml_engine): Append mhtml::epilogue-document
+	to the end of the Meta-HTML page before processing, if that
+	document exists and doesn't inhibit processing.
+
+Fri Feb  9 10:49:02 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* INSTALL (doinstall): New INSTALL script does the right thing.
+
+Tue Feb  6 08:02:00 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* http.c (decompose_and_post): New function handles posting of
+	multipart/form-data crap.  Now you can upload files.
+
+Mon Jan 29 10:53:41 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* access.c: New functions handle .mhttpd_access file checking
+	using Basic WWW-Authorization, and encrypted passwords in the
+	access file.  Pretty crufty, but it works.
+
+	* http.c (mhttpd_metahtml_engine): Allow the prologue document to
+	redirect.
+
+Thu Jan 25 15:10:34 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* http.c (mr_status): Allow a CGI to provide a "Status" header.
+	In this case, that status is the result code.
+
+Wed Jan 24 07:33:01 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* server.c (loop_over_connections): If http_host is not set to
+	anything, set it to the value of gethostname (), and set the value
+	of mhtml::server-name as well.  However, bind loosely in this case.
+
+	* http.c: Add HTTP_AUTHORIZATION to CGI environemnt and to ENV
+	package.
+
+Tue Jan 23 08:03:47 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* server.c (reinitialize_server): Change the current working
+	directory to be the same as sv_DocumentRoot.  Databases pathnames
+	which are not fully qualified will thus be created here.
+
+Sun Dec  3 12:08:20 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Makefile.in (SERVER_MINOR): Now at 1.2.  Some additions in
+	anticipation of supporting SSL.
+
+Wed Nov 29 20:36:35 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* path_resolve.c (mhttpd_resolve_location): Decode incoming URLs.
+	I'm quite convinced that this is incorrect behaviour, but it makes
+	our server work with the broken proxy server at BMW.
+
+Mon Nov 27 11:33:06 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* server.c (loop_over_connections): Add per-request-function.
+	Code in Meta-HTML can be called for every request.
+
+Sun Nov 26 15:00:22 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* http.c (http_handle_request): Log agent if requested.
+
+	* server.c (reinitialize_server): Set mhtml::include-prefix to the
+	current server directory.
+	(find_config_file): New function tries to derive the location of
+	the config file from the current directory.
+
+Fri Nov 24 09:34:49 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* http.c (mr_location): Numerous mods since the last entry!
+
+Thu Nov 16 13:00:01 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Welcome to the world of MHttpd.  Now at 1.0.

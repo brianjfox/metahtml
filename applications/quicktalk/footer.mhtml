@@ -1,0 +1,25 @@
+;;; footer.mhtml: -*- Meta-HTML -*-  Footer for QuickTalk pages.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu Aug 29 18:38:34 1996.
+<defsubst copyright>&#169;</defsubst>
+
+<layout::page>
+  <center>
+    <font size=-1>
+    QuickTalk design by
+    <a href="http://www.ua.com/~bfox">Brian J. Fox</a>
+    <br>
+      Implemented in <a href="http://www.metahtml.com/">
+    <font size="-1">Meta-HTML</font></a>
+    <br>
+    Copyright <copyright> 1996,
+    <a href="http://www.ua.com/">Universal Access Inc.</a>
+    </font>
+  </center>
+</layout::page>
+
+<layout::resolve-contents>
+</body>
+</html>
+

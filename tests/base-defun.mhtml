@@ -1,0 +1,26 @@
+;;; base-defun.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 14:46:48 1996.
+
+Result: "Defun Definition Works": <defun test-defun>Defun Definition Works</defun><test-defun>
+Result: "Defun Definition Works:<br>arg0": <defun test-defun>Defun Definition Works:<br>%0</defun><test-defun "arg0">
+Result: "Defun Definition Works:   <br>   arg0": <defun test-defun>
+Defun Definition Works:   <br>   %0 %1   
+</defun><test-defun arg0>
+Result: "Defun Definition Works:   <br>   arg0 value": <defun test-defun>
+Defun Definition Works:   <br>   %0 %1
+   
+</defun><set-var var2=value><test-defun arg0 <get-var var2>>
+Result: "Defun Definition Works:   <br>Variables: value1 value2": <defun test-defun var1 var2>
+
+Defun Definition Works:   <br>
+
+Variables: <get-var var1> <get-var var2>   
+</defun><test-defun value1 value2>
+Result: "Defun Definition Works:   <br>Variables: value1  value3": <defun test-defun var1 var2 var3>
+
+Defun Definition Works:   <br>
+
+Variables: <get-var var1> <get-var var2> <get-var var3>
+</defun><test-defun value1 "" value3>

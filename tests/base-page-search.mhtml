@@ -1,0 +1,8 @@
+;;; base-page-search.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 02:48:44 1996.
+
+Result: : <page-search 0 "Jarlath">
+Result: : <page-search 0 "jarlath@ua.com" end>
+Result: : <page-search 320 "Author">

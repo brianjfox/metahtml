@@ -1,0 +1,60 @@
+;;; create-room.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Aug 24 13:00:59 1996.
+<set-var title="QuickTalk: Create Temporary Room">
+<include header.mhtml>
+<session-import chat chat>
+
+<make-innocuous posted>
+<if <not <get-var chat::handle>>
+    <redirect welcome.mhtml>>
+
+<when <get-var-once posted::new-room>>
+  <subst-in-var new-room "^[ \t\r\n]+" "" "[ \t\r\n]+$" "">
+  <when <not <get-var-once new-room>>>
+    <layout::page>
+      <b>Sorry, but you have to enter the name of the room that you
+      would like to create!</b><p>
+    </layout::page>
+  </when>
+
+  <when <get-var-once new-room>>
+    <if <array-member <get-var new-room> chat-internal::room-names>
+	<prog
+	  <layout::page>
+	  <b>Sorry, but that name is already in use.  Please choose
+	  another.</b><p>
+	  </layout::page>>
+      <prog
+	<with-open-stream
+	 s <get-var mhtml::include-prefix mhtml::relative-prefix>/temp.rooms
+	 mode=append>
+	<stream-put s "<get-var new-room>\n">
+	</with-open-stream>
+	<set-var room=<get-var new-room> action="Set Options">
+	<redirect options.mhtml?<cgi-encode action room>>>>
+  </when>
+</when>
+    
+<layout::page>
+  <ptext>
+    You may create a new, temporary chat room here.  Rooms that are
+    created here are deleted after a relatively short period of
+    inactivity, so don't expect them to last too long.  On the other
+    hand, it can be a nice way to move a discussion from a room that is
+    dedicated to a particular topic, when that discussion is not
+    germaine.
+
+    If you don't want to make a temporary room, just
+    <a href="chat.mhtml"><b>go back to QuickTalk</b></a>.
+
+    <form method=post action="<thisdoc>">
+      <b>Room Name:</b> <input type=text size=15 name="new-room"
+			       value="<get-var-once new-room>">
+      <input type=submit name=action value="Create It!">
+    </form>
+  </ptext>
+</layout::page>
+
+<include footer.mhtml>

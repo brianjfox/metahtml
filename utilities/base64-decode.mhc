@@ -1,0 +1,120 @@
+#!/www/bin/mhc
+<set-var mhc::explicit-output-only=true>
+<set-var program-name = <dir::basename <get-var-once program-arguments[0]>>>
+
+<defun --output-handler filename>
+  <set-var default::output-filename=<get-var-once filename>>
+</defun>
+
+<defun -o-handler filename>
+  <--output-handler <get-var-once filename>>
+</defun>
+
+<defun error text &key no-help>
+  <mhc::print "<get-var-once default::program-name>: <get-var-once text>\n">
+  <if <not <get-var-once no-help>>
+      <--help-handler>>
+  <mhc::exit 1>
+</defun>
+
+<defun --help-handler arg>
+  <if <get-var-once arg>
+      <error "Unknown flag: <get-var-once arg>">
+    <concat
+     <mhc::print "Usage: <get-var-once default::program-name>">
+     <mhc::print " -o output input.b64\n">>>
+</defun>
+
+<defun --debug-handler &optional arg>
+  <set-var default::debugging = <get-var-once arg>>
+</defun>
+
+<defun debug text>
+  <if <get-var-once default::debugging>
+      <mhc::print "<get-var-once text>\n">>
+</defun>
+
+<defun default-handler arg>
+  <if <string-eq <substring <get-var-once arg> 0 1> "-">
+      <error "Unknown flag: <get-var-once arg>">
+    <if <not <get-var-once default::input-filename>>
+	<set-var default::input-filename = <get-var-once arg>>
+      <error "Too many arguments to <get-var-once default::program-name>">>>
+</defun>
+
+<defun base64-decode-file filename varname>
+  ;;; Decode the file of base64 encoded stuff in <var filename> and
+  ;;; leave the output in <var varname> as a binary variable.
+  ;;; If <var filename> cannot be read, return the empty string,
+  ;;; otherwise, return the length of the decoded material.
+  <if <not <dir::read-file <get-var-once filename> data>>
+      <return>>
+  <parser::canonicalize-var varname>
+  <coerce-var data type=array>
+
+  <unset-var lines>
+
+  ;;; Find the start of the stuff to decode.
+  <set-var i=0 count=<array-size data>>
+  <while <lt i count>>
+    <if <not <get-var-once data[i]>>
+	<break>>
+    <if <match <get-var-once data[i]> "^------=_NextPart">
+	<concat
+	 <increment i>
+	 <break>>
+      <increment i>>
+  </while>
+
+  ;;; Found header, now find start of Base64 material.
+  <while <lt i count>>
+    <if <not <get-var-once data[i]>>
+	<concat <increment i>
+		<break>>>
+    <if <not <match <get-var-once data[i]> "(^[ \t]|:)">>
+	<break>>
+    <increment i>
+  </while>
+
+  ;;; Found start of Base64 stuff.  Now find the end.
+  <while <lt i count>>
+    <if <not <get-var-once data[i]>>
+	<break>>
+    <array-append <get-var-once data[i]> lines>
+    <increment i>
+  </while>
+
+  ;;; Have the data.  Decode it.
+  <copy-var lines default::temp>
+  <base64decode <get-var-once lines[]> <get-var-once varname>>
+  <content-length <get-var-once varname>>
+</defun>
+
+;;; START OF PROGRAM.
+<mhc::parse-program-arguments>
+
+<if <not <get-var-once input-filename>>
+    <error "You must supply an input filename">>
+
+<if <not <get-var-once output-filename>>
+    <set-var output-filename = <get-var-once input-filename>.out>>
+
+<debug " Input: <get-var-once input-filename>\n">
+<debug "Output: <get-var-once output-filename>\n">
+
+<set-var length = <base64-decode-file <get-var-once input-filename> decoded>>
+<if <not <get-var-once length>>
+    <error "Couldn't read the file `<get-var-once input-filename>'!">>
+<if <eq length 0>
+    <error
+     "Document `<get-var-once input-filename> appeared to contain no data!">>
+
+<set-var written? = <dir::write-file <get-var-once output-filename> decoded>>
+
+<if <not <get-var-once written?>>
+    <error "Couldn't write output file `<get-var-once output-filename>'!">>
+
+<mhc::print "Wrote <get-var-once length> bytes to ">
+<mhc::print "<get-var-once output-filename>.\n">
+<mhc::exit 0>
+

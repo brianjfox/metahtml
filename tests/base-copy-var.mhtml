@@ -1,0 +1,7 @@
+;;; base-copy-var.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 03:29:09 1996.
+
+Result: bar: <set-var foo=bar><copy-var foo var1><get-var var1>
+Result: barbarbar: <set-var foo=bar><copy-var foo var1 var2 var3><get-var var1 var2 var3>

@@ -1,0 +1,127 @@
+
+			      Meta-HTML
+		  Copyright 1995, 1998 Brian J. Fox
+	      Written by Brian J. Fox (bfox@ai.mit.edu)
+
+This is the README file for various Meta-HTML binary distributions.
+
+General Instructions for Installation
+-------------------------------------
+
+There are distribution specific instructions located in the
+directories `server', `engine', and `mhc'.
+
+
+Installing Your First Web Server:
+--------------------------------
+
+    Type "./Install", and follow the directions.
+
+    The Install program handles the details of installing the Meta-HTML
+    Server for you.  It is the simplest and fastest way to get up and
+    running with Meta-HTML, and with a full featured web server.  If
+    you would like to install the Server manually, the following
+    instructions detail the necessary steps.
+
+    Installing the Meta-HTML Server is quite straight-forward, and only
+    requires you to have the most minimal knowledge of Unix-like systems.
+    For those of you who can't wait, the following sequence is sufficient
+    to install the Meta-HTML server on a machine that is not already running
+    a web server:
+
+      1) Choose a directory under which your server will be installed,
+	 say, "/usr/www".  We will call this directory <wwwroot>.
+	 (mkdir /usr/www)
+
+      2) Create <wwwroot>/bin, <wwwroot>/docs, <wwwroot>/conf, and
+	 <wwwroot>/logs.
+	 (mkdir /usr/www/bin /usr/www/docs /usr/www/conf /usr/www/logs)
+
+      3) Copy "server/mhttpd" and "Utilities/*" to <wwwroot>/bin.
+	 (cp server/mhttpd /usr/www/bin)
+	 (cp Utilities/* /usr/www/bin)
+
+      4) Copy "release" to <wwwroot>/docs/.
+	 (cp -r release /usr/www/docs/)
+
+      5) Copy "server/conf" to <wwwroot>/conf.
+	 (cp -r server/conf /usr/www/conf)
+
+      6) Create the file "<wwwroot>/conf/identity.local", and place
+	 the following Meta-HTML commands in it to tell the server
+	 which IP address and port it should serve documents from, and
+	 to tell it where those documents are stored.
+
+	 (emacs /usr/www/conf/identity.local)
+	 <set-var mhtml::document-root = /usr/www/docs>
+	 <set-var mhtml::server-name = www.myhost.com>
+	 <set-var mhtml::server-port = 80>
+
+      7) As the superuser, start the server from the <wwwroot> directory:
+	 (cd /usr/www; su -c bin/mhttpd)
+
+    Congratulations, you are now running the Meta-HTML Server, and you
+    have a Web site!  You can now go to your first URL:
+
+      8) Start a browser, and connect to "http://<your-host>/release/5.00",
+	 where "<your-host>" should be replaced with the name of your machine.
+
+
+Co-habitating the Meta-HTML Server with an Existing Server:
+-----------------------------------------------------------
+
+    You may run the Meta-HTML Server on a non-standard port (such as
+    8080), or under an aliased IP address for your machine.  The Server
+    tightly binds to the address and port that it finds in the
+    configuration file.  The newly installed server may serve the same
+    documents that you are already serving with another server, or, may be
+    configured to serve a different set of documents.
+
+    If you are installing the Server with its own set of documents to
+    serve, and its own IP address, simply follow the instructions given
+    under `Installing Your First Web Server'.
+
+    Otherwise, the intructions are almost identical; but you must manually
+    edit the `mhttpd.conf' file and change the port number to 8080.  You
+    do this by changing the line which reads:
+
+      <set-var mhtml::server-port = <if <get-var mhttpd::ssl-server> 443 80>>
+
+    to read:
+
+      <set-var mhtml::server-port = 8080>
+
+    Then start the server as described above.  The documents are served
+    from the directory specified in `MHTML::DOCUMENT-ROOT'.
+
+
+Installing the Meta-HTML CGI Engine:
+------------------------------------
+
+    Once again, you should just type "./Install".
+    Installing the Meta-HTML CGI Engine is a relatively simple task for
+    any specific existing Web server, but the methods vary from server to
+    server.  Thus, we suggest that you use your browser to connect to our
+    on-line documentation discussing the specifics of server
+    configuration:
+
+	    http://www.metahtml.com/documentation/manual/install.mhtml
+
+
+Installing the Meta-HTML Stand-Alone Processor:
+----------------------------------------------
+
+    Copy the file `mhc/mhc' to some directory in your path, say
+    `/usr/local/bin'.
+
+    Then, simply specify to your server that documents ending in ".mhtml"
+    are executable, make sure that the Meta-HTML documents that you create
+    actually are executable (chmod a+x file.mhtml), and that they begin
+    with:
+
+	#!/usr/local/bin/mhc
+	<set-var mhtml::include-prefix=YOUR-DOCUMENT-ROOT>
+
+    where "YOUR-DOCUMENT-ROOT" is replaced with the full path to your
+    document directory (e.g., /usr/www/docs).
+

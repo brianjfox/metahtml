@@ -1,0 +1,17 @@
+
+<set-var foo=bar bar=baz "This crazy variable"="this crazy value">
+<with-open-database dbvar /tmp/newdb.db mode=write-create>
+
+<get-var dbvar>
+<database-save-record dbvar "Brian J. Fox" foo bar baz "This crazy variable">
+<database-load-record dbvar "Brian J. Fox" prefix=loaded>
+
+The value of LOADED::FOO is <get-var LOADED::FOO>
+The value of loaded::bar is <get-var loaded::bar>
+The value of loaded::baz is <get-var loaded::baz>
+The value of "loaded::This crazy variable" is <get-var "loaded::This crazy variable">
+<set-var key="<database-first-key dbvar>">
+The first key in the database is: <get-var key>
+<database-query dbvar foo=bar bar=baz>
+</with-open-database>
+

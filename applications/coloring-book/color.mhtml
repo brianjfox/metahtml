@@ -1,0 +1,76 @@
+;;; color.mhtml: -*- Meta-HTML -*-  The Coloring Book Page.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jan 31 10:43:01 1997.
+<set-var title="Coloring book example">
+<include header.mhtml>
+<unset-var mhtml::cacheable>
+<require coloring-book>
+<cbook::initialize>
+
+<when <get-var env::query_string>>
+  <var-case
+    posted::action=set-color	<cbook::set-color <get-var posted::color>>
+    posted::action=undo		<cbook::undo <cbook::current-image>>
+    posted::action=set-pict	<cbook::set-image <get-var pict>>
+    posted::action=load		<redirect load-image.mhtml>
+    posted::action=save		<redirect save-image.mhtml>
+    posted::action=clear	<cbook::clear-image <cbook::current-image>>
+    default		<cbook::remember-click <get-var env::query_string>>>
+  <cbook::save-changes>
+</when>
+
+<layout::page>
+  <center>
+    <h3>Choose your crayon..</h3>
+    <table>
+      <tr valign=center>
+	<td align=center>
+	  <cbook::colorblock 20 true undo Undo> <br>
+	  <cbook::colorblock 20 true clear Clear> 
+	</td>
+	<td align=center>
+	  <set-var i=0>
+	  <while <get-var cbook::colors[i]>>
+	    <concat
+	     <a href="<thisdoc>?action=set-color&color=<get-var i>">
+	     <img src="<cbook::crayon-gif <get-var i>>" border=0>
+	     </a>>
+	    <increment i>
+	  </while>
+	</td>
+	<td align=center>
+	  <cbook::colorblock 20 true load Load> <br>
+	  <cbook::colorblock 20 true save Save>
+	</td>
+      </tr>
+    </table>
+    <p>
+    <table>
+      <tr valign=center>
+	<td align=left>
+	  <table>
+	    <tr>
+	      <td>
+		<center>
+		  <img src="<cbook::crayon-gif <cbook::current-color>>"><br>
+		  <b><cbook::color-name <cbook::current-color>></b>
+		</center>
+	      </td>
+	    </tr>
+	  </table>
+	</td>
+	<td align=center>
+	  <concat <a href="<thisdoc>">
+		  <img src="<cbook::colored-image <cbook::current-image>>"
+		       border=0 ISMAP>
+		  </a>>
+	</td>
+      </tr>
+    </table>
+    <p>
+    <a href="welcome.mhtml"><b>Color a Different Picture...</b></a>
+  </center>
+</layout::page>
+
+<include footer.mhtml>

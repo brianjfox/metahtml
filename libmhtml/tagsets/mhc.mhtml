@@ -1,0 +1,45 @@
+;;; mhc.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;; Copyright (c) 1999, 2001 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sat Jan 23 18:18:14 1999.
+<defun mhc::parse-program-arguments &optional array[]>
+  <when <not <get-var-once array>>>
+    <copy-var default::program-arguments array>
+    <array-shift -1 array>
+  </when>
+  <foreach arg array iter=x>
+    <unset-var flag valu>
+    <if <not <get-var-once skip-next>>
+	;;; Does the argument start with a "-"?
+	<if <match <get-var-once arg> "^-">
+	    ;;; Yes.  Separate flag from value (if present) and find a handler
+	    ;;; for it.
+	    <concat
+	     <set-var
+	       flag=<subst-in-string <get-var-once arg> "(^[^=]+)(.*$)" "\\1">
+	       valu=<subst-in-string <get-var-once arg> "(^[^=]+)(.*$)" "\\2">>
+	     <subst-in-var valu "^=" "">
+	     <set-var handler=<get-var-once flag>-handler>
+	     <if <defined? <get-var-once handler>>
+		 <if <%%function-arguments <get-var-once handler>>
+		     <if <match <get-var-once arg> "=">
+			 <%%backquote-eval <,<get-var-once handler>
+					    <get-var-once valu>>>
+		       <concat
+			<%%backquote-eval <,<get-var-once handler>
+					   <get-var-once array[<add x 1>]>>>
+			<set-var skip-next=true>>>
+		   <%%backquote-eval <,<get-var-once handler>>>>
+	       <if <defined? --help-handler>
+		   <--help-handler <get-var-once arg>>
+		 <mhc::default-help-handler <get-var-once arg>>>>>
+	  <if <defined? default-handler>
+	      <default-handler <get-var-once arg>>>>
+      <unset-var skip-next>>
+  </foreach>
+</defun>
+
+<defun mhc::default-help-handler arg>
+  <mhc::print "The argument <get-var-once arg> is meaningless\n">
+  <mhc::exit 1>
+</defun>

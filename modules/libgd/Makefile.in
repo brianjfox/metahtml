@@ -1,0 +1,121 @@
+# Makefile for libgd is in -*- Text -*- mode for Emacs editing ease.
+# Depending on your system, you will need to modify this makefile.
+# 
+# If you do not have gcc, change the setting for CC, but you must
+# use an ANSI standard C compiler (NOT the old SunOS 4.1.3 cc
+# compiler; get gcc if you are still using it). 
+# 
+# If the ar command fails on your system, consult the ar manpage
+# for your system. 
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= -DMHTML_VERSION=$(PACKVER)
+INSTALL = @INSTALL@
+FIND	= @FIND@
+PLATFORM= @PLATFORM@
+EXE	= @EXE@
+WEBBASEDIR = @WEBBASEDIR@
+MODULES_DIR = @MODULES_DIR@
+MHTML_SYSTEM_TYPE = @MHTML_SYSTEM_TYPE@
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+OS_LIBS	= @OS_LIBS@
+DLLDFLAGS = @DLLDFLAGS@
+
+# The real locations of programs.
+RANLIB	= @RANLIB@
+AR	= ar
+MKDIR	= mkdir
+TAR	= tar
+LN	= ln
+CP	= cp
+RM	= rm -f
+MV	= mv
+BASH_SHELL = @BASH_SHELL@
+bindir	= $(exec_prefix)/bin
+libdir	= $(exec_prefix)/lib
+docdir	= $(WEBBASEDIR)
+# You should not compile with anything other than GCC.
+# It is possible to compile with a fully ANSI compliant compiler that
+# isn't GCC, but it isn't recommended.
+
+CC		= gcc $(GCC_WARN)
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+# DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+OPTIMIZE_FLAGS	= -O69 -finline-functions
+INCLUDE_FLAGS	= @EXTRAINC@
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(INCLUDE_FLAGS)
+LDFLAGS		= $(STATIC) $(DEBUG_FLAGS) $(DLLDFLAGS)
+
+.c.o:
+	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) $(DEFS) -c $<
+
+LIBS = libgd.a $(OS_LIBS)
+PROGS = abut mkbg mktrans gifq recolor thumbnail composite coloring-book
+
+all: libgd.a $(PROGS)
+
+makebar: makebar.o
+	$(CC) -o makebar makebar.o $(LIBS)
+
+mkblank: mkblank.o
+	$(CC) -o mkblank mkblank.o $(LIBS)
+
+coloring-book: coloring-book.o
+	$(CC) -o coloring-book coloring-book.o $(LIBS)
+
+composite: composite.o
+	$(CC) -o composite composite.o $(LIBS)
+
+abut: abut.o
+	$(CC) -o abut abut.o $(LIBS)
+
+recolor: recolor.o
+	$(CC) -o recolor recolor.o $(LIBS)
+
+thumbnail: thumbnail.o
+	$(CC) -o thumbnail thumbnail.o $(LIBS)
+
+mktrans: mktrans.o
+	$(CC) -o mktrans mktrans.o $(LIBS)
+
+mkbg: mkbg.o
+	$(CC) -o mkbg mkbg.o $(LIBS)
+
+gifq: gifq.o
+	$(CC) -o gifq gifq.o $(LIBS)
+
+makeicon: makeicon.o
+	$(CC) -o makeicon makeicon.o $(LIBS)
+
+gddemo: gddemo.o libgd.a gd.h gdfonts.h gdfontl.h
+	$(CC) gddemo.o -o gddemo	$(LIBS)
+
+giftogd: giftogd.o libgd.a gd.h
+	$(CC) giftogd.o -o giftogd	$(LIBS) 
+
+libgd.a: gd.o gdfontt.o gdfonts.o gdfontmb.o gdfontl.o gdfontg.o \
+	gd.h gdfontt.h gdfonts.h gdfontmb.h gdfontl.h gdfontg.h
+	rm -f libgd.a
+	$(AR) rc libgd.a gd.o gdfontt.o gdfonts.o gdfontmb.o \
+		gdfontl.o gdfontg.o
+
+webgif: webgif.o libgd.a gd.h
+	$(CC) webgif.o -o webgif	$(LIBS)
+
+Makefile: Makefile.in
+	  (cd ../..; config.status)
+
+install: $(PROGS)
+	$(INSTALL) $(PROGS) $(bindir)
+
+clean: FORCE
+	rm -f *.o *.a gddemo giftogd $(PROGS)
+
+distclean realclean: clean
+	   rm -f *~ Makefile
+
+FORCE:

@@ -1,0 +1,15 @@
+;;; base-subst-in-string.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 01:45:49 1996.
+
+Result: string: <subst-in-string "string2" "2" "">
+Result: string: <subst-in-string "string12345" "[0-9]" "">
+Result: S2: <subst-in-string "Atring2" "Atring" "S">
+Result: S2: <subst-in-string "String2" "[a-z]" "">
+Result: tring2: <subst-in-string "String2" "[A-Z]" "">
+Result: String--: <subst-in-string "Ztring12" "[A-Z]" "S" "[0-9]" "-">
+Result: "THosE tHESE": <set-var str="THIS that"><subst-in-string "<get-var str>" "THIS" "THosE" "that" "tHESE">
+Result: <h3>Delay Execution</h3> ...do something...: <set-var str="&&h3%%Delay Execution&&/h3%% ...do something... then:"><subst-in-string "<get-var str>" "then:" "" "&&" "<" "%%" ">">
+Result: <h3>Acturary Inc.</h3>: <set-var str="&&h3%%H3 Title&&/h3%%"><set-var name="Acturary Inc."><subst-in-string "<get-var str>" "H3 Title" "<get-var name>" "&&" "<" "%%" ">">
+Result: <h4>This is a string</h4>: <subst-in-string "@This is a string@" "^@" "<h4>" "@$" "</h4>">

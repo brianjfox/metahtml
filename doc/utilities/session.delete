@@ -1,0 +1,18 @@
+;;; session.delete: -*- Fundamental -*-  What it looks like running
+;;; the delete-session command.
+;;;
+;;; Copyright (c) 1996 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 11:53:12 1996.
+root@server# <a href="list-sessions.mhtml">list-sessions</a> -s
+Sessions in database [3]:
+  SESSION [Meta Scheduler/2498587655903]  (2100 seconds remaining)
+  SESSION [BIX-Session/25631364981414]  (3271 seconds remaining)
+  SESSION [Online Shopping/25011681853662]  (2119 seconds remaining)
+
+root@server# delete-session 2498587655903
+Sessions Deleted = 1
+
+root@server# list-sessions -s
+Sessions in database [2]:
+  SESSION [BIX-Session/25631364981414]  (3257 seconds remaining)
+  SESSION [Online Shopping/25011681853662]  (2105 seconds remaining)

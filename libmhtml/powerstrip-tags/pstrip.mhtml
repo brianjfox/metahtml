@@ -1,0 +1,99 @@
+;;; pstrip.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Feb 22 10:42:40 1997.
+
+;;; Turn this on to get developer features.
+;;; <set-var ibis::developer?=true>
+
+<defun signon-required>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;;  This enforces a PowerStrip login before pages which contain sensitive
+  ;;;  information may be viewed.
+  <if <not <get-session-var site::user-id>>
+      <redirect <get-var mhtml::http-prefix><site::system-prefix>/Login.mhtml>>
+</defun>
+
+<defun ibis::system-packages>
+  <when <not <get-var ibis::cached-system-packages>>>
+    <set-var candidates[] =
+      <directories-in-dir <get-var mhtml::include-prefix><site::system-prefix>
+			  "^[A-Z].*">>
+    <set-var i=0 j=0 names[]="">
+    <while <get-var candidates[i]>>
+      <if <file-exists <concat <plist-get-prop candidates[i] FULL-NAME>
+			       /default.params>>
+	  <prog
+	    <set-var names[j] = <plist-get-prop candidates[i] NAME>>
+	    <increment j>>>
+      <increment i>
+    </while>
+    <set-var ibis::cached-system-packages[]=<get-var names[]>>
+  </when>
+  <get-var ibis::cached-system-packages[]>
+</defun>
+
+<defun ibis::system-plugins>
+  <when <not <get-var ibis::cached-system-plugins>>>
+    <set-var candidates[] =
+      <directories-in-dir <get-var mhtml::include-prefix><site::system-prefix>
+			  "^[A-Z].*">>
+    <set-var i=0 j=0 names[]="">
+    <while <get-var candidates[i]>>
+      <if <file-exists <concat <plist-get-prop candidates[i] FULL-NAME>
+			       /Welcome.mhtml>>
+	  <prog
+	    <set-var names[j] = <plist-get-prop candidates[i] NAME>>
+	    <increment j>>>
+      <increment i>
+    </while>
+    <set-var ibis::cached-system-plugins[]=<get-var names[]>>
+  </when>
+  <get-var ibis::cached-system-plugins[]>
+</defun>
+
+<defun ibis::trans-image>
+  <get-var mhtml::http-prefix-sans-sid>
+  <site::system-prefix>/images/misc/dot_clear.gif
+</defun>
+
+<defsubst transparent-align whitespace=delete>
+  <img src="<ibis::trans-image>" %attributes>
+</defsubst>
+
+<defun ibis::layout-plugin-buttons url-base>
+  <defvar url-base <get-var mhtml::http-prefix>>
+  <package-delete temp>
+  <directory-contents
+   <concat <get-var mhtml::include-prefix><site::system-prefix>
+	   /images/plugin-buttons> temp matching="\\.gif$">
+  <set-var list[]=<package-vars temp>>
+  <sort list>
+  <set-var i=0>
+  <while <get-var list[i]>>
+    <set-var name=<plist-get-prop <get-var list[i]> NAME>>
+    <set-var image=<site::system-prefix>/images/plugin-buttons/<get-var name>>
+    <subst-in-var name "\\.gif$" "">
+    <concat
+     <a href="<get-var url-base>/<get-var name>/"
+	<if <get-var ibis::frames> "target=main">>
+     <img src="<get-var image>" alt="<get-var name>" align=top border=0>
+     </a> " ">
+    <if <not <match <get-var layout::navigation-buttons> horizontal>>
+	<p>>
+    <increment i>
+  </while>
+</defun>
+
+<defun ibis::initialize>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Initialize the PowerStrip system.
+  ;;; Should be called after defining any overriding variables for a specific
+  ;;; page, such as layout::layout, etc.
+  <session::initialize>
+  <site::initialize>
+  <set-var ibis::acl-default-names[] =
+    <include <site::system-prefix>/Ibis/USER-ACL.txt>>
+  <layout::initialize>
+  <navlayout::initialize>
+</defun>

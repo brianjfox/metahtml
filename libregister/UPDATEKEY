@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Update the file "activation.key" if it is present in the current directory.
+#
+if [ "$1" ]; then mhtmltimeout="$1"; else mhtmltimeout="60"; fi
+
+key=`/www/bin/make_key $mhtmltimeout 2>/dev/null`
+if [ "$key" ]; then
+   info=`/www/bin/check_key $key 2>/dev/null | head -1`
+else
+   echo "Couldn't make the key: You don't have /www/bin/make_key!"
+fi
+
+if [ -f activation.key ]; then
+   echo -n "Updating existing activation.key file..."
+   echo ";;; -*- Meta-HTML -*-" >activation.key
+   echo ";;; This is your Meta-HTML Activation Key." >>activation.key
+   echo ";;; $info"					>>activation.key
+   echo "<set-var mhtml::activation-key = $key>"     >>activation.key
+   echo "done."
+elif [ -f local.conf ]; then
+   echo -n "Updating activation key in `pwd`/local.conf..."
+   cat local.conf | sed 's/<set-var mhtml::activation-key = [0-9A-Z]*>//' >local.conf-new
+   mv local.conf-new local.conf
+   echo "<set-var mhtml::activation-key = $key>"     >>local.conf
+   echo "done."
+else
+  echo "Can only UPDATE an existing key file, such as \"activation.key\""
+  echo "Please create a local.conf file first. "
+fi

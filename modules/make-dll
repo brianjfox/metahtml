@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# How to build a dll using Cygnus tools.  This file replaces LD.
+
+output_file=""
+input_files=""
+libraries=""
+
+# Exhaust all of the arguments, collecting them where they belong.
+prevarg=
+for arg
+do
+
+  # If the previous option needs an argument, assign it.
+  if test "$prevarg" = "output_file"; then
+    output_file="$arg";
+    prevarg=
+    continue
+  fi
+
+  if test "$prevarg" = "libpath"; then
+    libpath="$libpath -L$arg";
+    prevarg=
+    continue
+  fi
+
+  case "$arg" in
+    -o) prevarg=output_file; continue ;;
+    -l) libaries="$libraries $arg"; continue ;;
+    -L) prevarg=libpath; continue ;;
+    -L*) libpath="$libpath $arg"; continue ;;
+     # Ignore other hyphen arguments.
+    -*) echo "Ignoring $arg"; continue ;;
+    *) input_files="$input_files $arg"
+  esac
+done
+
+# Hope we have an output filename.
+basename=`echo $output_filename | sed -e 's/.dll//g'`
+
+# Now start the linking process.
+ld --dll -e _dllEntry@12 -o junk --base-file dll.base $input_files $libraries
+echo "EXPORTS" >${basename}.def
+echo "module_initialize" >>${basename}.def
+dlltool --dllname $output_file --base-file dll.base --def ${basename}.def \
+  --output-lib ${basename}.a --output-exp ${basename}.exp
+ld --dll -e _dllEntry@12 -o $output_file $input_files \
+   $libraries ${basename}.exp
+rm -f junk dll.base
+exit 0

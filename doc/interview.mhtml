@@ -1,0 +1,154 @@
+;;; interview.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul  3 17:42:55 1996.
+<html>
+<body bgcolor="#ffffff">
+
+<defun q&a question answer>
+  <p>
+  <table>
+    <tr valign=top>
+      <td align=right><b>Q:</b></td>
+      <td align=left><b><get-var question></b></td>
+    </tr>
+    <tr valign=top>
+      <td align=right><b>A:</b></td>
+      <td align=left><get-var answer></td>
+    </tr>
+  </table>
+  <p>
+</defun>
+
+<ptext>
+  <i>
+  The following is an interview with the creator of <meta-html>,
+  Universal Access Inc.'s <a
+  href="http:/www.ua.com/~bfox/">Brian J. Fox</a>.  The interview was
+  conducted in Brian's home, and revolved around why and how he
+  created this new Web language.  Brian was relaxing on a couch in the
+  living room, and kept offering me various host-type things, such as
+  wine, cheese platters, fine scotch, and finally Martini's.  I tried
+  to stay on track, but it was a little bit of a strain.
+  </i>
+</ptext>
+
+<table width=100%>
+  <tr valign=top>
+    <td width=49% align=left>
+    <q&a
+     <prog
+       When people found out that I was going to do this interview, quite a
+       few had questions that I found I couldn't answer.  I'm
+       hoping that you'll be able to fill in some of the details that I'm
+       missing.>
+     <prog
+       I hope so.  I guess you can start asking, and when I get stuck I'll
+       just fake it.  Do you want to try some Lagavulin scotch?>>
+    <q&a
+     <prog
+       Not just yet, I think, thanks.
+       When was the first time you thought of creating a new language for
+       generating Web applications?>
+     <prog
+       Sometime around Februrary of 1995.  I was involved in hacking up
+       the Wells Fargo <i><a href="https://banking.wellsfargo.com">Online
+       Banking website</a></i>, and I had been writing all this code to do
+       stuff.  You know, reading variables out of posted data, sending
+       cookies back and forth between the client and the browser, just this
+       nightmarish scenario.  And then we had to build each page
+       dynamically on the fly.  I hacked up a Scheme program to do all this
+       junk on the backend, and tossed it in as a prototype, but it really
+       wasn't industrial strength or anything, and you still had to write
+       HTML by printing it out.  I hated it, but it was the first working
+       prototype of the Online Banking system for the bank, and they got all
+       excited about it.  I just figured, "there has to be a better way.">>
+      <q&a
+       <prog So you built the language then?>
+       <prog No, they had these ridiculous deadlines, and I didn't really
+	 want to give them the general solution.  We just finished the
+	 project, and I took a break.  Then, around August <i>[1995]</i>, I
+	 took a contract to build this really hairy site.  It had like 27
+	 different areas, and they needed database integration and session
+	 tracking for everything.  I figured that I would just write some
+	 libraries that parsed special tags, and that would handle
+	 everything.  Right!>>
+
+      <q&a
+       <prog Is that a good description of Meta-HTML?  Some libraries that
+	 parse special tags?>
+       <prog
+	 Not really.  I had thought that would be enough at first, but it
+	 turned out we really needed a general solution.  I'd written
+	 interpreters before, and so I figured it wouldn't take as long to
+	 write a cleaner language than to try to hack up everything they
+	 needed in C.  I ended up putting in stuff like flow control and
+	 direct database access.  It came out pretty cool.>>
+      <q&a
+       <prog Did the process of building that site define everything that
+	 was needed in a Web applications language for you?>
+       <prog
+	 No, much to my surprise!  I needed more people than just myself to
+	 write code in this language.   I started showing it to friends and
+	 colleagues, like Dante <i>[DeLucia]</i> and Henry Minsky.  Once they
+	 started using the language I got a lot of valuable feedback.  These
+	 guys really wanted to do industrial stuff, and they didn't have super
+	 fast machines. In fact, I rewrote the parser around that time using
+	 more efficient algorithms, and got a big speedup in
+	 performance.>>
+    </td>
+    <td width=2%><br></td>
+    <td width=49% align=left>
+      <q&a
+       <prog How's the performance of the language now?>
+       <prog
+	 It's pretty good, although it will get better when the byte
+	 compiler and engine are finished.  Right now, it's around the speed
+	 of Perl, or TCL, instead of C, or C++.>>
+      
+      <q&a
+       <prog That brings up another question.  How come you didn't just use
+	 Perl to build your websites?>
+       <prog
+	 Let's just say I was pretty sure the results would be hard to
+	 maintain, and lengthy to build.  Besides, I wanted to use a
+	 language that would just let me write HTML wherever I wanted it,
+	 and not force me to go through quoting hell to get there.>>
+
+      <i> At this point, the food began to appear.  Smoked salmon, triple
+      creme brie, and iced Martini glasses.  I started to get worried.</i>
+
+      <q&a
+       <prog Some people say that Java is the way to go, and that it is a
+	 mistake to program in anything else.  What do you say to that?>
+       <prog
+	 Hey, if they want to write server-side applications in Java, more
+	 power to them.  But I want my applications to be finished this
+	 century, to be easily maintainable, and to be seamlessly
+	 interspersed with the HTML that displays them.  You can't do all
+	 that with Java.>>
+
+      <q&a
+       <prog
+	 I gather from your response that you don't like Java.  What other
+	 languages would you recommend instead?>
+
+       <prog <i>[While pouring me a large Martini]</i>
+	 No, no, don't get me wrong.  I actually like Java quite a bit.  In
+	 fact, we're writing a version of the Meta-HTML interpreter in Java
+	 right now, so that we can do some really slick stuff on the client.
+	 I just don't think it's the right solution to writing Web
+	 applications.  I can't stress enough as an applications builder
+	 what it means to have no overhead when writing a new page for your
+	 application.   I mean I can write four lines of Meta-HTML into a
+	 completely blank page and produce this complicated dynamically
+	 created page with hairy navigation and stuff.  Sure, I wrote some
+	 code to make the navigation in the first place, but why would I want
+	 to write it twice?  You've got to have variables, flow control, and
+	 totally seamless integration with the web environment if you want to
+	 get anything done quickly.>>
+    </td>
+  </tr>
+</table>
+
+<include footer.mhtml>

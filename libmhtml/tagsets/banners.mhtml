@@ -1,0 +1,92 @@
+;;; banners.mhtml: -*- Meta-HTML -*-  Dynamically create banner images.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Mar 15 11:42:03 1997.
+
+<set-var banners::images-webpath=/images/dynamic/banners>
+<set-var banners::base-banner-image=plug_red-banner.gif>
+<set-var banners::halign=Right banners::valign=Center>
+<set-var banners::fontname=NumbusSansL-Regular banners::font-size=34>
+<set-var banners::font-color=White>
+<set-var banners::prepended-text = "">
+<set-var banners::appended-text = "  ">
+
+<defun banners::base-banner-image-file>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Returns the full pathname of the current base image for
+  ;;; creating banners.  You don't need to call this function directly
+  ;;; -- instead set the variable <code>banners::base-banner-image</code>
+  ;;; to the name of a file in the directory
+  ;;; <code>/System/images/base-images/banners</code>.
+  <concat <get-var mhtml::include-prefix>
+	  /images/base-images/banners
+	  /<get-var banners::base-banner-image>>
+</defun>
+
+<defun banners::create-banner output-file image-text rotation>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Create a "banner" image in OUTPUT-FILE using IMAGE-TEXT.
+  ;;; The base image is taken from BANNERS::BASE-BANNER-IMAGE, which is
+  ;;; the basename of the image file, and is looked for in
+  ;;; <site::system-prefix>/images/base-images/banners.
+  ;;; Other parameters, including HALIGN, VALIGN, FONT, FONT-SIZE, and
+  ;;; FONT-COLOR are taken from their values in the BANNERS package.
+  <if <not <file-exists 
+	    <concat <get-var-once mhtml::include-prefix>
+		    <get-var-once banners::images-webpath>>>>
+      <make-directories
+       <concat <get-var-once mhtml::include-prefix>
+	       <get-var-once banners::images-webpath>>>>
+  <set-var x-y[] =
+    <cgi-exec gifq <banners::base-banner-image-file> width height>>
+  <with-open-database db /tmp/metahtml-site-lock.db mode=write-create>
+    <set-var the-file =
+      <image-builder::make-text-gif
+       <concat <get-var-once banners::prepended-text>
+	       <get-var-once image-text>
+	       <get-var-once banners::appended-text>>
+       <get-var-once banners::halign>
+       <get-var-once banners::valign>
+       <get-var-once x-y[0]> <get-var-once x-y[1]>
+       <get-var-once banners::fontname>
+       <get-var-once banners::font-size>
+       <get-var-once banners::font-color>
+       <banners::base-banner-image-file>>>
+    <cgi-exec
+     composite --retrans <if <get-var-once rotation>
+			     "-r <get-var-once rotation>">
+     <banners::base-banner-image-file> <get-var-once the-file>
+     "><get-var-once output-file>" errors=errors>
+  </with-open-database>
+  <cgi-exec rm -f <get-var-once the-file>>
+  <when <get-var-once errors>>
+    <page-debug Errors from composite: <get-var-once errors>>
+  </when>
+</defun>
+
+<defun banner link image-text rotation>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Return the HTML necessary to display a graphic image with
+  ;;; <var image-text> linked to <var link>.
+  <set-var image-name =
+    <downcase <concat <subst-in-string <get-var-once image-text>
+				       "[~`!@#$%^&*()|']" ""
+				       "^[ \t\r\n]+" ""
+				       "[ \t\r\n]+$" ""
+				       "[ -<>?/]" "_">
+		      -banner>>>
+  <set-var image-file = <concat <get-var-once mhtml::include-prefix>
+				<get-var-once banners::images-webpath>
+				/<get-var-once image-name>.gif>>
+  <if <not <file-exists <get-var-once image-file>>>
+      <banners::create-banner <get-var-once image-file>
+			      <get-var-once image-text>
+			      <get-var-once rotation>>>
+  <set-var x-y[]=<cgi-exec gifq <get-var-once image-file> width height>>
+  <a href="<get-var-once link>">
+    <img src="<concat <get-var-once banners::images-webpath>
+		      /<get-var-once image-name>.gif>"
+	 width=<get-var-once x-y[0]> height=<get-var-once x-y[1]> border=0
+	 alt="<get-var-once image-text>">
+  </a>
+</defun>

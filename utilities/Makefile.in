@@ -1,0 +1,121 @@
+# Makefile for the utilities directory.
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid
+# deployment of Internet and Intranet applications via the use
+# of the Meta-HTML language.
+# 
+# Copyright (c) 1995, 2000, Brian J. Fox (bfox@ai.mit.edu).
+# 
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the General Public License as published
+# by the Free Software Foundation; either version 1, or (at your
+# option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# FSF GPL for more details.
+# 
+# You should have received a copy of the FSF General Public License
+# along with this program; if you have not, you may obtain one
+# electronically at the following URL:
+# 
+# 	 http://www.metahtml.com/COPYING
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+DESLIB	= @DESLIB@
+DBINC	= $(GDBM_IN)
+DBLIB	= $(GDBMLIB) $(DESLIB)
+NTLIBS	= @NTLIBS@
+
+EXE	= @EXE@
+VERSDEF = -DMHTML_VERSION_STRING='$(MHTML_VERSION_STRING)'
+OS_LIBS	= @OS_LIBS@
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+bindir	= $(exec_prefix)/bin
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+
+# You should not compile with anything other than Gcc.
+# Of course, you actually can compile with any fully ANSI C compiler,
+# and this could be an advantage, like, say, for example, you have to
+# compile this code at UCSB, and the FUCKING LOSING MORON who
+# installed Gcc didn't do it right.
+#
+CC		 = gcc $(GCC_WARN)
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+# DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+OPTIMIZE_FLAGS	= -O69 -finline-functions
+INCLUDE_FLAGS	= 
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(INCLUDE_FLAGS)
+LDFLAGS		= $(DEBUG_FLAGS)
+
+PROGDEFS	= AR='$(AR)' RANLIB='$(RANLIB)' LN='$(LN)' CP='$(CP)' \
+		  RM='$(RM)' CC='$(CC)' INSTALL='$(INSTALL)'
+
+OTHERDEFS	= MHTML_VERSION='$(PACKVER)' bindir=$(bindir) TOPDIR=../../
+
+PCFLAGS		= $(PROGDEFS) CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS)' \
+		  DEBUG_FLAGS='$(DEBUG_FLAGS)' $(OTHERDEFS) \
+		  PROFILE_FLAGS='$(PROFILE_FLAGS)' 'EXE=$(EXE)' \
+		  OPTIMIZE_FLAGS='$(OPTIMIZE_FLAGS)' DEFS='$(DEFS)' \
+		  OS_LIBS='$(OS_LIBS)' NTLIBS='$(NTLIBS)'
+
+SUBDIRS = imagemap mkpass strip-tags
+
+all: subdirs
+
+subdirs: FORCE
+	for dir in $(SUBDIRS); do (cd $$dir; $(MAKE) $(PCFLAGS) ); done
+
+clean: FORCE
+	for dir in $(SUBDIRS); do (cd $$dir; $(MAKE) $(PCFLAGS) clean); done
+
+distclean realclean: FORCE
+	for dir in $(SUBDIRS); do (cd $$dir; $(MAKE) $(PCFLAGS) distclean); done
+	$(RM) Makefile
+
+install: subdirs binary_install
+	for dir in $(SUBDIRS); do (cd $$dir; $(MAKE) $(PCFLAGS) install); done
+
+redhat_install: subdirs binary_install
+	for dir in $(SUBDIRS); do (cd $$dir; $(MAKE) install bindir=$(libdir)); done
+
+binary_install: FORCE
+	$(INSTALL) start-servers $(bindir)/start-servers
+	$(INSTALL) stop-servers $(bindir)/stop-servers
+	$(RM) -f $(bindir)/webmail
+	cat webmail | sed -e 's@/www/bin@$(bindir)@g' >$(bindir)/webmail
+	chmod a+x $(bindir)/webmail
+	cat base64-decode.mhc | sed -e 's@/www/bin@$(bindir)@g' >$(bindir)/base64-decode
+	chmod a+x $(bindir)/base64-decode
+	$(RM) -f $(bindir)/mklib
+	cat mklib | sed -e 's@/www/bin@$(bindir)@g' >$(bindir)/mklib
+	chmod a+x $(bindir)/mklib
+	$(RM) -f $(bindir)/mkapi
+	cat mkapi | sed -e 's@/www/bin@$(bindir)@g' >$(bindir)/mkapi
+	chmod a+x $(bindir)/mkapi
+	$(RM) -f $(bindir)/rollover-logs
+	cat rollover-logs | sed -e 's@/www/bin@$(bindir)@g' >$(bindir)/rollover-logs
+	chmod a+x $(bindir)/rollover-logs
+	$(RM) -f $(bindir)/mhcmake
+	cat mhcmake.src | sed -e 's@/www/bin@$(bindir)@g' >$(bindir)/mhcmake
+	chmod a+x $(bindir)/mhcmake
+	$(RM) -f $(bindir)/show-doc.mhc
+	cat show-doc.mhc | sed -e 's@/www/bin@$(bindir)@g' >$(bindir)/show-doc.mhc
+	chmod a+x $(bindir)/show-doc.mhc
+FORCE:
+

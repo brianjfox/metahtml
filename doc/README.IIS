@@ -1,0 +1,51 @@
+README.IIS: -*- Text -*- Instructions for running Meta-HTML under MS IIS.
+Author: Henry Minsky (hqm@ua.com) Fri, 24 Jan 1997 17:07
+
+Associating Interpreters with Applications (Script Mapping)
+
+    With file-name extension mapping, you can map file-name extensions
+    to the proper program to run files with those extensions. The
+    following file-name extensions are preinstalled:
+
+    .bat or .cmd=C:\Winnt\System32\cmd.exe /c %s %s 
+
+    .idc=C: \Winnt\System32\Inetsrv\Httpodbc.dll 
+
+    For other file-name extensions, you must edit the information in
+    the the Windows NT registry.
+
+    In the .bat example above, the first %s is the mapped URL (that
+    is, C:\InetPub\Scripts\Test.bat). The second %s represents the
+    parameters to the URL (in other words, the query string; the
+    second %s is used only if an equals sign is not found).
+
+    Thus, you can reference URLs such as: 
+
+    /scripts/test.bat?This+is+a+search 
+
+Instructions for adding a script mapping to IIS:
+
+    1. Start Regedt32.exe and open
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\W3SVC\Parameters\ScriptMap
+
+    2. Add a new entry of type REG_SZ.
+       This means it is a null terminated string.
+
+    3. Type the file-name extension used for your scripts, for example
+       ".mhtml", remember to include the ".".
+
+    4. In the String editor, type the full path to the interpreter
+       used with that script. (C:\METAHTML\bin\nph-mhtml.exe)
+
+    5. Restart the WWW service.
+
+================================================================
+
+The metahtml engine can be made to run on every file which
+ends with .mhtml.
+
+    A. Add a Registry entry as indicated above
+
+    B. Make sure to set the Executable button on the
+       directory from which you are serving documents, using
+       the Internet Server control panel (Directories)

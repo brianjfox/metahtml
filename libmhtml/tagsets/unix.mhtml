@@ -1,0 +1,117 @@
+;;; unix.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;; Copyright (c) 1998, 2001 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Fri Oct  2 13:02:48 1998.
+
+<defun unix::hostname>
+  <set-var hostprog = <path::find-executable hostname>>
+  <when <get-var-once hostprog>>
+    <set-var host[] = <cgi-exec <get-var-once hostprog>>>
+    <get-var-once host>
+  </when>
+</defun>
+
+<defun unix::get-passwd-entry username &key file>
+  <defvar file /etc/passwd>
+  <set-var read? = <dir::read-file <get-var-once file> passwords>>
+  <coerce-var passwords type=array>
+  <foreach line passwords>
+    <unset-var info>
+    <set-var info=<subst-in-string <get-var-once line> ":" "\n">>
+    <coerce-var info type=array>
+    <when <string-eq <get-var-once username> <get-var-once info[0]>>>
+      <in-package local>
+	<set-var
+	  username = <get-var-once ^::info[0]>
+	  password = <get-var-once ^::info[1]>
+	  uid = <get-var-once ^::info[2]>
+	  gid = <get-var-once ^::info[3]>
+	  gecos = <get-var-once ^::info[4]>
+	  homedir = <get-var-once ^::info[5]>
+	  shell = <get-var-once ^::info[6]>>
+	<package-to-alist>
+      </in-package>
+      <break>
+    </when>
+  </foreach>
+</defun>
+
+<defun unix::put-passwd-entry userinfo &key file>
+  <defvar file /etc/passwd>
+  <set-var username = <alist-get-var userinfo username>>
+  <set-var read? = <dir::read-file <get-var-once file> passwords>>
+  <coerce-var passwords type=array>
+  <set-var maxid=1>
+  <foreach line passwords iter=x>
+    <unset-var info>
+    <set-var info=<subst-in-string <get-var-once line> ":" "\n">>
+    <coerce-var info type=array>
+    <if <gt maxid info[2]>
+	<set-var maxid=<get-var-once info[2]>>>
+    <if <string-eq <get-var-once username> <get-var-once info[0]> caseless=t>
+	<set-var index=<get-var-once x>>>
+  </foreach>
+
+  <defvar index <array-size passwords>>
+  <set-var passwords[index] =
+    <concat
+     <alist-get-var userinfo username> ":"
+     <or <alist-get-var userinfo password> "!!"> ":"
+     <or <alist-get-var userinfo uid> <get-var-once maxid>> ":"
+     <or <alist-get-var userinfo gid>
+	 <alist-get-var userinfo uid>
+	 <get-var-once maxid>>
+     ":"
+     <or <alist-get-var userinfo gecos> <alist-get-var userinfo username>> ":"
+     <or <alist-get-var userinfo homedir> "/tmp"> ":"
+     <or <alist-get-var userinfo shell> "/etc/nologin">>>
+  <dir::write-file <get-var-once file> passwords>
+</defun>
+
+<defun unix::all-passwd-entries &key file>
+  <defvar file /etc/passwd>
+  <set-var read? = <dir::read-file <get-var-once file> passwords>>
+  <coerce-var passwords type=array>
+  <foreach line passwords>
+    <unset-var info>
+    <set-var info=<subst-in-string <get-var-once line> ":" "\n">>
+    <coerce-var info type=array>
+    <in-package local>
+      <set-var
+	username = <get-var-once ^::info[0]>
+	password = <get-var-once ^::info[1]>
+	uid = <get-var-once ^::info[2]>
+	gid = <get-var-once ^::info[3]>
+	gecos = <get-var-once ^::info[4]>
+	homedir = <get-var-once ^::info[5]>
+	shell = <get-var-once ^::info[6]>>
+      <array-append <package-to-alist> ^::results>
+    </in-package>
+  </foreach>
+  <get-var-once results[]>
+</defun>
+
+<defun unix::get-group-entry username &key file>
+  <defvar file /etc/group>
+  <set-var loaded=<dir::read-file <get-var-once file> groupdata>>
+  <coerce-var groupdata type=array>
+  <foreach line groupdata>
+    <unset-var info>
+    <set-var info=<subst-in-string <get-var-once line> ":" "\n">>
+    <coerce-var info type=array>
+    <when <string-eq <get-var-once username> <get-var-once info[0]>>>
+      <in-package local>
+	<set-var
+	  username = <get-var-once ^::info[0]>
+	  password = <get-var-once ^::info[1]>
+	  gid = <get-var-once ^::info[2]>
+	  users = <get-var-once ^::info[3]>>
+	<subst-in-var users "[ \t,]+" "\n">
+	<coerce-var users type=array>
+	<package-to-alist>
+      </in-package>
+      <break>
+    </when>
+  </foreach>
+</defun>
+

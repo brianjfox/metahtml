@@ -1,0 +1,115 @@
+;;; create-section.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul  3 10:40:00 1996.
+<set-var title="Create Documentation Section">
+<include header.mhtml>
+
+<when <get-var posted::action>>
+  <if <string-eq <get-var-once posted::action> Cancel>
+      <redirect <get-var mhtml::url-to-dir>/function-index.mhtml>>
+
+  <when <string-eq <get-var-once posted::action> "Delete Definition">>
+    <set-var key =
+      <upcase <subst-in-string <get-var-once posted::section>
+			       "^[ \t]+" ""
+			       "[ \t]+$" ""
+			       " +" "-">>>
+    <with-open-database db <metahtml::section-db> mode=write>
+      <database-delete-record db <get-var-once key>>
+    </with-open-database>
+    <redirect <get-var mhtml::url-to-dir>/toc.mhtml>
+  </when>
+
+  <when <string-eq <get-var-once posted::action> "Save Definition">>
+    <set-var missing =
+      <var-case
+	section=""	Section
+	short-desc=""	"Short Description">>
+
+    <when <not <get-var missing>>>
+      <copy-package raw-posted posted>
+      <unset-var posted::action>
+      <package-delete rec>
+
+      <alist-to-package <package-to-alist posted> rec>
+      <set-var rec::section =
+	<upcase <subst-in-string <get-var-once rec::section>
+				 "^[ \t]+" ""
+				 "[ \t]+$" ""
+				 " +" "-">>>
+
+      <unset-var rec::key>
+      <with-open-database db <metahtml::section-db> mode=write-create>
+	<set-var x =
+	  <database-save-package db <upcase <get-var-once rec::section>>
+				 rec strip=t>>
+      </with-open-database>
+
+      <redirect view-section.mhtml?<cgi-encode section>>
+    </when>
+  </when>
+
+  <when <string-eq <get-var-once posted::action> "Edit Definition">>
+  </when>
+</when>
+
+<if <and <get-var-once posted::key> <not <get-var-once posted::section>>>
+    <set-var
+      posted::section=<get-var-once posted::key>
+      section=<get-var-once posted::section>>>
+
+<when <get-var-once posted::section>>
+  <with-open-database db <metahtml::section-db> mode=read>
+    <set-var x =
+      <database-load-record db <upcase <get-var-once posted::section>>>>
+  </with-open-database>
+</when>
+
+<center>
+  <form method=post action="<thisdoc>">
+    <table>
+      <tr>
+	<td align=right> <b>Section Name:</b> </td>
+	<td align=left>
+	  <input type=text size=30 name=section value=<get-var-once section>>
+	  <input type=submit name=action value="Edit Definition">
+	</td>
+      </tr>
+
+      <tr>
+	<td align=right> <b> Search Keywords: </b> </td>
+	<td align=left colspan=2>
+	  <input type=text size=60 name=keywords
+		 value="<get-var-once keywords>">
+	</td>
+      </tr>
+
+      <subst-in-var short-desc "&" "&amp;" "<" "&lt;" ">" "&gt;">
+      <tr>
+	<td align=right> <b>Short Description:</b> </td>
+	<td align=left colspan=2>
+	  <concat <textarea name=short-desc rows=8 cols=60 WRAP="PHYSICAL">
+		  <get-var-once short-desc>
+		  </textarea>>
+	</td>
+      </tr>
+
+      <subst-in-var long-desc "&" "&amp;">
+      <tr>
+	<td align=right> <b>Long Description:</b> </td>
+	<td align=left colspan=2>
+	  <concat <textarea name=long-desc rows=20 cols=60 WRAP="PHYSICAL">
+		  <get-var-once long-desc>
+		  </textarea>>
+	</td>
+      </tr>
+    </table>
+
+    <input type=submit name=action value="Save Definition">
+    <input type=submit name=action value="Delete Definition">
+    <input type=submit name=action value="Cancel">
+  </form>
+</center>
+
+<include footer.mhtml>

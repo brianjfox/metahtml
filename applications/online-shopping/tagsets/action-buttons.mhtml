@@ -1,0 +1,68 @@
+;;; action-buttons.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1995 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Nov 21 10:51:02 1995.
+
+;;;
+;;; The Netscape browser passes the "value" of the button that was
+;;; clicked on in a form, not just the name.  For other browsers, only
+;;; the name of the button is passed, and it is passed without any
+;;; value. 
+;;;
+;;; Use <action-button "Save File" "Delete File"> to make the buttons
+;;; in the form.
+;;;
+;;; Use <action-retrieve "Save File" "Delete File"> to set the
+;;; variable "action" to the action which was selected.
+;;;
+<set-var ab::vertical-layout=true>
+<set-var mhtml::html-2.0-compliant =
+  <match <get-var env::http_user_agent> "(Mozilla|Explorer|OmniWeb)">>
+
+<defsubst action-buttons>
+  <set-var ab::buttons[]="%0\n%1\n%2\n%3\n%4\n%5\n%6\n%7\n%8\n%9" ab::index=0>
+  <if <or <not <get-var ab::buttons[1]>>
+	  <get-var mhtml::html-2.0-compliant>>
+      <prog
+	<while <get-var ab::buttons[ab::index]>>
+	  <input type=submit name=action
+		 value="<get-var ab::buttons[ab::index]>">
+	  <increment ab::index>
+	</while>>
+    <prog
+      Select from the following:<br>
+      <while <get-var ab::buttons[ab::index]>>
+        <input type=radio name="action"
+	       value="<get-var ab::buttons[ab::index]>"
+	       <if <eq <get-var ab::index> 0> checked>>
+	<get-var ab::buttons[ab::index]>
+	<if <get-var ab::vertical-layout> <br>>
+	<increment ab::index>
+      </while>
+      <input type=submit name=ignore value="Do It">>>
+</defsubst>
+
+;;;
+;;; You give the same list to this function as you gave in the
+;;; <action-buttons> statement on the input page.  It sets the
+;;; variable "action" to the button which was pressed.
+
+<defsubst action-retrieve>
+  <when <not <get-var mhtml::html-2.0-compliant action>>>
+    <if <not "%1">
+	<set-var action="%0">
+      <prog
+	<set-var
+	  ab::buttons[]="%0\n%1\n%2\n%3\n%4\n%5\n%6\n%7\n%8\n%9"
+	  ab::index=0
+	  ab::posted=<package-vars posted>>
+	<while <get-var ab::buttons[ab::index]>>
+	  <set-var ab::present = 
+	    <match <get-var ab::posted>
+		   "action-<get-var ab::buttons[ab::index>">>
+	  <if <get-var ab::present>
+	      <set-var action="<get-var ab::buttons[ab::index]>" ab::index=10>
+	    <increment ab::index>>
+	  </while>>>
+  </when>
+</defsubst>

@@ -1,0 +1,455 @@
+;;;  input-macros.mhtml -*- Meta-HTML -*- 
+;;;
+;;;  functions for input and verification of standard input types
+;;;
+;;;  Copyright (c) 1995 Jarlath O' Carroll
+;;;  Author: Jarlath O' Carroll - (jarlath@oisin.com) Jan '96
+
+
+;;;
+;;; Macro to get the evaluated result in a selection box
+;;;
+<defsubst optionify whitespace=delete>
+  <option value="%1"
+	  <ifeq "<get-var %0>" "%1" "selected" >
+	  > %2
+</defsubst>
+
+;;;
+;;; Get month index number
+;;;
+<defsubst get-month-index whitespace=delete>
+  <var-case
+   %0="Jan" "1"
+   %0="Feb" "2"
+   %0="Mar" "3"
+   %0="Apr" "4"
+   %0="May" "5"
+   %0="Jun" "6"
+   %0="Jul" "7"
+   %0="Aug" "8"
+   %0="Sep" "9"
+   %0="Oct" "10"
+   %0="Nov" "11"
+   %0="Dec" "12">
+</defsubst>
+
+;;;
+;;; Given ARG0 the month index return the 3 character 
+;;; description of same month
+;;;
+<defsubst get-indexed-month whitespace=delete>
+  <var-case
+   %0="1"  "Jan"
+   %0="2"  "Feb"
+   %0="3"  "Mar"
+   %0="4"  "Apr"
+   %0="5"  "May"
+   %0="6"  "Jun"
+   %0="7"  "Jul"
+   %0="8"  "Aug"
+   %0="9"  "Sep"
+   %0="10" "Oct"
+   %0="11" "Nov"
+   %0="12" "Dec">
+</defsubst>
+
+;;;
+;;; Get number of days in month given ARG1 as month in 3 character 
+;;; or numeric month index form
+;;;
+<defsubst get-month-days whitespace=delete>
+  <set-var gmd::x="%0">
+  <if <match <get-var <get-var gmd::x>> "^0+">
+      <set-var <get-var gmd::x>=
+	<match <get-var <get-var gmd::x>> "^0+" action=delete>>>
+  <if <match <get-var <get-var gmd::x>> "^[0-9][0-9]?$">
+      <prog
+       <set-var gmd::x=<get-var <get-var gmd::x>>>
+       <set-var gmd::num-of-days=
+		<var-case
+		 gmd::x="1" "31"
+		 gmd::x="2" "28"
+		 gmd::x="3" "31"
+		 gmd::x="4" "30"
+		 gmd::x="5" "31"
+		 gmd::x="6" "30"
+		 gmd::x="7" "31"
+		 gmd::x="8" "31"
+		 gmd::x="9" "30"
+		 gmd::x="10" "31"
+		 gmd::x="11" "30"
+		 gmd::x="12" "31">>>       
+    <prog
+     <set-var gmd::num-of-days=
+	      <var-case
+	       gmd::x="Jan" "31"
+	       gmd::x="Feb" "28"
+	       gmd::x="Mar" "31"
+	       gmd::x="Apr" "30"
+	       gmd::x="May" "31"
+	       gmd::x="Jun" "30"
+	       gmd::x="Jul" "31"
+	       gmd::x="Aug" "31"
+	       gmd::x="Sep" "30"
+	       gmd::x="Oct" "31"
+	       gmd::x="Nov" "30"
+	       gmd::x="Dec" "31">>>>
+  <get-var gmd::num-of-days>
+</defsubst>
+
+;;;
+;;; Day of Date Selector
+;;;
+<defsubst date-day-selection whitespace=delete>
+  <set-var i=1>
+  <select name="%0" size=1>
+  <optionify "%0" "None" "None">
+  <while <lt <get-var i> 32>>
+    <optionify "%0" "<get-var i>" "<get-var i>">
+    <increment i>
+  </while>
+  </select>
+</defsubst>
+
+
+;;;
+;;; Month of Date Selection
+;;;
+<defsubst date-month-selection whitespace=delete>
+  <select name="%0" size=1>
+  <optionify "%0" "None" "None">
+  <optionify %0 Jan January>
+  <optionify %0 Feb Febuary>
+  <optionify %0 Mar March>
+  <optionify %0 Apr April>
+  <optionify %0 May May>
+  <optionify %0 Jun June>
+  <optionify %0 Jul July>
+  <optionify %0 Aug August>
+  <optionify %0 Sep September>
+  <optionify %0 Oct October>
+  <optionify %0 Nov November>
+  <optionify %0 Dec December>
+  </select>
+</defsubst>
+
+;;;
+;;; Year of Date Selection
+;;; ARG1 - IF "-x" interpreted as the number of years before the current year
+;;; ARG2 - the number of years after the current year 
+;;; ARG1 - IF "x" interpreted as the number of years after the current year
+;;;
+<defsubst date-year-selection whitespace=delete>
+  <select name="%0" size=1>
+  <optionify "%0" "None" "None">
+
+  ;;; Get todays date
+  <set-var today=<cgi-exec "date">>
+  <subst-in-var today " " "\n">
+  <set-var today[]=<get-var today>>
+  <set-var current-year=<get-var today[5]>>
+
+  <if <match "%1" "^-[0-9]$">
+      <prog <set-var current-year=<add <get-var current-year> %1>>
+	    <set-var i=%1> <set-var year-limit=%2>>
+    <prog <set-var i=0> <set-var year-limit=%1>>>
+
+  <while <lt <get-var i> <add <get-var year-limit> 1>>>
+    <optionify %0 <get-var current-year> <get-var current-year>>
+    <increment current-year>
+    <increment i>
+  </while>
+  </select>
+</defsubst>
+
+
+;;;
+;;; Time Selection
+;;; Time delivered in Arg1 number of intervals per hour: 2 = every half hour
+;;; Start time Arg2 on 24hr clock (1 - 24)
+;;; End time Arg3 on 24hr clock (1 - 24)
+;;; Default 24 - 24
+;;;
+<defsubst time-selection whitespace=delete>
+  <select name="%0" size=1>
+  <optionify "%0" "None" "None">
+  <set-var interval=<div 60 %1>>
+  <if %2 <set-var i=%2>>
+  <if <not <get-var i>> <set-var i=0>>
+  <if %3 <set-var limit=%3>>
+  <if <not <get-var limit>> <set-var limit=24>>
+  <while <not <gt <get-var i> limit>>>
+    <if <lt <get-var i> 10> <set-var i="0<get-var i>">>
+    <optionify "%0" <get-var i>:00 <get-var i>:00>
+    <set-var j=1>
+    <when %1>
+      <while <and <lt <get-var j> %1> <not <eq <get-var i> <get-var limit>>>>>
+	<optionify "%0" "<get-var i>:<mul <get-var interval> j>" 
+		   "<get-var i>:<mul <get-var interval> j>">
+	<increment j>
+      </while>
+    </when>
+    <increment i>
+  </while>
+  </select>
+</defsubst>
+
+;;;
+;;; Verify the date has the correct format.
+;;;
+<defsubst verify-date whitespace=delete>
+  <unset-var resulting-date>
+  <set-var verify-date::date=<get-var %0>>
+
+  ;;; Get todays date
+  <set-var verify-date::today=<cgi-exec "date">>
+  <subst-in-var verify-date::today " " "\n">
+  <set-var verify-date::today[]=<get-var verify-date::today>>
+  <set-var verify-date::current-year=<get-var verify-date::today[5]>>
+
+  <if <match "<get-var %0>" "^([0-9]{1,2}[- :/\\\\]?){2}(19|20)?[0-9]{2}$">
+      <prog 
+       <subst-in-var verify-date::date "\\\\\\\\" "\n" "[-/: ]" "\n">
+       <set-var verify-date::date[]=<get-var verify-date::date>>
+       <if <not <match "<get-var verify-date::date[2]>" "^(19|20)[0-9]{2}$">>
+	   <set-var verify-date::current-year=
+		    <match "<get-var verify-date::current-year>"
+			   "(19|20)" action=delete>>>
+       <if <and <gt <get-var verify-date::date[1]> 0>
+		<lt <get-var verify-date::date[1]>
+			<add <get-month-days verify-date::date[0]> 1>>
+		<gt <get-var verify-date::date[0]> 0>
+		<lt <get-var verify-date::date[0]> 13>
+		<gt <get-var verify-date::date[2]>
+		    <sub verify-date::current-year 1>>>
+	   <set-var resulting-date=<get-var %0>>>>>
+  <get-var resulting-date>
+</defsubst>
+
+
+;;;
+;;; Verify the time has the correct format.
+;;;
+<defsubst verify-time whitespace=delete>
+  <unset-var resulting-time>
+  <set-var verify-time::time=<get-var %0>>
+  <if <match "<get-var %0>" "^[0-9][0-9]?[-: ][0-9][0-9][ ]?(am|pm)?$">
+      <prog
+       <set-var verify-time::ampm=<match <get-var verify-time::time> "(am|pm)"
+					 action=extract>>
+       <subst-in-var verify-time::time "[-: ]" "\n" "pm" "" "am" "">
+       <set-var verify-time::time[]=<get-var verify-time::time>>
+       <if <or <eq <get-var verify-time::time[0]> 12>
+	       <and <gt <get-var verify-time::time[0]> 12>
+		    <prog <if <get-var verify-time::ampm>
+			      <string-eq <get-var verify-time::ampm> "pm">
+			    "true">>>>
+		    <set-var resulting-time=<get-var %0>>>
+       <if <and <get-var resulting-time>
+		<or <lt <get-var verify-time::time[0]> 24>
+		    <and <eq <get-var verify-time::time[0]> 24>
+			 <eq <get-var verify-time::time[1]> 0>>>
+		<lt <get-var verify-time::time[1]> 60>>
+	   <set-var resulting-time=<get-var %0>>
+	 <unset-var resulting-time>>>>
+  <get-var resulting-time>
+</defsubst>
+
+
+;;;
+;;; Verify the numeric value is numeric
+;;;
+<defsubst verify-numeric whitespace=delete>
+  <unset-var resulting-numeric>
+  <set-var verify-numeric::numeric=<get-var %0>>
+  <if <match "<get-var %0>" "[0-9]+">
+      <prog
+       <set-var resulting-numeric=<get-var %0>>>>
+  <get-var resulting-numeric>
+</defsubst>
+
+;;;
+;;; Verify the dollar amount has the correct format.
+;;;
+<defsubst verify-dollar whitespace=delete>
+  <unset-var resulting-dollar>
+  <set-var verify-dollars::dollar=<get-var %0>>
+  <if <match "<get-var %0>" "^[$]?[0-9]+(\\\\.[0-9][0-9]?)?$">
+      <prog
+       <set-var resulting-dollar=<get-var %0>>>>
+  <get-var resulting-dollar>
+</defsubst>
+
+;;;
+;;; Verify the email address has the correct format.
+;;;
+<defsubst verify-email whitespace=delete>
+  <unset-var resulting-email>
+  <if <match "<get-var %0>" "^[-_[:alnum:]]+@[-_[:alnum:]]+\\\\.[[:alnum:]]+">
+      <set-var resulting-email=<get-var %0>>>
+  <get-var resulting-email>
+</defsubst>
+
+;;;
+;;; Verify the url is in the correct format.
+;;;
+<defsubst verify-url whitespace=delete>
+  <unset-var resulting-url>
+  <subst-in-var %0 "http://" "" "http:\\\\\\\\" "" "http:" "" " " "">
+  <set-var tmp-url=<get-var %0>>
+  <if <match "<get-var tmp-url>" "^[-_[:alnum:]]+\\\\.[-_[:alnum:]]+\\\\.[[:alnum:]]+(/[~[:alnum:]]+){0,10}">
+      <set-var resulting-url=<concat "http://" "<get-var tmp-url>">>>
+  <get-var resulting-url>
+</defsubst>
+
+
+;;;
+;;; Verify the phone number is in the correct format.
+;;;
+<defsubst verify-phone whitespace=delete>
+  <unset-var resulting-phone>
+  <subst-in-var %0 " " "-">
+  <set-var tmp-phone=<get-var %0>>
+
+  ;;; US number including area code
+  <if <match "<get-var tmp-phone>" "^(1-|1)?[0-9]{3}[-]?[0-9]{3}[-]?[0-9]{4}$">
+      <set-var resulting-phone=<get-var tmp-phone>>>
+  ;;; US number excluding area code
+  <if <match "<get-var tmp-phone>" "^[0-9]{3}[-]?[0-9]{4}$">
+      <set-var resulting-phone=<get-var tmp-phone>>>
+  ;;; international number, with optional 011 prefix, specify country code
+  <if <match "<get-var tmp-phone>" "^(011-|011)?[0-9]{1,3}[-]?[0-9]{1,4}[-]?[0-9]{3,4}[-]?[0-9]{3,4}$">
+      <set-var resulting-phone=<get-var tmp-phone>>>
+  ;;; international number, not specifying country code
+  <if <match "<get-var tmp-phone>" "^[0-9]{1,4}[-]?[0-9]{3,4}[-]?[0-9]{3,4}$">
+      <set-var resulting-phone=<get-var tmp-phone>>>
+  <get-var resulting-phone>
+</defsubst>
+
+
+;;;
+;;; Verify SSN
+;;;
+<defsubst verify-ssn whitespace=delete>
+  <set-var tmp-ssn=<get-var "%0">>
+  <subst-in-var tmp-ssn "[- \t]+" "">
+  <if <eq 9 "<match <get-var tmp-ssn> ".*" action=length>">
+      <get-var tmp-ssn>>
+</defsubst>
+
+<comment>
+  Original
+  <defsubst verify-ssn whitespace=delete>
+    <unset-var resulting-ssn>
+    <subst-in-var %0 " " "-">
+    <set-var tmp-ssn=<get-var %0>>
+    <if <match "<get-var tmp-ssn>" "^[0-9]{3}[-]?[0-9]{2}[-]?[0-9]{4}$">
+	<set-var resulting-ssn=<get-var tmp-ssn>>>
+    <get-var resulting-ssn>
+  </defsubst>
+</comment>
+
+;;;
+;;; Verify Input List:  
+;;; If Arg0 specified redirect to there otherwise
+;;; fall-thru to the current page.
+;;;
+;;; Usage:
+;;;
+;;;  <verify-input-list>
+;;;  var-name1   [type=var-name-type]    [string="var-name-string"]
+;;;  .
+;;;  .
+;;;  .
+;;;  .
+;;;  </verify-input-list>
+;;;
+;;; var-name-types are:  value  -  ensure it has a value other than ""
+;;;                      email  -  ensure it has a value like an email address
+;;;                      phone  -  ensure it has a value like a phone number
+;;;                      url    -  ensure it has a value like an url
+;;;                      ssn    -  ensure it has a value like an ssn
+;;;                      date   -  ensure it has a xx/xx/xx format
+;;;                      time   -  ensure it has a xx:xx xm format
+;;;                      dollar -  ensure it has the format of a dollar amount
+;;;
+;;; default=value
+;;;
+;;; more verifable types to come...
+;;;
+;;; var-name-string:     the string you wwish to use to tell the user about
+;;;                      a problem with the input for the variable.
+;;; default=var-name
+;;;
+<defmacro verify-input-list whitespace=delete>
+  <set-var verify-list::body[]=<prog %body>>
+  <set-var verify-list::i=0>
+  <unset-var verify-list::fall-thru>
+
+  <while <and <get-var verify-list::body[verify-list::i]>
+	      <not <get-var verify-list::fall-thru>>>>
+
+    <set-var verify-list::verify-var=
+	     <get-var verify-list::body[verify-list::i]>>
+
+    <set-var verify-list::type=<match <get-var verify-list::verify-var>
+					"type=.*" action=extract>>
+    <set-var verify-list::type=<match <get-var verify-list::type>
+					"type=" action=delete>>
+    <set-var verify-list::type=<match <get-var verify-list::type>
+					" string=.*" action=delete>>
+
+
+    <set-var verify-list::string=<match <get-var verify-list::verify-var>
+					      "string=.*" action=extract>>
+    <set-var verify-list::string=<match <get-var verify-list::string>
+					      "string=" action=delete>>
+
+    <set-var verify-list::name=<match <get-var verify-list::verify-var>
+					" type=.*" action=delete>>
+    <subst-in-var verify-list::name " " "">
+
+    <if <not <get-var verify-list::string>>
+	<set-var verify-list::string=<get-var verify-list::name>>>
+
+    <if <not <get-var verify-list::type>>
+	<set-var verify-list::type=value>>
+    
+    <when <and <get-var <get-var verify-list::name>>
+	       <get-var verify-list::type>>>
+      
+      <if <and <string-eq <get-var verify-list::type> "numeric">
+		 <not <get-var <get-var verify-list::name>>>>
+	  <set-var <get-var verify-list::name>=0>>
+      <if <not <string-eq <get-var verify-list::type> "value">>
+	  <set-var verify-list::result=<verify-<get-var verify-list::type>
+					       <get-var verify-list::name>>>
+	<set-var verify-list::result=true>>
+      
+    </when>
+    
+    ;;; If result has a value then good otherwise verification failed    
+    <when <or <not <get-var <get-var verify-list::name>>>
+	      <not <get-var verify-list::result>>>>
+      <set-session-var ERROR-MESSAGE="The <get-var verify-list::string> value
+      specified is incorrect, please correct and re-submit.">
+      <if "%0"
+	  <redirect "<get-var %0>">
+	<set-var verify-list::fall-thru=true>>
+     
+    </when>
+    
+    <increment verify-list::i>
+    
+  </while>
+
+</defmacro>
+
+
+<defsubst reset-form-values whitespace=delete>
+  <set-var form-vars[]=<package-vars posted>>
+  <set-var cmd="%unset-var <get-var form-vars[]>>">
+  <subst-in-var cmd "POSTED::" "" "^%" "<">
+  <get-var cmd>
+</defsubst>

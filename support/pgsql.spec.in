@@ -1,0 +1,11 @@
+%package pgsql
+Summary: PostGres SQL connectivity module for Meta-HTML.
+Group: Applications/WWW
+Requires: metahtml
+
+%description pgsql
+Using modpgsql.so, you can enable the connection of Meta-HTML to PostGres
+databases, by simply saying <sql::set-datbase-type pgsql>.
+
+%files pgsql
+/usr/lib/metahtml/modpgsql.so

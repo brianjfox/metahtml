@@ -1,0 +1,60 @@
+#!/bin/sh
+# -*- Bash -*-
+# Start the local Meta-HTML Web Servers running.
+#
+dir=`echo $0 | sed -e 's@/[^/]*$@@'`
+if [ "$dir" = "" ]; then dir=`pwd`; fi
+PATH=$dir:$PATH:/usr/sbin
+export PATH
+export LD_LIBRARY_PATH
+LD_LIBRARY_PATH="`echo $dir | sed -e 's@/[^/]*$@@'`/lib:/lib:/usr/lib:$LD_LIBRARY_PATH"
+
+# List of hosts or web directories, one per line.
+# Each one gets its own copy of mhttpd (or Apache).
+LOCALSITES=$1
+
+dir=`echo $0 | sed -e 's@/[^/]*$@@'`
+if [ "$dir" = "" ]; then dir=`pwd`; fi
+
+if [ "$LOCALSITES" = "" ]; then
+   for dir in /etc/sysconfig /etc /usr/lib/metahtml /www/bin; do
+      if [ -f $dir/mhttpd -a ! -x $dir/mhttpd ]; then
+         LOCALSITES=$dir/mhttpd
+	 break;
+      elif [ -f $dir/MHTTPD ]; then
+	 LOCALSITES=$dir/MHTTPD
+	 break;
+      elif [ -f $dir/LOCAL-SITES ]; then
+	 LOCALSITES=$dir/LOCAL-SITES
+	 break;
+      fi
+   done
+fi
+
+if [ "$LOCALSITES" ]; then
+   MHTTPD_HOSTS=`cat $LOCALSITES 2>/dev/null`
+fi
+
+if [ "$MHTTPD_HOSTS" ]; then
+   # Start the mhttpd servers.
+   for site in $MHTTPD_HOSTS; do
+      if [ -d /www/$site/conf ]; then
+	 confdir=/www/$site/conf
+	 sitedir=/www/$site
+      elif [ -d $site ]; then
+	 confdir=$site/conf
+	 sitedir=$site
+      fi
+      if [ -x $sitedir/start-server ]; then
+         echo -n "Calling $sitedir/start-server for $site..."
+         (cd $sitedir; ./start-server)
+         echo "done."
+      elif [ -r $confdir/mhttpd.conf ]; then
+	 echo "Starting server for $site."
+	 (mhttpd --config $confdir/mhttpd.conf)
+	 sleep 1
+      else
+         echo "Cannot start server for $site: No file $confdir/mhttpd.conf."
+      fi
+   done
+fi

@@ -1,0 +1,11 @@
+;;; ncsa.mhtml: How to configure for the NCSA server.
+<set-var
+  title="Configuring for the NCSA Server"
+  prev-page="apache.mhtml" prev-title="Configuring Apache"
+  next-page="cern.mhtml" next-title="Configuring CERN">
+<include header.mhtml>
+
+<pre>
+ScriptAlias / /usr/www/docs/cgi-bin/nph-engine/
+</pre>
+<include footer.mhtml>

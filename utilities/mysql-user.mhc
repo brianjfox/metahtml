@@ -1,0 +1,94 @@
+#!/www/bin/mhc
+;;; mysql-user.mhc: -*- Meta-HTML -*-  Create a new MySQL Database user
+;;; who has access to every database that is created. 
+;;;
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Jul  4 12:13:03 1998.
+<set-var mhc::explicit-output-only=true>
+
+<defun usage &optional exit-code>
+  <mhc::print "Usage: <get-var default::program-name> [--help] [user-spec]...
+
+Grant access to a MySQL database -- should be run as a user that has 
+permission to change the MySQL grant tables (e.g., root).
+
+Each USER-SPEC is a username/password pair, separated by colons.
+
+A username can look like user@host.domain, so a complete specification
+for the user "bfox" on the host "nirvana.datawave.net" with a
+password of "foobar" would look like:
+
+  bfox@nirvana.datawave.net:foobar
+
+Can also make third element be a database: bfox@nirvana:foobar:wwwdb
+">
+  <if <var-exists exit-code>
+      <mhc::exit <get-var-once exit-code>>>
+</defun>
+
+<set-var program-name = <get-var-once program-arguments[0]>>
+<if <match <get-var-once program-name> "/">
+    <subst-in-var program-name "(.*/)([^/]+$)" "\\2">>
+<unset-var userspecs>
+<foreach arg program-arguments start=1>
+  <if <or <string-eq <get-var-once arg> "-h">
+	  <string-eq <get-var-once arg> "-?">
+	  <string-eq <get-var-once arg> "-help">
+	  <string-eq <get-var-once arg> "--help">>
+      <usage 0>
+    <array-append <get-var-once arg> userspecs>>
+</foreach>
+
+<sql::set-database-type mysql>
+
+<if <not <get-var-once userspecs>> <usage 2>>
+
+;;; Give each user full access to the database.
+<set-var
+  rec::Select_priv = Y
+  rec::Insert_priv = Y
+  rec::Update_priv = Y
+  rec::Delete_priv = Y
+  rec::Create_priv = Y
+  rec::Drop_priv = Y
+  rec::Reload_priv = Y
+  rec::Shutdown_priv = Y
+  rec::Process_priv = Y
+  rec::File_priv = Y
+  rec::Grant_priv = Y
+  rec::References_priv = Y
+  rec::Index_priv = Y
+  rec::Alter_priv = Y>
+
+<sql::with-open-database db DSN="HOST=localhost;DATABASE=mysql">
+  <foreach userspec userspecs>
+    <set-var user/pass=<subst-in-string <get-var userspec> ":" "\n">>
+    <coerce-var user/pass type=array>
+    <set-var user/host[]=<subst-in-string <get-var user/pass> "@" "\n">>
+    <set-var
+      user=<or <get-var user/host[0]> %>
+      host=<or <get-var user/host[1]> %>
+      pass=<get-var user/pass[1]>
+      data=<or <get-var user/pass[2]> %>>
+
+    <set-var
+      rec::Host     = <get-var host>
+      rec::Db       = <get-var data>
+      rec::Password = <get-var pass>
+      rec::User     = <get-var user>>
+
+    <sql::database-save-package db <get-var user> rec keyname=User table=db>
+    <sql::database-save-package db <get-var user> rec keyname=User table=user>
+    <sql::database-exec-sql
+     db "UPDATE user SET password = password('<get-var pass>')
+          WHERE user = '<get-var user>' AND host = '<get-var host>'">
+    <if <not <string-eq <get-var-once host> '%'>>
+	<sql::database-save-package db <get-var host> rec
+				    keyname=host table=host>>
+  </foreach>
+</sql::with-open-database>
+<mhc::print <system-error-output retrieve>>
+<mhc::print <debugging-output retrieve>>
+
+
+  

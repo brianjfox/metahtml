@@ -1,0 +1,59 @@
+;;; entry-action.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;; Copyright (c) 1995 Universal Access, Inc
+;;; Author: Brian J. Fox (bfox@ua.com) Tue Sep 12 17:46:26 1995.
+
+<include substs.mhtml>
+<include ../macros/action-buttons.mhtml>
+
+;;; Using existing class or new class.
+<set-var class=<or <get-var posted::class> <get-session-var current-class>>>
+
+;;; Force the Product-ID to have no spaces.
+<subst-in-var Product-ID "[ \t\n]" "-">
+<subst-in-var Unit-Price "[$a-zA-Z,]" "">
+<if <and <get-var Unit-Price>
+	 <not <match <get-var Unit-Price> "[.]">>>
+    <set-var Unit-Price = "<get-var Unit-Price>.00">>
+
+<defsubst add-entry>
+  <with-open-database db <db-of-class <get-var class>> mode=<get-var dbwrite>>
+    <database-save-record db "<canonicalize <get-var Product-ID>>"
+      Class Product-ID Product-Name Unit-Price Attributes Short-Description
+      Product-Description Information-URL>
+  </with-open-database>
+</defsubst>
+
+<defsubst put-back-and-get-next>
+  <add-entry>
+  <with-open-database db <db-of-class <get-var class>> mode=<get-var dwrite>>
+    <set-var key=<database-next-key db "<canonicalize <get-var Product-ID>>">>
+    <if <not <get-var key>>
+	<prog
+	  <set-var key=<database-first-key db>>
+	  <set-session-var session-message="At Start of Database">>>
+  </with-open-database>
+  <redirect "<get-var mhtml::url-to-dir>/edit-entry.mhtml?<cgi-encode class key>">
+</defsubst>
+
+<defsubst del-entry>
+  <with-open-database db <db-of-class <get-var class>> mode=<get-var dbwrite>>
+    <database-delete-record db "<canonicalize <get-var Product-ID>>">
+  </with-open-database>
+</defsubst>
+
+<action-retrive "Add/Modify" "Remove" "Put Back and Get Next">
+<var-case
+  action="Add/Modify"	<add-entry>
+  action="Remove"	<del-entry>
+  action="Put Back and Get Next"  <put-back-and-get-next>>
+
+;;; When debugging, show the package variables.
+;;;
+;;; <set-var debugging-shopping=t>
+<if <get-var debugging-shopping>
+    <prog
+      Action was: `<get-var action>'<br>
+      Database is: `<db-of-class <get-var class>>'<br>
+      <include /macros/dump-package.mhtml>
+      <dump-all-packages>>
+  <redirect <get-var mhtml::url-to-dir>/view-class.mhtml>>

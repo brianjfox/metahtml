@@ -1,0 +1,6 @@
+;;; base-unset-var.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 21:51:01 1996.
+
+Result: "Before: Some String After:": <set-var var1="Some String">Before: <get-var var1><unset-var var1> After: <get-var var1>

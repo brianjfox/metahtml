@@ -1,0 +1,68 @@
+;;; sillyserve.mhc: -*- Meta-HTML -*-  Example of a silly server.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Oct  1 08:11:44 1997.
+<set-var mhc::explicit-output-only = true>
+
+<defun silly::kill-self>
+  <unset-var silly::server-active>
+</defun>
+
+<defun silly::get-line>
+  <with-open-stream s *standard-input* mode=read notimeout=true>
+    <set-var line=<stream-get s stop-at="\n">>
+  </with-open-stream>
+  <subst-in-var line "[<>]" "" "^[ \t\r\n]+" "" "[ \t\r\n]+$" "">
+  <get-var-once line>
+</defun>
+
+<defun silly::put-line line>
+  <with-open-stream s *standard-output* mode=write-create>
+    <stream-put s "<get-var-once line>\n">
+  </with-open-stream>
+</defun>
+
+<defun commands::hello command &rest args[]>
+  <silly::put-line "Hello yourself!">
+</defun>
+
+<defun commands::goodbye command &rest args[]>
+  <silly::put-line "Goodbye to you!">
+  <silly::kill-self>
+</defun>
+
+<defun commands::get command &rest args[]>
+  <silly::put-line "`<get-var command>' called with: ">
+  <foreach arg args>
+    <silly::put-line <get-var-once arg>>
+  </foreach>
+</defun>
+
+<defun commands::unimplemented command &rest args[]>
+  <silly::put-line "Unknown command `<get-var-once command>'">
+</defun>
+
+<defun silly::do-command line>
+  <set-var args[]=<subst-in-string <get-var-once line> "[ \t\r\n]+" "\n">>
+  <set-var function = <get-var-once args[0]>>
+  <set-var command = <get-var-once function>>
+  <array-shift -1 args>
+  <if <not <function-def commands::<get-var-once function>>>
+      <set-var function=unimplemented>>
+  <set-var :expr = <commands::<get-var-once function>
+			      <get-var-once command>
+			      <get-var-once args[]>>>
+  <get-var :expr>
+</defun>
+  
+<defun silly::server-handler>
+  <set-var silly::server-active = true>
+  <silly::put-line "Welcome to the Simply Silly Server!">
+  <while <get-var silly::server-active>>
+    <set-var line = <silly::get-line>>
+    <silly::do-command <get-var-once line>>
+  </while>
+</defun>
+
+<set-var x = <load-module ./serverfuncs.so>>
+<server::make-server silly::server-handler 2005>

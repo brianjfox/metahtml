@@ -1,0 +1,46 @@
+;;; cart-display.mhtml: -*- Meta-HTML -*-
+;;; <include> this to display the contents of the shopping cart, for
+;;; browsers which do not support HTML Tables.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox, Jarlath O' Carroll
+
+<when <get-var contents[0]>>
+  <center>
+    <set-var i=0 total=0 num-items=0 names[]=<package-vars cart>>
+    <table border>
+      <tr>
+	<td align=center><b><i>Cancel</i></b></td>
+	<td align=center><b><i>Quantity</i></b></td>
+	<td align=center><b><i>Item Name</i></b></td>
+	<td align=center><b><i>Unit Price</i></b></td>
+	<td align=center><b><i>Product Description/Remarks</i></b></td>
+	<td align=center><b><i>Total</i></b><br></td>
+      </tr>
+
+      <while <get-var contents[i]>>
+	<breakout-contents contents[i]>
+	<load-item>
+
+	;;; Okay.  CLASS, KEY, QUANTITY, and INFO have been set
+	;;; up, and the info about this item has been loaded.  Display
+	;;; a row if this item has a quantity greater than 0.
+	<set-var mhtml::decimal-places=2>
+	<set-var real-price=<mul quantity unit-price>>
+	<tr>
+	  <td align=center>
+	    <input type=checkbox name="DELETE::<get-var i>">
+	  </td>
+	  <td align=center><input name="QUANTITY::<get-var i>" value="<get-var quantity>" size=5></td>
+	  <td align=left><get-var product-name></td>
+	  <td align=right>$<get-var unit-price></td>
+	  <td align=center><or <get-var info> &nbsp;></td>
+	  <td align=right>$<get-var real-price><br></td>
+	</tr>
+	<set-var total=<add total real-price>>
+	<unset-var mhtml::decimal-places>
+	<set-var num-items=<add num-items quantity>>
+	<increment i>
+      </while>
+    </table>
+  </center>
+</when>

@@ -1,0 +1,27 @@
+<set-var title="Order Received">
+<include header.mhtml>
+
+<font size=7>
+<center>
+<p><br><br><br><br><br><br>
+<i><b>THANK YOU</b></i>
+<p>
+<i><b>FOR YOUR ORDER!!!</b></i>
+</center>
+</font>
+
+<p><br>
+<plain-text>
+  Your order has been received, and had this been a real Internet store,
+  with genuine products, we'd be sending them to you right now!
+
+  Compare, you can't do better than here!
+
+  <b>Please feel free to
+  <a href="<get-var mhtml::url-to-dir>/">Continue Shopping</a>
+  at your leisure.</b>
+</plain-text>
+
+<p><br>
+
+<include footer.mhtml>

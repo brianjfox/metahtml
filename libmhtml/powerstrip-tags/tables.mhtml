@@ -1,0 +1,143 @@
+;;; tables.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Dec 15 15:41:00 1996.
+<defun tables::maxcols-of array[]>
+  <set-var i=0 maxcols=0>
+  <while <get-var array[i]>>
+    <set-var x[] = <subst-in-string <get-var array[i]> ";" "\n">>
+    <set-var cols = <mul 2 <array-size x>>>
+    <if <gt cols maxcols> <set-var maxcols=<get-var cols>>>
+    <increment i>
+  </while>
+  <get-var maxcols>
+</defun>
+
+<defmacro tables::titled-table &body body &attributes attr>
+  <table border=0>
+    <tr> <th align=left> <%%eval <get-var-once attr>> </th> </tr>
+    <tr>
+      <td>
+	<table>
+	  <get-var-once body>
+	</table>
+      </td>
+    </tr>
+  </table>
+</defmacro>
+
+<defun tables::layout-table-data data[]>
+  <set-var maxcols=<tables::maxcols-of <get-var data[]>>>
+  <set-var index=0>
+  <while <get-var data[index]>>
+    <set-var elements[]=<subst-in-string <get-var data[index]> ";" "\n">>
+    <set-var i=0>
+    <tr>
+      <while <get-var elements[i]>>
+	<set-var info[]=<subst-in-string <get-var elements[i]> "," "\n">>
+	<if <string-eq <substring <get-var info[0]> 0 1> "!">
+	    <set-var read-only?=true info[0]=<substring <get-var info[0]> 1>>
+	  <unset-var read-only?>>
+	<increment i>
+	<td align=right> <b><get-var info[0]>:</b> </td>
+	<td align=left
+	    <if <and <not <get-var elements[i]>>
+		     <lt <mul i 2> maxcols>>
+		"colspan=<sub maxcols <mul <sub i 1> 2>>">>
+	  <if <get-var read-only?>
+	      <prog <i> <or <get-var default::<get-var info[2]>> &nbsp;> </i>>>
+	  <if <get-var info[3]>
+	      <concat <textarea name="<get-var info[2]>"
+				cols=<get-var info[1]>
+				rows=<get-var info[3]>>
+		      <get-var default::<get-var info[2]>>
+		      </textarea>>
+	    <input type=<if <get-var read-only?> hidden text>
+		   size=<get-var info[1]> name="<get-var info[2]>"
+		   value="<or <get-var default::<get-var info[2]>>
+			<get-var site::<get-var info[2]>>>">>
+	</td>
+      </while>
+    </tr>
+    <increment index>
+  </while>
+</defun>
+
+<defun tables::display-table-data data[]>
+  <set-var maxcols=<tables::maxcols-of <get-var data[]>>>
+  <set-var index=0>
+  <while <get-var data[index]>>
+    <set-var elements[]=<subst-in-string <get-var data[index]> ";" "\n">>
+    <set-var i=0>
+    <tr>
+      <while <get-var elements[i]>>
+	<set-var info[]=<subst-in-string <get-var elements[i]> "," "\n">>
+	<if <string-eq <substring <get-var info[0]> 0 1> "!">
+	    <set-var info[0]=<substring <get-var info[0]> 1>>>
+	<increment i>
+	<td align=right> <b><get-var info[0]>:</b> </td>
+	<td align=left
+	    <if <and <not <get-var elements[i]>>
+		     <lt <mul i 2> maxcols>>
+		"colspan=<sub maxcols <mul <sub i 1> 2>>">>
+	  <i> <or <get-var default::<get-var info[2]>> &nbsp;> </i>
+	</td>
+      </while>
+    </tr>
+    <increment index>
+  </while>
+</defun>
+
+<defun vertical-table array-name width link extra-link-info>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Lay out a table according to number of columns, but listing each
+  ;;; item vertically.  The number of items to each column is determined
+  ;;; by dividing the total number of items by the number of desired columns.
+  <parser::canonicalize-var array-name>
+  <set-var array[]=<get-var-once <get-var array-name>[]>>
+  <set-var size=<alist-get-var <symbol-info array> SIZE>>
+  <set-var limit=<div size <or <get-var width> 1>>>
+  <set-var leftover = <sub size <mul limit <or <get-var width> 1>>>>
+
+  <set-var i=0 limits[]="">
+  <while <lt i width>>
+    <set-var limits[i]=<get-var limit>>
+    <increment i>
+  </while>
+
+  <set-var i=0>
+  <while <gt leftover 0>>
+    <increment limits[i]>
+    <increment i>
+    <decrement leftover>
+  </while>
+
+  <table width=100%>
+    <set-var i=0 col=0>
+    <tr valign=top>
+      <while <lt col width>>
+        <set-var count=0>
+        <td align=left width=<div 100 width>%>
+          <while <and <get-var-once array[i]> <lt count limits[col]>>>
+            <set-var key=<get-var-once array[i]>>
+            <if <get-var-once link>
+                <if <not <match <get-var link> "#">>
+                    <concat <a href="<get-var-once link>?<cgi-encode key>"
+                               <get-var extra-link-info>>
+                            <get-var-once key>
+                            </a>>
+                  <concat <a href="#<get-var key>">
+                          <get-var-once key>
+                          </a>>>
+              <get-var-once key>>
+            <br>
+            <increment i>
+            <increment count>
+          </while>
+        </td>
+        <increment col>
+      </while>
+    </tr>
+  </table>
+</defun>
+

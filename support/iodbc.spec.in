@@ -1,0 +1,12 @@
+%package iodbc
+Summary: iODBC connectivity module for Meta-HTML.
+Group: Applications/WWW
+Requires: metahtml
+
+%description iodbc
+Using modiodbc.so, you can enable the connection of Meta-HTML to OpenLink
+Software's iODBC drivers.
+
+%files iodbc
+/usr/lib/metahtml/modiodbc.so
+

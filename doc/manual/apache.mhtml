@@ -1,0 +1,187 @@
+;;; apache.mhtml: How to configure for the Apache server.
+<set-var
+  title="Configuring for the Apache Server"
+  prev-page="serverconf.mhtml" prev-title="Server Configuration"
+  next-page="apache-fastcgi.mhtml" next-title="FastCGI Apache">
+<include header.mhtml>
+
+<plain-text>
+  There are three possibilities to choose from when configuring your
+  Apache server to work with <Meta-HTML> files:
+
+  <ol>
+    <li> You can <a href="#every">run every document on your
+    server through the <Meta-HTML> CGI Engine</a>.  While there is
+    nothing horribly wrong with this, it is essentially equivalent to
+    running the <Meta-HTML> server itself, so we do not highly
+    recommend it.
+
+    <li> You can <a href="#action">run only <Meta-HTML>
+    documents through the <Meta-HTML> CGI Engine</a>, foregoing the
+    ability to use statefull sessions with non-cookie capable
+    browsers.  If you never use statefull sessions, or, if you only
+    have cookie-capable clients connecting to your server (e.g.,
+    Netscape, MSIE), this solution is completely reasonable, and
+    totally painless.
+
+    <li> You can <a href="#compile">run only <Meta-HTML>
+    documents through the <Meta-HTML> CGI Engine</a>, handling the
+    case of non-cookie capable browsers co-existing with statefull
+    sessions.  This is our recommended configuration.
+  </ol>
+
+  <br>
+  <h3>Step 1: Install the Engine:</h3>
+  In order for the Engine to operate under Apache, you must place it
+  in your <code>cgi-bin</code> directory, and make it executable.  For
+  example, if your <code>srm.conf</code> file contained:
+  <pre>
+   ScriptAlias /cgi-bin/ /www/htdocs/cgi-bin/</pre>
+  then you would copy the Engine and its config file to that directory:
+  <pre>
+   user@host$ cp engine/engine /www/htdocs/cgi-bin/nph-engine
+   user@host$ cp engine/engine.conf /www/htdocs/cgi-bin/</pre>
+
+  <br>
+  <h3>Step 2: Edit the <code>engine.conf</code> file:</h3>
+  Now edit the <code>engine.conf</code> file in
+  <code>/www/htdocs/cgi-bin</code>, simply by reading the comments.
+  For most installations, you won't actually need to change any of the
+  parameters defined within -- the saavy site administrator may wish
+  to add special behaviour, or to modify the existing behaviour.
+
+  <br>
+  <h3>Step 3: Edit the Apache <code>srm.conf</code> file:</h3>
+  Now edit the <code>srm.conf</code> for your Apache server.
+  There are two possible edits:
+
+  <ol>
+    <a name="every"></a>
+    <b><li>Running Every Document Through the Engine</b>
+
+    Add the following line before all of your other <code>ScriptAlias</code>
+    lines:
+    <pre>
+     ScriptAlias / /cgi-bin/nph-engine
+    </pre>
+
+    <a name="action"></a>
+    <b><li>Running Only <Meta-HTML> Documents Through the Engine</b>
+
+    Add the following lines to the <code>srm.conf</code> file, before
+    all other <code>ScriptAlias</code> lines:
+    <pre>
+     AddType metahtml/interpreted .mhtml
+     Action metahtml/interpreted /cgi-bin/nph-engine
+    </pre>
+  </ol>
+
+  <a name="compile"></a>
+  <br>
+  <h3>Step 4: Compiling Apache 1.x With the <Meta-HTML> "mini-module":</h3>
+  If you want to make sure that non-cookie capable browsers can have
+  statefull sessions, you will need to recompile your 1.x server
+  with the <Meta-HTML> mini-module installed.  Here is how to do that:
+
+  <ol>
+    <b><li></b>
+    Place the following line in <code>src/Configuration</code> (in
+    your Apache 1.x source tree)
+    <pre>
+     Module mhtml_module           mod_mhtml.o</pre>
+
+    <b><li></b>
+    Copy the <code>mod_mhtml.c</code> file to the <code>src</code>
+    directory of your Apache 1.x source tree.
+
+    <b><li></b>
+    Reconfigure the compilation of your server by typing
+    <code>./Configure</code> from the <code>src</code> directory of
+    your Apache 1.x source tree.
+
+    <b><li></b>
+    Recompile the Apache server by typing <code>make</code>, and then
+    copy the <code>httpd</code> file to whereever you have installed
+    the previous version of the Apache server.
+  </ol>
+
+  <h3>That's it!</h3>
+  Congratulations!  You have configured the <Meta-HTML> Engine to work
+  with your Apache server!
+
+  So that you can see exactly what the mini-module does, I have
+  included the source code below:
+</plain-text>
+
+<pre>
+  /* mod_mhtml.c: -*- C -*-  Apache mini-module code for Meta-HTML. */
+
+  #include "httpd.h"
+  #include "http_config.h"
+  #include "http_request.h"
+  #include "http_core.h"
+  #include "http_protocol.h"
+  #include "http_log.h"
+  #include "http_main.h"
+  #include "util_script.h"
+
+  /* If the URI starts with a string of digits, leave them there, but
+     make the filename be everything after it. */
+  static int
+  translate_filename (struct request_rec *req)
+  {
+    register int i;
+    int result = DECLINED;
+
+    if ((req->uri != (char *)NULL) &&
+        ((req->uri[0] == '/') && (isdigit (req->uri[1]))))
+      {
+        for (i = 1; isdigit (req->uri[i]); i++);
+
+
+        /* If the URI contains a cookie, then gobble it, stuff it into
+           req->subprocess_env, and move along. */
+        if (req->uri[i] == '\0' || req->uri[i] == '/')
+          {
+            register int j;
+            char *value = (char *)palloc (req->pool, 1 + i);
+            table *page_env = req->subprocess_env;
+
+            strncpy (value, req->uri + 1, i - 1);
+            value[i - 1] = '\0';
+
+            for (j = 0; req->uri[i] != '\0'; j++, i++)
+              req->uri[j] = req->uri[i];
+
+            req->uri[j] = '\0';
+
+            /* Now stuff the value into a meaningful environment variable. */
+            table_add (req->subprocess_env, "METAHTML_URL_COOKIE", value);
+          }
+      }
+
+    return (result);
+  }
+
+  module mhtml_module =
+  {
+     STANDARD_MODULE_STUFF,
+     NULL,                      /* initializer */
+     NULL,                      /* dir config creater */
+     NULL,                      /* dir merger --- default is to override */
+     NULL,                      /* server config */
+     NULL,                      /* merge server config */
+     NULL,                      /* command table */
+     NULL,                      /* handlers */
+     translate_filename,        /* filename translation */
+     NULL,                      /* check_user_id */
+     NULL,                      /* check auth */
+     NULL,                      /* check access */
+     NULL,                      /* type_checker */
+     NULL,                      /* fixups */
+     NULL                               /* logger */
+  };
+</pre>
+
+<include footer.mhtml>
+

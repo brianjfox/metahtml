@@ -1,0 +1,6 @@
+#!/www/bin/mhc
+;;; show-doc.mhc: -*- Meta-HTML -*-  Show documentation of arg1.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Jul  7 13:56:40 1998.
+<mhc::print <mdb::describe-function <get-var-once program-arguments[1]>>>

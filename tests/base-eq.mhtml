@@ -1,0 +1,17 @@
+;;; base-eq.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sat Oct 26 18:13:47 1996.
+
+Result: true: <eq 3 3>
+Result: true: <eq 3 3.0>
+Result: true: <eq 3.0000 3.0>
+Result: true: <eq 3.00001 3.00001>
+Result: : <eq 3.00001 -3.00001>
+Result: true: <eq -3.00001 -3.00001>
+Result: true: <eq -3.00 -3.00000>
+Result: true: <eq -3. -3.0000>
+Result: true: <eq -3. -3.>
+Result: : <eq -3.00 -9.00000>
+Result: : <eq -3. 9.0000>
+Result: : <eq -3. .>

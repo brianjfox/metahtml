@@ -1,0 +1,79 @@
+;;; test-math.mhtml: -*- Meta-HTML -*-  Test the arithmetic functions.
+;;;
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 23 01:37:09 PDT 1996
+
+<defsubst gt-test whitespace=delete>
+  <test-section gt>
+  <test-entry><gt 9 5></test-entry>
+  <test-entry><gt 9.0 5.0></test-entry>
+  <test-entry><not <gt 5 9.0>></test-entry>
+</defsubst>
+
+<defsubst lt-test whitespace=delete>
+  <test-section lt>
+  <test-entry><lt 5 9></test-entry>
+  <test-entry><lt 5.0 9.0></test-entry>
+  <test-entry><not <lt 9.0 5>></test-entry>
+</defsubst>
+
+<defsubst eq-test whitespace=delete>
+  <test-section eq>
+  <test-entry><eq 3 3></test-entry>
+  <test-entry><eq 3 3.0></test-entry>
+  <test-entry "true"><prog <set-var x=3> <eq x 3>></test-entry>
+</defsubst>
+
+<defsubst add-test whitespace=delete>
+  <test-section add>
+  <test-entry 2><add 1 1></test-entry>
+  <test-entry 2><add 4 -2></test-entry>
+  <test-entry 2><add -8 10></test-entry>
+  <test-entry 2><add 1.7 .3></test-entry>
+</defsubst>
+
+<defsubst sub-test whitespace=delete>
+  <test-section sub>
+  <test-entry 2><sub 4 2></test-entry>
+  <test-entry 2><sub -2 -4></test-entry>
+  <test-entry 2><sub 1 -1></test-entry>
+  <test-entry 2><sub 2.5 .5></test-entry>
+</defsubst>
+ 
+<defsubst mul-test whitespace=delete>
+  <test-section mul>
+  <test-entry 2><mul 1 2></test-entry>
+  <test-entry 2><mul 2 1></test-entry>
+  <test-entry 2><mul -2 -1></test-entry>
+  <test-entry 2><mul -4 -.5></test-entry>
+</defsubst>
+
+<defsubst div-test whitespace=delete>
+  <test-section div>
+  <test-entry 2><div 2 1></test-entry>
+  <test-entry 2><div -2 -1></test-entry>
+  <test-entry 2><div 16 8></test-entry>
+  <test-entry 2><div -4 -2.0></test-entry>
+</defsubst>
+
+<defsubst mod-test whitespace=delete>
+  <test-section mod>
+  <test-entry 2><mod 102 50></test-entry>
+  <test-entry 2><mod 5 3></test-entry>
+  <test-entry -2><mod -5 3></test-entry>
+  <test-entry -2><mod -5 -3.0></test-entry>
+</defsubst>
+
+<defsubst increment-test whitespace=delete>
+  <test-section increment>
+  <test-entry 2><set-var x=1><increment x><get-var x></test-entry>
+  <test-entry 2><set-var x=-1><increment x by=3><get-var x></test-entry>
+  <test-entry -2><set-var x=3><increment x by=-5><get-var x></test-entry>
+</defsubst>
+
+<defsubst decrement-test whitespace=delete>
+  <test-section decrement>
+  <test-entry 2><set-var x=3><decrement x><get-var x></test-entry>
+  <test-entry 2><set-var x=-1><decrement x by=-3><get-var x></test-entry>
+  <test-entry -2><set-var x=1><decrement x by=3><get-var x></test-entry>
+</defsubst>

@@ -1,0 +1,6 @@
+;;; base-set-form-input-values.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 18:27:56 1996.
+
+Result: <form><input type=text name="full-name" value="" size=10></form><set-form-input-values>: <set-var full-name="Jarlath O'Carroll Esq."><form><input type=text name="full-name" value="" size=10></form><set-form-input-values>

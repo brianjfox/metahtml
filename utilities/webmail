@@ -1,0 +1,122 @@
+#!/www/bin/mhc
+;;; webdomo.mhtml: -*- Meta-HTML -*-
+;;;
+;;; Copyright (c) 1996 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Jun  2 02:48:52 1996.
+;;;
+;;; This program is the target of a sendmail alias.  It receives an E-Mail
+;;; message from standard input, and then POSTs the material to the web page
+;;; which actually handles E-mail.  Simple and effective, this implements
+;;; an extremely straightforward way to bridge Internet mail onto a web site.
+;;;
+
+;;; The program itself produces no implicit output.
+<set-var mhc::explicit-output-only=true>
+
+;;; So, use this subst to "print" things if you have to.
+<defsubst print whitespace=delete>
+  <with-open-stream print *standard-output* type=file mode=write>
+    <stream-put print <prog %body>>
+  </with-open-stream>
+</defsubst>
+
+;;; Get the contents of the mailed message.
+<with-open-stream s *standard-input* type=file mode=read>
+  <stream-get-contents s the-message>
+</with-open-stream>
+
+;;; Get every header from the message, placing them into a list of
+;;; headers.  The headers will be posted to the web page as separate
+;;; variables, along with the body.
+<set-var line-start-indicator="%line-start%">
+<coerce-var the-message type=string>
+<subst-in-var the-message "\n" "\n<get-var line-start-indicator>">
+<set-var temp[]=<get-var-once the-message>>
+<set-var headers[]="" hindex=0 tindex=0>
+
+;;; The first line should be "From  bfox@ai.mit.edu".
+;;; That's the last person to send this message.  If it went through a
+;;; couple of alias lists, it might not reflect the sender at all.
+;;; Change this string to "Last-Known-Sender", and pass that header
+;;; instead.
+<set-var headers[hindex] =
+  <subst-in-string <get-var-once temp[tindex]>
+                   "^From[ \t]+" "Last-Known-Sender: ">>
+<increment hindex>
+<increment tindex>
+<subst-in-var temp[tindex] "^<get-var line-start-indicator>" "">
+
+;;; The rest of the headers follow.
+<while <and <get-var-once temp[tindex]>
+	    <match <get-var-once temp[tindex]> ":">>>
+  <set-var headers[hindex]=<get-var-once temp[tindex]>>
+  <increment tindex>
+  <subst-in-var temp[tindex] "^<get-var line-start-indicator>" "">
+  <while <match <get-var-once temp[tindex]> "^[ \t]+">>
+    <subst-in-var temp[tindex] "^[ \t]+" " ">
+    <set-var headers[hindex]= <get-var-once headers[hindex] temp[tindex]>>
+    <increment tindex>
+    <subst-in-var temp[tindex] "^<get-var line-start-indicator>" "">
+  </while>
+  <increment hindex>
+</while>
+
+;;; Get the message body.
+<package-delete headers>
+<set-var temp[tindex]="%end-of-headers%\n<get-var-once temp[tindex]>">
+<set-var the-body = <get-var-once temp[]>>
+<subst-in-var the-body
+	      "\n<get-var line-start-indicator>" "\n"
+	      "^.*\n%end-of-headers%\n" "">
+
+;;; Make a package containing the headers.
+<set-var i=0>
+<while <get-var-once headers[i]>>
+  <set-var
+    name=<match <get-var-once headers[i]> "^[^:]+" action=extract>
+    value=<match <get-var-once headers[i]> "^[^:]+:[ \t]*" action=delete>>
+  <set-var j=0>
+  <while <get-var-once headers::<get-var-once name>[j]>>
+    <increment j>
+  </while>
+  <set-var headers::<get-var-once name>[j]=<get-var-once value>>
+  <increment i>
+</while>
+
+;;; Post this to our well known URL.
+<set-var host=<or <get-var program-arguments[1]> www.ua.com:80>>
+<set-var doc=<or <get-var program-arguments[2]>
+		 /System/E-Mail/e-mail-handler.mhtml>>
+
+;;; Make a nice postable string.
+<set-var header-names=<package-vars headers strip=true>>
+<set-var headers::the-body=<get-var-once the-body>>
+<set-var headers::header-names=<get-var-once header-names>>
+<set-var expr = "<%cgi-encode the-body header-names <get-var header-names>>">
+<subst-in-var expr "^<%" "<">
+<in-package headers>
+  <set-var default::contents=<get-var default::expr>>
+</in-package>
+<subst-in-var contents "^([\r\n]+[ \t]*[\r\n]+)+" "">
+<set-var content-length = <match <get-var-once contents> ".*" action=length>>
+
+<comment>
+  <with-open-stream s /tmp/bfox type=file mode=write-create>
+    <stream-put s "\n ***** START OF WEBMAIL OUTPUT *****\n">
+    <stream-put s <get-var-once the-body>>
+    <stream-put s "\n ***** END OF WEBMAIL OUTPUT *****\n">
+  </with-open-stream>
+</comment>
+
+<with-open-stream s <get-var host> type=tcp mode=write-create>
+  <stream-put s "POST <get-var doc> HTTP/1.0\r\n">
+  <stream-put s "User-Agent: Meta-HTML-Mail-Poster/1.0\r\n">
+  <stream-put s "Host: <get-var host>\r\n">
+  <stream-put s "Accept: */*\r\n">
+  <stream-put s "Content-type: application/x-www-form-urlencoded\r\n">
+  <stream-put s "Content-length: <get-var content-length>\r\n\r\n">
+  <stream-put s "<get-var-once contents>\r\n">
+  <stream-get-contents s ignore>
+</with-open-stream>
+
+

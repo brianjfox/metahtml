@@ -1,0 +1,120 @@
+;;; browse-restrict.mhtml: -*- Meta-HTML -*-  Restrict the amount of
+;;; information which appears in the database browser.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Nov  2 23:19:09 1997.
+<defvar browser-page rolodex-browse.mhtml>
+<if <get-var-once posted::cancel> <redirect <get-var browser-page>>>
+<set-var title="Selection Configurator">
+<include header.mhtml>
+<unset-var mhtml::cacheable>
+<require browser>
+<session-import browser browser>
+
+<set-var :fields[]=<browser::database-fields> default::field-names[]="">
+
+<foreach :field :fields>
+  <package-delete :info>
+  <alist-to-package <get-var :field> :info>
+  <when <not <get-var-once :info::is_unique>>>
+    <array-append <get-var :info::name> default::field-names>
+  </when>
+</foreach>
+
+<when <get-var-once posted::no-restrictions>>
+  <set-var browser::restrictions[]="">
+  <session-export browser browser>
+  <redirect <get-var browser-page>>
+</when>
+
+<when <get-var-once posted::set-restrictions>>
+  <unset-var posted::set-restrictions>
+  <set-var browser::restrictions[]="">
+  <set-var i=0>
+  <while <lt i 4>>
+    <set-var
+     :name = <get-var posted::field-name-<get-var i>>
+     :rule = <get-var posted::field-rule-<get-var i>>
+     :value = <get-var posted::field-value-<get-var i>>>
+    <subst-in-var :rule "NOT=" "<>">
+
+    <when <or <not <string-eq <get-var :rule> "LIKE">>
+              <get-var :value>>>
+      <set-var expr = <concat "<get-var :name> "
+                              "<get-var :rule> "
+                              "'"
+                              <if <match <get-var :rule> LIKE> "%">
+                              <get-var :value>
+                              <if <match <get-var :rule> LIKE> "%">
+                              "'">>
+      <array-append <get-var expr> browser::restrictions>
+    </when>
+    <increment i>
+  </while>
+  <set-var browser-window::window-start = 0>
+  <session-export browser browser>
+  <session-export browser-window browser-window>
+  <redirect <get-var-once browser-page>>
+</when>
+
+<browser::parse-restrictions browser::restrictions>
+
+<layout::page>
+  <center>
+    <form method=post action=<thisdoc>>
+      <input type=hidden name=browser-page value=<get-var browser-page>>
+
+      <h3> Restrict Selections: </h3>
+
+      <set-var i=0>
+      <while <lt i 4>>
+        <table border=2 width=500 bgcolor="#D8BFD8" cellspacing=0>
+          <tr valign=center>
+            <td align=left>
+	      <font color=#000000>
+              <concat
+               "where "
+               <select name=field-name-<get-var i>>
+               <foreach f field-names>
+               <option <if <string-eq <get-var field-name-<get-var i>>
+                                      <get-var f>> SELECTED>> <get-var f> "\n"
+               </foreach>
+               </select>
+               <select name=field-rule-<get-var i>>
+               <option value=LIKE
+                       <if <string-eq <get-var field-rule-<get-var i>>
+                                      LIKE> SELECTED>>
+               "contains"
+               <option value="NOT LIKE"
+                       <if <string-eq <get-var field-rule-<get-var i>>
+                                      "NOT LIKE"> SELECTED>>
+               "doesn't contain"
+               <option value="="
+                       <if <string-eq <get-var field-rule-<get-var i>>
+                                      "="> SELECTED>>
+               "is exactly"
+               <option value="NOT="
+                       <if <string-eq <get-var field-rule-<get-var i>>
+                                      "<>"> SELECTED>>
+               "is not"
+               </select>
+               <input type=text name=field-value-<get-var i> size=20
+                      value="<get-var field-value-<get-var i>>">>
+	      </font>
+            </td>
+          </tr>
+        </table>
+        <increment i>
+      </while>
+      <p>
+      <font color=#000000>
+      <input type=submit name=set-restrictions value="Set Restrictions">
+      <input type=submit name=no-restrictions value="No Restrictions">
+      <input type=submit name=cancel value="Cancel">
+      </font>
+    </form>
+  </center>
+</layout::page>
+
+<include footer.mhtml>
+

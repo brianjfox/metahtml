@@ -1,0 +1,110 @@
+;;; maintenance/maintenance-action.mhtml: -*- Meta-HTML -*-
+;;;
+;;; Allow the user to enter the maintenance password if they haven't
+;;; done so successfully yet.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Tue Sep 12 22:47:30 1995.
+;;;
+;;; Get the maintenance password, and then try to do some maintenance.
+;;;
+<include tagsets/action-buttons.mhtml>
+
+<when <not <get-var posted::action>>>
+  <set-var title="Maintenance Authorization">
+  <include header.mhtml>
+
+  <if <check-password password>
+      <prog
+	<session-import "" .pack>
+	<if <match <package-vars .pack> "MAINTENANCE-PASSWORD">
+	    <set-var been-here-before=true>>
+	<if <and <get-var been-here-before>
+		 <get-session-var "maintenance-password">
+		 <redirect "<get-var mhtml::url-to-dir>/catalog/">>>>>
+
+  <if <or <not <or <get-var password-db-readable>
+		   <get-var password-present-p>>>
+	  <not <get-var system-password>>>
+      <set-var allow-creation=true>>
+
+  <when <not <get-var been-here-before>>>
+    <plain-text first-char=<font size="+2">>
+    In order to do maintenance, you must have the maintenance password.
+
+    Without the maintenance password, you may still view the screens for
+    performing the catalog maintenance, but you will not be allowed to
+    change the information contained in the catalog.
+
+    If you know the password, then enter it below.  In any case, you may
+    still click on <b>Maintain</b> in order to see the maintenance
+    pages, or you may return to
+      <a href="<get-var mhtml::last-url>">
+	<small-caps>
+	  OnLine Shopping:<get-session-var mhtml::last-title>
+	</small-caps>
+      </a>. 
+    </plain-text>
+  </when>
+
+  <when <get-var allow-creation>>
+    <plain-text first-char=<font size=+2>>
+	Your system currently doesn't have password protection for the
+	purposes of maintaining the <small-caps>OnLine Shopping</small-caps>
+	Catalog.  You can give your system password protection by
+	simply typing in the system password here, and clicking on
+	<b>Create Password</b>.
+
+	Click <b>Maintain</b> without entering any password if you are
+	happy not having a system password (<i>not recommended!!</i>).
+	Without a system password, anybody who accesses your pages may
+	be able to change the contents of the catalog database.
+    </plain-text>
+  </when>
+
+  <hr>
+  <form method=POST action="<get-var mhtml::current-doc>">
+  <table>
+    <tr>
+      <td align=right>Maintenance Password:</td>
+      <td><input type=password size=8 name=system-password value=""></td>
+    </tr>
+  </table>
+  <if <get-var allow-creation>
+      <action-buttons "Create Password" "Maintain">
+    <action-buttons "Maintain">>
+  </form>
+  <include footer.mhtml>
+</when>
+
+;;; What to do when a button has been clicked.
+;;;
+;;; Check the posted password against the session database password.
+;;; If they are the same, place that password in the user session.
+;;; Otherwise, not.
+;;;
+<when <get-var posted::action>>
+  <include tagsets/substs.mhtml>
+
+  <set-session-var maintenance-password="<get-var posted::system-password>">
+  <action-retrieve "Create Password" "Maintain">
+  <var-case
+    action="Create Password"
+    <prog
+      <with-open-database db <database password> mode=write-create>
+        <set-var
+	  password-db-writeable = true
+	  password-written-p =
+	  <database-save-record db system-password system-password>>
+      </with-open-database>
+      <if <and <get-var password-db-writeable>
+	       <get-var password-written-p>>
+	  <prog
+	    <set-session-var session-message =
+	      "The maintenance password has been set!">
+	    <set-session-var maintenance-password = <get-var system-password>>>
+	<set-session-var error-message =
+	  "The password database could not be written!">>>>
+  <redirect "<get-var mhtml::url-to-dir>/catalog/">
+</when>
+

@@ -1,0 +1,27 @@
+;;; view-source.mhtml: -*- Meta-HTML -*-  View a specific Roldex source page.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 27 22:32:55 1998.
+
+<set-var title="Source Viewer">
+<include header.mhtml>
+
+<if <not <get-var-once env::query_string>>
+    <redirect welcome.mhtml>>
+
+<set-var file=<get-var-once env::query_string>>
+<set-var file=<subst-in-string <get-var-once file> "(.*/)([^/]+$)" "\\2">>
+
+;;; Allow users to view the contents of the tagsets directory.
+<if <match <get-var-once env::query_string> "tagsets">
+    <set-var file = tagsets/<get-var-once file>>>
+
+<set-var contents=<dir::read-file <thisdir>/<get-var-once file>>>
+<subst-in-var contents "&" "&amp;" "<" "&lt;" ">" "&gt;">
+
+<layout::page>
+  <h3> Source of: <get-var-once file> </h3>
+  <pre><get-var-once contents></pre>
+</layout::page>
+
+<include footer.mhtml>

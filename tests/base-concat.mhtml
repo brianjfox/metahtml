@@ -1,0 +1,8 @@
+;;; base-concat.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 03:22:00 1996.
+
+Result: 12345: <concat 1 2 3 4 5>
+Result: "To whom it may concern or anybody else for that matter": <set-var tmp="To whom it may concern"><concat <get-var tmp> " or anybody else for that matter">
+Result: Towhomitmayconcernoranybodyelseforthatmatter: <concat To whom it may concern or anybody else for that matter>

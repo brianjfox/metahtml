@@ -1,0 +1,125 @@
+;;; options.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Aug 17 10:35:24 1996.
+<set-var title="QuickTalk Options">
+<include header.mhtml>
+
+<make-innocuous posted>
+<if <string-eq <get-var-once posted::action> "Create Temp Room">
+    <redirect create-room.mhtml>>
+
+<when <get-var action>>
+  <when <string-eq <get-var action> "Set Options">>
+    <unset-var posted::action>
+    <set-var posted::current-room = <get-var posted::room>>
+    <unset-var posted::room>
+    <set-var current-room=<get-session-var chat::current-room>>
+    <alist-to-package <package-to-alist posted> chat>
+    <when <not <string-eq <get-var chat::current-room>
+			  <get-var current-room>>>>
+      <set-var handle=<get-session-var chat::handle>>
+      <set-var chat::handle=QUICKTALK>
+      <chat::add-to-history "[<get-var handle> has joined us...]">
+      <unset-var chat::handle>
+    </when>
+    <session-export chat chat>
+  </when>
+  <redirect chat.mhtml>
+</when>
+
+<session-import chat chat>
+
+<ptext>
+  <center>  <h3><quicktalk> Options</h3> </center>
+
+  You can modify a few parameters controlling the behaviour of
+  <quicktalk> here.
+</ptext>
+
+<p>
+
+<set-var history-lines=<or <get-var chat::history-lines> 10>>
+<set-var refresh-interval=<or <get-var chat::refresh-interval> 15>>
+<set-var show-times=<get-var chat::show-times>>
+<set-var room=<get-var chat::current-room>>
+<set-var rows = <or <get-var chat::rows> 1>>
+<set-var cols = <or <get-var chat::cols> 50>>
+
+<center>
+  <form method=post action="<thisdoc>">
+    <table>
+      <tr>
+	<td align=right> <b>History Lines: </b> </td>
+	<td align=left>
+	  <select name=history-lines>
+	    <select-option history-lines 5>
+	    <select-option history-lines 6>
+	    <select-option history-lines 7>
+	    <select-option history-lines 8>
+	    <select-option history-lines 9>
+	    <select-option history-lines 10>
+	    <select-option history-lines 15>
+	    <select-option history-lines 20>
+	    <select-option history-lines 25>
+	    <select-option history-lines 30>
+	    <select-option history-lines 35>
+	    <select-option history-lines 40>
+	    <select-option history-lines 50>
+	    <select-option history-lines 100>
+	  </select>
+	</td>
+	<td align=right> <b> Refresh Interval: </b> </td>
+	<td align=left>
+	  <select name=refresh-interval>
+	    <select-option refresh-interval None>
+	    <select-option refresh-interval 5>
+	    <select-option refresh-interval 10>
+	    <select-option refresh-interval 15>
+	    <select-option refresh-interval 20>
+	    <select-option refresh-interval 30>
+	    <select-option refresh-interval 60>
+	    <select-option refresh-interval 120>
+	  </select>
+	</td>
+	<td align=right> <b> Show Times: </b> </td>
+	<td align=left>
+	  <input type=radio name=show-times value="true"
+		 <if <get-var show-times> CHECKED>>Yes<br>
+	  <input type=radio name=show-times value=""
+		 <if <string-eq <get-var show-times> ""> CHECKED>>No
+	</td>
+      </tr>
+      <tr>
+	<td align=right> <b> Input Cols: </b> </td>
+	<td align=left>
+	  <select name=cols>
+	    <select-option cols 30>
+	    <select-option cols 40>
+	    <select-option cols 50>
+	    <select-option cols 60>
+	    <select-option cols 70>
+	    <select-option cols 80>
+	  </select>
+	</td>
+	<td align=right> <b> Input Rows: </b> </td>
+	<td align=left>
+	  <select name=rows>
+	    <select-option rows 1>
+	    <select-option rows 2>
+	    <select-option rows 3>
+	    <select-option rows 4>
+	    <select-option rows 5>
+	  </select>
+	</td>
+      </tr>
+      <chat::select-room>
+    </table>
+    <p>
+    <input type=submit name=action value="Set Options">
+    <input type=submit name=action value="Create Temp Room">
+    <input type=submit name=action value="Cancel">
+  </form>
+</center>
+	
+<include footer.mhtml>

@@ -1,0 +1,6 @@
+;;; base-msql-host-databases.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 00:23:54 1996.
+
+Result: test: <msql::host-databases host=localhost>

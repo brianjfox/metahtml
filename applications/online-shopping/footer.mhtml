@@ -1,0 +1,23 @@
+;;; footer.mhtml: -*- Meta-HTML -*-  Bottom of every page for Online-Shopping.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Sun Sep 10 08:36:39 1995.
+
+<include navbar.mhtml>
+<p>
+<center>
+  <font size=-1>
+  Designed by
+  <a href="http://www.ua.com/">Universal Access Inc.</a>
+  <br>
+  <if <get-var site::user-id>
+      <a href="<get-var mhtml::http-prefix>/System/">>
+    Implemented
+    <if <get-var site::user-id>
+	</a>>
+  in <a href="http://www.metahtml.com/">
+  <font size="-1">Meta-HTML</font></a>
+  </font>
+</center>
+</body>
+</html>

@@ -1,0 +1,6 @@
+;;; site.params: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 27 21:53:36 1998.
+<set-var site::database-engine=mysql>
+<set-var site::admin-password = "schnitzel">

@@ -1,0 +1,194 @@
+# Makefile.in: -*- Text -*-  Source for configure to make a Makefile from.
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+#
+# You should have received a copy of the UAI Free Software License
+# along with this program; if you have not, you may obtain one by
+# writing to:
+#
+# Universal Access Inc.
+# 129 El Paseo Court
+# Santa Barbara, CA
+# 93101
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+GDBMLIB = @GDBMLIB@
+GDBM_IN = @GDBM_IN@
+DBINC	= $(GDBM_IN)
+DBLIB	= $(GDBMLIB)
+
+OS_LIBS = @OS_LIBS@
+EXE	= @EXE@
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+
+bindir	= $(exec_prefix)/bin
+libdir	= $(exec_prefix)/lib
+incdir	= $(prefix)/include
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+
+# You cannot compile with anything other than GNU C.
+CC		 = gcc $(GCC_FLAGS)
+GCC_FLAGS	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+OPTIMIZE_FLAGS	= -O69
+INCLUDE_FLAGS	= -I../libutils -I../libmhtml $(DBINC)
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(INCLUDE_FLAGS)
+LDFLAGS		= $(DEBUG_FLAGS)
+
+LIBUTILS	= ../libutils/libutils.a
+LIBMHTMLSTUB	= libmhtmlstub.a
+STUBOBJECTS	= session.o database.o symbols.o stub.o session_data.o \
+		  forms.o lockname.o gdbm_session.o tcp_session.o
+STUBDEFS	= -DHAVE_CONFIG_H -DNO_EXTRAS
+LIBCC		= $(CC) $(CFLAGS) -c -I. -I.. $(INCLUDE_FLAGS) $(STUBDEFS)
+
+PARSEARGS	= parseargs.o
+
+PROGS		= binary-session$(EXE) create-session$(EXE) \
+		  delete-session$(EXE) list-sessions$(EXE) \
+		  reap-sessions$(EXE) set-session-timeout$(EXE) \
+		  session-data-test$(EXE) set-session-var$(EXE) \
+		  get-session-var$(EXE) gc-database$(EXE)
+
+REQLIBS		= $(PARSEARGS) $(LIBMHTMLSTUB) $(LIBUTILS)
+TARGETS		= $(PROGS)
+LIBRARIES	= $(REQLIBS) $(DBLIB) $(OS_LIBS)
+
+.c.o:
+	@echo Compiling $@ from $<
+	@$(CC) $(CFLAGS) $(INCLUDE_FLAGS) -c $<
+
+all:	$(TARGETS)
+
+$(LIBUTILS):
+	(cd ../libutils; $(MAKE) $@)
+
+$(LIBMHTMLSTUB): $(STUBOBJECTS)
+	$(RM) $@
+	$(AR) cq $@ $(STUBOBJECTS)
+	if [ "$(RANLIB)" ]; then $(RANLIB) $@; fi
+
+session.o: ../libmhtml/session.c
+	@echo Compiling $@ from $<
+	@$(LIBCC) -o session.o ../libmhtml/session.c
+
+session_data.o: ../libmhtml/session_data.c
+	@echo Compiling $@ from $<
+	@$(LIBCC) -o session_data.o ../libmhtml/session_data.c
+
+forms.o: ../libmhtml/forms.c
+	@echo Compiling $@ from $<
+	@$(LIBCC) -o forms.o ../libmhtml/forms.c
+
+gdbm_session.o: ../libmhtml/gdbm_session.c
+	@echo Compiling $@ from $<
+	@$(LIBCC) -o gdbm_session.o ../libmhtml/gdbm_session.c
+
+tcp_session.o: ../libmhtml/tcp_session.c
+	@echo Compiling $@ from $<
+	@$(LIBCC) -o tcp_session.o ../libmhtml/tcp_session.c
+
+database.o: ../libmhtml/database.c
+	@echo Compiling $@ from $<
+	@$(LIBCC) -o database.o ../libmhtml/database.c
+
+symbols.o: ../libmhtml/symbols.c
+	@echo Compiling $@ from $<
+	@$(LIBCC) -o symbols.o ../libmhtml/symbols.c
+
+lockname.o: ../libmhtml/lockname.c
+	@echo Compiling $@ from $<
+	@$(LIBCC) -o lockname.o ../libmhtml/lockname.c
+
+$(PROGS): $(REQLIBS)
+
+Makefile: Makefile.in
+	(cd ..; ./config.status)
+
+binary-session$(EXE): binary-session.o $(PARSEARGS)
+	@echo Compiling $@ from $<
+	@$(CC) $(LDFLAGS) -o $@ binary-session.o $(LIBRARIES)
+
+create-session$(EXE): create-session.o $(PARSEARGS)
+	@echo Compiling $@ from $<
+	@$(CC) $(LDFLAGS) -o $@ create-session.o $(LIBRARIES)
+
+delete-session$(EXE): delete-session.o $(PARSEARGS)
+	@echo Compiling $@ from $<
+	@$(CC) $(LDFLAGS) -o $@ delete-session.o $(LIBRARIES)
+
+list-sessions$(EXE): list-sessions.o $(PARSEARGS)
+	@echo Compiling $@ from $<
+	@$(CC) $(LDFLAGS) -o $@ list-sessions.o $(LIBRARIES)
+
+reap-sessions$(EXE): reap-sessions.o $(PARSEARGS)
+	@echo Compiling $@ from $<
+	@$(CC) $(LDFLAGS) -o $@ reap-sessions.o $(LIBRARIES)
+
+set-session-timeout$(EXE): set-session-timeout.o $(PARSEARGS)
+	@echo Compiling $@ from $<
+	@$(CC) $(LDFLAGS) -o $@ set-session-timeout.o $(LIBRARIES)
+
+set-session-var$(EXE): set-session-var.o $(PARSEARGS)
+	@echo Compiling $@ from $<
+	@$(CC) $(LDFLAGS) -o $@ set-session-var.o $(LIBRARIES)
+
+get-session-var$(EXE): get-session-var.o $(PARSEARGS)
+	@echo Compiling $@ from $<
+	@$(CC) $(LDFLAGS) -o $@ get-session-var.o $(LIBRARIES)
+
+session-data-test$(EXE): session-data-test.o $(PARSEARGS)
+	@echo Compiling $@ from $<
+	@$(CC) $(LDFLAGS) -o $@ session-data-test.o $(LIBRARIES)
+
+gc-database$(EXE): gc-database.o
+	@echo Compiling $@ from $<
+	@$(CC) $(LDFLAGS) -o $@ gc-database.o $(LIBRARIES)
+
+install: $(TARGETS)
+	for file in $(PROGS); do \
+	  $(INSTALL) $$file $(bindir)/$$file; \
+	done
+
+clean-executables: FORCE
+	$(RM) $(PROGS) *.a
+
+clean:  FORCE
+	$(RM) *.o *.a $(PROGS)
+
+distclean realclean: clean
+	$(RM) *.cache *.log Makefile
+
+tags TAGS: FORCE
+	(cd ..; $(MAKE) $@)
+
+FORCE:

@@ -1,0 +1,25 @@
+;;; base-defmacro.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 13:36:29 1996.
+
+Result: "Macro Definition Works": <defmacro test-macro>Macro Definition Works</defmacro><test-macro></test-macro>
+Result: "Macro Definition Works:<br>Macro Body": <defmacro test-macro>Macro Definition Works:<br>%body</defmacro><test-macro>Macro Body</test-macro>
+Result: "Macro Definition Works:   <br>   Macro Body": <defmacro test-macro>
+Macro Definition Works:   <br>   %body   
+</defmacro><test-macro>Macro Body</test-macro>
+Result: "Macro Definition Works:   <br>   Macro Body": <defmacro test-macro whitespace=delete>
+Macro Definition Works:   <br>   %body   
+</defmacro><test-macro>Macro Body</test-macro>
+Result: "Macro Definition Works:   <br>   Macro Body<br>Variables: value1 value2": <defmacro test-macro var1 var2 whitespace=delete>
+
+Macro Definition Works:   <br>   %body<br>
+
+Variables: <get-var var1> <get-var var2>   
+</defmacro><test-macro value1 value2>Macro Body</test-macro>
+Result: "Macro Definition Works:   <br>   Macro Body<br>Variables: value1": <defmacro test-macro var1 var2 var3 whitespace=delete>
+
+Macro Definition Works:   <br>   %body<br>
+
+Variables: <get-var var1> <get-var var2>   
+</defmacro><test-macro value1 "">Macro Body</test-macro>

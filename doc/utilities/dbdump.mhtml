@@ -1,0 +1,21 @@
+;;; dbdump.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 02:34:10 1996.
+<set-var title="dbdump: Print out a Database">
+<include header.mhtml>
+
+<layout::page>
+  <h3> Quickly View Database Contents </h3>
+  <ptext>
+    <synopsis dbdump filename...>
+
+    Produces an ASCII representation of the databases specified by
+    <var filename>s on the standard output.  This is mostly useful for
+    debugging, see <a href="dbpack.mhtml"><code>dbpack</code></a> for
+    generating machine independent representations of a database.
+  </ptext>
+</layout::page>
+<include footer.mhtml>
+
+

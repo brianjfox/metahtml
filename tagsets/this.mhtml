@@ -1,0 +1,64 @@
+;;; this.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Feb 25 13:00:07 1997.
+
+;;; Always reference Meta-HTML as <meta-html>
+<defsubst meta-html whitespace=delete>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Produces the canonical form of the words "Meta-HTML".
+  <concat
+   <font color="#00309B">Meta-</font>HTML
+   <if <not <get-var mhtml::printed-tm>>
+       <concat <sup><font size=-2>TM</font></sup>
+	       <increment mhtml::printed-tm>>>>
+</defsubst>
+<defsubst meta-html-notm><meta-html></defsubst>
+
+;;; The PTEXT macro is heavily used.
+<defmacro ptext whitespace=delete>
+  <plain-text first-char=<font size="+2"> nobr=true nolower=true>
+    %body
+  </plain-text>
+</defmacro>
+
+<defun thisdoc>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; The complete URL to this document, without the query string or
+  ;;; path information.
+  <get-var mhtml::url-to-dir>/<get-var mhtml::current-doc>
+</defun>
+
+<defun thisdoc-title>
+  <capitalize
+   <subst-in-string <thisdoc> "(.*/)([^/]+)(\\.mhtml$)" "\\2" "[-_]+" " ">>
+</defun>
+
+<defun thispage>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; The local web-based URL to this document, without the query string
+  ;;; or path information.
+  <subst-in-string <get-var mhtml::location> "\\?.*$" "">
+</defun>
+
+<defsubst thisdir whitespace=delete>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; The fully qualified pathname to the directory containing the currently
+  ;;; executing document.
+  <get-var mhtml::include-prefix mhtml::relative-prefix>
+</defsubst>
+
+<defsubst incdir whitespace=delete>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; The Web based pathname to the directory containing the document which
+  ;;; is currently being included with <tag include>.
+  <or <get-var %%::relpref> <get-var mhtml::relative-prefix>>
+</defsubst>
+
+<defsubst thisfile whitespace=delete>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; The fully qualified pathname to the document which is currently
+  ;;; executing.
+  <concat <get-var mhtml::include-prefix mhtml::relative-prefix>
+	  /<get-var mhtml::current-doc>>
+</defsubst>

@@ -1,0 +1,12 @@
+;;; base-sort.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 18:42:23 1996.
+
+Result: "Brian J. Fox
+Henry Q. Minsky
+Jarlath O'Carroll
+Juliana Minsky
+Micheal Fredkin
+Mike Ramsey
+Sally Barton": <set-var names[]="Henry Q. Minsky"\n"Brian J. Fox"\n"Jarlath O'Carroll"\n"Micheal Fredkin"\n"Juliana Minsky"\n"Mike Ramsey"\n"Sally Barton"><sort names><get-var names[]>

@@ -1,0 +1,61 @@
+;;; initialize.src: -*- Meta-HTML -*- 
+;;;
+;;; Copyright (c) 1996 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Wed Aug 21 08:39:42 1996.
+<defsubst initialize::initialize>
+  <session::initialize>
+  <layout::initialize>
+  <navlayout::initialize>
+</defsubst>
+
+<defsubst require-access whitespace=delete>
+  <if <not <acl-test site::user-acl "%0">>
+      <redirect /access-denied.mhtml>>
+</defsubst>
+
+<defsubst internal-message whitespace=delete>
+  <layout::page>
+  <table>
+    <tr valign=top>
+      <td align=right> <b>Note:</b> </td>
+      <td align=left>
+	<ptext>
+	  %body
+	</ptext>
+      </td>
+    </tr>
+  </table>
+  <p>
+  </layout::page>
+</defsubst>
+
+<defsubst meta-html whitespace=delete>
+  <concat
+   <font color="#cc1100">META</font>-HTML
+   <sup><font size=-2>TM</font></sup>>
+</defsubst>
+
+<defun meta-html-notm>
+  <font color="#cc1100">META</font>-HTML
+</defun>
+
+<defsubst message>
+  <set-session-var message = <prog <get-session-var message> %body>>
+</defun>
+
+<defsubst show-message>
+  <set-var message = <get-session-var message>>
+  <unset-session-var message>
+  <when <get-var message>>
+    <table>
+      <tr valign=top>
+	<td align=right> <b>Note:</b> </td>
+	<td align=left>
+	  <get-var message>
+	</td>
+      </tr>
+    </table>
+  </when>
+</defsubst>
+
+

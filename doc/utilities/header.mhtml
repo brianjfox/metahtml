@@ -1,0 +1,20 @@
+;;; header.mhtml: -*- Meta-HTML -*-  Header for the utilities.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Feb  6 14:28:40 1996.
+
+<defvar mhtml::images
+  <subst-in-string <get-var mhtml::url-to-dir-sans-sid> "[^/]+$" "images/">>
+
+<include ../header.mhtml>
+<defsubst synopsis whitespace=delete>
+  <ptext>
+  Synopsis:
+  <ul>
+    <example>
+      %body
+    </example>
+  </ul>
+  </ptext>
+</defsubst>
+

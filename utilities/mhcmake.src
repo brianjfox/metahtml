@@ -1,0 +1,242 @@
+#! /www/bin/mhc
+;;; -*- Meta-HTML -*- Mode makes me happy when editing with Emacs.
+;;;
+;;; $Id: mhcmake.src,v 1.1 2001/10/28 15:34:26 bfox Exp $
+;;; Copyright (c) 1997, 1998 Richard Tietjen
+;;; Author: Richard Tietjen <rtietjen@connix.com> 
+;;; 
+;;; Purpose: Command line utility to compile Meta-HTML tagged files
+;;; 
+;;; Usage: mhcmake [(-r| --require) macdefs-file] file file ...
+;;; 
+;;; Install: copy to a directory such as /usr/local/bin that's on your
+;;; path and chmod +x /usr/local/bin/mhcmake to make it executable.  
+;;; Set the shebang statement to your local copy of mhc,
+;;; (#!/www/bin/mhc, for instance.)
+;;; 
+;;; Note: Meta-HTML code should run through mhcmake the same way it goes
+;;; through nph-engine.  That is to say, the same code should work both
+;;; ways.  mhcmake tries to set mhtml::require-directories to what
+;;; nph-engine would see, and it redefines the require function to honor
+;;; mhtml::require-directories.  It also alters <include> to work in the
+;;; file-system environment.
+;;; 
+;;; see also: .mdbinit for mdb initialization
+;;; 
+;;; Further documentation is appended to the script.
+;;;
+
+;;; We manage all output by ourselves.
+<set-var mhc::explicit-output-only=true>
+<set-var make::version=1.0>
+
+;;;
+;;; Where to find library files. Set environment variable
+;;; MHC_REQUIRE=.:..:../tagsets to change this.
+<set-var mhtml::require-directories[] =
+  <or
+   <subst-in-string <get-var ENV::MHC_REQUIRE> ":" "\n">
+   <prog
+     .
+     ./tagsets
+     ./macros
+     ..
+     ../tagsets
+     ../macros
+     /var/www/tagsets
+     /var/www/macros>>>
+
+;;; Some utility functions.
+<defun make::print-error message>
+  <with-open-stream s *standard-error* mode=write-create>
+    <stream-put s <get-var-once message>>
+  </with-open-stream>
+</defun>
+
+<defun make::print-message message>
+  <when <not <get-var-once make::be-quiet>>>
+    <with-open-stream s *standard-error* mode=write-create>
+      <stream-put s <get-var-once message>>
+    </with-open-stream>
+  </when>
+</defun>
+
+<defun make::usage>
+  <make::print-error
+   <concat "Usage: mhcmake -q [--require filename]... "
+	   "[--output filename] input-files...\n">>
+</defun>
+
+<defun make::bad-parameter param>
+  <make::print-error "mhcmake: Bad parameter `<get-var-once param>'\n">
+  <make::usage>
+  <mhc::exit>
+</defun>
+
+;;;;;;;;;;;;;;;;
+;;;
+;;; Provide our own functions for REQUIRE and INCLUDE.
+;;;
+;;;;;;;;;;;;;;;;
+;;; INCLUDE
+<defun make::include file &key level &unevalled alt>
+  <subst-in-var file "~" <get-var ENV::HOME>>
+  ;;; <if <string-eq <substring <get-var file> 0 1> "/">
+	  ;;; <set-var  mhtml::include-prefix=""> ;;; absolute, from root
+	  ;;; <set-var  mhtml::include-prefix=".">> ;;; relative to pwd
+  <make::print-message "Including <get-var file>\n">
+  <mhc-include <get-var file> alt=<get-var-once alt>>
+</defun>
+
+;;;;;;;;;;;;;;;;
+;;;  REQUIRE
+<defun make::require file>
+  <make::print-message "Requiring <get-var file>: ">
+  <foreach dir mhtml::require-directories>
+    ;;; <require> prepends include-prefix/
+    <if <match <get-var-once dir> "^/">
+	<set-var dir = <get-var mhtml::include-prefix dir>>
+      <set-var dir = <concat 
+		      <get-var mhtml::include-prefix>
+		      <get-var mhtml::relative-prefix>
+		      "/"
+		      <get-var dir>>>>
+    <if <or <file-exists <get-var dir>/<get-var file>.src>
+	    <file-exists <get-var dir>/<get-var file>.lib>
+	    <file-exists <get-var dir>/<get-var file>.mhtml>
+	    <file-exists <get-var dir>/<get-var file>>>
+	<group
+	 <set-var
+	   found = true
+	   save-include = <get-var mhtml::include-prefix>
+	   save-relative= <get-var mhtml::relative-prefix>
+	   mhtml::relative-prefix="/" mhtml::include-prefix=<get-var dir>>
+	 <make::print-message "[succeeded (<get-var dir>/<get-var file>)]\n">
+	 <mhc-require <get-var file>>
+	 <set-var
+	   mhtml::include-prefix  = <get-var save-include>
+	   mhtml::relative-prefix = <get-var save-relative>>
+	 <break>>>
+  </foreach>
+  <if <not <get-var-once found>>
+      <make::print-message "[failed]\n">>
+</defun>
+
+<defun redirect url>
+  <make::print-error "The program tried to redirect [<get-var url>]\n">
+  <make::print-error "Giving up.\n">
+  <mhc::exit>
+</defun>
+
+;;; Now preserve original functions:
+<copy-var *meta-html*::require *meta-html*::mhc-require>
+<copy-var *meta-html*::include *meta-html*::mhc-include>
+<copy-var *user-functions*::make::include *user-functions*::include>
+<copy-var *user-functions*::make::require *user-functions*::require>
+
+;;;
+;;; more work needed:
+<defun !doctype name loc spec defs>
+  <make::require <get-var name>>
+</defun>
+;;;
+;;; inhale ~/.mhcrc configuration:
+<include <get-var ENV::HOME>/.mhcrc alt="">
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;							;;;
+;;; Parse command line for options and filenames	;;;
+;;;							;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+<unset-var make::requires make::filenames next-is-require next-is-output>
+
+<foreach arg program-arguments start=1>
+  <if <get-var-once next-is-require>
+      <concat
+       <array-append <get-var-once arg> make::requires>
+       <unset-var next-is-require>>
+    <if <get-var-once next-is-output>
+	<concat
+	 <set-var make::output-filename = <get-var-once arg>>
+	 <unset-var next-is-output>>
+      ;;; Either a command flag, or a standard filename.
+      <if <string-eq <substring <get-var-once arg> 0 1> "-">
+	  <var-case
+	    arg="-r"		<set-var next-is-require=true>
+	    arg="--require"	<set-var next-is-require=true>
+	    arg="-o"		<set-var next-is-output=true>
+	    arg="--output"	<set-var next-is-output=true>
+	    arg="-q"		<set-var make::be-quiet=true>
+	    arg="-quiet"	<set-var make::be-quiet=true>
+	    default		<make::bad-parameter <get-var arg>>>
+      <array-append <get-var-once arg> make::filenames>>>>
+</foreach>
+
+;;; User provided no files, and no requires.
+<if <not <get-var-once make::filenames make::requires>>
+    <concat
+     <make::print-error "You should really run `mhcmake' on some files.\n">
+     <make::usage>
+     <mhc::exit>>>
+
+<when <not <get-var make::be-quiet>>>
+  <make::print-error
+   <concat "mhcmake v<get-var make::version>\n"
+	   "Copyright (c) 1997, 1998 Richard Tietjen <rtietjen@connix.com>\n"
+	   "Extra Hacks: Fri May 22, 1998, Brian J. Fox <bfox@ai.mit.edu>\n"
+	   <if <get-var-once make::requires>
+	       <concat
+		" [required files: <comma-separated make::requires>]\n">>
+	   <if <get-var make::output-filename>
+	       <concat " --output <get-var make::output-filename>\n">>
+	   <concat "Run on files: <comma-separated make::filenames>\n">>>
+</when>
+
+;;; I want to run web docs through this without
+;;; change.  So output normally just goes to STDOUT
+;;; special macros can redirect to other streams if they wish.
+<defvar make::output-filename *standard-output*>
+
+;;; Default the include prefix as best as we can.  Notice the special
+;;; hack to handle "docs", and to modify the relative prefix.
+<set-var mhtml::include-prefix[] = <cgi-exec pwd>>
+<when <match <get-var-once make::filenames[0]> "^/">>
+  <set-var dir = <dir::dirname <get-var-once make::filenames[0]>>>
+  <set-var top = <match <get-var-once dir> "docs" action=endpos>>
+  <if <get-var top>
+      <set-var
+	mhtml::include-prefix = <substring <get-var-once dir> 0 <get-var top>>
+	mhtml::relative-prefix= <substring <get-var-once dir> <get-var top>>>
+    <set-var
+      mhtml::include-prefix = <get-var-once dir>
+      mhtml::relative-prefix= "">>
+  <set-var make::filenames[0] =
+    <subst-in-string <get-var-once make::filenames[0]>
+		     <get-var mhtml::include-prefix mhtml::relative-prefix>/
+		     "">>
+</when>
+
+<make::print-message " Include-Prefix: <get-var mhtml::include-prefix>\n">
+<make::print-message "Relative-Prefix: <get-var mhtml::relative-prefix>\n">
+
+;;; Now actually do the requires.
+<foreach file make::requires>
+  <make::require <get-var-once file>>
+</foreach>
+
+;;; Get filename arguments loaded, and save code in a variable.
+<set-var make::results =
+  <concat
+   <foreach file make::filenames>
+   <make::include <get-var-once file> alt=<make::print-error
+					   "Can't find `<get-var file>'\n">>
+   </foreach>>>
+
+<cleanup-whitespace make::results>
+<with-open-stream s <get-var-once make::output-filename> mode=write-create>
+  <stream-put s <get-var-once make::results>>
+</with-open-stream>
+
+<make::print-error <debugging-output retrieve clear>>
+<make::print-error <system-error-output retrieve clear>>

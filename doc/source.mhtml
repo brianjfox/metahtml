@@ -1,0 +1,54 @@
+;;; source.mhtml: -*- Meta-HTML -*-  Macros which aid in source viewing.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jul  5 09:13:05 1996.
+
+<defun source-view-link link current-path>
+  <set-var disp=<get-var link>>
+  <when <not <string-eq <substring <get-var link> 0 1> />>>
+    <set-var dir=<subst-in-string <get-var current-path> "/[^/]+$" "">>
+    <subst-in-var dir "^<get-var mhtml::include-prefix>" "">
+    <if <not <match <get-var dir> "/">> <set-var dir="">>
+    <set-var link=<get-var dir>/<get-var link>>
+  </when>
+  <concat
+   <a href="<get-var mhtml::http-prefix>/meta-html/view-file.mhtml<get-var link>">
+   <get-var disp>
+   </a>>
+</defun>
+  
+<defun manpage-link funname>
+  <a href="<get-var mhtml::http-prefix>/meta-html/manual/man-page.mhtml?KEY=<get-var funname>"><get-var funname></a>
+</defun>
+
+<defun source-of web-path highlight-keywords-p>
+  <if <string-eq <substring <get-var web-path> 0 1> />
+      <set-var path = <get-var mhtml::include-prefix web-path>>
+    <set-var path =
+      <concat <get-var mhtml::include-prefix mhtml::relative-prefix>/
+	      <get-var web-path>>>>
+
+  <with-open-stream stream <get-var path> mode=read>
+    <stream-get-contents stream contents>
+  </with-open-stream>
+  <coerce-var contents type=string>
+
+  <subst-in-var contents "&" "&amp;" "<" "&lt;" ">" "&gt;">
+  <subst-in-var contents "(^|[ \t\n]+)(\\;\\;\\;)" "\\1<font>;</font>;;">
+  <subst-in-var contents
+		"(&lt;include[ \t\n]+)([^&]+)(&gt;)"
+		"&lt;include <verbatim><source-view-link \\2 <get-var path>></verbatim>&gt;">
+
+  ;;; Now the ridiculous part.
+  <when <get-var highlight-keywords-p>>
+    <set-var i=0>
+    <set-var keywords[]=<downcase <package-vars *meta-html* strip=true>>>
+    <while <get-var keywords[i]>>
+      <subst-in-var contents
+		    "(&lt;<get-var keywords[i]>)([ \t\n])"
+		    "&lt;<manpage-link <get-var keywords[i]>>\\2">
+      <increment i>
+    </while>
+  </when>
+  <get-var contents>
+</defun>

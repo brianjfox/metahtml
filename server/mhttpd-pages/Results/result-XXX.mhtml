@@ -1,0 +1,22 @@
+;;; result-200.mhtml: -*- Meta-HTML -*-
+;;; Document contains no data.  Sorry.
+;;;
+;;;  Copyright (c) 1995 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Nov 13 18:36:14 1995.
+<html>
+<head>
+  <title>
+    Mhttpd@<get-var mhtml::server-name>:<get-var mhtml::server-port> -
+    <get-var mhttpd::result-reason>
+  </title>
+<body>
+<h2>Document contains no data!</h2>
+<hr>
+Your <b><get-var mhttpd::request-method></b> request for
+<b><get-var mhttpd::requested-url></b> from the server <b>
+<get-var mhtml::server-name></b>, resulted in a document with no
+data.  The reason given was <b><get-var mhttpd::result-reason></b>
+(HTTP code of <b><get-var mhttpd::result-code></b>).
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+;;; footer.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Apr 26 15:41:20 1997.
+<include ../footer.mhtml>

@@ -1,0 +1,10 @@
+;;; base-and.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 16:11:46 1996.
+
+Result: true: <and true true>
+Result: true: <and true true true>
+Result: : <and true "">
+Result: : <and "" true>
+Result: : <and "" "">

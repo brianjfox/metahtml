@@ -1,0 +1,44 @@
+;;; features.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Jul  6 01:45:59 1996.
+<set-var title="Language Features of Meta-HTML">
+<set-var
+  prev-page="overview.mhtml" prev-title="Language Overview"
+  next-page="install.mhtml" next-title="Installation Guide">
+
+<include header.mhtml>
+<set-var mhtml::cacheable=true>
+
+<with-open-database db <metahtml::section-db> mode=read>
+  <database-query db true keys=sections>
+</with-open-database>
+
+<sort sections>
+
+<h3>Sections contained within:</h3>
+
+<ul>
+  <set-var i=0>
+  <while <get-var sections[i]>>
+    <concat
+     <li>
+     <a href="#<get-var sections[i]>">
+     <capitalize <subst-in-string <get-var sections[i]> "-" " ">>
+     </a>
+     <br>>
+    <increment i>
+  </while>
+</ul>
+
+<p>
+
+<set-var sindex=0>
+<while <get-var sections[sindex]>>
+  <a name="<get-var sections[sindex]>"></a>
+  <format-section <get-var sections[sindex]>>
+  <increment sindex>
+</while>
+
+<include footer.mhtml>
+

@@ -1,0 +1,216 @@
+;;; uidurl.mhtml: -*- Meta-HTML -*-  The WebFaX UID to URL mapping server.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu Oct  2 20:58:50 1997.
+;;;				*Finished!: Thu Oct  2 21:30:36 1997
+<defun webfax::url-database>/www/webfax/writable/uidurl.db</defun>
+<set-var server::server-port = 4880>
+
+<defun webfax::canonicalize-id id>
+  <pad <get-var id> 8 align=right pad-char=0>
+</defun>
+
+<defun commands::store_url cmd url>
+  ;;; STORE_URL is the basic way to intern a URL.  If the URL is
+  ;;; already in the database, its assigned UID is returned, otherwise
+  ;;; a new UID is allocated and returned.  Thus, this call always
+  ;;; returns a valid number UID.
+  <package-delete temp>
+  <with-open-database db <webfax::url-database> mode=write-create>
+    <set-var present? =
+      <database-load-record db <get-var url> package=temp>>
+    <when <not <get-var present?>>>
+      <package-delete next>
+      <set-var x = <database-load-record db NEXTID package=next>>
+      <defvar next::id 0>
+      <increment next::id>
+      <set-var next::id = <webfax::canonicalize-id <get-var next::id>>>
+      <set-var temp::url= <get-var url>>
+      <set-var temp::id = <get-var next::id>>
+      <set-var x =
+	<database-save-package db <get-var url> temp strip=true>>
+      <set-var x =
+	<database-save-package db <get-var temp::id> temp strip=true>>
+      <set-var id = <get-var next::id>>
+      <set-var x = <database-save-record db NEXTID id>>
+    </when>
+    <server::put-line "0 <get-var temp::id>">
+  </with-open-database>
+</defun>
+
+<defun commands::fetch_url cmd url>
+  ;;; Either return a corresponding UID, or a response indicating the
+  ;;; URL is not in the database.
+  ;;;
+  ;;; Case sensitivity is required for the URL key string comparisons,
+  ;;; since the HTML portions of the URL demand it.  For example, the
+  ;;; URL "www.foo.com/Welcome.html" is not identical to the url
+  ;;; "www.foo.com/welcome.html", and thus must be assigned a
+  ;;; different UID.
+  <package-delete temp>
+  <with-open-database db <webfax::url-database> mode=read>
+    <set-var present? =
+      <database-load-record db <get-var url> package=temp>>
+  </with-open-database>
+  <if <get-var temp::id>
+      <server::put-line "0 <get-var temp::id>">
+    <server::put-line "1 URL_NOT_FOUND <get-var url>">>
+</defun>
+
+<defun commands::fetch_uid cmd uid>
+  ;;; FETCH_UID returns a URL for a given UID, or else a response
+  ;;; indicating the URL is not in the database.
+  <package-delete temp>
+  <set-var uid = <webfax::canonicalize-id <get-var uid>>>
+  <with-open-database db <webfax::url-database> mode=read>
+    <set-var present? =
+      <database-load-record db <get-var uid> package=temp>>
+  </with-open-database>
+  <if <get-var temp::id>
+      <server::put-line "0 <get-var temp::url>">
+    <server::put-line "1 UID_NOT_FOUND <get-var uid>">>
+</defun>
+
+<defun commands::set_uid_to_url cmd uid url>
+  ;;; Force the mapping of UID to URL.
+  <package-delete temp nextid>
+  <set-var temp::id = <webfax::canonicalize-id <get-var uid>>>
+  <with-open-database db <webfax::url-database> mode=write-create>
+    <set-var x = <database-load-record db NEXTID package=nextid>>
+    <set-var x = <database-save-package db <get-var uid> temp strip=true>>
+    <if <not <get-var nextid::id>>
+	<prog
+	  <set-var nextid::id = <get-var temp::id>>
+	  <set-var x = <database-save-package db NEXTID nextid strip=true>>>>
+  </with-open-database>
+  <server::put-line "0 <get-var url>">
+</defun>
+
+<defun commands::store_ismap cmd uid width height>
+  ;;; Associate a width and hieght with a UID.
+  <package-delete temp>
+  <set-var uid = <webfax::canonicalize-id <get-var uid>>>
+  <with-open-database db <webfax::url-database> mode=write-create>
+    <set-var x = <database-load-record db <get-var uid> package=temp>>
+    <defvar temp::uid <get-var uid>>
+    <set-var temp::width = <get-var width> temp::height = <get-var height>>
+    <set-var x = <database-save-package db <get-var uid> temp strip=true>>
+  </with-open-database>
+  <server::put-line "0 ISMAP_STORED <get-var uid>">
+</defun>
+
+<defun commands::check_ismap cmd uid>
+  ;;; Get the width and height values of an ISMAP URL, if the associated
+  ;;; UID has such values.
+  <package-delete temp>
+  <set-var uid = <webfax::canonicalize-id <get-var uid>>>
+  <with-open-database db <webfax::url-database> mode=read>
+    <set-var x = <database-load-record db <get-var uid> package=temp>>
+  </with-open-database>
+  <if <and <get-var temp::width> <get-var temp::height>>
+      <server::put-line "0 <get-var width> <get-var height>">
+    <if <get-var x>
+	<server::put-line "1 UID_NOT_ISMAP <get-var uid>">
+      <server::put-line "1 UID_NOT_FOUND <get-var uid>">>>
+</defun>
+
+<defun commands::set_last_id cmd uid>
+  ;;; Set the UID of the next free UID in the database.
+  ;;; This is a dangerous command.  If you assign a value that has already
+  ;;; been used, then new URLs that are interned may be given the same
+  ;;; UIDs as older ones, causing an inconsistent database.
+  <set-var uid = <webfax::canonicalize-id <get-var uid>>>
+  <with-open-database db <webfax::url-database> mode=write-create>
+    <set-var x = <database-save-record db NEXTID uid>>
+  </with-open-database>
+  <server::put-line "0 NEXT_UID_SET <get-var uid>">
+</defun>
+
+<defun commands::delete_uid cmd uid>
+  ;;; Deletes a UID entry from the database.
+  <set-var uid = <webfax::canonicalize-id <get-var uid>>>
+  <with-open-database db <webfax::url-database> mode=write>
+    <set-var x = <database-delete-record db <get-var uid>>>
+  </with-open-database>
+  <if <get-var x>
+      <server::put-line "0 UID_DELETED <get-var uid>">
+    <server::put-line "1 UID_NOT_FOUND <get-var uid>">>
+</defun>
+
+<defun commands::delete_url cmd url>
+  ;;; Deletes a URL entry from the database.
+  <with-open-database db <webfax::url-database> mode=write>
+    <set-var x = <database-delete-record db <get-var url>>>
+  </with-open-database>
+  <if <get-var x>
+      <server::put-line "0 URL_DELETED <get-var url>">
+    <server::put-line "1 URL_NOT_FOUND <get-var url>">>
+</defun>
+
+<defun commands::urls_matching cmd regexp>
+  ;;; List all URLs in the database which match the regular expression.
+  <set-var temp::regexp = <get-var regexp> temp::matches[]"">
+  <with-open-database db <webfax::url-database> mode=read>
+    <database-query db <and <string-eq <get-var url> <get-var key>>
+			    <match <get-var url> <get-var temp::regexp>>>
+      format = <array-append <get-var url> temp::matches>>
+  </with-open-database>
+  <foreach url temp::matches>
+    <server::put-line "0 <get-var url>">
+  </foreach>
+  <server::put-line "12 End of Listing [<array-size temp::matches> found]">
+</defun>
+
+<defun commands::list_database cmd regexp>
+  ;;; List all URLs in the database which match the regular expression.
+  <defvar regexp .*>
+  <set-var temp::regexp = <get-var regexp> temp::matches[]="">
+  <with-open-database db <webfax::url-database> mode=read>
+    <database-query db <and <string-eq <get-var url> <get-var key>>
+			    <match <get-var url> <get-var temp::regexp>>>
+      format = <array-append "<get-var uid> <get-var url>" temp::matches>>
+  </with-open-database>
+  <foreach url temp::matches>
+    <server::put-line "0 <get-var url>">
+  </foreach>
+  <server::put-line "12 End of Listing [<array-size temp::matches> found]">
+</defun>
+
+;;; ------------------------------------------------------------
+;;;
+;;; FETCHDOC COMMANDS FOLLOW:
+;;;
+<set-var
+  dtmf::2="[2AaBbCc]" dtmf::3="[3DdEeFf]" dtmf::4="[4GgHhIi]"
+  dtmf::5="[5JjKkLl]" dtmf::6="[6MmNnOo]" dtmf::7="[7PpRrSs]"
+  dtmf::8="[8TtUuVv]" dtmf::9="[9WwXxYy]" dtmf::0="[0QqZz.]"
+  dtmf::1=".">
+
+<defun dtmf::make-regexp dtmf>
+  <set-var digits[]=<subst-in-string <get-var dtmf> "(.)" "\\1\n">>
+  <foreach digit digits>
+    <set-var regexp="<get-var regexp><get-var dtmf::<get-var digit>>">
+  </foreach>
+  <get-var regexp>
+</defun>
+
+<defun commands::match_dtmf_string cmd dtmf-string max-choices>
+  ;;; Map a string of digits from a DTMF touch-tone telephone keypad to
+  ;;; a list of possible URLs from the database.
+  <set-var temp::regexp = <dtmf::make-regexp <get-var dtmf-string>>>
+  <with-open-database db <webfax::url-database> mode=read>
+    <database-query db <and <string-eq <get-var key> <get-var url>>
+			    <match <get-var url> <get-var temp::regexp>>>
+      format = <array-append <get-var url> temp::matches>>
+  </with-open-database>
+  <sort temp::matches>
+  <set-var i=0>
+  <foreach url temp::matches>
+    <server::put-line "0 <get-var url>">
+    <increment i>
+    <if <eq i max-choices> <break>>
+  </foreach>
+  <server::put-line
+   <concat "12 END_OF_DTMF_MATCHES "
+	   "[ <get-var i> of <array-size temp::matches> delivered]">>
+</defun>

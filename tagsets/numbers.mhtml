@@ -1,0 +1,32 @@
+;;; numbers.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue May  7 00:28:09 1996.
+<defun comma-separated-digits num>
+  ;;; DOC_SECTION (ARITHMETIC-OPERATORS)
+  ;;; Produce NUM in standard human readable format, inserting commas
+  ;;; where appropriate.
+  ;;;
+  ;;; Example:
+  ;;; <complete-example>
+  ;;; <comma-separated-digits 98342367.09>
+  ;;; </complete-example>
+  <if <match <get-var num> "\\.">
+      <set-var
+	append=<subst-in-string <get-var num> "(.*)(\\..*$)" "\\2">
+	num = <subst-in-string <get-var num> "(.*)(\\..*$)" "\\1">>>
+  <set-var digits[]=<subst-in-string <get-var num> "([0-9])" "\\1\n">>
+  <set-var info[]=<symbol-info digits> length=<sub info[1] 1>>
+  <when <gt length 2>>
+    <set-var counter=0>
+    <while <gt length -1>>
+      <set-var output=<get-var digits[length] output>>
+      <decrement length>
+      <increment counter>
+      <if <and <eq counter 3> <gt length -1>>
+	  <set-var counter=0 output=",<get-var output>">>
+    </while>
+    <set-var num=<get-var output>>
+  </when>
+  <get-var num append>
+</defun>

@@ -1,0 +1,16 @@
+;;; base-decrement.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sat Oct 26 22:26:53 1996.
+
+Result: 2: <set-var x=3><decrement x><get-var x>
+Result: 2: <set-var x=-1><decrement x by=-3><get-var x>
+Result: -2: <set-var x=1><decrement x by=3><get-var x>
+Result: 3: <set-var x=3><decrement x by=0><get-var x>
+Result: -0.003: <set-var x=3><decrement x by=3.003><get-var x>
+Result: -6.003: <set-var x=-3><decrement x by=3.003><get-var x>
+Result: -0.003: <set-var x=-3><decrement x by=-3.003><get-var x>
+Result: -6.003: <set-var x=3><decrement x by=-3.003><get-var x>
+Result: 0: <set-var x=3.003><decrement x by=3.003><get-var x>
+Result: 3: <set-var x=3><decrement x by=0><get-var x>
+Result: 0: <set-var x=0><decrement x by=0><get-var x>

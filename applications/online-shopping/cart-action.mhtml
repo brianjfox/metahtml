@@ -1,0 +1,28 @@
+;;; cart-action.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Sat Oct 21 00:09:30 1995.
+;;;
+
+<include tagsets/substs.mhtml>
+<include tagsets/cart-substs.mhtml>
+<include tagsets/action-buttons.mhtml>
+
+<action-retrieve "Purchase" "Update Cart" "Continue Shopping">
+
+<defsubst update-cart>
+  <read-cart>
+  <cart-to-array contents>
+  <set-var contents-len=<array-length contents>>
+  <maybe-change-quantity contents>
+  <maybe-delete-items contents>
+  <array-to-cart contents <get-var contents-len>>
+  <write-cart>
+</defsubst>
+
+<var-case
+  action="Continue Shopping"	<redirect "<get-var mhtml::url-to-dir>/">
+  action="Purchase"		<redirect "shipping.mhtml">
+  action="Update Cart"		<prog <update-cart> <redirect "cart.mhtml">>>
+
+<redirect "<get-var mhtml::url-to-dir>/">

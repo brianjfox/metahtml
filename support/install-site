@@ -1,0 +1,631 @@
+#!/bin/sh
+# -*- Bash -*-
+# This script installs the Meta-HTML web site for you, in the location that
+# you specify.  You are prompted for the locations of various parts of the
+# distribution before any copying is done.
+#
+set -e
+
+if echo '\c' | grep -s c >/dev/null 2>&1
+then
+        ECHO_N="echo -n"
+        ECHO_C=""
+else
+        ECHO_N="echo"
+        ECHO_C='\c'
+fi
+
+if [ -x ./mhc/mhc ]; then
+   MHTML_VERSION=`./mhc/mhc --version`
+else
+   MHTML_VERSION=5.09
+fi
+
+# Set default locations.
+servername=`hostname`
+serverport=80
+install_server=
+install_engine=
+
+echo ""
+echo "            Meta-HTML Site Installer for V$MHTML_VERSION"
+echo ""
+echo "This script installs a Meta-HTML web site for you, in the location"
+echo "that you specify.  You are prompted for the locations of various parts"
+echo "of the distribution before any copying is done."
+echo ""
+echo "The last step before actually installing is to tell you that this"
+echo "will be done.  This way, you always get a chance to change your mind."
+echo ""
+echo "First, are you interested in installing the Meta-HTML Server or are"
+echo "you interested in installing the Meta-HTML CGI Engine?"
+echo ""
+echo "   1) I would like to install the Meta-HTML Server."
+echo "   2) I would like to install the Meta-HTML CGI Engine."
+echo "   3) I would like to install the Meta-HTML FastCGI Engine."
+echo "   4) I would like to install the Meta-HTML ISP Engine."
+echo ""
+${ECHO_N} "Please enter your choice [default: 1]: ${ECHO_C}"
+read temp
+if [ "$temp" = "" ]; then temp=1; fi
+if [ "$temp" = "1" ]; then
+   install_server=true;
+   installname="Meta-HTML Server";
+else
+   install_engine=true;
+   engineprog=engine;
+   installname="Meta-HTML CGI Engine";
+   if [ "$temp" = "3" ]; then
+      engineprog=fcgi-engine;
+      installname="Meta-HTML FastCGI Engine";
+   fi
+   if [ "$temp" = "4" ]; then
+      engineprog=ispengine;
+      installname="Meta-HTML ISP Engine";
+   fi
+fi
+
+echo ""
+echo "Okay, we'll install the $installname."
+echo ""
+
+echo "Enter a name, or press RETURN for the default."
+if [ "$install_server" ]; then
+   ${ECHO_N} "What name should the Server answer to [$servername]? ${ECHO_C}"
+else
+   ${ECHO_N} "What name does your current web server answer to [$servername]? ${ECHO_C}"
+fi
+read temp
+if [ "$temp" = "" ]; then temp=$servername; fi
+servername="$temp"
+
+echo ""
+echo "Enter a port number, or press RETURN for the default."
+if [ "$install_server" ]; then
+   ${ECHO_N} "What port should the Server answer on [$serverport]? ${ECHO_C}"
+else
+   ${ECHO_N} "What port does your current web server answer on [$serverport]? ${ECHO_C}"
+fi
+read temp
+if [ "$temp" = "" ]; then temp=${serverport}; fi
+serverport="$temp"
+
+if [ "${bindir}" = "" ]; then
+   bindir=/www/bin;
+   rootdir=/www/${servername};
+else
+   rootdir=`(cd ${bindir}/../; pwd)`/${servername}
+fi
+confdir=${rootdir}/conf
+logdir=${rootdir}/logs
+docdir=${rootdir}/docs
+cgidir=${docdir}/cgi-bin
+
+echo ""
+echo "    ${bindir}:"
+if [ "$CALLED_FROM_Install" = "true" ]; then
+   echo "        This is the directory under which the Meta-HTML binaries"
+   echo "        have been installed.  If you have manually installed the"
+   echo "        binaries in a different location, you should say so when"
+   echo "        asked."
+   echo ""
+else
+   echo "        Since you are running this script separate from the binary"
+   echo "        install, we can only guess as to where you have installed "
+   echo "        the Meta-HTML binaries.  But we need to know, or the install"
+   echo "        will fail!  Please enter the location where the Meta-HTML"
+   echo "        binaries have been installed."
+   echo ""
+fi
+${ECHO_N} "    Enter a new value, or press RETURN to accept: ${ECHO_C}"
+read temp
+if [ "$temp" = "" ]; then temp=${bindir}; fi
+bindir=$temp
+
+if [ "$install_server" ]; then
+   if [ ! -x ${bindir}/mhttpd ]; then
+      echo ""
+      echo "                  INSTALL ABORTED!"
+      echo ""
+      echo "The file \`${bindir}/mhttpd' wasn't found/executable."
+      echo "We cannot install completely without this file."
+      echo ""
+      exit 1
+   fi
+
+   echo ""
+   echo "    ${rootdir}:"
+   echo "        This is the directory under which the \`conf' and \`logs'"
+   echo "        directories are to be installed."
+   echo ""
+   ${ECHO_N} "    Enter a new value, or press RETURN to accept: ${ECHO_C}"
+   read temp
+   if [ "$temp" = "" ]; then temp=${rootdir}; fi
+   rootdir=$temp
+
+   confdir=${rootdir}/conf
+   logdir=${rootdir}/logs
+   docdir=${rootdir}/docs
+
+   echo ""
+   echo "    ${confdir}:"
+   echo "        This is the directory where the configuration files will"
+   echo "        be installed."
+   echo ""
+   ${ECHO_N} "    Enter a new value, or press RETURN to accept: ${ECHO_C}"
+   read temp
+   if [ "$temp" = "" ]; then temp=${confdir}; fi
+   confdir=$temp
+
+   echo ""
+   echo "    ${logdir}:"
+   echo "        This is the directory under which the log files will be stored."
+   echo ""
+   ${ECHO_N} "    Enter a new value, or press RETURN to accept: ${ECHO_C}"
+   read temp
+   if [ "$temp" = "" ]; then temp=${logdir}; fi
+   logdir=$temp
+fi
+
+if [ "$install_engine" ]; then
+   if [ ! -x ${bindir}/${engineprog} ]; then
+      echo ""
+      echo "                  INSTALL ABORTED!"
+      echo ""
+      echo "The file \`${bindir}/${engineprog}' isn't executable."
+      echo "We cannot install completely without this file."
+      echo ""
+      exit 1
+   fi
+fi
+
+echo ""
+echo "    ${docdir}:"
+echo "        This is the directory under which your HTML documents will be"
+echo "        served.  This install script creates sub-directories here"
+${ECHO_N} "        called "
+if [ -d PowerStrip ]; then
+   ${ECHO_N} "\`System', "
+fi
+if [ -d Xact-CyberCash ]; then
+   ${ECHO_N} "\`System/Xact', \`Xact', "
+fi
+
+echo "\`release', and \`cgi-bin'."
+
+echo ""
+${ECHO_N} "    Enter a new value, or press RETURN to accept: ${ECHO_C}"
+read temp
+if [ "$temp" = "" ]; then temp=${docdir}; fi
+docdir=$temp
+cgidir=${docdir}/cgi-bin
+
+if [ "$install_engine" ]; then
+   echo ""
+   echo "    ${cgidir}:"
+   echo "        This is the directory where the ${installname} will reside."
+   echo ""
+   ${ECHO_N} "    Enter a new value, or press RETURN to accept: ${ECHO_C}"
+   read temp
+   if [ "$temp" = "" ]; then temp=${cgidir}; fi
+   cgidir=$temp;
+fi
+
+echo ""
+echo "Okay, we are about to install the ${installname}"
+echo ""
+echo "|---------------------------------------------------------------------|"
+echo "|  Please check the following locations, and make sure that they are  |"
+echo "|  correct.  If you are happy with the locations, type \"yes\" as       |"
+echo "|  your answer.  ANYTHING ELSE means that you aren't ready, or need   |"
+echo "|  to change the values that you have entered.                        |"
+echo "|---------------------------------------------------------------------|"
+echo ""
+echo "  Meta-HTML binaries installed in: ${bindir}"
+echo "  Your server answers to the name: ${servername}"
+echo "        Your server talks on port: ${serverport}"
+
+if [ -d PowerStrip ]; then
+   echo "   PowerStrip Framework placed in: ${docdir}/System"
+fi
+if [ -d Xact-CyberCash ]; then
+   echo "   Xact Payment System Pages placed in: ${docdir}/Xact"
+   echo "   Xact Administration Pages placed in: ${docdir}/System/Xact"
+fi
+
+echo "    \`release' directory placed in: ${docdir}/release"
+
+if [ "$install_server" ]; then
+   echo "    Server config files placed in: ${confdir}"
+   echo "       Server log files placed in: ${logdir}"
+fi
+echo "   CGI-BIN programs are placed in: ${cgidir}";
+if [ "$install_engine" ]; then
+   echo "     The Engine will be placed in: ${cgidir}";
+fi
+echo ""
+${ECHO_N} "    Use these values to install the ${installname} (yes or no)? ${ECHO_C}"
+read temp
+echo ""
+
+if [ "$temp" != "yes" -a "$temp" != "YES" ]; then
+   echo ""
+   echo "                    INSTALL STOPPED!"
+   echo ""
+   echo " We are not installing, specifically because you didn't type \"yes\"."
+   echo " If you are curious about this, perhaps you didn't read the "
+   echo " paragraph above, where you were told that not typing \"yes\" would"
+   echo " result in a non-install."
+   echo ""
+   echo " Type \`./install-site' to start over, or to enter new values."
+   echo ""
+   exit 1
+fi
+
+# Start by installing the distribution website.  No matter whether the
+# user is installing the server or the engine, this site will be installed.
+#
+
+# Make the install directories if they do not already exist.
+# Make the release dir.
+set `echo ${docdir} | sed -e 's@/@ @g'`
+fullpath=/
+for dir in $*; do
+   if [ ! -d ${fullpath}${dir} ]; then
+      echo "   mkdir ${fullpath}${dir}"
+      mkdir ${fullpath}${dir}
+   fi
+   fullpath=${fullpath}${dir}/
+done
+
+# Copy the current release over to the install area.
+umask 000
+
+# Copy the "Welcome.mhtml" file to top level.
+${ECHO_N} "   Installing the default top-level Welcome file...${ECHO_C}"
+cp Welcome.mhtml ${docdir}/
+echo "done."
+
+# Install PowerStrip if it is present.
+if [ -d PowerStrip ]; then
+   ${ECHO_N} "   Installing the PowerStrip framework...${ECHO_C}"
+   ${ECHO_N} " files...${ECHO_C}"
+   cp -r PowerStrip/* ${docdir}/
+   mv ${docdir}/welcome.mhtml ${docdir}/powerstrip.mhtml
+   # Unpack the initial database.
+   ${ECHO_N} " databases...${ECHO_C}"
+   (cd ${docdir}/System/data/system/STARTUP; ${bindir}/dbpack *.packed; mv *.db ..)
+   # Unpack the search-index if present.
+   if [ -r ${docdir}/search-index.db.packed ]; then
+      ${ECHO_N} " search index...${ECHO_C}"
+      (cd ${docdir}; ${bindir}/dbpack *.packed);
+   fi
+   # Unpack the documentation databases if present.
+   if [ -f ${docdir}/documentation/manual/function.db.packed ]; then
+      ${ECHO_N} " documentation...${ECHO_C}"
+      (cd ${docdir}/documentation/manual; ${bindir}/dbpack *.packed);
+   fi
+   echo "done."
+fi
+
+# Install the imagemap utility into CGI-BIN.
+if [ -f ${bindir}/imagemap ]; then
+   # Make the CGIBIN dir.
+   if [ ! -d ${cgidir} ]; then
+      echo "   mkdir ${cgidir} "
+      mkdir ${cgidir}
+   fi
+   cp ${bindir}/imagemap ${cgidir}/imagemap
+   chmod a+rx ${cgidir}/imagemap
+fi
+
+# Install Xact if it is present.
+if [ -d Xact-CyberCash ]; then
+   echo "   Installing the Xact Payment System... ${ECHO_C}"
+   . ./xact-install
+fi
+
+${ECHO_N} "   Installing the release tree...${ECHO_C}"
+cp -r release ${docdir}/
+for d in sql-browser sql-rolodex; do
+   if [ -d ./applications/$d ]; then
+      
+      cp -r ./applications/$d ${docdir}/release/$MHTML_VERSION/;
+   fi
+done
+echo "done."
+
+# Install the documentation under the release directory if this isn't
+# a PowerStrip install.
+if [ ! -d PowerStrip ]; then
+   if [ -d ./doc ]; then
+      ${ECHO_N} "   Installing the documentation...${ECHO_C}"
+      cp -r ./doc ${docdir}/release/$MHTML_VERSION/documentation
+      echo "done."
+   fi
+fi
+
+# Install the sql-rolodex application as an example, if it is present.
+if [ -d applications/sql-rolodex ]; then
+   ${ECHO_N} "   Installing the sample SQL Rolodex application...${ECHO_C}"
+   cp -r ./applications/sql-rolodex ${docdir}/release/$MHTML_VERSION/
+   echo "done."
+fi
+
+# Install the sql-browser application as an example, if it is present.
+if [ -d applications/sql-browser ]; then
+   ${ECHO_N} "   Installing the SQL Browser application...${ECHO_C}"
+   cp -r ./applications/sql-browser ${docdir}/release/$MHTML_VERSION/
+   echo "done."
+fi
+
+# Install the engine or server.
+echo "Installing the ${installname}"
+
+if [ "$install_engine" ]; then
+   # Make the install directories if they do not already exist.
+   # Make the CGIBIN dir.
+   set `echo ${cgidir} | sed -e 's@/@ @g'`
+   fullpath=/
+   for dir in $*; do
+      if [ ! -d ${fullpath}${dir} ]; then
+	 echo "   mkdir ${fullpath}${dir}"
+	 mkdir ${fullpath}${dir}
+      fi
+      fullpath=${fullpath}${dir}/
+   done
+
+   if [ "$engineprog" = "engine" ]; then
+      destprog=nph-engine;
+   else
+      destprog=$engineprog
+   fi
+
+   # Install the Engine of choice in CGIDIR.  Save old files if present.
+   if [ -f ${cgidir}/${destprog} ]; then
+      echo "   Saving old ${destprog} as ${destprog}.old..."
+      mv ${cgidir}/${destprog} ${cgidir}/${destprog}.old
+   fi
+   echo "   Copying $destprog..."
+   cp ${bindir}/$engineprog ${cgidir}/${destprog}
+
+   # Install the engine.conf file with the desired values.
+
+   # Save the old one if necessary.
+   if [ -f ${cgidir}/engine.conf ]; then
+      echo "   Saving old engine.conf as engine.conf.old..."
+      echo "      cp ${cgidir}/engine.conf ${cgidir}/engine.conf.old"
+      cp ${cgidir}/engine.conf ${cgidir}/engine.conf.BAK
+   fi
+
+   # Now make the new one.
+   ${ECHO_N} "   Creating new engine.conf...${ECHO_C}"
+   cat >${cgidir}/engine.conf <<EOF
+;;; engine.conf: -*- Meta-HTML -*-  Typical startup file for (nph-)Engine.
+;;;
+;;; Copyright (c) 1996 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sat Sep 14 03:51:33 1996.
+
+;;; You set the variable MHTML::DOCUMENT-ROOT to tell the engine
+;;; where your documents are being served from.  If the location
+;;; of the engine is "/www/metahtml/docs/cgi-bin/nph-engine", then
+;;; the default document root is "/www/metahtml/docs".  This may or
+;;; may not be correct for your site.  Simply set the variable here if
+;;; it is not.
+;;; <set-var mhtml::document-root = /www/metahtml/docs>
+
+;;; The user that you would like the engine to run under.
+;;; This only has an effect if the engine is already running as the
+;;; root user.
+;;; <set-var mhtml::default-user = nobody>
+
+;;; If you wish to allow your users to store documents underneath
+;;; their home directories, then set this variable to be the name of
+;;; the subdirectory under which users store their documents.  For
+;;; example, if the URL "/~bfox/welcome.mhtml" should be served from
+;;; a subdirectory of Brian Fox's home directory called "public_html",
+;;; then you would do:
+;;;
+;;; <defvar mhtml::~directory  public_html>
+
+;;; Use cookies that appear permanent to the client.
+<set-var mhtml::permanent-cookies = true>
+
+;;; Top level cgi-directory.  Actually an array of possible cgi directories.
+<set-var mhtml::cgi-directories[0]=/cgi-bin/>
+
+;;; Analogous to MHTML::PROLOGUE-DOCUMENT is MHTML::PER-PAGE-FUNCTION.
+;;; You probably only need one or the other, but not both.  If this
+;;; variable is set to the name of a defun, defsubst, or defmacro,
+;;; then that function is called with no arguments.  Here is the
+;;; default that we recommend -- it makes all posted data innocuous.
+;;;
+;;; If you turn this off, you will have to make sure that your pages
+;;; are written in a secure fashion.  Please see the manual
+;;; description of <get-var-once> for more details.
+;;;
+<defun mhtml::engine-per-page-function>
+  <mhtml::post-secure>
+  ;;;
+  ;;; Code that sets up the URL rewriter.  This has to be a per-page function
+  ;;; because we haven't computed the URL of the document at the time
+  ;;; this engine.conf file is read, so variables such as mhtml::http-prefix
+  ;;; aren't set yet, and will be changed at the time the page location is
+  ;;; computed.
+  <when <get-var rewriter::engine-webpath>>
+    <set-var
+      mhtml::http-prefix = <get-var mhtml::http-prefix
+			     rewriter::engine-webpath>
+      mhtml::http-prefix-sans-sid = <get-var mhtml::http-prefix-sans-sid
+				      rewriter::engine-webpath>
+      mhtml::url-to-dir = <get-var mhtml::http-prefix mhtml::relative-prefix>
+      mhtml::url-to-dir-sans-sid = <get-var mhtml::http-prefix-sans-sid
+				     mhtml::relative-prefix>
+      mhtml::full-url = <get-var mhtml::http-prefix mhtml::location>>
+    <copy-var *meta-html*::rewriter::a *meta-html*::a>
+    <copy-var *meta-html*::rewriter::img *meta-html*::img>
+    <copy-var *meta-html*::rewriter::form *meta-html*::form>
+  </when>
+</defun>
+
+<set-var mhtml::per-page-function = mhtml::engine-per-page-function>
+<set-var mime-type::.asp=metahtml/interpreted>
+
+;;; If your Web server cannot perform the necessary mappings to run
+;;; the Meta-HTML Engine from "/", then set REWRITER::ENGINE-WEBPATH
+;;; to be the path to the Meta-HTML engine.
+;;;
+;;; If this variable is set, then we install code to rewrite URL
+;;; references in Meta-HTML pages, such that constructs such as
+;;; <a href="/foo"> ... </a> get translated to
+;;;  <a href="/cgi-bin/nph-engine/foo"> ... </a>.
+;;;
+;;; The rewriter code can be used to rewrite various references in any
+;;; case -- simply do the COPY-VARs below without changing the
+;;; variables mhtml::http-prefix or rewriter::rewrite-prefix.  Then,
+;;; references in your pages which looked like <img src="/images/foo.gif">
+;;; get rewritten to say <img src="http://www.foo.com/images/foo.gif">
+;;; instead.
+;;;
+;;; <set-var rewriter::engine-webpath = /cgi-bin/nph-engine>
+EOF
+   if [ -r ./MHTML.KEY ]; then
+      cat MHTML.KEY >>${cgidir}/engine.conf;
+   fi
+
+   # Make sure that everyone can read this file.
+   chmod a+r ${cgidir}/engine.conf
+   echo "done."
+fi
+
+# If the user wanted to install the server, do the server specific parts
+# now.
+if [ "$install_server" ]; then
+   # Make the directories where the config files live.
+   echo "Creating the path to the configuration directory."
+   set `echo ${confdir} | sed -e 's@/@ @g'`
+   fullpath=/
+   for dir in $*; do
+      if [ ! -d ${fullpath}${dir} ]; then
+	 echo "   mkdir ${fullpath}${dir}"
+	 mkdir ${fullpath}${dir}
+      fi
+      fullpath=${fullpath}${dir}/
+   done
+   mkdir ${rootdir}/writable; chmod a+rwx,o+t ${rootdir}/writable;
+
+   # Copy the config directory into place.
+   ${ECHO_N} "Copying the configuration files...${ECHO_C}"
+   cp -r server/conf/* ${confdir}
+   echo "done."
+
+   # Modify the local.conf configuration file.
+   idfile="${confdir}/local.conf"
+   echo "<set-var mhtml::server-name = ${servername}>"  >${idfile}
+   echo "<set-var mhtml::server-port = ${serverport}>" >>${idfile}
+   echo "<set-var mhtml::document-root = ${docdir}>"   >>${idfile}
+   echo "<set-var mhtml::server-root = ${rootdir}>"   >>${idfile}
+
+   # Make sure that the directory containing the utility programs is
+   # in the mhtml::exec-path.
+   echo ";;; MHTML::EXEC-PATH is what gets passed in the environment to CGI" >>${confdir}/advanced.local
+   echo ";;; programs as PATH.  Choose carefully." >>${confdir}/advanced.local
+   echo "<defvar mhtml::exec-path"		   >>${confdir}/advanced.local
+   echo "   <concat ${bindir}:/opt/metahtml/bin:/www/bin:" >>${confdir}/advanced.local
+   echo "           /<get-var mhtml::document-root>/cgi-bin" >>${confdir}/advanced.local
+   echo "          :<get-var mhtml::server-root>/bin:/bin:/usr/bin:/usr/local/bin" >>${confdir}/advanced.local
+   echo "          :/usr/ucb>>" >>${confdir}/advanced.local
+
+   # Modify the "logging" configuration file.
+   lgfile="${confdir}/local.conf"
+   echo "<set-var mhtml::access-log = ${logdir}/access_log>"   >>${lgfile}
+   echo "<set-var mhtml::error-log = ${logdir}/error_log>"     >>${lgfile}
+   echo ";;; <set-var mhtml::referer-log = ${logdir}/referer_log>" >>${lgfile}
+   echo ";;; <set-var mhtml::debug-log = ${logdir}/debug_log>" >>${lgfile}
+
+   # Maybe create the "activation.key" file.
+   if [ -r MHTML.KEY ]; then
+      if [ -r ${confdir}/activation.key ]; then
+	 :
+      else
+	 cat MHTML.KEY >${confdir}/activation.key
+	 echo "<include activation.key>" >>${confdir}/local.conf
+      fi
+   fi
+
+   # Make the directories where the log files live.
+   echo "Creating the path to the log files directory."
+   set `echo ${logdir} | sed -e 's@/@ @g'`
+   fullpath=/
+   for dir in $*; do
+      if [ ! -d ${fullpath}${dir} ]; then
+	 echo "   mkdir ${fullpath}${dir}"
+	 mkdir ${fullpath}${dir}
+      fi
+      fullpath=${fullpath}${dir}/
+   done
+fi
+
+# Unpack any packed databases that need unpacking...
+echo "Unpacking packed databases..."
+(cd ${docdir}; \
+ find . -name "*.db.packed" -exec ${bindir}/dbpack \{\} \; -print)
+echo "Done."
+
+# I think that we are done!  Let's tell them that, and split.
+echo ""
+echo "                     INSTALLATION COMPLETE!"
+echo ""
+if [ -d Xact-CyberCash ]; then
+   echo "You have successfully installed the ${installname} and the Xact Payment"
+   echo "Extensions - a UAI Advanced Embedded Server Technology."
+else
+   echo "You have successfully installed the ${installname} on your system."
+fi
+echo ""
+if [ "$install_engine" ]; then
+   echo "Now that the Engine is installed, you must ensure that your server"
+   echo "can access it using normal style URLs.  For documentation on "
+   echo "exactly what you need to type in your server configuration files,"
+   echo "connect to the following URL:"
+   echo ""
+   echo "    http://${servername}/"
+   echo ""
+   echo "click on the link to the documentation, and follow the instructions"
+   echo "for your specific server."
+   echo ""
+fi
+
+if [ "$install_server" ]; then
+   echo "Now that the Server is installed, you are ready to start it running."
+   echo ""
+   echo "If you are running the server on a privileged port, such as \`80',"
+   echo "you will have to start the server as the superuser.  Currently,"
+   echo "you have specified to run the server on port ${serverport}."
+   echo ""
+   echo "To start the server, simply type:"
+   echo ""
+   echo "     ${bindir}/mhttpd --config ${confdir}/mhttpd.conf"
+   echo ""
+   echo "After you have successfully started the server, use your browser"
+   echo "to connect to:"
+   echo ""
+   echo "     http://${servername}:${serverport}/"
+   echo ""
+fi
+
+if [ -d Xact-CyberCash ]; then
+   echo "Congratulations on getting <M>powered with The Xact Payment System!"
+   echo ""
+   echo "Details on how you can customize the Xact Payment System to work"
+   echo "with your merchant account and then to integrate it into your"
+   echo "existing Web application are available at the following location:"
+   echo ""
+   echo "     http://${servername}:${serverport}/Xact/Install.mhtml"
+   echo ""
+else
+   echo "Congratulations on getting <M>powered!"
+fi
+echo ""
+echo "Happy Hacking!"
+echo ""

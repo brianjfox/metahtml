@@ -1,0 +1,6 @@
+;;; base-verbatim.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 21:57:08 1996.
+
+Result: "<cgi-exec "/bin/who">": <verbatim><cgi-exec "/bin/who"></verbatim>

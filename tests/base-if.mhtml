@@ -1,0 +1,7 @@
+;;; base-if.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 15:41:12 1996.
+
+Result: true: <set-var tmp=true><if <get-var tmp> <get-var tmp>>
+Result: false: <set-var tmp=><if <get-var tmp> "true" "false">

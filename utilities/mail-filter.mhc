@@ -1,0 +1,105 @@
+#!/www/bin/mhc
+;;; mail-filter.mhc: -*- Meta-HTML -*-  A filter which converts non-executable
+;;; text into executable statements, for the purposes of forwarding to a list.
+;;;
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Aug 16 12:50:50 1997.
+
+;;; Arg1 is the recipient.
+;;; Standard input is the message.
+
+;;; The headers of interest.
+<set-var interesting-headers[] =
+	 <prog
+	   From
+	   Date
+	   Subject
+	   Errors-to
+	   Return-Receipt-to
+	   Reply-to
+	   Return-Path>>
+
+<defsubst the-headers whitespace=delete>
+  <foreach header interesting-headers>
+    <if <var-exists headers::<get-var-once header>>
+	<concat "<get-var-once header>: "
+		"<get-var-once headers::<get-var-once header>>\n">>
+  </foreach>
+</defsubst>
+
+
+<with-open-stream s *standard-input* mode=read>
+  <while <stream-readable s>>
+    <set-var line=<stream-get s stop-at="\n">>
+    <if <not <get-var-once line>>
+	<break>
+      <prog
+	<subst-in-var line "&lt;" "<" "&gt;" ">" "&amp;" "&" "\n$" "" "\r$" "">
+	<array-append <get-var-once line> raw-headers>>>
+  </while>
+  <stream-get-contents s body>
+</with-open-stream>
+
+<coerce-var body type=string>
+<subst-in-var body "&lt;" "<" "&gt;" ">" "&amp;" "&">
+
+;;; Skip the "From bfox@metahtml.com" line.
+<array-shift -1 raw-headers>
+
+;;; Process the remaining headers.  Each line may be indented, which means it
+;;; belongs to the current header variable.  If so, just append them.
+;;;
+<package-delete headers>
+<unset-var current-header>
+
+<defsubst save-current-header whitespace=delete>
+  ;;; Found start of new header.  Save the old one if present.
+  <when <var-exists current-header>>
+    <set-var
+     name = <subst-in-string <get-var-once current-header>
+			     "(^[-_a-zA-Z0-9]+)(:.*$)" "\\1">
+     value = <subst-in-string <get-var-once current-header>
+			      "(^[-_a-zA-Z0-9]+:)(.*$)" "\\2">>
+    <set-var headers::<get-var name> = <get-var-once value>>
+    <array-append <get-var name> headers>
+    <unset-var current-header>
+  </when>
+</defsubst>
+
+<foreach line raw-headers>
+  ;;; If this line starts with alphabetics, and contains nothing other
+  ;;; then alphanumerics, underscores and hyphens until a colon is seen,
+  ;;; then it is the start of a new header.
+  <if <match <get-var-once line> "^[-_a-zA-Z0-9]+:">
+      <prog
+	<save-current-header>
+	;;; Create the new one.
+	<set-var current-header = <get-var-once line>>>
+    ;;; Not the start of a header.  Must be the continuation of the 
+    ;;; current one.
+    <if <match <get-var-once line> "^[ \t]+">
+	<prog
+	  <subst-in-var line "^[ \t]+" "">
+	  <set-var current-header = <concat <get-var-once current-header>
+					    " "
+					    <get-var once line>>>>>>
+</foreach>
+<save-current-header>
+
+<comment>
+  <with-open-stream s /tmp/mail mode=write-create>
+    <stream-put s <dump-package headers>>
+    <stream-put s <the-headers>>
+  </with-open-stream>
+</comment>
+
+<when <get-var-once headers::from>>
+  <e-mail::sendmail
+   <get-var-once headers::from>
+   <get-var-once program-arguments[2]>
+   "" ""
+   <the-headers>
+   <get-var-once body>>
+</when>
+

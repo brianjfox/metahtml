@@ -1,0 +1,14 @@
+;;; welcome.mhtml: -*- Meta-HTML -*-  How to use "mklib" to create libraries.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul 23 13:09:31 1997.
+<set-var title="The Art of Making Meta-HTML Libraries">
+<include header.mhtml>
+
+<layout::page>
+
+mklib -o filename.lib filename.mhtml
+
+</layout::page>
+
+<include footer.mhtml>

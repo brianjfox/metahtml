@@ -1,0 +1,62 @@
+;;; smtp.mhtml: -*- Meta-HTML -*- 
+;;; This code attempts to implement a simple SMTP receiver tightly bound
+;;; to a specific host.  At the time of this comment, only a very few
+;;; commands are supported -- see "HELP" for a listing.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Oct  8 23:06:47 1997.
+
+<set-var server::server-port = 25>
+<set-var server::help-prefix = "214">
+
+214-Topics:
+214-    HELO  EHLO      MAIL    RCPT    DATA
+214-    RSET  NOOP      QUIT    HELP    VRFY
+214-    EXPN  VERB      ETRN    DSN
+21
+
+<defun smtp::print line continuation?>
+  <if <get-var continuation?>
+      <server::put-line "250- <get-var line>">
+    <server::put-line "250 <get-var line>">>
+</defun>
+
+<defun commands::helo cmd hostname>
+  <smtp::print "<get-var server::server-host> Hello <get-var server::server-addr> [<get-var server::server-addr>], pleased to meet you">
+</defun>
+
+<defun commands::mail cmd ignore sender>
+  <set-var smtp::recipients[]="">
+  <set-var smtp::sender = <get-var sender>>
+  <smtp::print "<get-var sender>... Sender ok">
+</defun>
+
+<defun commands::rcpt cmd ignore recipient>
+  <array-append <get-var recipient> smtp::recipients>
+  <smtp::print "<get-var recipient>... Recipient ok">
+</defun>
+
+<defun commands::data cmd>
+  <unset-var smtp::message-body>
+  <if <not <get-var smtp::sender>>
+      <concat
+       <smtp::error "Need MAIL command">
+       <return>>>
+
+  <if <not <get-var smtp::recipients>>
+      <concat
+       <smtp::error "Need RCPT (recipient)">
+       <return>>>
+
+  <server::put-line "354 Enter mail, end with \".\" on a line by itself">
+  <set-var smtp::message-id = <make-identifier 8>>
+  <while true>
+    <set-var line = <server::get-line>>
+    <if <string-eq <get-var-once line> ".">
+	<break>
+      <array-append <get-var-once line> smtp::message-body>>
+  </while>
+  <smtp::send-message>
+  <server::put-line
+   "250 <get-var smtp::message-id> Message accepted for delivery">
+</defun>

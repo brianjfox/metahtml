@@ -1,0 +1,35 @@
+;;; header.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 27 21:17:32 1998.
+
+<session::initialize>
+<require rolodex>
+<html>
+<title>An SQL Rolodex: <get-var title></title>
+<body bgcolor=#FFFFFF>
+<p><br>
+<table border=2 width=300 bgcolor=#D8BFD8>
+  <tr>
+    <td align=right>
+      <font color=Black face=Helvetica size=4>
+      <b>An SQL Rolodex: <get-var title></b>
+      </font>
+    </td>
+  </tr>
+  <when <get-session-var message>>
+    <tr> <td> <show-message> </td> </tr>
+  </when>
+</table>
+<DEBUGGING-OUTPUT>
+<SYSTEM-ERROR-OUTPUT>
+<p><br>
+
+;;; Make the page look kinda nice -- it's indented and fixed width.
+<table width=600>
+  <tr valign=top>
+    <td align=left width=30>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align=left>
+    ;;; The rest is in the footer.

@@ -1,0 +1,219 @@
+;;; tabs.mhtml: -*- Meta-HTML -*-  Dynamically create small graphic images.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Mar 15 10:40:39 1997.
+<set-var tabs::images-webpath = /images/tabs>
+<set-var tabs::base-tab-image = blue-tab.gif>
+<set-var tabs::halign = Right tabs::valign=Center>
+<set-var tabs::fontname = NimbusSansL-Regular tabs::font-size=12>
+<set-var tabs::italic-fontname = Times-Roman>
+<set-var tabs::font-color = magenta>
+<set-var tabs::prepended-text = "">
+<set-var tabs::appended-text = " ">
+
+<defun tabs::base-tab-image-file>
+  <concat <get-var-once mhtml::include-prefix>
+	  <if <defined? <site::system-prefix>>
+	      <site::system-prefix>>
+	  /images/base-images/tabs
+	  /<get-var-once tabs::base-tab-image>>
+</defun>
+
+<defun tabs::create-tab output-file image-text italic? rotation>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Create a "tab" image in <var output-file> using <var image-text>.
+  ;;; The base image is taken from <var TABS::BASE-TAB-IMAGE>, which is
+  ;;; the basename of the image file, and is looked for in
+  ;;; <site::system-prefix>/images/base-images/tabs.
+  ;;; Other parameters, including HALIGN, VALIGN, FONT, FONT-SIZE, and
+  ;;; FONT-COLOR are taken from their values in the TABS package.
+  <if <not <file-exists
+	    <get-var-once mhtml::include-prefix tabs::images-webpath>>>
+      <concat
+       <make-directories
+	<get-var-once mhtml::include-prefix tabs::images-webpath>>
+       <if <not <file-exists
+		 <get-var-once mhtml::include-prefix tabs::images-webpath>>>
+	   <page-debug
+	    "Couldn't create <get-var-once tabs::images-webpath>!">>>>
+  <set-var x-y[]=<cgi-exec gifq <tabs::base-tab-image-file> width height>>
+  <with-open-database db /tmp/metahtml-site-lock.db mode=write-create>
+    <set-var the-file =
+      <image-builder::make-text-gif
+       <concat <get-var-once image-text>
+	       <get-var-once tabs::appended-text>>
+       <get-var-once tabs::halign> <get-var-once tabs::valign>
+       <get-var-once x-y[0]> <get-var-once x-y[1]>
+       <if <get-var-once italic?>
+	   <get-var-once tabs::italic-fontname>
+	 <get-var-once tabs::fontname>>
+       <get-var-once tabs::font-size>
+       <get-var-once tabs::font-color>
+       <tabs::base-tab-image-file>>>
+    <cgi-exec
+     errors=errors
+     composite --retrans <if <get-var-once rotation>
+			     "-r <get-var-once rotation>">
+     <tabs::base-tab-image-file> <get-var-once the-file>
+     "><get-var-once output-file>">
+  </with-open-database>
+  <cgi-exec rm -f <get-var-once the-file>>
+  <when <get-var-once errors>>
+    <page-debug Errors from composite: <get-var-once errors>>
+  </when>
+</defun>
+
+<defun tab link image-text italic? target>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Return the HTML necessary to display a graphic image with <var
+  ;;; IMAGE-TEXT> in the left-hand border of the page, linked to <var LINK>.
+  <if <match <get-var-once link> "^/">
+      <set-var link = <get-var-once mhtml::http-prefix link>>>
+  <set-var image-name =
+    <downcase <concat <subst-in-string <get-var image-text>
+				       "[~`!@#$%^&*()|']" ""
+				       "^[ \t\r\n]+" ""
+				       "[ \t\r\n]+$" ""
+				       "[ -<>?/]" "_">
+		      <if <get-var-once italic?>
+			  -tabi -tab>>>>
+  <set-var image-file = <concat
+			 <get-var-once mhtml::include-prefix>
+			 <get-var-once tabs::images-webpath>
+			 /<get-var-once image-name>.gif>>
+  <if <not <file-exists <get-var-once image-file>>>
+      <tabs::create-tab <get-var-once image-file> <get-var-once image-text>>>
+  <layout::left-border>
+    <a href="<get-var-once link>"
+       <if <get-var-once target> " target=<get-var-once target>">>
+      <img src="<concat <get-var-once tabs::images-webpath>
+			/<get-var-once image-name>.gif>"
+	   border=0 vspace=4 alt="<get-var-once image-text>">
+    </a>
+    <br>
+  </layout::left-border>
+</defun>
+
+<defun page-tab link image-text italic? target>
+  <if <match <get-var-once link> "^/">
+      <set-var link = <get-var-once mhtml::http-prefix link>>>
+  <set-var image-name =
+    <downcase <concat <subst-in-string <get-var-once image-text>
+				       "[~`!@#$%^&*()|']" ""
+				       "^[ \t\r\n]+" ""
+				       "[ \t\r\n]+$" ""
+				       "[ -<>?/]" "_">
+		      <if <get-var-once italic?>
+			  -tabi -tab>>>>
+  <set-var image-file = <concat <get-var-once mhtml::include-prefix>
+				<get-var-once tabs::images-webpath>
+				/<get-var-once image-name>.gif>>
+  <if <not <file-exists <get-var-once image-file>>>
+      <tabs::create-tab <get-var-once image-file> <get-var-once image-text>>>
+
+  <set-var x-y[]=<cgi-exec gifq <get-var-once image-file> width height>>
+  <a href="<get-var-once link>"
+     <if <get-var-once target> " target=<get-var-once target>">>
+    <img src="<concat <get-var-once tabs::images-webpath>
+		      /<get-var-once image-name>.gif>"
+	 width=<get-var-once x-y[0]> height=<get-var-once x-y[1]> border=0
+	 alt="<get-var-once image-text>">
+  </a>
+</defun>
+
+<defun tabs::default-bright-func image-name image-file image-text>
+  <unset-var image-name image-file>
+  <set-var image-text = <concat "[ " <get-var-once image-text> " ]">>
+  <package-to-alist>
+</defun>
+
+<defun tabs::larger-font-bright-func image-name image-file image-text>
+  <unset-var image-name image-file image-text>
+  <set-var current-size[]=<subst-in-string <get-var-once tabs::font-size>
+					   "([0-9]*)([^0-9]*)" "\\1\n\\2">>
+  <set-var tabs::font-size = <concat
+			      <add 2 <or <get-var-once current-size[0]> 10>>
+			      <get-var-once current-size[1]>>>
+</defun>
+
+<defun tabs::js-tab link image-text &key italic? target bright-func>
+  <set-var image-name =
+    <downcase <concat <subst-in-string <get-var-once image-text>
+                                       "[~`!@#$%^&*()|']" ""
+                                       "^[ \t\r\n]+" ""
+                                       "[ \t\r\n]+$" ""
+                                       "[ -<>?/]" "_">
+                      <if <get-var-once italic?>
+                          -tabi -tab>>>>
+  <set-var image-file = <concat <get-var-once mhtml::include-prefix>
+                                <get-var-once tabs::images-webpath>
+                                /<get-var-once image-name>.gif>>
+  <when <not <file-exists <get-var-once image-file>>>>
+    <tabs::create-tab <get-var-once image-file> <get-var-once image-text>>
+    <set-var
+      saved=<package-to-alist tabs>
+      image-file1 = <subst-in-string <get-var-once image-file>
+				     "-tab\\." "-tab-i.">
+      params = <apply <or <get-var-once bright-func> tabs::default-bright-func>
+		      <get-var-once image-name>
+		      <get-var-once image-file>
+		      <get-var-once image-text>>>
+    <tabs::create-tab <or <alist-get-var params image-file>
+			  <get-var-once image-file1>>
+		      <or <alist-get-var params image-text>
+			  <get-var-once image-text>>>
+    <alist-to-package <get-var-once saved> tabs>
+  </when>
+  <set-var count = <or <get-var-once default::image_counter> 0>>
+  <increment default::image_counter by=2>
+  <script language=JavaScript>
+  image_<get-var-once count> = new Image ();
+  image_<get-var-once count>.src =
+  "<get-var-once tabs::images-webpath>/<get-var-once image-name>.gif";
+  <increment count>
+  image_<get-var-once count> = new Image ();
+  image_<get-var-once count>.src =
+  "<get-var-once tabs::images-webpath>/<get-var-once image-name>-i.gif";
+  </script>
+  <set-var x-y[]=<cgi-exec gifq <get-var-once image-file> width height>>
+  <a href="<get-var-once link>"
+     <if <get-var-once target> "target=<get-var-once target>">
+     onMouseOver='document["i_<get-var-once count>"].src =
+     image_<get-var-once count>.src; return (true);'
+     onMouseOut='document["i_<get-var-once count>"].src =
+     image_<sub count 1>.src;
+     return (true);'>
+    <img
+     name="i_<get-var-once count>"
+     src="<get-var-once tabs::images-webpath>/<get-var-once image-name>.gif"
+     width=<get-var-once x-y[0]> height=<get-var-once x-y[1]> border=0
+     alt="<get-var-once image-text>">
+  </a>
+</defun>
+
+
+<defun tabi link image-text>
+  <tab <get-var link> <get-var image-text> true>
+</defun>
+
+<defun vtab link image-text italic?>
+  <set-var image-name =
+    <downcase <concat v <subst-in-string <get-var image-text>
+					 "[~`!@#$%^&*()|']" ""
+					 "^[ \t\r\n]+" ""
+					 "[ \t\r\n]+$" ""
+					 "[ -<>?/]" "_">
+		      <if <get-var italic?>
+			  -tabi -tab>>>>
+  <set-var image-file = <concat <get-var mhtml::include-prefix>
+				<get-var tabs::images-webpath>
+				/<get-var image-name>.gif>>
+  <if <not <file-exists <get-var image-file>>>
+      <tabs::create-tab <get-var image-file> <get-var image-text> "" 270>>
+  <layout::left-border>
+    <a href="<get-var link>">
+      <img src="<get-var tabs::images-webpath>/<get-var image-name>.gif"
+	   border=0  alt="<get-var image-text>">
+    </a>
+  </layout::left-border>
+</defun>

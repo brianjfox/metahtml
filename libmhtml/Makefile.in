@@ -1,0 +1,310 @@
+# Makefile.in: -*- Text -*-  Source for configure to make a Makefile from.
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+REGEX_IN= @REGEX_IN@
+GDBM_IN = @GDBM_IN@
+DES_IN	= @DES_IN@
+CRYPTFUNCS_O = @CRYPTFUNCS_O@
+MODFUNCS_O = @MODFUNCS_O@
+DESLIB = @DESLIB@
+DBINC	= $(GDBM_IN) $(DES_IN)
+OS_NAME = @OS_NAME@
+OS_LIBS = @OS_LIBS@
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+
+bindir	= @bindir@
+libdir	= @libdir@
+incdir	= $(prefix)/include
+MODDEF = -DCOMPILE_TIME_MODULE_DIRECTORY='"$(libdir)"'
+# MKLIB_COMPILE_FLAG = @MKLIB_COMPILE_FLAG@
+
+MKLIB = ../mhc/mhc ../utilities/mklib $(MKLIB_COMPILE_FLAG)
+MKBOOTSTRAPLIB = ../mhc/mhc -z ../utilities/mklib $(MKLIB_COMPILE_FLAG)
+
+# The real locations of programs.
+RANLIB = @RANLIB@
+AR	= ar
+MKDIR	= mkdir
+TAR	= tar
+LN	= ln
+CP	= cp
+RM	= rm -f
+MV	= mv
+BASH_SHELL = @BASH_SHELL@
+bindir	= $(exec_prefix)/bin
+MKDIR = mkdir
+
+VERSDEF = -DMHTML_VERSION_STRING='"$(MHTML_VERSION)"' \
+	  -DMHTML_SUBVER_STRING='"$(MHTML_MINOR)"'
+
+#
+# ALL_SUBDIRS is the list of all of the subdirectories within which we
+# would like to run various `make's, or ".", which means that there
+# are no subdirectories.
+ALL_SUBDIRS = .
+
+VERSION = 6.09
+DISTNAME = libmhtml-$(VERSION)
+WEBBASEDIR = @WEBBASEDIR@
+
+CC = gcc
+# PROFILE_FLAGS = -pg
+# OPTIMIZE_FLAGS = -O69
+DEBUG_FLAGS = -g $(PROFILE_FLAGS)
+GCC_WARN = -Wall -Wstrict-prototypes -Wshadow
+CFLAGS = $(GCC_WARN) $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS)
+LDFLAGS = $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS)
+LIBRARIES = $(LIBPATHS) $(REQUIRED_LIBS)
+INCLUDES =  @EXTRAINC@ -I. -I.. -I$(LIBDIR) $(REGEX_IN) $(DBINC)
+
+.c.o:
+	@echo compiling $< into $@
+	@$(CC) $(CFLAGS) $(DEFS) $(VERSDEF) $(INCLUDES) -I.. $(MODDEF) -c $<
+
+SESSION_MANAGER_SRC = gdbm_session.c tcp_session.c
+SESSION_MANAGER_OBJ = gdbm_session.o tcp_session.o
+
+SESSION_SRC = session.c session_data.c $(SESSION_MANAGER_SRC)
+SESSION_OBJ = session.o session_data.o $(SESSION_MANAGER_OBJ)
+
+LIB_CSRC = symbols.c forms.c pages.c pagefuncs.c database.c streamfuncs.c \
+	   dbfuncs.c filefuncs.c prims.c symdump.c cgi-exec.c parser.c \
+	   cryptfuncs.c require.c sessionfuncs.c dbmfuncs.c modfuncs.c \
+	   cleaner.c rewriter.c lockname.c arrayfuncs.c mathfuncs.c \
+	   stringfuncs.c debugfuncs.c macrofuncs.c varfuncs.c packfuncs.c \
+	    alistfuncs.c relfuncs.c bootstrapper.c bootstrapcode.c \
+	    system_preload.c $(SESSION_SRC)
+
+LIB_HSRC = symbols.h forms.h pages.h session.h database.h session_data.h \
+	   parser.h streamfuncs.h symdump.h sessionfuncs.h \
+	   language.h mhtmlstd.h locking.h
+
+LIB_OBJS = symbols.o forms.o pages.o pagefuncs.o database.o streamfuncs.o \
+	   dbfuncs.o filefuncs.o $(CRYPTFUNCS_O) prims.o \
+	   symdump.o cgi-exec.o parser.o require.o initfuncs.o \
+	   sessionfuncs.o dbmfuncs.o rewriter.o $(MODFUNCS_O) lockname.o \
+	   bootstrapper.o bootstrapcode.o cleaner.o arrayfuncs.o \
+	   flowfuncs.o mathfuncs.o stringfuncs.o debugfuncs.o macrofuncs.o \
+	   varfuncs.o packfuncs.o alistfuncs.o relfuncs.o system_preload.o \
+	   $(SESSION_OBJ)
+
+XFUNCFILES = $(CRYPTFUNCS_O) $(MODFUNCS_O)
+FUNCFILES = pagefuncs.o streamfuncs.o dbfuncs.o filefuncs.o \
+	    prims.o cgi-exec.o require.o sessionfuncs.o $(XFUNCFILES) \
+	    dbmfuncs.o rewriter.o cleaner.o arrayfuncs.o flowfuncs.o \
+	    mathfuncs.o stringfuncs.o debugfuncs.o macrofuncs.o varfuncs.o \
+	    packfuncs.o alistfuncs.o relfuncs.o
+EXTRADOC_FILES = powerstrip-api.c standard-api.c sections.c
+
+T=tagsets
+STANDARD_TAGS = standard.mhtml \
+	$(T)/characters.mhtml $(T)/dirfuns.mhtml $(T)/dump-package.mhtml \
+	$(T)/english-numbers.mhtml $(T)/german-numbers.mhtml \
+	$(T)/form-to-database.mhtml $(T)/general.mhtml $(T)/locale.mhtml \
+	$(T)/menus.mhtml $(T)/message.mhtml $(T)/forms.mhtml \
+	$(T)/mhttpd.mhtml $(T)/numbers.mhtml $(T)/pagecount.mhtml \
+	$(T)/date-time.mhtml $(T)/sendmail.mhtml \
+	$(T)/session.mhtml $(T)/source.mhtml $(T)/this.mhtml $(T)/math.mhtml \
+	$(T)/parser.mhtml $(T)/form-to-database.mhtml $(T)/lang.mhtml \
+	$(T)/http.mhtml $(T)/sql.mhtml $(T)/pagelist.mhtml \
+	$(T)/image-builder.mhtml $(T)/buttons.mhtml $(T)/banners.mhtml \
+	$(T)/tabs.mhtml $(T)/border.mhtml $(T)/debug.mhtml \
+	$(T)/site.mhtml $(T)/sitedefs.mhtml \
+	$(T)/mdb.mhtml $(T)/mhc.mhtml $(T)/colors.mhtml $(T)/basic-auth.mhtml \
+	$(T)/unix.mhtml $(T)/gnuplot.mhtml $(T)/arrays.mhtml $(T)/sort.mhtml
+
+P=powerstrip-tags
+POWERSTRIP_TAGS = \
+	$(P)/crypto.mhtml \
+	$(P)/edit-page.mhtml $(P)/indexer.mhtml \
+	$(P)/layout.mhtml $(P)/linkup.mhtml $(P)/login.mhtml \
+	$(P)/navbar.mhtml $(P)/navicon.mhtml $(P)/navlayout.mhtml \
+	$(P)/nested-items.mhtml $(P)/parameters.mhtml \
+	$(P)/pstrip.mhtml \
+	$(P)/standard-footer.mhtml $(P)/standard-header.mhtml \
+	$(P)/tables.mhtml 
+
+TARGET_LIB = libmhtml.a
+TEST_PROGS = 
+TEST_OBJS  = 
+
+LIBDIR = ../libutils
+LIBPATHS = -L$(LIBDIR)bprintf -L$(LIBDIR)xmalloc -L$(LIBDIR)wisper 
+
+DOCTARGETS = functions.db.packed sections.db.packed
+TARGETS = $(TARGET_LIB) $(DOCTARGETS)
+
+all: rebootstrap $(TARGETS)
+
+$(TARGET_LIB): $(LIB_OBJS)
+	$(RM) $@
+	$(AR) cq $@ $(LIB_OBJS)
+	if [ "$(RANLIB)" ]; then $(RANLIB) $@; fi
+
+rebootstrap: FORCE
+	@if test -x ../mhc/mhc -a ! -s ./bootstrap.lib; then \
+	  $(RM) bootstrap.lib bootstrapcode.c; \
+	fi
+	@if test -x ../mhc/mhc -a ! -s ./system.lib; then \
+	  $(RM) system.lib system_preload.c; \
+	fi
+
+forms.o: forms.h
+pages.o: pages.c pages.h
+
+initfuncs.o: initfuncs.c
+initfuncs.c: $(FUNCFILES) mkinit
+	./mkinit $(FUNCFILES) >initfuncs.c
+
+createdoc: createdoc.o ../libutils/libutils.a
+	$(CC) -o createdoc createdoc.o ../libutils/libutils.a
+
+$(DOCTARGETS): $(FUNCFILES) $(EXTRADOC_FILES) createdoc
+	./createdoc -o functions.db.packed -s sections.db.packed \
+	    $(FUNCFILES) $(EXTRADOC_FILES)
+
+system_preload.c: makebootstrap system.lib
+	./makebootstrap --prefix system_preload system.lib >system_preload.c
+
+system_preload.o: system_preload.c system.mhtml
+
+system.lib: system.mhtml
+	@if [ -x ../mhc/mhc ]; then \
+	$(MKLIB) -o system.lib system.mhtml; \
+	else \
+	  (\
+	   echo ""; \
+	   echo "WARNING: system.lib file is older than system.mhtml,"; \
+	   echo "         and ../mhc/mhc isn't built yet."; \
+	   echo "         A zero length system.lib file is being made so"; \
+	   echo "         that this build will finish, and then you should"; \
+	   echo "         call \`make' again from top-level to rebuild it."; \
+	   echo ""; \
+	  ); \
+	  $(RM) -f $@; touch $@; \
+	  exit 0; \
+	fi
+
+makebootstrap: makebootstrap.c
+	$(CC) $(CFLAGS) $(DEFS) $(INCLUDES) -o makebootstrap makebootstrap.c
+
+bootstrapcode.c: makebootstrap bootstrap.lib
+	./makebootstrap --prefix bootstrap bootstrap.lib >bootstrapcode.c
+
+bootstrapcode.o: bootstrapcode.c bootstrap.mhtml
+
+powerstrip-api.c standard-api.c bootstrap.lib: \
+	 bootstrap.mhtml $(STANDARD_TAGS) $(POWERSTRIP_TAGS)
+	@if [ -x ../mhc/mhc ]; then \
+	   $(MKBOOTSTRAPLIB) -o bootstrap.lib bootstrap.mhtml; \
+	else \
+	  (\
+	   echo ""; \
+	   echo "WARNING: bootstrap.lib file is older than bootstrap.mhtml,"; \
+	   echo "         and ../mhc/mhc isn't built yet."; \
+	   echo "         A zero length bootstrap.lib file is being made so"; \
+	   echo "         that this build will finish, and then you should"; \
+	   echo "         call \`make' again from top-level to rebuild it."; \
+	   echo ""; \
+	  ); \
+	  $(RM) -f $@; touch $@; \
+	  exit 0; \
+	fi
+
+$(FUNCFILES): language.h mhtmlstd.h
+
+Makefile: Makefile.in
+	(cd ..; ./config.status)
+
+install:
+	@echo "To install the libmhtml library, type \"make install-libs\"."
+
+install-libs: libmhtml.a
+	$(INSTALL) libmhtml.a $(libdir)
+	for file in *.h; do \
+	  $(INSTALL) $$file $(incdir)/$$file; \
+	done
+
+tags TAGS: FORCE
+	etags *.c *.h
+
+clean: FORCE
+	$(RM) -f *.o *.a $(TARGETS) initfuncs.c bootstrapcode.c
+	$(RM) -f makebootstrap TAGS createdoc
+
+distclean realclean: clean
+	$(RM) *.o *core* *~ DISTFILES *.bak *.gz foo *\#* Makefile
+
+dist: DISTFILES
+	$(RM) -rf $(DISTNAME)
+	$(MKDIR) $(DISTNAME)
+	for d in `find $(ALL_SUBDIRS) -type d -print`; do \
+	  if [ "$$d" != "." -a "$$d" != "./$(DISTNAME)" ]; then \
+	    mkdir $(DISTNAME)/$$d; \
+	  fi \
+	done
+	for f in `cat DISTFILES`; do \
+	  $(LN) $(srcdir)/$$f $(DISTNAME)/$$f || \
+		{ echo copying $$f; cp -p $(srcdir)/$$f $(DISTNAME)/$$f ; } \
+	done
+	(cd $(DISTNAME); $(MAKE) $(MFLAGS) distclean)
+	$(TAR) chvf - $(DISTNAME) | gzip >$(DISTNAME).tar.gz
+	$(RM) -rf $(DISTNAME)
+
+# Gets rid of most of the unwanted files.  Verify manually (if necessary)
+# that this produces a list of all the files desired in the distribution. 
+DISTFILES: FORCE
+	$(RM) -rf $(DISTNAME)
+	(cd $(srcdir); find . ! -type d -print) \
+	| sed  '/\/RCS\//d; \
+	       /\/EMACS-BACKUPS\//d; \
+	       /\.tar.*/d; \
+	       /~$$/d; /\.o$$/d; \
+	       /\/config\.status$$/d; \
+	       /\/.*\.BAK$$/d; \
+	       /\/TAGS$$/d; \
+	       /\/core$$/d; \
+	       /\/[a-z]*\.core$$/d; \
+	       /\/core\.[a-z]*$$/d; \
+	       /\/a.out$$/d; \
+	       /\/=/d; \
+	       /\/conftest\.c$$/d; \
+	       /\/DISTFILES$$/d; \
+	       /\/xact\/xact$$/d; \
+	       /\.toc$$/d; \
+	       /\.aux$$/d; /\.log$$/d; \
+	       /\.cps$$/d; /\.cp$$/d; \
+	       /\.fns$$/d; /\.fn$$/d; \
+	       /\.tps$$/d; /\.tp$$/d; \
+	       /\.vrs$$/d; /\.vr$$/d; \
+	       /\.pgs$$/d; /\.pg$$/d; \
+	       /\.kys$$/d; /\.ky$$/d; \
+	       s/^.\///; /^\.$$/d;' \
+	| sort | uniq > DISTFILES
+
+
+FORCE:

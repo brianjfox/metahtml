@@ -1,0 +1,71 @@
+     ------------------------------------------------------------
+
+	      Meta-HTML Changes in 5.01 from 5.00
+
+THE Meta-HTML REFERENCE MANUAL CAN NOW BE PRINTED OUT!
+  The file `doc/manual/metahtml.ps' is a postscript version of the
+  manual, and the mhc script `build-ps' can be used to generate the
+  manual from the documentation files and databases.  In order to
+  generate the manual, you will have to have the TeX, texindex, and
+  dvips programs installed, and in your path.
+
+  The printed manual is about 96 pages, contains a function index,
+  a variable index, and a table of contents, and is heavily cross
+  referenced.
+
+CHANGES WHICH AFFECT COMPILATION AND INSTALLATION:
+  Meta-HTML should now configure and install itself on an even wider
+  variety of systems than before.  Specifically, problems reported for
+  FreeBSD, NetBSD, NeXT, Solaris-2.4, and Solaris-2.5 have been
+  addressed.
+
+CHANGES WHICH AFFECT APACHE INSTALLATION:
+  There is a new `mod_mhtml.c' file which can be compiled in with your
+  server even if you aren't sure you will be running Meta-HTML.
+  This allows for a much simpler configuration of the Apache server.
+
+CHANGES WHICH AFFECT THE LANGUAGE:
+  There have been several changes which affect the operation of the
+  interpreter -- mostly in subtle ways.  All reported bugs have been
+  fixed, and a couple of new features have been added.
+
+    Additional macro argument expansion control, %attributes, %xbody,
+    and %qbody, for getting the attribute list, the evaluated body,
+    and the quoted body, respectively.
+
+    A new tag, <VAR-EXISTS>, takes a single variable name as an
+    argument and returns the string "true" if that variable has
+    been defined, even if its value is the empty string ("").
+
+    There is a new tag, <SYSTEM-ERROR-OUTPUT>, which (analogous to
+    <tag DEBUGGING-OUTPUT> is replaced with the output of internal
+    functions that result in error conditions.  Most notably, if
+    functions such as <WITH-OPEN-DATABASE> or <WITH-OPEN-STREAM>
+    encounter error conditions, that status is reported in this tag.
+
+    The <INCLUDE> tag now uses the directory of the containing file as
+    the current directory, not the directory of the requesting
+    document.  Essentially, this means that it acts more like the C
+    pre-processor `#include'.
+
+    The variables MHTML::INCLUDE-PREFIX and MHTML::RELATIVE-PREFIX
+    show the full path to the document being retrieved, so there
+    continues to be a mechanism for conditionally including a file
+    in the same directory of the current document -- it looks like:
+
+      <include <get-var mhtml::relative-prefix>/local.mhtml alt="">
+
+    In the INCLUDEd file, the variable %%::RELPREF reflects the
+    current Web path to the document being included.  You won't
+    need this for anything though.
+
+    Both the Server and Engine have newer configuration files and
+    added code, which default the following behavior:
+
+	  Posted data is made non-executable by default.
+	  Cookies are set to be "permanent" by default.
+	  User directories are handled in <INCLUDE> statements,
+	  and also by both the Server and Engine, if, and only if, the
+	  variable MHTML::~DIRECTORY is defined and has a value.
+	  A typical value for this variable might be "public_html".
+

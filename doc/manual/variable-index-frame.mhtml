@@ -1,0 +1,6 @@
+;;; variable-index-frame.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Jul  9 11:19:47 1996.
+<set-var hacking-frames=true>
+<include variable-index.mhtml>

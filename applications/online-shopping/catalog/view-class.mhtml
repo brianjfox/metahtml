@@ -1,0 +1,41 @@
+;;; view-class.mhtml: -*- Meta-HTML -*-  View an existing class.
+;;;
+;;; Copyright (c) 1995 Universal Access, Inc
+;;; Author: Brian J. Fox (bfox@ua.com) Tue Sep 12 12:44:35 1995.
+
+<if <get-var posted::class>
+    <set-session-var current-class=<get-var posted::class>>>
+<set-var title="View/Modify <get-session-var current-class>">
+<include header.mhtml>
+<plain-text first-char=<font size=+2>>
+<set-var class=<get-session-var current-class>>
+
+<with-open-database db <database classes>>
+  <set-var ignore=<database-load-record db <get-var class>>>
+</with-open-database>
+
+Here is a product list.  Click on the item that you would like to
+modify, or click
+<a href="<get-var mhtml::url-to-dir>/edit-entry.mhtml?<cgi-encode class>">
+  <i>here</i>
+</a> to create a new item.
+
+</plain-text>
+<hr>
+Current Class: <get-var class><br>
+Current Database: <match <db-of-class <get-var class>>
+			 <get-var mhtml::include-prefix>/ action=delete>
+<p>
+<set-var product-list=<product-list <db-of-class <get-var class>>>>
+
+<if <eq <get-var products-listed> 0>
+    <prog <i>
+      [ <a href="<concat <get-var mhtml::url-to-dir>/
+			 edit-entry.mhtml?<cgi-encode class>>">
+      No products in database</a>.]</i>>
+  <prog <hr><get-var product-list><hr>>>
+<p>
+<font size=+2>B</font>ack to
+<a href="<get-var mhtml::url-to-dir>/">Catalog Maintenance</a>.<br>
+<include footer.mhtml>
+

@@ -1,0 +1,49 @@
+;;; set-session-timeout.mhtml: -*- Meta-HTML -*-  Man Page for
+;;; set-session-timeout utility.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 11:56:29 1996.
+;;;
+<set-var title="set-session-timeout: Meta-HTML Utility">
+<include header.mhtml>
+
+<layout::page>
+  <h3> Control Time of Connected Session </h3>
+
+  <ptext>
+    <synopsis set-session-timeout [-f session-db] session-id new-timeout-value>
+
+    <code>set-session-timeout</code> allows the server administrator to
+    control the amount of time a particular session has before it times
+    out, directly from the command line.
+
+    The <var new-timeout-value> is expressed in seconds, and the special
+    signal value of <code><b>forever</b></code> indicates that the session
+    should never timeout (useful when debugging <meta-html> session
+    manipulation code).
+
+    If you are utilizing a session database which is not stored in the
+    usual location (<code>/tmp/sessions.db</code>), you may give the
+    <code>-f <i>FILENAME</i></code> argument, where
+    <code><i>FILENAME</i></code> is the path to the file containing the
+    session database.
+
+    Here is an example of use:
+  </ptext>
+  <pre>
+  root@server# <a href="list-sessions.mhtml">list-sessions</a> -s
+  Sessions in database [3]:
+  SESSION [Meta Scheduler/2498587655903]  (2100 seconds remaining)
+  SESSION [BIX-Session/25631364981414]  (3271 seconds remaining)
+  SESSION [Online Shopping/25011681853662]  (2119 seconds remaining)
+
+  root@server# set-session-timeout 2498587655903 12
+  Changed Timeout to 12
+
+  root@server# list-sessions -s 2498587655903
+  SESSION [Meta Scheduler/2498587655903]  (11 seconds remaining)
+
+  </pre>
+</layout::page>
+
+<include footer.mhtml>

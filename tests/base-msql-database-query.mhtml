@@ -1,0 +1,6 @@
+;;; base-msql-database-query.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 22:57:24 1996.
+
+Result: "Jarlath, 17:Jarlath": <set-var query="select * from test where name like 'Jarlath'"><msql::with-open-database db database=test host=localhost><msql::database-query db query=<get-var query> format="<get-var name>, <get-var age>:" keys=dbkeys keyname=name></msql::with-open-database><get-var dbkeys[]>

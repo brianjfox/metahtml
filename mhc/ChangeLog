@@ -1,0 +1,120 @@
+1998-05-22  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* mhc.c (define_mhc_exit): New function for mhc: mhc::exit causes
+	immediate exit of the process.
+
+1998-05-11    <bfox@roadshow.datawave.net>
+
+	* mhc.c (parse_program_args): MHC can now read a script from
+	stdin.  For example:
+
+		echo "<set-var foo=bar> <get-var foo>" | mhc
+	
+	is completely valid input.
+	
+Tue Sep 23 09:16:22 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* mhc.c (parse_program_args): Allow argument of --config filename
+	to read a configuration file before processing the page.
+
+Fri Jul 12 10:42:35 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* imagemap.c (imagemap_this_url): Fix substitution for SID bug.
+
+Wed Apr 24 14:09:11 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* engine.c (check_cookie_compatible): Let OmniWeb do Cookies.
+
+	* imagemap.c (imagemap_error_page): Insert HTTP header if this is
+	nph-imagemap.
+	(imagemap_this_url): Insert HTTP header if this is nph-imagemap.
+
+Thu Nov 30 20:02:02 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* mhc.c (new file): Standalone interpreter engine is the minimum
+	goody for running Meta-HTML code.  You can now put
+	`#!/usr/local/bin/mch' at the top of some page.
+	
+Sun Oct 15 18:22:41 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* build-page.c (main): Try "directory" after "index", "welcome",
+	"home", and "begin".
+
+Fri Sep 29 09:28:27 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* build-page.c (main): Define mhtml::version as the current
+	version of this Meta-HTML.
+
+Wed Sep 27 11:19:54 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* dbpack.c (unpackage_db): Anal casting for DEC compiler.
+
+Tue Sep 26 14:52:04 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* dbdump.c (format_alist): Database alists are not saved with a
+	terminating null character, so don't expect one to be there.
+
+Thu Sep 21 02:21:39 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* dbdump.c (main): Fix typo.  STREAM comes before STRING in
+	fprintf, right?
+
+	* build-page.c (main): Use the new cookie stuff.
+	Don't place the SID into the page variable URLS if this
+	browser/server combination is cookie compatible.  Environment
+	variable MHTML_COOKIE_COMPATIBLE controls whether or not we
+	believe that the server is cookie compatible.
+
+Sun Sep 10 00:06:57 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* build-page.c (main): Rewrite the way that defaulted documents
+	are looked up.  Try `index.mhtml', then `index.html', then
+	`Index.mhtml', and then `Index.html', and do the same for
+	`welcome', `home', and `begin', in that order.
+
+Tue Aug 15 11:49:48 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* build-page.c (main): Allow the page variable "mhtml::cacheable"
+	to control the expiration date of the returned page.  To allow a
+	document to be cached, simply <set-var mhtml::cacheable=true> in
+	the page being built.
+
+Mon Aug 14 11:41:30 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* build-page.c (main): Arrange that posted values passed in as an
+	array get the array values set in the page.
+	(main): Test for "*.mhtml" before "*.html".
+
+Sat Aug 12 03:37:37 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* imagemap.c (main): New File.
+
+	* build-page.c: Don't build in the map dispatch code.  Use our new
+	imagemap code instead.
+
+Fri Aug 11 12:43:16 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* build-page.c (filename_extension): Return the extension of
+	FILENAME.
+	(maybe_return_image): Check to see if this request is for an
+	image.  If so, return the image immediately.
+
+Mon Aug  7 12:55:59 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* build-page.c: Rewrite variable getting/setting logic.  New Page
+	Variables, and new meanings for Page Variables.
+	mhtml::http-to-host is now http://foo.com
+	mhtml::http-prefix is now http://foo.com/foo/123456789
+	mhtml::http-prefix-sans-sid is now http://foo.com/foo
+	The document is the first component containing .mhtml/, or the
+	full tail of path_info otherwise.
+
+Sun Aug  6 22:27:37 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* build-page.c (main): Only allow posting to files which end in
+	".mhtml/"
+
+Sat Aug  5 14:36:45 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* build-page.c (main): Changed usage of mthml-varname to
+	mhtml::var-name.  Also see changes to ../libmhtml/forms.c.

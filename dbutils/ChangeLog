@@ -1,0 +1,13 @@
+Wed Sep 27 11:19:54 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* dbpack.c (unpackage_db): Anal casting for DEC compiler.
+
+Tue Sep 26 14:52:04 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* dbdump.c (format_alist): Database alists are not saved with a
+	terminating null character, so don't expect one to be there.
+
+Thu Sep 21 02:21:39 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* dbdump.c (main): Fix typo.  STREAM comes before STRING in
+	fprintf, right?

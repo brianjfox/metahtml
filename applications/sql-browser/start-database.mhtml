@@ -1,0 +1,17 @@
+;;; start-database.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue May 20 09:41:47 1997.
+<if <get-file-properties /usr/local/Hughes/bin/msql2d>
+    <cgi-exec nowait=true errors=errors output=output
+	      /usr/local/Hughes/bin/msql2d &>
+  <if <get-file-properties /usr/local/Minerva/bin/msqld>
+      <cgi-exec nowait=true errors=errors output=output
+		/usr/local/Minerva/bin/msqld &>
+    <set-var errors="Can't Find a Database Server to Start!">>>
+
+<if <get-var-once errors>
+    <message <get-var-once errors>>>
+
+<redirect welcome.mhtml>
+

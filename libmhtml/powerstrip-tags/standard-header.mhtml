@@ -1,0 +1,86 @@
+;;; standard-header.mhtml: -*- Meta-HTML -*-  Default header for all of IBIS.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Nov  8 12:40:50 1996.
+<defsubst ibis::standard-header whitespace=delete>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Insert the standard PowerStrip header, including the
+  ;;; system site header, and inserting the contents of the
+  ;;; variable IBIS::HEAD-PARAMS in the
+  ;;; <example code><HEAD> ... </HEAD></example> area.
+  ;;;
+  ;;; Also see <funref POWERSTRIP-SYSTEM-TAGS ibis::standard-footer>.
+  <html>
+  <head>
+  <title> <get-var-once title> </title>
+  <get-var ibis::head-params>
+  </head>
+
+  ;;; Use user-supplied parameters for the basic styles.
+  <if <get-var site::admin-area>
+      <body <site::admin-body-value text>
+	    <site::admin-body-value bgcolor>
+	    <site::admin-body-value link>
+	    <site::admin-body-value vlink>
+	    <site::admin-body-value alink>
+	    <get-var ibis::body-params>
+	    <site::admin-body-value background>>
+    <body <site::body-value text>
+	  <site::body-value bgcolor>
+	  <site::body-value link>
+	  <site::body-value vlink>
+	  <site::body-value alink>
+	  ;;; Allow page specific overrides.
+	  <get-var ibis::body-params>
+	  <site::body-value background>>>
+
+  ;;; Include local navigation if there is any, and it isn't inhibited.
+  <when <and <not <get-var site::inhibit-navigation>>
+	     <match <get-var layout::navigation-buttons> top>>>
+    <include <get-var mhtml::relative-prefix>/navbar.mhtml alt="">
+  </when>
+
+  ;;; Show the system navigation bar if the administrator wants to,
+  ;;; and if she is logged in.
+  <when <and <string-eq <get-var site::show-system-navigation> "True">
+	     <not <get-var site::admin-area>>
+	     <match <get-var layout::layout> "right">>>
+    <layout::right-border>
+      <center>
+	<navicon PowerStrip
+		 <site::system-prefix>/welcome.mhtml "System Maintenance">
+	<navicon Pages <site::system-prefix>/Pages "Page Maintenance">
+	<navicon Profiles <site::system-prefix>/Profiles "Administrator Profiles">
+	<navicon Sessions <site::system-prefix>/Sessions "Session Maintenance">
+	<navicon Reports <site::system-prefix>/Reports/ "Report Generator">
+	<navicon Site <site::system-prefix>/Site "Modify Site Appearance">
+	<navicon Parameters <site::system-prefix>/Ibis/ "Modify Plugins">
+
+	<ibis::layout-plugin-buttons <site::system-prefix>>
+      </center>
+    </layout::right-border>
+  </when>
+
+  ;;; Stuff and Bother.  Here is where the site logo/header might go:
+  <concat <a href="<get-var mhtml::http-prefix>/">
+	  <if <get-var site::title-image>
+	      <img src="<get-var site::title-image>" border=0 align=left
+		   alt="Image">>
+	  </a>>
+  <when <get-var site::header>>
+    <include <get-var site::header> alt="">
+  </when>
+
+  <when <defined? site::page-header-function>>
+    <site::page-header-function>
+  </when>
+
+  <p><br clear=left>
+  <layout::default-header>
+
+  ;;; Show any pending messages.
+  <layout::page>
+    <SYSTEM-ERROR-OUTPUT>
+    <show-message>
+  </layout::page>
+</defsubst>

@@ -1,0 +1,9 @@
+;;; base-capitalize.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sat Oct 26 23:11:45 1996.
+
+Result: "This That These Those": <capitalize "THIS thAt These those">
+Result: "Why Are Those Fish In My Swimming Pool": <capitalize "Why Are those fiSH in my SwimmiNG pOOl">
+Result: Why: <capitalize Why Are those fiSH in my SwimmiNG pOOl>
+

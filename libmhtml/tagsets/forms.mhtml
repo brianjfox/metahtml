@@ -1,0 +1,195 @@
+;;; forms.mhtml: -*- Meta-HTML -*-  Tagset for manipulating form information.
+;;;
+;;;  Copyright (c) 1997, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue May 13 13:11:46 1997.
+
+<defun forms::remember-form-data>
+  <if <match <package-names> POSTED>
+      <set-session-var <thispage>-formdata=<package-to-alist posted strip=t>>
+    <alist-to-package <get-session-var <thispage>-formdata> default>>
+</defun>
+
+<defun forms::forget-form-data>
+  <unset-session-var <thispage>-formdata>
+</defun>
+
+<defun forms::standard-buttons &optional forms-index>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Display the standard buttons for input when performing
+  ;;; <funref HTML-HELPERS forms::multiple-instances>.
+  ;;; If there are no current instances of the form, this produces
+  ;;; a language sensitive submit button with the name of "form-create" --
+  ;;; if the instance that this function is called in already has values,
+  ;;; then two submit buttons are produced, with names "form-modify" and
+  ;;; "form-accept".
+  ;;;
+  ;;; If you would like to control the placement of these buttons, then
+  ;;; you should set the variable <var forms::no-submits>.  In this case,
+  ;;; you are responsible for calling forms::standard-buttons yourself.
+  <if <not <var-exists forms-index>>
+      <set-var forms-index=<get-var ^::forms-index>>>
+  <when <get-var forms-index>>
+    <input type=submit name=form-accept
+	   value="<lang en="Apply Changes" de="&Uuml;bernehmen">">
+    <input type=submit name=form-remove
+	   value="<lang en="Remove" de="L&ouml;schen">">
+  </when>
+  <when <not <get-var forms-index>>>
+    <input type=submit name=form-create
+	   value="<lang en="Create New" de="Erstellen">">
+  </when>
+</defun>
+
+<defmacro forms::multiple-instances session-pack 
+  &key modify-hook create-hook remove-hook method action enctype
+  &body &unevalled the-form-body
+  whitespace=delete>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Creates a repeating form, allowing multiple entries of data sets.
+  ;;; The body of this macro is exactly whatever you might put in a
+  ;;; standard FORM body.  What is needed here is examples, and there
+  ;;; really isn't space for any.  Please see the file called
+  ;;; multiple-instances.mhtml in the distribution for examples.
+  <defvar method POST>
+  <defvar action <thisdoc>>
+  <if <not <var-exists modify-hook>> <set-var modify-hook=forms::modify-hook>>
+  <if <not <var-exists create-hook>> <set-var create-hook=forms::create-hook>>
+  <if <not <var-exists remove-hook>> <set-var remove-hook=forms::remove-hook>>
+  <if <not <package-vars <get-var session-pack>>>
+      <session-import <get-var session-pack> <get-var session-pack>>>
+
+  <when <string-eq <get-var-once posted::session-pack>
+		   <get-var-once session-pack>>>
+    <unset-var posted::session-pack>
+    <when <get-var-once posted::form-accept>>
+      <if <defined? <get-var modify-hook>>
+	  <set-var forms::modifiable? = <apply <get-var modify-hook> posted>>
+	<set-var forms::modifiable? = true>>
+      <when <get-var-once forms::modifiable?>>
+	<package-delete :forms>
+	<copy-package posted :forms>
+	<unset-var :forms::form-accept
+		   :forms::forms-index
+		   :forms::session-pack>
+	<set-var
+	  <get-var session-pack>::items[posted::forms-index] =
+	  <package-to-alist :forms strip=true>>
+	<set-var forms-update-session=true>
+	<unset-var forms::modifiable?>
+      </when>
+    </when>
+
+    <when <get-var-once posted::form-create>>
+      <unset-var posted::form-create>
+      <if <defined? <get-var create-hook>>
+	  <set-var forms::createable? = <apply <get-var create-hook> posted>>
+	<set-var forms::createable? = true>>
+      <when <get-var-once forms::createable?>>
+	<array-append <package-to-alist posted strip=true>
+		      <get-var-once session-pack>::items>
+	<set-var forms-update-session=true>
+	<unset-var forms::createable?>
+      </when>
+    </when>
+
+    <when <get-var-once posted::form-remove>>
+      <if <defined? <get-var remove-hook>>
+	  <set-var forms::removable? = <apply <get-var remove-hook> posted>>
+	<set-var forms::removable? = true>>
+      <when <get-var-once forms::removable?>>
+	<package-delete forms-temp-pack>
+	<alist-to-package
+	 <get-var-once <get-var session-pack>::items[posted::forms-index]>
+	 forms-temp-pack>
+	<array-shift -1 <get-var session-pack>::items
+		     start=<get-var posted::forms-index>>
+	<if <eq 0 <array-size <get-var session-pack>::items>>
+	    <concat <package-delete <get-var session-pack>>
+		    <session-destroy-package <get-var session-pack>>>
+	  <set-var forms-update-session=true>>
+	<unset-var forms::removable?>
+	<set-var :names[] = <package-vars forms-temp-pack strip=t>>
+	<foreach :name :names>
+	  <unset-var default::<get-var :name> posted::<get-var :name>
+		     :form-data::<get-var :name>>
+	</foreach>
+      </when>
+    </when>
+
+    <if <get-var-once forms-update-session>
+	<session-export <get-var-once session-pack>
+			<get-var-once session-pack>>>
+  </when>
+  <set-var forms-index=0>
+  <foreach instance <get-var session-pack>::items iter=secret-forms-index>
+    <package-delete :forms :form-data>
+    <alist-to-package <get-var-once instance> :forms>
+    <unset-var :forms::forms-index>
+    <copy-package :forms default>
+    <copy-package :forms posted>
+    <copy-package :forms :form-data>
+    <form method="<get-var-once method>" action="<get-var-once action>"
+	  <if <get-var-once enctype> "enctype='<get-var-once enctype>'">>
+      <input type=hidden name=forms-index value=<get-var-once forms-index>>
+      <input type=hidden name=session-pack value="<get-var-once session-pack>">
+      <get-var-eval the-form-body>
+      <increment forms-index>
+      <set-var :names[] = <package-vars :forms strip=t>>
+      <foreach :name :names>
+	<unset-var default::<get-var-once :name> posted::<get-var-once :name>
+		   :form-data::<get-var-once :name>>
+      </foreach>
+      <when <not <get-var-once forms::no-submits>>>
+	<center>
+	  <forms::standard-buttons>
+	</center>
+      </when>
+    </form>
+  </foreach>
+
+  <package-delete :forms>
+  <unset-var forms-index>
+  <form method=<get-var-once method> action=<get-var-once action>>
+    <input type=hidden name=session-pack value="<get-var-once session-pack>">
+    <get-var-eval the-form-body>
+    <when <not <get-var-eval forms::no-submits>>>
+      <center>
+	<forms::standard-buttons>
+      </center>
+    </when>
+  </form>
+</defmacro>
+
+<defun forms::multiple-instance-resolve session-pack dest-pack>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; For every instance of a form in SESSION-PACK, append the
+  ;;; elements in order to arrays in DEST-PACK.  Thus, if your
+  ;;; form contained "name" and "age" input fields, and the user
+  ;;; created multiple instances of this form, the output of
+  ;;; calling <tag forms::multiple-instance-resolve mypack results>
+  ;;; would be:
+  ;;; <ul>
+  ;;; <li>RESULTS::NAME[0] --> Brian
+  ;;; <li>RESULTS::NAME[1] --> John
+  ;;; <li>...
+  ;;; <li>RESULTS::AGE[0] --> 38  (i.e., Brian's age)
+  ;;; <li>RESULTS::AGE[1] --> 37  (i.e., John's age).
+  ;;; </ul>
+  ;;;
+  ;;; You have to call <tag forms::multiple-instance-resolve> for every form
+  ;;; in your page which used <tag forms::multiple-instances>.  Since this
+  ;;; requires the use of the session database, you can call
+  ;;; <tag forms::multiple-instance-resolve> from any page at any time to read
+  ;;; the contents of the session data, and return the information.
+  <session-import <get-var session-pack> <get-var session-pack>>
+  <package-delete <get-var dest-pack>>
+  <foreach :form-alist <get-var session-pack>::items>
+    <package-delete :temp>
+    <alist-to-package <get-var-once :form-alist> :temp>
+    <set-var :names[]=<package-vars :temp strip=true>>
+    <foreach :name :names>
+      <array-append <get-var-once :temp::<get-var :name>>
+		    <get-var dest-pack>::<get-var :name>>
+    </foreach>
+  </foreach>
+</defun>

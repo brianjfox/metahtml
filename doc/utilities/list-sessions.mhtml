@@ -1,0 +1,33 @@
+;;; list-sessions.mhtml: -*- Meta-HTML -*-  Man page for list-sessions.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 11:18:37 1996.
+<set-var title="List-sessions: Show active sessions">
+<include header.mhtml>
+
+<layout::page>
+  <h3> Examine Contents of Session Database </h3>
+  <ptext>
+    <synopsis list-sessions [-f session-db] [-s | --short] [session-id ...]>
+
+    <code>list-sessions</code> displays the contents of the session
+    database, either all of the records, or only those specified by
+    <var session-id>s, in a verbose format (the default), or in a short
+    format.
+
+    To query a session database which is not stored in the usual location,
+    you give the <code>-f <i>FILENAME</i></code> argument, where
+    <code><i>FILENAME</i></code> is the path to the file containing the
+    session database.
+
+    Note that the session database (usually in <code>/tmp/sessions.db</code>)
+    is normally only readable by the superuser.  In this case, you should
+    run this command as the superuser.
+
+    Here is sample output:
+  </ptext>
+  <pre>
+<include session.list>
+  </pre>
+</layout::page>
+<include footer.mhtml>

@@ -1,0 +1,224 @@
+;;; ncsa-patches.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Fri Sep 22 10:50:31 1995.
+<if <not <get-var files-are-included>>
+    <prog
+      <set-var title="Diffs for the NCSA Server">
+      <include header.mhtml>>
+  <prog
+   <h2>Diffs for the NCSA Server</h2>>>
+
+<plain-text first-char="<font size=+2>">
+This documents contains the changes that need to be made to the NCSA
+server in order to have it handle <b>HTTP Cookies</b> as used by
+Netscape, and proposed in the HTML 3.0 specification.
+
+Two of the existing files need extremely minor modifications, as does
+the <code>Makefile</code> in the <code>src</code> directory.  Two
+additional files implement the majority of the cookie code (about 40
+lines in total).
+
+The files which have changed are:
+
+<ul>
+  <li> <code>http_mime.c</code><br>
+  A single if statement which calls <code>remember_cookie ()</code>
+  when the MIME header <code>Cookie:</code> is seen.
+  <p><li> <code>http_script.c</code><br>
+  Minor modifications to add any cookies gathered to the execution
+  environment of a CGI program.
+  <p><li> <code>Makefile</code><br>
+  Define <code>HTTP_COOKIES</code>, and link with <code>http_cookie.o</code>.
+</ul>
+
+The two new files are:
+
+<ul>
+  <li> <code>http_cookie.c</code><br>
+  Trivial code to remember a cookie on a dynamically allocated array.
+  <p><li> <code>http_cookie.h</code><br>
+  Header file which declares the <code>remember_cookie ()</code>
+  function and the array of cookies.
+</ul>
+
+Here are the diffs that you can apply to your NCSA server:
+</plain-text>
+
+<h3>http_mime.c</h3>
+<pre>
+<verbatim quote>
+*** http_mime.c.~1~	Sat May  7 19:47:08 1994
+--- http_mime.c	Wed Sep 20 17:22:10 1995
+***************
+*** 7,12 ****
+--- 7,13 ----
+  
+  
+  #include "httpd.h"
++ #include "http_cookie.h"
+  
+  struct mime_ext {
+      char *ext;
+***************
+*** 391,396 ****
+--- 392,402 ----
+          }
+          if(!strcasecmp(w,"If-modified-since"))
+              strcpy(ims,l);
++ 
++ #if defined (HTTP_COOKIES)
++ 	if (strcasecmp (w, "Cookie") == 0)
++ 	  remember_cookie (l);
++ #endif /* HTTP_COOKIES */
+  
+          http2cgi(w);
+          if(in_headers_env) {
+</verbatim>
+<pre>
+
+<h3>http_script.c</h3>
+<pre>
+<verbatim quote>
+*** http_script.c.~1~	Sat May  7 19:47:10 1994
+--- http_script.c	Wed Sep 20 17:20:45 1995
+***************
+*** 8,13 ****
+--- 8,14 ----
+   */
+  
+  #include "httpd.h"
++ #include "http_cookie.h"
+  
+  int pid;
+  
+***************
+*** 80,86 ****
+  }
+  
+  #define MAX_COMMON_VARS 9
+! #define MAX_CGI_VARS (MAX_COMMON_VARS+9)
+  
+  char **add_cgi_vars(char **env,
+                      char *method, char *path, char *path_args, char *args,
+--- 81,87 ----
+  }
+  
+  #define MAX_COMMON_VARS 9
+! #define MAX_CGI_VARS (MAX_COMMON_VARS+14)
+  
+  char **add_cgi_vars(char **env,
+                      char *method, char *path, char *path_args, char *args,
+***************
+*** 89,97 ****
+  {
+      int x;
+      char t[HUGE_STRING_LEN],t2[HUGE_STRING_LEN];
+  
+!     if(!(env = new_env(env,MAX_CGI_VARS,&x)))
+!         die(NO_MEMORY,"add_cgi_vars",out);
+  
+      env[x++] = make_env_str("GATEWAY_INTERFACE","CGI/1.1",out);
+  
+--- 90,115 ----
+  {
+      int x;
+      char t[HUGE_STRING_LEN],t2[HUGE_STRING_LEN];
++     int new_env_size = MAX_CGI_VARS;
+  
+! #if defined (HTTP_COOKIES)
+!     register int i, cookie_count = 0;
+! 
+!     if (cookies != (char **)NULL)
+!       {
+! 	for (i = 0; cookies[i] != (char *)NULL; i++);
+! 	cookie_count = i;
+! 	new_env_size += cookie_count + 1;
+!       }
+! #endif
+! 
+!     if (!(env = new_env (env, new_env_size, &x)))
+!       die (NO_MEMORY,"add_cgi_vars",out);
+! 
+! #if defined (HTTP_COOKIES)
+!     for (i = 0; i < cookie_count; i++)
+!       env[x++] = make_env_str ("HTTP_COOKIE", cookies[i], out);
+! #endif /* HTTP_COOKIES */
+  
+      env[x++] = make_env_str("GATEWAY_INTERFACE","CGI/1.1",out);
+</verbatim>
+</pre>
+
+<h3>http_cookie.h</h3>
+<pre>
+<verbatim quote>
+/* http_cookie.h: Add the minimum support for Netscape Cookies.  */
+
+/*  Copyright (c) 1995 Brian J. Fox
+    Author: Brian J. Fox (bfox@ua.com) Wed Sep 20 17:04:50 1995.
+    The world is free to use this.  See GNU Copyleft for details. */
+
+#if defined (HTTP_COOKIES)
+/* A NULL terminated array of cookie=value strings taken from the client's
+   mime headers. */
+extern char **cookies;
+
+/* How we remember a cookie passed in by the client. */
+extern void remember_cookie (char *cookie_string);
+#endif /* HTTP_COOKIES */
+</verbatim>
+
+<h3>http_cookie.c</h3>
+<verbatim quote>
+/* http_cookie.c: The minimal support required for handling HTTP Cookies. */
+
+/*  Copyright (c) 1995 Brian J. Fox
+    Author: Brian J. Fox (bfox@ua.com) Wed Sep 20 17:07:43 1995.
+    
+    This file is free software; see the GPL for details. */
+
+extern void *malloc (int size);
+extern void *realloc (void *pointer, int size);
+
+#define whitespace(x) ((x == ' ') || (x == '\t') || (x == '\n'))
+
+/* A NULL terminated array of COOKIE=VALUE strings. */
+char **cookies = (char **)0;
+static int cookies_size = 0;
+static int cookies_index = 0;
+
+/* How to remember a cookie passed in by the client. */
+void
+remember_cookie (char *cookie_string)
+{
+  register int i, start;
+
+  for (start = 0; whitespace (cookie_string[start]); start++);
+  for (i = start; cookie_string[i] && !whitespace (cookie_string[i]); i++);
+
+  if (i != start)
+    {
+      char *cookie;
+
+      cookie = (char *)malloc (1 + (i - start));
+      strncpy (cookie, cookie_string + start, i - start);
+      cookie[i - start] = '\0';
+
+      if (cookies_index + 2 > cookies_size)
+	{
+	  if (!cookies)
+	    cookies = (char **)malloc ((cookies_size = 10) * sizeof (char *));
+	  else
+	    cookies = (char **)realloc
+	      (cookies, ((cookies_size += 10) * sizeof (char *)));
+
+	  cookies[cookies_index++] = cookie;
+	  cookies[cookies_index] = (char *)0;
+	}
+    }
+}
+</verbatim>
+</pre>
+
+<if <not <get-var files-are-included>>
+    <include footer.mhtml>>

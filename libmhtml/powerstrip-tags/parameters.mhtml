@@ -1,0 +1,322 @@
+;;; parameters.mhtml: -*- Meta-HTML -*-  Parameter parser.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Oct 27 09:47:42 1996.
+;;;
+;;; Functions which allow the modification of a particular package's
+;;; parameter set.
+;;;
+;;; Each package which can be installed in the System area of IBIS may
+;;; have a file in its top-level directory called default.params, which
+;;; contain the parameters for that application as shipped by the
+;;; manufacturer.
+;;; 
+;;; When such a file is present, the PowerStrip administrator can use the
+;;; generic package parameter tools to modify the values.
+;;;
+
+<defun defparam name documentation &key type value choices[]>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Functions which allow the modification of a particular plugin's
+  ;;; parameter set.
+  ;;;
+  ;;; Each plugin which can be installed in the System area of IBIS may
+  ;;; have a file in its top-level directory called default.params, which
+  ;;; contain the parameters for that application as shipped by the
+  ;;; manufacturer.
+  ;;; 
+  ;;; When such a file is present, the PowerStrip administrator can use the
+  ;;; generic plugin parameter manipulation tools to modify the values.
+  ;;;
+  <set-var order=<get-var ibis::**defparam-counter**>>
+  <increment ibis::**defparam-counter**>
+  <unset-var <get-var documentation>>
+  <defvar type string>
+  <var-case
+    type=array	<set-var <get-var name>[] = <get-var-once value>>
+    default	<set-var <get-var name> = <get-var-once value>>>
+  <set-var ibis-parameters::<get-var name> = <package-to-alist>>
+</defun>
+
+<defun ibis::package-parameters package into-array>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Get the parameters for PACKAGE into the variable named by
+  ;;; INTO-ARRAY, a fully qualified variable name.
+  ;;; Each element of the returned array is an alist.
+  <set-var package = <upcase <get-var package>>>
+  <set-var names[]=<package-vars ibis-parameters strip=true>>
+  <set-var values[]="">
+  <foreach name names>
+    <if <match <get-var name> "^<get-var package>::">
+	<array-append <get-var-once ibis-parameters::<get-var name>> values>>
+  </foreach>
+  <copy-var values <get-var into-array>>
+</defun>
+
+<defun ibis::handle-preview>
+  <session-import preview preview>
+  <when <package-vars preview>>
+    <when <get-var site::admin-area>>
+      ;;; The copy-var statements work perfectly for this situation.
+      ;;; If the variable being copied from existed, then the value of the
+      ;;; receiving variable is changed.  Otherwise, no change takes place.
+      <copy-var preview::admin-layout layout::layout>
+      <copy-var preview::admin-left-border-width layout::left-border-width>
+      <copy-var preview::right-left-border-width layout::right-border-width>
+    </when>
+    <when <not <get-var site::admin-area>>>
+      <copy-var preview::layout layout::layout>
+      <copy-var preview::left-border-width layout::left-border-width>
+      <copy-var preview::right-border-width layout::right-border-width>
+      <copy-var preview::navigation-buttons layout::navigation-buttons>
+    </when>
+    <alist-to-package <package-to-alist preview> site>
+  </when>
+</defun>
+
+<defun ibis::site-values-changed>
+  <if <get-var-once site::admin-area>
+      <prog
+	<defvar layout::layout <get-var-once site::admin-layout>>
+	<defvar layout::left-border-width
+	  <get-var-once site::admin-left-border-width>>
+	<defvar layout::right-border-width
+	  <get-var-once site::admin-right-border-width>>
+	<defvar layout::border-fudge-factor 15>>
+    <prog
+      <defvar layout::layout <get-var-once site::layout>>
+      <defvar layout::left-border-width
+	<get-var-once site::left-border-width>>
+      <defvar layout::right-border-width
+	<get-var-once site::right-border-width>>
+      <defvar layout::navigation-buttons
+	<get-var-once site::navigation-buttons>>>>
+</defun>
+
+<defun ibis::package-get package>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Get the parameters for PACKAGE, storing them in PACKAGE.
+  <set-var ibis::**defparam-counter**=100>
+
+  ;;;
+  ;;; Try to get the parameters from a frozen configuration file first.
+  ;;;
+  <set-var
+    fdefault = <ibis::default-frozen-parameter-filename <get-var-once package>>
+    default = <ibis::default-parameter-filename <get-var-once package>>
+    fmodified = <ibis::user-frozen-parameter-filename <get-var-once package>>
+    modified = <ibis::user-parameter-filename <get-var-once package>>>
+
+  ;;;
+  ;;; Try to get the parameters from a frozen configuration file first.
+  ;;;
+  <if <file-newer? <get-var-once fdefault> <get-var-once default>>
+      <set-var x = <%%read-package-file <get-var-once fdefault>>>
+    <include <ibis::default-parameter-webpath <get-var-once package>>>>
+
+  <if <file-newer? <get-var-once fmodified> <get-var-once modified>>
+      <set-var x = <%%read-package-file <get-var fmodified>>>
+    <include <ibis::user-parameter-webpath <get-var-once package>>>>
+</defun>
+
+;;; Get the parameters for PACKAGE.
+<defun ibis::package-sections-get package section>
+  <set-var ibis::**defparam-counter**=100>
+  <include <ibis::default-parameter-webpath <get-var-once package>>>
+</defun>
+
+<defun ibis::parameter-input param-alist>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Create a form entry for editing <var param-alist>.
+  <alist-to-package <get-var param-alist>>
+  <defvar rows 5>
+  <defvar cols 40>
+  <tr valign=top>
+    <td align=right> <b>Name: </b> </td>
+    <td align=left> <b> <get-var name> </b> </td>
+  </tr>
+  <tr valign=top>
+    <td align=right> <b> Description: </b> </td>
+    <td align=left>
+      <subst-in-string <get-var documentation> "\n[ \t\r\n]*\n" "<p>">
+    </td>
+  </tr>
+
+  <tr>
+    <td align=right> <b>Default Value:</b> </td>
+    <td align=left> <b> <get-var-once value[]> </b> </td>
+  </tr>
+
+  <tr>
+    <td align=right> <b>Current Value:</b> </td>
+    <td align=left>
+      <set-var on=<get-var-once <get-var-once name>>>
+      <var-case
+	type=string <input type=text size=40 name="<get-var-once name>"
+			   value="<get-var-once <get-var-once name>>">
+
+	type=number <input type=text size=8 name="<get-var-once name>"
+			   value="<get-var-once <get-var-once name>>">
+
+	type=yes-or-no
+	<prog
+	  <input type=radio name="<get-var-once name>" value=Yes
+		 <if <get-var-once on> CHECKED>>Yes
+		 &nbsp;<b>or</b>&nbsp;
+		 <input type=radio name="<get-var-once name>" value=""
+			<if <not <get-var-once on>> CHECKED>>No>
+
+	type=true-or-false
+	<prog
+	  <input type=radio name="<get-var-once name>" value=True
+		 <if <get-var-once on> CHECKED>>True
+		 &nbsp;<b>or</b>&nbsp;
+		 <input type=radio name="<get-var-once name>" value=""
+			<if <not <get-var-once on>> CHECKED>>False>
+
+	type=on-or-off
+	<prog
+	  <input type=radio name="<get-var-once name>" value=On
+		 <if <get-var-once on> CHECKED>>On
+		 &nbsp;<b>or</b>&nbsp;
+		 <input type=radio name="<get-var-once name>" value=""
+			<if <not <get-var-once on>> CHECKED>>Off>
+
+	type=choice
+	<prog
+	  <select name="<get-var-once name>"><concat "\n">
+	  <foreach choice choices>
+	  <option <if <string-eq <get-var-once <get-var-once name>>
+				 <get-var-once choice>>
+		      SELECTED>><get-var-once choice><concat "\n">
+          </foreach>
+	  </select>>
+	type=paragraph 
+	<concat <textarea rows=<get-var-once rows> cols=<get-var-once cols>
+			  name="<get-var-once name>">
+		<get-var-once <get-var-once name>>
+		</textarea>>
+
+	type=array
+	<concat <textarea rows=<get-var-once rows> cols=<get-var-once cols>
+			  name="<get-var-once name>">
+		<get-var-once <get-var-once name>[]>
+		</textarea>>>
+    </td>
+  </tr>
+</defun>
+
+<defun ibis::user-parameter-filename package>
+  <get-var-once mhtml::include-prefix>
+  <site::system-prefix>/<get-var-once package>/modified.params
+</defun>
+
+<defun ibis::user-frozen-parameter-filename package>
+  <get-var-once mhtml::include-prefix>
+  <site::system-prefix>/<get-var-once package>/modified.params.lib
+</defun>
+
+<defun ibis::default-parameter-filename package>
+  <get-var-once mhtml::include-prefix>
+  <site::system-prefix>/<get-var-once package>/default.params
+</defun>
+
+<defun ibis::default-frozen-parameter-filename package>
+  <get-var-once mhtml::include-prefix>
+  <site::system-prefix>/<get-var-once package>/default.params.lib
+</defun>
+
+<defun ibis::user-parameter-webpath package>
+  <site::system-prefix>/<get-var-once package>/modified.params
+</defun>
+
+<defun ibis::default-parameter-webpath package>
+  <site::system-prefix>/<get-var-once package>/default.params
+</defun>
+
+<defun ibis::delete-user-parameters package>
+  <with-open-stream s <ibis::user-parameter-filename <get-var-once package>>
+		    type=file mode=write-create>
+  </with-open-stream>
+</defun>
+
+<defun ibis::parameter-sorter alist>
+  <alist-to-package <get-var alist>>
+  <or <get-var-once order> <get-var-once name>>
+</defun>
+
+<defun ibis::sort-parameters varname>
+  <sort <get-var-once varname> ibis::parameter-sorter>
+</defun>
+
+<defun ibis::write-modified-parameters the-package mod-package package-file>
+  <defvar mod-package posted>
+  <defvar package-file <ibis::user-parameter-filename <get-var-once the-package>>>
+  <include <ibis::default-parameter-webpath <get-var-once the-package>>>
+  <ibis::package-parameters <get-var-once the-package> ibis::parameter-list>
+  <set-var limit=<array-size ibis::parameter-list> i=0 modified=0>
+
+  <with-open-stream s <get-var-once package-file> type=file mode=write-create>
+    <foreach alist ibis::parameter-list>
+      <in-package local>
+	<alist-to-package <get-var-once ^::alist>>
+	<var-case
+	  type=array
+	  <set-var newval[] =
+	    <get-var-once
+	     <get-var-once ^::mod-package>::<get-var-once name>[]>>
+	  default
+	  <set-var newval =
+	    <get-var-once
+	     <get-var-once ^::mod-package>::<get-var-once name>>>>
+	<subst-in-var newval "^[ \t\n]+" "">
+	<subst-in-var value "^[ \t\n]+" "">
+	<when <not <string-eq <get-var-once newval[]>
+			      <get-var-once value[]>>>>
+	  <set-var s=<get-var ^::s>>
+	  <when <eq <get-var-once ^::modified> 0>>
+	    <stream-put s ";;">
+	    <stream-put s "; modified.params: -*- Meta-HTML -*- ">
+	    <stream-put s "DO NOT EDIT!!\n;;">
+	    <stream-put s "; Parameters for <get-var-once ^::the-package>, ">
+	    <stream-put s "automatically generated from\n;;">
+	    <stream-put s "; <thisdoc>,\n;;">
+	    <stream-put s "; on <date>, by user <get-var-once site::user-id>.">
+	    <stream-put s "\n">
+	  </when>
+
+	  <stream-put s "\n;;">
+	  <stream-put s ";\n">
+	  <stream-put s "<">
+	  <stream-put s "set-var <get-var-once name>">
+	  <var-case type=array <stream-put s "[]">>
+	  <stream-put s " = <">
+	  <stream-put s "prog ">
+	  <stream-put s <subst-in-string <get-var-once newval[]> "\r\n" "\n">>
+	  <stream-put s ">>\n">
+	  <increment ^::modified>
+	</when>
+      </in-package>
+    </foreach>
+  </with-open-stream>
+  <ibis::write-frozen-parameters <get-var-once the-package>>
+  <get-var-once modified>
+</defun>
+
+<defun ibis::write-frozen-parameters the-package the-file>
+  <set-var orig-contents = <package-to-alist <get-var-once the-package>>>
+  <package-delete <get-var-once the-package>>
+  <include <ibis::default-parameter-filename <get-var-once the-package>>>
+  <set-var written? =
+    <%%write-package-file
+     <ibis::default-parameter-filename <get-var-once the-package>>.lib
+     <get-var-once the-package>>>
+  <package-delete <get-var-once the-package>>
+  <alist-to-package <get-var-once orig-contents> <get-var-once the-package>>
+</defun>
+
+<defun ibis::plugin-edit-url plugin>
+  <get-var-once mhtml::http-prefix>
+  <site::system-prefix>/Ibis/edit-package.mhtml
+  ?THE-PACKAGE=<get-var-once plugin>
+</defun>

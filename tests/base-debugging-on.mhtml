@@ -1,0 +1,13 @@
+;;; base-debugging-on.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 11:57:58 1996.
+
+Result: "[DEBUGGING-OUTPUT]: Entering <MOD >
+<MOD ...> seen with zero args
+Leaving <MOD >
+
+0<DEBUGGING-OUTPUT>": <debugging-on mod=10><mod><DEBUGGING-OUTPUT>
+Result: "[DEBUGGING-OUTPUT]: <MOD ...> seen with zero args
+
+0<DEBUGGING-OUTPUT>": <debugging-on mod=0><mod><DEBUGGING-OUTPUT>

@@ -1,0 +1,215 @@
+<set-var title="Regex - Index">
+<include header.mhtml>
+<layout::page>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_8.mhtml">previous</A>, next, last section, <A HREF="welcome.mhtml">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC68" HREF="welcome.mhtml#TOC68">Index</A></H1>
+
+<P>
+<H2>$</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX75">$</A>
+</DIR>
+<H2>(</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX57">(</A>
+</DIR>
+<H2>)</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX58">)</A>
+</DIR>
+<H2>*</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX30"><SAMP>`*'</SAMP></A>
+</DIR>
+<H2>+</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX32"><SAMP>`+'</SAMP></A>
+</DIR>
+<H2>-</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX48"><SAMP>`-'</SAMP></A>
+</DIR>
+<H2>.</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX29"><SAMP>`.'</SAMP></A>
+</DIR>
+<H2>:</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX56"><SAMP>`:]'</SAMP> in regex</A>
+</DIR>
+<H2>?</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX33"><SAMP>`?'</SAMP></A>
+</DIR>
+<H2>[</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX45"><SAMP>`['</SAMP></A>
+<LI><A HREF="regex_3.mhtml#IDX55"><SAMP>`[:'</SAMP> in regex</A>
+<LI><A HREF="regex_3.mhtml#IDX50"><SAMP>`[^'</SAMP></A>
+</DIR>
+<H2>\</H2>
+<DIR>
+<LI><A HREF="regex_2.mhtml#IDX28">\</A>
+<LI><A HREF="regex_3.mhtml#IDX49"><SAMP>`\'</SAMP></A>
+<LI><A HREF="regex_4.mhtml#IDX86"><SAMP>`\''</SAMP></A>
+<LI><A HREF="regex_3.mhtml#IDX59">\(</A>
+<LI><A HREF="regex_3.mhtml#IDX60">\)</A>
+<LI><A HREF="regex_4.mhtml#IDX81"><SAMP>`\&#60;'</SAMP></A>
+<LI><A HREF="regex_4.mhtml#IDX82"><SAMP>`\&#62;'</SAMP></A>
+<LI><A HREF="regex_4.mhtml#IDX85"><SAMP>`\`'</SAMP></A>
+<LI><A HREF="regex_4.mhtml#IDX80"><SAMP>`\B'</SAMP></A>
+<LI><A HREF="regex_4.mhtml#IDX78"><SAMP>`\b'</SAMP></A>
+<LI><A HREF="regex_5.mhtml#IDX88"><SAMP>`\S'</SAMP></A>
+<LI><A HREF="regex_5.mhtml#IDX87"><SAMP>`\s'</SAMP></A>
+<LI><A HREF="regex_4.mhtml#IDX84"><SAMP>`\W'</SAMP></A>
+<LI><A HREF="regex_4.mhtml#IDX83"><SAMP>`\w'</SAMP></A>
+<LI><A HREF="regex_3.mhtml#IDX37"><SAMP>`\{'</SAMP></A>
+<LI><A HREF="regex_3.mhtml#IDX40">\|</A>
+<LI><A HREF="regex_3.mhtml#IDX38"><SAMP>`\}'</SAMP></A>
+</DIR>
+<H2>]</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX46"><SAMP>`]'</SAMP></A>
+</DIR>
+<H2>^</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX67">^</A>
+<LI><A HREF="regex_3.mhtml#IDX47"><SAMP>`^'</SAMP></A>
+</DIR>
+<H2>a</H2>
+<DIR>
+<LI><A HREF="regex_7.mhtml#IDX98">allocated initialization</A>
+<LI><A HREF="regex_3.mhtml#IDX41">alternation operator</A>
+<LI><A HREF="regex_3.mhtml#IDX72">alternation operator and <SAMP>`^'</SAMP></A>
+<LI><A HREF="regex_3.mhtml#IDX65">anchoring</A>
+<LI><A HREF="regex_3.mhtml#IDX69">anchors</A>, <A HREF="regex_3.mhtml#IDX77">anchors</A>
+<LI><A HREF="regex_2.mhtml#IDX25">Awk</A>
+</DIR>
+<H2>b</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX64">back references</A>
+<LI><A HREF="regex_3.mhtml#IDX31">backtracking</A>, <A HREF="regex_3.mhtml#IDX43">backtracking</A>
+<LI><A HREF="regex_3.mhtml#IDX68">beginning-of-line operator</A>
+<LI><A HREF="regex_3.mhtml#IDX53">bracket expression</A>
+<LI><A HREF="regex_7.mhtml#IDX101">buffer field, set by <CODE>re_compile_pattern</CODE></A>
+<LI><A HREF="regex_7.mhtml#IDX97">buffer initialization</A>
+</DIR>
+<H2>c</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX54">character classes</A>
+</DIR>
+<H2>e</H2>
+<DIR>
+<LI><A HREF="regex_2.mhtml#IDX27">Egrep</A>
+<LI><A HREF="regex_2.mhtml#IDX23">Emacs</A>
+<LI><A HREF="regex_7.mhtml#IDX119">end in <CODE>struct re_registers</CODE></A>
+<LI><A HREF="regex_3.mhtml#IDX76">end-of-line operator</A>
+</DIR>
+<H2>f</H2>
+<DIR>
+<LI><A HREF="regex_7.mhtml#IDX96">fastmap initialization</A>
+<LI><A HREF="regex_7.mhtml#IDX105">fastmap_accurate field, set by <CODE>re_compile_pattern</CODE></A>
+<LI><A HREF="regex_7.mhtml#IDX114">fastmaps</A>
+</DIR>
+<H2>g</H2>
+<DIR>
+<LI><A HREF="regex_2.mhtml#IDX26">Grep</A>
+<LI><A HREF="regex_3.mhtml#IDX61">grouping</A>
+</DIR>
+<H2>i</H2>
+<DIR>
+<LI><A HREF="regex_7.mhtml#IDX127">ignoring case</A>
+<LI><A HREF="regex_3.mhtml#IDX34">interval expression</A>
+</DIR>
+<H2>m</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX44">matching list</A>
+<LI><A HREF="regex_3.mhtml#IDX52">matching newline</A>
+<LI><A HREF="regex_7.mhtml#IDX106">matching with GNU functions</A>
+</DIR>
+<H2>n</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX74">newline_anchor field in pattern buffer</A>
+<LI><A HREF="regex_3.mhtml#IDX51">nonmatching list</A>
+<LI><A HREF="regex_3.mhtml#IDX73">not_bol field in pattern buffer</A>
+<LI><A HREF="regex_7.mhtml#IDX117">num_regs in <CODE>struct re_registers</CODE></A>
+</DIR>
+<H2>o</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX71">open-group operator and <SAMP>`^'</SAMP></A>
+<LI><A HREF="regex_3.mhtml#IDX42">or operator</A>
+</DIR>
+<H2>p</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX63">parenthesizing</A>
+<LI><A HREF="regex_7.mhtml#IDX94">pattern buffer initialization</A>
+<LI><A HREF="regex_7.mhtml#IDX89">pattern buffer, definition of</A>
+<LI><A HREF="regex_2.mhtml#IDX24">POSIX Awk</A>
+</DIR>
+<H2>r</H2>
+<DIR>
+<LI><A HREF="regex_7.mhtml#IDX111">range argument to <CODE>re_search</CODE></A>
+<LI><A HREF="regex_7.mhtml#IDX104">re_nsub field, set by <CODE>re_compile_pattern</CODE></A>
+<LI><A HREF="regex_7.mhtml#IDX90">re_pattern_buffer definition</A>
+<LI><A HREF="regex_7.mhtml#IDX116">re_registers</A>
+<LI><A HREF="regex_7.mhtml#IDX93">re_syntax_options initialization</A>
+<LI><A HREF="regex_7.mhtml#IDX125">REG_EXTENDED</A>
+<LI><A HREF="regex_7.mhtml#IDX126">REG_ICASE</A>
+<LI><A HREF="regex_7.mhtml#IDX129">REG_NEWLINE</A>
+<LI><A HREF="regex_7.mhtml#IDX128">REG_NOSUB</A>
+<LI><A HREF="regex_1.mhtml#IDX2">regex.c</A>
+<LI><A HREF="regex_1.mhtml#IDX1">regex.h</A>
+<LI><A HREF="regex_3.mhtml#IDX66">regexp anchoring</A>
+<LI><A HREF="regex_7.mhtml#IDX132">regmatch_t</A>
+<LI><A HREF="regex_7.mhtml#IDX120">regs_allocated</A>
+<LI><A HREF="regex_7.mhtml#IDX123">REGS_FIXED</A>
+<LI><A HREF="regex_7.mhtml#IDX122">REGS_REALLOCATE</A>
+<LI><A HREF="regex_7.mhtml#IDX121">REGS_UNALLOCATED</A>
+<LI><A HREF="regex_2.mhtml#IDX3">regular expressions, syntax of</A>
+</DIR>
+<H2>s</H2>
+<DIR>
+<LI><A HREF="regex_7.mhtml#IDX108">searching with GNU functions</A>
+<LI><A HREF="regex_7.mhtml#IDX110">start argument to <CODE>re_search</CODE></A>
+<LI><A HREF="regex_7.mhtml#IDX118">start in <CODE>struct re_registers</CODE></A>
+<LI><A HREF="regex_7.mhtml#IDX91">struct re_pattern_buffer definition</A>
+<LI><A HREF="regex_3.mhtml#IDX62">subexpressions</A>
+<LI><A HREF="regex_2.mhtml#IDX5">syntax bits</A>
+<LI><A HREF="regex_7.mhtml#IDX103">syntax field, set by <CODE>re_compile_pattern</CODE></A>
+<LI><A HREF="regex_7.mhtml#IDX92">syntax initialization</A>
+<LI><A HREF="regex_2.mhtml#IDX4">syntax of regular expressions</A>
+</DIR>
+<H2>t</H2>
+<DIR>
+<LI><A HREF="regex_7.mhtml#IDX95">translate initialization</A>
+</DIR>
+<H2>u</H2>
+<DIR>
+<LI><A HREF="regex_7.mhtml#IDX102">used field, set by <CODE>re_compile_pattern</CODE></A>
+</DIR>
+<H2>w</H2>
+<DIR>
+<LI><A HREF="regex_4.mhtml#IDX79">word boundaries, matching</A>
+</DIR>
+<H2>{</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX35"><SAMP>`{'</SAMP></A>
+</DIR>
+<H2>|</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX39">|</A>
+</DIR>
+<H2>}</H2>
+<DIR>
+<LI><A HREF="regex_3.mhtml#IDX36"><SAMP>`}'</SAMP></A>
+</DIR>
+
+</P>
+
+<P><HR><P>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_8.mhtml">previous</A>, next, last section, <A HREF="welcome.mhtml">table of contents</A>.
+</layout::page>
+<include footer.mhtml>

@@ -1,0 +1,26 @@
+;;; debug.mhtml: -*- Meta-HTML -*-  Tags which aid in debugging.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jun  7 18:50:24 1996.
+
+<defvar debug::debug-file /tmp/mhtml-debug-output>
+
+<defsubst debug whitespace=delete>
+  <when <not <get-var debug::wrote-this-session>>>
+    <with-open-stream debug-stream <get-var debug::debug-file>
+		      mode=write-create>
+    </with-open-stream>
+    <cgi-exec chmod a+rw <get-var-once debug::debug-file> errors=:x output=:z>
+    <set-var debug::wrote-this-session = true>
+  </when>
+  <with-open-stream debug-stream <get-var debug::debug-file> mode=append>
+    <stream-put debug-stream %qbody>
+    <stream-put debug-stream "\n">
+  </with-open-stream>
+</defsubst>
+
+<defun debug::make-text-page>
+  <with-open-stream s *standard-output* mode=write-create type=file>
+    <stream-put s "HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\n">
+  </with-open-stream>
+</defun>

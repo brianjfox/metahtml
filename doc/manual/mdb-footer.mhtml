@@ -1,0 +1,28 @@
+;;; footer.mhtml: -*- Meta-HTML -*-
+;;; The stuff that appears at the bottom of every page.
+
+<when <not <get-var footer-already-included>>>
+  <set-var footer-already-included=true>
+  <when <not <get-var hacking-frames>>>
+    <defsubst copyright>&#169;</defsubst>
+    <p>
+    <center>
+      <img src="rainbowline.gif" alt=""><br>
+      <font size=-2>The
+      <a href="http://www.metahtml.com/"><mdb></a>
+      Reference Manual V1.0</font>
+      <font size=-2>
+      Copyright <copyright> 1998,
+      <a href="http://www.metahtml.com/~bfox">Brian J. Fox</a>
+      <br>
+      Found a bug? Send mail to
+      <a href="mailto:bug-manual@metahtml.com">
+        bug-manual@metahtml.com
+      </a>
+      </font>
+    </center>
+  </when>
+  </body>
+  </html>
+  <cleanup-whitespace>
+</when>

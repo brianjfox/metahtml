@@ -1,0 +1,6 @@
+;;; base-time.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 21:07:13 1996.
+
+Result: true: <if <match "<time>" "^[0-9]+$"> true>

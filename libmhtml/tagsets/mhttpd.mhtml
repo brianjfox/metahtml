@@ -1,0 +1,40 @@
+;;; mhttpd.mhtml: -*- Meta-HTML -*-  Functions used by the server.
+;;;
+;;;  Copyright (c) 1997, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue May 27 09:36:02 1997.
+<defun mhtml::post-secure>
+  <if <not <match <get-var mhtml::location> "/System/">>
+      <concat <copy-package posted raw-posted>
+	      <mhtml::non-executable posted default env>>>
+</defun>
+
+<defun mhtml::non-executable &rest package-names[]>
+  <foreach pack package-names>
+    <set-var vars[]=<package-vars <get-var pack>>>
+    <foreach _var vars>
+      <subst-in-var <get-var _var> "[<>]" "">
+    </foreach>
+  </foreach>
+</defun>
+
+<defun mhtml::default-header whitespace=keep>
+  <html>
+  <head> <title> <or <get-var-once default::title>
+		     <get-var-once ^::title>
+		     <dir::basename <thisdoc>>> </title>
+  </head>
+  <body bgcolor=White>
+</defun>
+
+<defun mhtml::default-footer whitespace=keep>
+  <center>
+    <hr width=80% size=2>
+    <font size=-1>
+    <i> This document generated using <a href="http://www.metahtml.com/">
+      <Meta-HTML></a><br>
+      Copyright <get-var char::copy> 1995, 2001 
+      <a href="http://www.metahtml.com/~bfox">Brian J. Fox</a>
+  </center>
+  </body>
+  </html>
+</defun>

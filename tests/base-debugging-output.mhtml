@@ -1,0 +1,13 @@
+;;; base-debugging-output.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 12:15:27 1996.
+
+Result: "[DEBUGGING-OUTPUT]: <EQ ...> seen with zero args
+
+<DEBUGGING-OUTPUT>true": <DEBUGGING-OUTPUT><eq>
+Result: <DEBUGGING-OUTPUT><set-ar var1="Some String">: <DEBUGGING-OUTPUT><set-ar var1="Some String">
+Result: "[DEBUGGING-OUTPUT]: Closing tag missing for <test-macro ...>
+
+<test-macro>": <defmacro test-macro>incorrect macro definition</defmacro><test-macro>
+

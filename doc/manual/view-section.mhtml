@@ -1,0 +1,112 @@
+;;; view-section.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Jul  1 10:53:32 1996.
+<if <get-var posted::section>
+    <set-var posted::key=<get-var posted::section>>>
+
+<if <and <not <get-var static::building-html>>
+	 <get-var-once posted::key>
+	 <file-exists <thisdir>/<upcase <get-var-once posted::key>>.html>>
+    <redirect <upcase <get-var-once posted::key>>.html>>
+
+<set-var title =
+  <prog
+    Section Intro:
+    <capitalize <subst-in-string <or <get-var key> <get-var section>>
+				 "-" " ">>>>
+<require ./mandefs>
+
+<when <get-var-once posted::section>>
+  <set-var posted::key=<get-var-once posted::section>>
+  <set-var key=<get-var-once posted::section>>
+</when>
+
+<when <get-var-once posted::key>>
+  <set-var posted::key =
+    <upcase <subst-in-string <get-var-once key>
+			     "^[ \t]+" "" "[ \t]+$" "" " +" "-">>>
+  <set-var key=<get-var-once posted::key>>
+</when>
+
+<section::get-sections>
+
+<set-var p="" n="" .="" i=0>
+<while <and <gt i -1> <get-var-once sections[i]>>>
+  <if <string-eq <get-var-once sections[i]> <get-var-once key>>
+      <prog
+	<if <gt i 0>
+	    <set-var p=<sub i 1>>>
+	<set-var .=<get-var i>>
+	<if <get-var-once sections[<add i 1>]>
+	    <set-var n=<add i 1>>>
+	<set-var i=-1>>
+    <increment i>>
+</while>
+
+<when <get-var p>>
+  <with-local-package>
+    <set-var
+      key=<get-var default::sections[default::p]>
+      default::prev-page = view-section.mhtml?<cgi-encode key>
+      default::prev-title =
+      <capitalize <subst-in-string <get-var key> "-" " ">>>
+  </with-local-package>
+</when>
+
+<when <get-var n>>
+  <with-local-package>
+    <set-var
+      key=<get-var default::sections[default::n]>
+      default::next-page = view-section.mhtml?<cgi-encode key>
+      default::next-title =
+      <capitalize <subst-in-string <get-var key> "-" " ">>>
+  </with-local-package>
+</when>
+
+<include header.mhtml>
+<set-var mhtml::cacheable=true>
+<set-var posted::expanded-view=true>
+
+<when <get-var-once posted::key>>
+  <package-delete section>
+  <with-open-database db <metahtml::section-db> mode=read>
+    <set-var x =
+      <database-load-record db <upcase <get-var-once key>> prefix=section>>
+  </with-open-database>
+
+  <when <not <get-var x>>>
+    <ptext>
+      There isn't a documentation pointer for the section <get-var-once key>
+      in the database <metahtml::section-db>.
+
+      Perhaps now would be a good time to
+      <concat <a href="create-section.mhtml?<cgi-encode key>">>
+      <b>enter the pointer</b>.</a>
+    </ptext>
+    <p>
+  </when>
+</when>
+
+<if <not <get-var-once posted::key>>
+    <redirect section-index.mhtml>>
+
+<when <get-var x>>
+  <format-section <upcase <get-var posted::key>> true>
+</when>
+
+<p>
+<when <not <string-eq <get-var env::server_name> "www.metahtml.com">>>
+  <a href="create-section.mhtml?<cgi-encode key>">
+    Edit Section
+  </a>
+  <br>
+</when>
+<a href="function-index.mhtml">
+  Function Index
+</a>
+<br>
+<a href="variable-index.mhtml">
+  Variable Index
+</a>
+<include footer.mhtml>

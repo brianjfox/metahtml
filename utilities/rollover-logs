@@ -1,0 +1,11 @@
+#!/bin/sh
+
+for log in access_log debug_log error_log referer_log; do
+   for site in `cat /www/bin/LOCAL-SITES`; do
+      if [ -f /www/$site/logs/$log -a -d /www/$site/logs/LOGS ]; then
+	 newlog=/www/$site/logs/LOGS/$log-`date | sed "s/ /-/g"`
+	 mv /www/$site/logs/$log $newlog
+	 /bin/gzip $newlog
+      fi
+   done
+done

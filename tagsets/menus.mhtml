@@ -1,0 +1,45 @@
+;;; menus.mhtml: -*- Meta-HTML -*-  Macros make menus easier.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Feb 10 16:13:30 1996.
+
+<defmacro menu title &key nobr whitespace=delete>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Create an HTML menu with title, text and links.
+  ;;; 
+  ;;; Calling sequence:
+  ;;; <example>
+  ;;; <menu "This Is The Title">
+  ;;;   This is link text: target.mhtml
+  ;;;   External Site:  http://www.external.com/welcome.mhtml
+  ;;; </menu>
+  ;;; </example>
+  <in-package local>
+    <set-var lines[]="%xbody" limit=<array-size lines>>
+    <small-caps upper="+2" lower="+0" other="+2">
+      <if <get-var nobr>
+	  <concat <nobr><b><get-var ^::title></b></nobr>>
+	<concat <b><get-var ^::title></b>>>
+    </small-caps>
+    <br>
+    <ul>
+      <foreach item lines>
+	<set-var
+	  link=<match <get-var item> ":.*$" action=extract>
+	  item=<match <get-var item> ":.*$" action=delete>
+	  link=<match <get-var link> "^:[ \t]*" action=delete>>
+	<if <not <match <substring <get-var link> 0 4> "http"> caseless=true>
+	    <if <not <match <substring <get-var link> 0 1> "/">>
+		<set-var link =
+		  <concat <get-var mhtml::url-to-dir>/<get-var link>>>
+	      <set-var link = <concat <get-var mhtml::http-prefix link>>>>>
+	<li> <a href="<get-var link>">
+	  <if <get-var nobr>
+	      <concat <nobr><b><get-var item></b></nobr>>
+	    <concat <b><get-var item></b>>>
+	</a>
+	<p>
+      </foreach>
+    </ul>
+  </in-package>
+</defmacro>

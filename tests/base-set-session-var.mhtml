@@ -1,0 +1,12 @@
+;;; base-set-session-var.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 14:05:01 1996.
+<defun base::set-session-var>
+  <set-var anonymous=anonymous>
+  <create-session anonymous allow-multiple>
+  <set-session-var tmp = "Session Active">
+  <get-session-var tmp>
+</defun>
+
+Result: "Session Active": <base::set-session-var>

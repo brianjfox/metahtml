@@ -1,0 +1,116 @@
+<set-var title="Regex - Table of Contents">
+<include header.mhtml>
+<layout::page>
+<H1>Regex</H1>
+<H2>edition 0.12a</H2>
+<H2>19 September 1992</H2>
+<ADDRESS>Kathryn A. Hargreaves</ADDRESS>
+<ADDRESS>Karl Berry</ADDRESS>
+<P>
+<P><HR><P>
+<UL>
+<LI><A NAME="TOC1" HREF="regex_1.mhtml#SEC1">Overview</A>
+<LI><A NAME="TOC2" HREF="regex_2.mhtml#SEC2">Regular Expression Syntax</A>
+<UL>
+<LI><A NAME="TOC3" HREF="regex_2.mhtml#SEC3">Syntax Bits</A>
+<LI><A NAME="TOC4" HREF="regex_2.mhtml#SEC4">Predefined Syntaxes</A>
+<LI><A NAME="TOC5" HREF="regex_2.mhtml#SEC5">Collating Elements vs. Characters</A>
+<LI><A NAME="TOC6" HREF="regex_2.mhtml#SEC6">The Backslash Character</A>
+</UL>
+<LI><A NAME="TOC7" HREF="regex_3.mhtml#SEC7">Common Operators</A>
+<UL>
+<LI><A NAME="TOC8" HREF="regex_3.mhtml#SEC8">The Match-self Operator (<VAR>ordinary character</VAR>)</A>
+<LI><A NAME="TOC9" HREF="regex_3.mhtml#SEC9">The Match-any-character Operator (<CODE>.</CODE>)</A>
+<LI><A NAME="TOC10" HREF="regex_3.mhtml#SEC10">The Concatenation Operator</A>
+<LI><A NAME="TOC11" HREF="regex_3.mhtml#SEC11">Repetition Operators</A>
+<UL>
+<LI><A NAME="TOC12" HREF="regex_3.mhtml#SEC12">The Match-zero-or-more Operator (<CODE>*</CODE>)</A>
+<LI><A NAME="TOC13" HREF="regex_3.mhtml#SEC13">The Match-one-or-more Operator (<CODE>+</CODE> or <CODE>\+</CODE>)</A>
+<LI><A NAME="TOC14" HREF="regex_3.mhtml#SEC14">The Match-zero-or-one Operator (<CODE>?</CODE> or <CODE>\?</CODE>)</A>
+<LI><A NAME="TOC15" HREF="regex_3.mhtml#SEC15">Interval Operators (<CODE>{</CODE> ... <CODE>}</CODE> or <CODE>\{</CODE> ... <CODE>\}</CODE>)</A>
+</UL>
+<LI><A NAME="TOC16" HREF="regex_3.mhtml#SEC16">The Alternation Operator (<CODE>|</CODE> or <CODE>\|</CODE>)</A>
+<LI><A NAME="TOC17" HREF="regex_3.mhtml#SEC17">List Operators (<CODE>[</CODE> ... <CODE>]</CODE> and <CODE>[^</CODE> ... <CODE>]</CODE>)</A>
+<UL>
+<LI><A NAME="TOC18" HREF="regex_3.mhtml#SEC18">Character Class Operators (<CODE>[:</CODE> ... <CODE>:]</CODE>)</A>
+<LI><A NAME="TOC19" HREF="regex_3.mhtml#SEC19">The Range Operator (<CODE>-</CODE>)</A>
+</UL>
+<LI><A NAME="TOC20" HREF="regex_3.mhtml#SEC20">Grouping Operators (<CODE>(</CODE> ... <CODE>)</CODE> or <CODE>\(</CODE> ... <CODE>\)</CODE>)</A>
+<LI><A NAME="TOC21" HREF="regex_3.mhtml#SEC21">The Back-reference Operator (<STRONG>\</STRONG><VAR>digit</VAR>)</A>
+<LI><A NAME="TOC22" HREF="regex_3.mhtml#SEC22">Anchoring Operators</A>
+<UL>
+<LI><A NAME="TOC23" HREF="regex_3.mhtml#SEC23">The Match-beginning-of-line Operator (<CODE>^</CODE>)</A>
+<LI><A NAME="TOC24" HREF="regex_3.mhtml#SEC24">The Match-end-of-line Operator (<CODE>$</CODE>)</A>
+</UL>
+</UL>
+<LI><A NAME="TOC25" HREF="regex_4.mhtml#SEC25">GNU Operators</A>
+<UL>
+<LI><A NAME="TOC26" HREF="regex_4.mhtml#SEC26">Word Operators</A>
+<UL>
+<LI><A NAME="TOC27" HREF="regex_4.mhtml#SEC27">Non-Emacs Syntax Tables</A>
+<LI><A NAME="TOC28" HREF="regex_4.mhtml#SEC28">The Match-word-boundary Operator (<CODE>\b</CODE>)</A>
+<LI><A NAME="TOC29" HREF="regex_4.mhtml#SEC29">The Match-within-word Operator (<CODE>\B</CODE>)</A>
+<LI><A NAME="TOC30" HREF="regex_4.mhtml#SEC30">The Match-beginning-of-word Operator (<CODE>\&#60;</CODE>)</A>
+<LI><A NAME="TOC31" HREF="regex_4.mhtml#SEC31">The Match-end-of-word Operator (<CODE>\&#62;</CODE>)</A>
+<LI><A NAME="TOC32" HREF="regex_4.mhtml#SEC32">The Match-word-constituent Operator (<CODE>\w</CODE>)</A>
+<LI><A NAME="TOC33" HREF="regex_4.mhtml#SEC33">The Match-non-word-constituent Operator (<CODE>\W</CODE>)</A>
+</UL>
+<LI><A NAME="TOC34" HREF="regex_4.mhtml#SEC34">Buffer Operators</A>
+<UL>
+<LI><A NAME="TOC35" HREF="regex_4.mhtml#SEC35">The Match-beginning-of-buffer Operator (<CODE>\`</CODE>)</A>
+<LI><A NAME="TOC36" HREF="regex_4.mhtml#SEC36">The Match-end-of-buffer Operator (<CODE>\'</CODE>)</A>
+</UL>
+</UL>
+<LI><A NAME="TOC37" HREF="regex_5.mhtml#SEC37">GNU Emacs Operators</A>
+<UL>
+<LI><A NAME="TOC38" HREF="regex_5.mhtml#SEC38">Syntactic Class Operators</A>
+<UL>
+<LI><A NAME="TOC39" HREF="regex_5.mhtml#SEC39">Emacs Syntax Tables</A>
+<LI><A NAME="TOC40" HREF="regex_5.mhtml#SEC40">The Match-syntactic-class Operator (<CODE>\s</CODE><VAR>class</VAR>)</A>
+<LI><A NAME="TOC41" HREF="regex_5.mhtml#SEC41">The Match-not-syntactic-class Operator (<CODE>\S</CODE><VAR>class</VAR>)</A>
+</UL>
+</UL>
+<LI><A NAME="TOC42" HREF="regex_6.mhtml#SEC42">What Gets Matched?</A>
+<LI><A NAME="TOC43" HREF="regex_7.mhtml#SEC43">Programming with Regex</A>
+<UL>
+<LI><A NAME="TOC44" HREF="regex_7.mhtml#SEC44">GNU Regex Functions</A>
+<UL>
+<LI><A NAME="TOC45" HREF="regex_7.mhtml#SEC45">GNU Pattern Buffers</A>
+<LI><A NAME="TOC46" HREF="regex_7.mhtml#SEC46">GNU Regular Expression Compiling</A>
+<LI><A NAME="TOC47" HREF="regex_7.mhtml#SEC47">GNU Matching</A>
+<LI><A NAME="TOC48" HREF="regex_7.mhtml#SEC48">GNU Searching</A>
+<LI><A NAME="TOC49" HREF="regex_7.mhtml#SEC49">Matching and Searching with Split Data</A>
+<LI><A NAME="TOC50" HREF="regex_7.mhtml#SEC50">Searching with Fastmaps</A>
+<LI><A NAME="TOC51" HREF="regex_7.mhtml#SEC51">GNU Translate Tables</A>
+<LI><A NAME="TOC52" HREF="regex_7.mhtml#SEC52">Using Registers</A>
+<LI><A NAME="TOC53" HREF="regex_7.mhtml#SEC53">Freeing GNU Pattern Buffers</A>
+</UL>
+<LI><A NAME="TOC54" HREF="regex_7.mhtml#SEC54">POSIX Regex Functions</A>
+<UL>
+<LI><A NAME="TOC55" HREF="regex_7.mhtml#SEC55">POSIX Pattern Buffers</A>
+<LI><A NAME="TOC56" HREF="regex_7.mhtml#SEC56">POSIX Regular Expression Compiling</A>
+<LI><A NAME="TOC57" HREF="regex_7.mhtml#SEC57">POSIX Matching</A>
+<LI><A NAME="TOC58" HREF="regex_7.mhtml#SEC58">Reporting Errors</A>
+<LI><A NAME="TOC59" HREF="regex_7.mhtml#SEC59">Using Byte Offsets</A>
+<LI><A NAME="TOC60" HREF="regex_7.mhtml#SEC60">Freeing POSIX Pattern Buffers</A>
+</UL>
+<LI><A NAME="TOC61" HREF="regex_7.mhtml#SEC61">BSD Regex Functions</A>
+<UL>
+<LI><A NAME="TOC62" HREF="regex_7.mhtml#SEC62">BSD Regular Expression Compiling</A>
+<LI><A NAME="TOC63" HREF="regex_7.mhtml#SEC63">BSD Searching</A>
+</UL>
+</UL>
+<LI><A NAME="TOC64" HREF="regex_8.mhtml#SEC64">GNU GENERAL PUBLIC LICENSE</A>
+<UL>
+<LI><A NAME="TOC65" HREF="regex_8.mhtml#SEC65">Preamble</A>
+<LI><A NAME="TOC66" HREF="regex_8.mhtml#SEC66">TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION</A>
+<LI><A NAME="TOC67" HREF="regex_8.mhtml#SEC67">Appendix: How to Apply These Terms to Your New Programs</A>
+</UL>
+<LI><A NAME="TOC68" HREF="regex_9.mhtml#SEC68">Index</A>
+</UL>
+<P><HR><P>
+This document was generated on 13 July 1997 using the
+<A HREF="http://www.metahtml.com/texi2mhtml/">texi2html</A>
+translator version 1.51.</P>
+</layout::page>
+<include footer.mhtml>

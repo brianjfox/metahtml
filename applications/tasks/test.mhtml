@@ -1,0 +1,21 @@
+;;; test.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Universal Access Inc.
+;;;  Author: Henry Minsky (hqm@ua.com) Sat Sep 14 13:40:32 1996.
+
+;;; Make some test tasks to test the database mechanism.
+
+<include tasks.mhtml>
+
+<add-task "Get new acetone bottle"
+	   milan 
+	   High
+	    "not done yet"
+	     "Get a nice new acetone bottle from Spoo Mart.">
+
+<add-task "Clean lenses"
+	   milan
+	    High
+	     "not done yet"
+	      "Clean all the lenses on everything">
+

@@ -1,0 +1,21 @@
+;;; image-substs.mhtml: -*- Meta-HTML -*-  How to get product images.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep 10 08:53:56 1995.
+<defsubst file-exists-p whitespace=delete>
+  <get-file-properties %0>
+</defsubst>
+
+<defsubst jpeg-key whitespace=delete>
+  <if <file-exists-p
+       "<get-var mhtml::include-prefix mhtml::relative-prefix>/images/<get-var key>.jpg">
+      "<get-var mhtml::url-to-dir-sans-sid>/images/<get-var key>.jpg"
+    "<get-var mhtml::url-to-dir-sans-sid>/images/NotAvail.gif">
+</defsubst>
+
+<defsubst gif-key whitespace=delete>
+  <if <file-exists-p
+       "<get-var mhtml::include-prefix>/images/<get-var key>.gif">
+      "<get-var mhtml::url-to-dir-sans-sid>/images/<get-var key>.gif"
+    "<get-var mhtml::url-to-dir-sans-sid>/images/NotAvail.gif">
+</defsubst>

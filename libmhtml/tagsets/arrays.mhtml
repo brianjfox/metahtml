@@ -1,0 +1,194 @@
+;;;arrays.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;; Copyright (c) 1999, 2001 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Mon Jan 11 12:41:24 1999.
+
+;;; <array-size>, <array-member>, <array-append>, and <array-add-unique>
+;;; are now all written as primitives.
+
+<defun array-union array1 array2>
+  ;;; DOC_SECTION (ARRAYS)
+  ;;; Return the union of the two arrays represented by the variables
+  ;;; <var array1> and <var array2>.
+  ;;; For example:
+  ;;; <complete-example>
+  ;;; <set-var a1[0]=0 a1[1]=1 a1[2]=2 a2[0]=2 a2[1]=3 a2[2]=4>
+  ;;; <array-union a1 a2>
+  ;;; </complete-example>
+  <parser::canonicalize-var array1>
+  <parser::canonicalize-var array2>
+  <foreach element <get-var-once array1>>
+    <array-add-unique <get-var-once element> results>
+  </foreach>
+  <foreach element <get-var-once array2>>
+    <array-add-unique <get-var-once element> results>
+  </foreach>
+  <get-var-once results[]>
+</defun>
+
+<defun array-intersection array1 array2>
+  ;;; DOC_SECTION (ARRAYS)
+  ;;; Return the intersection of the two arrays represented by the variables
+  ;;; <var array1> and <var array2>.
+  ;;; For example:
+  ;;; <complete-example>
+  ;;; <set-var a1[0]=0 a1[1]=1 a1[2]=2 a2[0]=2 a2[1]=3 a2[2]=4>
+  ;;; <array-intersection a1 a2>
+  ;;; </complete-example>
+  <parser::canonicalize-var array1>
+  <parser::canonicalize-var array2>
+  <foreach element <get-var-once array1>>
+    <if <array-member <get-var-once element> <get-var-once array2>>
+	<array-add-unique <get-var-once element> results>>
+  </foreach>
+  <get-var-once results[]>
+</defun>
+
+<defun array-section arrayvar &optional beg end>
+  ;;; DOC_SECTION (ARRAYS)
+  ;;; Return the section of the array in <var arrayvar> which starts at
+  ;;; index offset <var beg> and continues until index offset <var end>.
+  ;;;
+  ;;; <var beg> defaults to zero (i.e., the beginning of the array), and
+  ;;; <var end> defaults to the size of the array (see also
+  ;;; <funref arrays array-size>).
+  ;;;
+  ;;; If <var beg> is greater than <var end>, the elements of the array
+  ;;; are returned in reverse order, starting from the <var end>th element.
+  <parser::canonicalize-var arrayvar>
+  <defvar beg 0>
+  <defvar end <array-size <get-var-once arrayvar>>>
+  <if <gt end beg>
+      <concat
+       <increment end>
+       <if <gt end <array-size <get-var-once arrayvar>>>
+	   <set-var end = <array-size <get-var-once arrayvar>>>>>>
+  <foreach elt <get-var-once arrayvar>
+	   start=<get-var-once beg> end=<get-var-once end>>
+    <array-append <get-var-once elt> results>
+  </foreach>
+  <get-var-once results[]>
+</defun>
+
+<defsubst array-delete-index index arrayvar whitespace=delete>
+  ;;; DOC_SECTION (ARRAYS)
+  ;;; Delete the element of <var arrayvar> indicated by <var index>.
+  ;;; The remainder of the array after <var index> is shifted back by one,
+  ;;; so that the array ends up with one less element than it had before.
+  <array-shift -1 <get-var-once arrayvar> start=<get-var-once index>>
+</defsubst>
+
+<defun comma-separated arrayvar whitespace=delete>
+  ;;; DOC_SECTION (ARRAYS)
+  ;;; Produce a human readable string of the elements in the array
+  ;;; variable <var arrayvar> separated by commas where appropriate,
+  ;;; and with the word "and" after the penultimate item.
+  ;;;
+  <parser::canonicalize-var arrayvar>
+  <with i=0 size=<array-size <get-var-once arrayvar>>>
+    <while <lt i size>>
+      <concat
+       <get-var-once <get-var-once arrayvar>[i]>
+       <if <eq i <sub size 2>> " and "
+	 <if <lt i <sub size 2>> ", ">>>
+      <increment i>
+    </while>
+  </with>
+</defun>
+
+<defun package-eq package-1 package-2 &key strict>
+  ;;; DOC_SECTIONS (PACKAGES)
+  ;;; Returns "true" if every variable in <var package-1> has a matching
+  ;;; variable and identical value in <var package-2>.
+  ;;;
+  ;;; Without the keyword argument <var strict=true>, <var package-2> is
+  ;;; allowed to contain variables that <var package-1> doesn't -- such
+  ;;; variables are simply ignored, as <tag package-eq> executes in
+  ;;; <var package-1>-centric mode.
+  ;;;
+  ;;; With keyword argument <var strict=true>, <var package-1> and
+  ;;; <var package-2> must be exactly similar; the same number of
+  ;;; variables, and each one with the same name.
+  ;;;
+  ;;; <complete-example>
+  ;;; <set-var pack1::foo=bar pack1::bar=bingo>
+  ;;; <set-var pack2::foo=bar pack2::bar=bingo pack2::baz=baz>
+  ;;; PACKAGE-EQ: <package-eq pack1 pack2>
+  ;;; PACKAGE-EQ: (strict) <package-eq pack1 pack2 strict=true>
+  ;;; </complete-example>
+  <set-var
+    result=true done=""
+    vars[]=<package-vars <get-var-once package-1> strip=true>>
+  <if <get-var-once strict>
+      <concat
+       <set-var vars2[]=<package-vars <get-var-once package-2> strip=true>>
+       <if <neq <array-size vars> <array-size vars2>>
+	   <unset-var result>
+	 <set-var vars[]=<array-union vars vars2>>>>>
+
+  <when <get-var-once result>>
+    <foreach base vars>
+      <set-var
+	name1=<get-var-once package-1>::<get-var-once base>
+	name2=<get-var-once package-2>::<get-var-once base>>
+      <if <or <not <var-exists <get-var-once name1>>>
+	      <not <var-exists <get-var-once name2>>>
+	      <not <string-eq <get-var-once <get-var-once name1>[]>
+			      <get-var-once <get-var-once name2>[]>>>>
+	  <concat
+	   <unset-var result>
+	   <break>>>
+    </foreach>
+  </when>
+  <get-var-once result>
+</defun>
+
+<defun package-diff package-1 package-2 &key verbose>
+  ;;; DOC_SECTIONS (PACKAGES)
+  ;;; Returns an alist describing the differences between <var package-1> and
+  ;;; <var package-2>.
+  ;;;
+  ;;; The returned alist contains three elements -- the key <var DIFFERS> is
+  ;;; an array of the variable names that existed in both packages, but did
+  ;;; not have identical values; the key <var ONLY-IN-xxx> is an array of the
+  ;;; variable names which were found in the <var xxx> package (where
+  ;;; <var xxx> is one of either the value of <var package-1> or the value
+  ;;; of <var package-2>.
+  ;;;
+  ;;; If the keyword argument <var verbose=true> is supplied, then additional
+  ;;; information appears in the value of the <var DIFFERS> key -- this
+  ;;; information is not generally easily parseable by a program, but supplies
+  ;;; a great deal of information while debugging.
+  ;;;
+  ;;; <complete-example>
+  ;;; <set-var pack1::foo=bar pack1::bar=bingo>
+  ;;; <set-var pack2::foo=bar pack2::bar=bingo pack2::baz=baz>
+  ;;; PACKAGE-DIFF: (normal)  <package-diff pack1 pack2>
+  ;;; PACKAGE-DIFF: (verbose) <package-diff pack1 pack2 verbose=true>
+  ;;; </complete-example>
+  <set-var vars[]=<package-vars <get-var-once package-1> strip=true>>
+  <set-var vars2[]=<package-vars <get-var-once package-2> strip=true>>
+  <set-var vars[]=<array-union vars vars2>>
+
+  <foreach base vars>
+    <set-var
+      name1=<get-var-once package-1>::<get-var-once base>
+      name2=<get-var-once package-2>::<get-var-once base>>
+    <copy-var <get-var-once name1> val1>
+    <copy-var <get-var-once name2> val2>
+    <if <not <var-exists <get-var-once name1>>>
+	<array-append <get-var-once base> only-in-2>
+      <if <not <var-exists <get-var-once name2>>>
+	  <array-append <get-var-once base> only-in-1>
+	<if <not <string-eq <get-var-once val1[]> <get-var-once val2[]>>>
+	    <if <not <get-var-once verbose>>
+		<array-append <get-var-once base> differs>
+	      <array-append
+	       <concat <get-var-once base> "\n"
+		       "VAL1: `<get-var-once val1[]>' \n"
+		       "VAL2: `<get-var-once val2[]>'"> differs>>>>>
+  </foreach>
+  <make-alist only-in-<get-var-once package-1>[]=<get-var-once only-in-1[]>
+	      only-in-<get-var-once package-2>[]=<get-var-once only-in-2[]>
+	      differs[]=<get-var-once differs[]>>
+</defun>

@@ -1,0 +1,122 @@
+;;; dump-package.mhtml -*- Meta-HTML -*- code for debugging packages.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Aug 1995.
+;;;
+;;; Usage: <dump-package package-name>
+;;; Dump the contents of the given package out.
+;;;
+<defmacro dp::h4 whitespace=delete>
+  <if <not <get-var text-mode?>>
+      "<h4>%body</h4>"
+    %qbody>
+</defmacro>
+
+<defmacro dp::h3 whitespace=delete>
+  <if <not <get-var text-mode?>>
+      "<h3>%body</h3>"
+    %qbody>
+</defmacro>
+
+<defun dump-package &key recurse? text-mode? &rest packages[]>
+  ;;; DOC_SECTION (DEBUGGING-COMMANDS)
+  ;;; Dump the contents of the specified <var packages> in a format
+  ;;; suitable for including in <code>HTML</code> output.  If the
+  ;;; keyword argument <var RECURSE?> is non-empty, then recursively
+  ;;; dump the contents of any alists found as values in <var pack>.
+  ;;; If the keyword argument <var text-mode?> is non-empty, then
+  ;;; dump the contents of the packages in a format suitable for
+  ;;; placing within a &lt;PRE&gt; ... &lt;/PRE&gt; construct.  This
+  ;;; happens automatically when running under <b>mdb</b>.
+  <if <not <get-var-once packages>>
+      <set-var packages[0]=^>>
+  <if <get-var-once mdb::running-in-mdb>
+      <set-var text-mode? = true>>
+
+  <foreach pack packages>
+    <set-var pack=<upcase <get-var pack>>>
+    <set-var vars[]=<package-vars <get-var pack>>>
+    <sort vars>
+    <if <not <get-var text-mode?> <p>>>
+    <if <match <get-var pack> "ANONYMOUS-....">
+	<concat <dp::h4> "[anonymous alist]" </dp::h4>>
+      <concat <dp::h3> "Dump of package: <get-var pack>" </dp::h3>>>
+    <when <not <get-var text-mode?>>>
+      <ul>
+	<font size=-1>
+    </when>
+      <foreach name vars>
+	<parser::canonicalize-var name>
+	<set-var size=<array-size <get-var-once name>>>
+	<concat "\n\t">
+	<if <not <get-var text-mode?>>
+	    <li>>
+	<subst-in-string <get-var-once name> "^\\<get-var pack>::" "">
+	<concat ": ">
+	<if <gt size 1>
+	    <concat
+	     <if <not <get-var text-mode?>> <ol>>
+	     <foreach value <get-var-once name>>
+	     <subst-in-var value "&" "&amp;" "<" "&lt;" ">" "&gt;">
+	     <concat "\n\t\t">
+	     <if <and <get-var recurse?>
+		      <alist? <get-var-once value>>>
+		 <concat
+		  <set-var new-pack = ANONYMOUS-<make-identifier 4>>
+		  <alist-to-package <get-var value> <get-var new-pack>>
+		  <if <not <get-var text-mode?>>
+		      <li>>
+		  <dump-package <get-var new-pack>
+				recurse?=true
+				text-mode=?<get-var text-mode?>>
+		  <package-delete <get-var new-pack>>>
+	       <concat
+		<if <not <get-var text-mode?>> <li>>
+		<get-var value>>>
+	     </foreach>
+	     <if <not <get-var text-mode?>> </ol>>>
+	  <concat
+	   <set-var value=<get-var-once <get-var-once name>>>
+	   <subst-in-var value "&" "&amp;" "<" "&lt;" ">" "&gt;">
+	   <if <and <get-var recurse?>
+		    <alist? <get-var-once value>>>
+	       <concat
+		 <set-var new-pack = ANONYMOUS-<make-identifier 4>>
+		 <alist-to-package <get-var value> <get-var new-pack>>
+		 <dump-package <get-var new-pack>
+			       recurse?=true text-mode?=<get-var text-mode?>>
+		 <package-delete <get-var new-pack>>>
+	     <get-var value>>>>
+      </foreach>
+      <when <not <get-var text-mode?>>>
+	</font>
+      </ul>
+      <br>
+    </when>
+    <if <get-var text-mode?> <concat "\n">>
+  </foreach>
+</defun>
+
+<defun dump-alist #alist &key recurse?>
+  ;;; DOC_SECTION (DEBUGGING-COMMANDS)
+  ;;; Dump out the contents of <var alist> in the same fashion as 
+  ;;; <funref language-operators dump-package> would.
+  <alist-to-package <get-var-once #alist>>
+  <unset-var #alist>
+  <dump-package recurse?=<get-var-once recurse>>
+</defun>
+
+;;;
+;;; Usage: <dump-all-packages>
+;;; Calls dump-package on every defined package.
+;;;
+<defun dump-all-packages &key recurse?>
+  ;;; DOC_SECTION (DEBUGGING-COMMANDS)
+  ;;; Call <funref language-operators dump-package> on every defined package.
+  ;;; If the keyword argument <var recurse?> is supplied, it indicates
+  ;;; that any association lists found as values in the package
+  ;;; variables should be dumped out as well.
+  <set-var packages[]=<package-names> i=0>
+  <apply dump-package <get-var-once packages[]> recurse?=<get-var recurse?>>
+</defun>
+

@@ -1,0 +1,90 @@
+;;; message.mhtml: -*- Meta-HTML -*-  Functions for showing messages.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 29 10:48:11 1996.
+<defsubst message whitespace=delete>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Add BODY to the contents of the session variable "message".
+  ;;; Also see <funref html-helpers show-message>.
+  <set-session-var message = <prog <get-session-var message> %body>>
+</defsubst>
+
+<defsubst show-message whitespace=delete>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Display the contents of the session variable "message",
+  ;;; and then remove that variable from the session.
+  ;;; Also see <funref html-helpers message>.
+  <set-var message = <get-session-var message>>
+  <unset-session-var message>
+  <when <get-var message>>
+    <table bgcolor=#D8BFD8 border=2 width=400>
+      <tr>
+	<td align=center>
+	  <table width=95%>
+	    <tr valign=top>
+	    <td align=right> <font color="#000000"><b>Note:</b></font> </td>
+	      <td align=left>
+		<font color="#000000"><get-var message></font>
+	      </td>
+	    </tr>
+	  </table>
+	</td>
+      </tr>
+    </table>
+  </when>
+</defsubst>
+
+<defsubst internal-message whitespace=delete>
+  <layout::page>
+    <table bgcolor=#D8BFD8 border=2 width=400>
+      <tr>
+	<td align=center>
+	  <table width=95%>
+	    <tr valign=top>
+	    <td align=right> <font color="#000000"><b>Note:</b></font> </td>
+	      <td align=left>
+		<font color="#000000">
+		<ptext>
+		  %body
+		</ptext>
+		</font>
+	      </td>
+	    </tr>
+	  </table>
+	</td>
+      </tr>
+    </table>
+    <p>
+  </layout::page>
+</defsubst>
+
+<defun inform &rest info>
+  <array-append <get-var-once info> default::informative-messages>
+</defun>
+
+<defun show-inform>
+  <when <get-var-once default::informative-messages>>
+    <table bgcolor=#D8BFD8 border=2 width=430>
+      <tr>
+	<td align=center>
+	  <table width=95%>
+	    <tr valign=center top>
+	    <td align=right>
+		<img src=/images/misc/alert.gif alt="Note:">
+		;;; <font color="#000000"><b>Note:</b></font>
+	      </td>
+	      <td align=left>
+		<font color="#000000">
+		<foreach line default::informative-messages>
+		  <get-var line><br>
+		</foreach>
+		</font>
+	      </td>
+	    </tr>
+	  </table>
+	</td>
+      </tr>
+    </table>
+    <p>
+  </when>
+</defun>

@@ -1,0 +1,9 @@
+;;; base-upcase.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 02:11:57 1996.
+
+Result: "THIS THAT THESE THOSE": <upcase "THIS THaT These those">
+Result: "THIS'N'THAT": <upcase this'n'that>
+Result: THIS: <upcase this that these those>
+Result: "A E I O U": <upcase "A e i O u">

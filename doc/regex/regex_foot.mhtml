@@ -1,0 +1,42 @@
+<set-var title="Regex - Footnotes">
+<include header.mhtml>
+<layout::page>
+<H1>Regex</H1>
+<H2>edition 0.12a</H2>
+<H2>19 September 1992</H2>
+<ADDRESS>Kathryn A. Hargreaves</ADDRESS>
+<ADDRESS>Karl Berry</ADDRESS>
+<P>
+<P><HR><P>
+<H3><A NAME="FOOT1" HREF="regex_2.mhtml#DOCF1">(1)</A></H3>
+<P>Sometimes
+you don't have to explicitly quote special characters to make
+them ordinary.  For instance, most characters lose any special meaning
+inside a list (see section <A HREF="regex_3.mhtml#SEC17">List Operators (<CODE>[</CODE> ... <CODE>]</CODE> and <CODE>[^</CODE> ... <CODE>]</CODE>)</A>).  In addition, if the syntax bits
+<CODE>RE_CONTEXT_INVALID_OPS</CODE> and <CODE>RE_CONTEXT_INDEP_OPS</CODE>
+aren't set, then (for historical reasons) the matcher considers special
+characters ordinary if they are in contexts where the operations they
+represent make no sense; for example, then the match-zero-or-more
+operator (represented by <SAMP>`*'</SAMP>) matches itself in the regular
+expression <SAMP>`*foo'</SAMP> because there is no preceding expression on which
+it can operate.  It is poor practice, however, to depend on this
+behavior; if you want a special character to be ordinary outside a list,
+it's better to always quote it, regardless.
+<H3><A NAME="FOOT2" HREF="regex_3.mhtml#DOCF2">(2)</A></H3>
+<P>Regex therefore doesn't consider the <SAMP>`^'</SAMP> to be
+the first character in the list.  If you put a <SAMP>`^'</SAMP> character first
+in (what you think is) a matching list, you'll turn it into a
+nonmatching list.
+<H3><A NAME="FOOT3" HREF="regex_3.mhtml#DOCF3">(3)</A></H3>
+<P>You can't use a character class for the starting
+or ending point of a range, since a character class is not a single
+character.
+<H3><A NAME="FOOT4" HREF="regex_7.mhtml#DOCF4">(4)</A></H3>
+<P>Regular expressions are also referred to as
+"patterns," hence the name "pattern buffer."
+<H3><A NAME="FOOT5" HREF="regex_7.mhtml#DOCF5">(5)</A></H3>
+<P>A table that maps all uppercase letters to
+the corresponding lowercase ones would work just as well for this
+purpose.
+</layout::page>
+<include footer.mhtml>

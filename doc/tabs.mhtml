@@ -1,0 +1,13 @@
+;;; tabs.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Jun 13 15:03:54 1998.
+<tab /documentation "Documentation">
+<tab /documentation/manual/ "Reference">
+<tab /documentation/debugger/ "Debugger">
+<tab /documentation/server/  "Server">
+<tab /documentation/manual/hiding.mhtml "CGI Engine">
+<tab /documentation/utilities/ "Utilities">
+<tab /documentation/HOWTO "HOWTO">
+<tab <get-var mhtml::http-prefix>/ "Home">
+

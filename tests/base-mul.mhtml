@@ -1,0 +1,17 @@
+;;; base-mul.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@carraig.samsar.acom) Sat Oct 26 19:16:22 1996.
+
+Result: 2: <mul 1 2>
+Result: 2: <mul 2 1>
+Result: 2: <mul -2 -1>
+Result: 2: <mul -4 -.5>
+Result: -6: <mul -2 3>
+Result: 6: <mul 2 3.0>
+Result: -6: <mul -2 3.0>
+Result: 2: <mul 2.000 1.0>
+Result: 0.005: <mul -1 -.005>
+Result: -0.005: <mul -1 .005>
+Result: 0.00000005: <mul .001 .00005>
+Result: 4: <mul -4 -.>

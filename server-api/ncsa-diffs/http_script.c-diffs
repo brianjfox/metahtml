@@ -1,0 +1,67 @@
+*** http_script.c.~1~	Sat May  7 19:47:10 1994
+--- http_script.c	Wed Sep 20 17:20:45 1995
+***************
+*** 8,13 ****
+--- 8,14 ----
+   */
+  
+  #include "httpd.h"
++ #include "http_cookie.h"
+  
+  int pid;
+  
+***************
+*** 80,86 ****
+  }
+  
+  #define MAX_COMMON_VARS 9
+! #define MAX_CGI_VARS (MAX_COMMON_VARS+9)
+  
+  char **add_cgi_vars(char **env,
+                      char *method, char *path, char *path_args, char *args,
+--- 81,87 ----
+  }
+  
+  #define MAX_COMMON_VARS 9
+! #define MAX_CGI_VARS (MAX_COMMON_VARS+14)
+  
+  char **add_cgi_vars(char **env,
+                      char *method, char *path, char *path_args, char *args,
+***************
+*** 89,97 ****
+  {
+      int x;
+      char t[HUGE_STRING_LEN],t2[HUGE_STRING_LEN];
+  
+!     if(!(env = new_env(env,MAX_CGI_VARS,&x)))
+!         die(NO_MEMORY,"add_cgi_vars",out);
+  
+      env[x++] = make_env_str("GATEWAY_INTERFACE","CGI/1.1",out);
+  
+--- 90,115 ----
+  {
+      int x;
+      char t[HUGE_STRING_LEN],t2[HUGE_STRING_LEN];
++     int new_env_size = MAX_CGI_VARS;
+  
+! #if defined (HTTP_COOKIES)
+!     register int i, cookie_count = 0;
+! 
+!     if (cookies != (char **)NULL)
+!       {
+! 	for (i = 0; cookies[i] != (char *)NULL; i++);
+! 	cookie_count = i;
+! 	new_env_size += cookie_count + 1;
+!       }
+! #endif
+! 
+!     if (!(env = new_env (env, new_env_size, &x)))
+!       die (NO_MEMORY,"add_cgi_vars",out);
+! 
+! #if defined (HTTP_COOKIES)
+!     for (i = 0; i < cookie_count; i++)
+!       env[x++] = make_env_str ("HTTP_COOKIE", cookies[i], out);
+! #endif /* HTTP_COOKIES */
+  
+      env[x++] = make_env_str("GATEWAY_INTERFACE","CGI/1.1",out);
+  

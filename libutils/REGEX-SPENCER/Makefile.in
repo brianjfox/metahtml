@@ -1,0 +1,72 @@
+# This Makefile for Henry Spencer's regex library is in -*- Text -*- mode.
+# Copyright (c) 1998 Brian J. Fox
+# Author: Brian J. Fox (bfox@ai.mit.edu)
+#
+RM = rm -f
+LN = ln
+CP = cp
+MV = mv
+AR = ar
+RANLIB = ranlib
+MKDIR = mkdir
+TAR = tar
+LIBCOMPAT = ../compat/libcompat.a
+EXE =
+srcdir = .
+
+#
+# ALL_SUBDIRS is the list of all of the subdirectories within which we
+# would like to run various `make's, or ".", which means that there
+# are no subdirectories.
+ALL_SUBDIRS = .
+
+CC = gcc
+# OPTIMIZE_FLAGS = -O69
+DEBUG_FLAGS = -g
+CFLAGS = -Wall -Wstrict-prototypes  $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS)
+LDFLAGS = $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS)
+
+LIB_CSRC = regcomp.c regexec.c regerror.c regfree.c
+LIB_OBJS = regcomp.o regexec.o regerror.o regfree.o
+REGEXH   = regex.h
+REGEXHSRC= regex2.h $(LIB_CSRC)
+
+TARGET_LIB = libregex.a
+REQUIRED_LIBS = $(LIBCOMPAT)
+TARGETS = $(TARGET_LIB) $(REGEXH)
+INCLUDES = -I. -I.. -I../..
+
+# arrangements to build forward-reference header files
+.SUFFIXES:	.ih .h
+.c.ih:
+	sh ./mkh $(MKHFLAGS) -p $< >$@
+
+.c.o:
+	$(CC) -DPOSIX_MISTAKE $(CFLAGS) $(DEFS) $(INCLUDES) -c $<
+
+all: $(TARGETS)
+
+$(TARGET_LIB): $(LIB_OBJS)
+	$(RM) $@
+	$(AR) cq $@ $(LIB_OBJS)
+	if [ "$(RANLIB)" ]; then $(RANLIB) $@; fi
+
+$(REGEXH):	$(REGEXHSRC) mkh
+	sh ./mkh $(MKHFLAGS) -i _REGEX_H_ $(REGEXHSRC) >regex.tmp
+	cmp -s regex.tmp regex.h 2>/dev/null || cp regex.tmp regex.h
+	rm -f regex.tmp
+
+regcomp.o:	cclass.h cname.h regcomp.ih
+regexec.o:	engine.c engine.ih
+regerror.o:	regerror.ih
+
+../compat/libcompat.a:
+	(cd ../compat; $(MAKE))
+
+clean: FORCE
+	$(RM) $(LIB_OBJS) $(TARGETS)
+
+distclean realclean: clean
+	$(RM) *.o *core* *~ DISTFILES *.bak
+
+FORCE:

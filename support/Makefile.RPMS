@@ -1,0 +1,142 @@
+# -*- Fundamental -*- Mode is good for Makefiles.
+#
+MYSQLVER   = 3.23.28-1
+MHTMLVER   = 6.10.01-1
+APACHEVER  = 1.3.14
+OPENSSLVER = 0.9.5a
+MODSSLVER  = 2.6.3-$(APACHEVER)
+RPMARCH	   = i386
+RPMINST   = rpm -ivh --force --nodeps
+
+all: FORCE
+	@echo "Possible targets:"
+	@echo "  make metahtml-install: Installs only things Meta-HTML"
+	@echo "make metahtml-uninstall: Uninstalls only things Meta-HTML"
+	@echo "     make metahtml-wipe: Uninstalls, deletes /home/mhttpd"
+	@echo "     make mysql-install: Installs MySQL Server and Clients"
+	@echo "     make mysql-clients: Installs only MySQL Clients"
+
+metahtml-install: FORCE
+	@if [ -x /etc/rc.d/init.d/mhttpd ]; then \
+	  /etc/rc.d/init.d/mhttpd stop 2>/dev/null; \
+        fi
+	@$(RPMINST) metahtml-$(MHTMLVER).$(RPMARCH).rpm
+	@$(RPMINST) metahtml-modules-$(MHTMLVER).$(RPMARCH).rpm
+	@$(RPMINST) metahtml-devel-$(MHTMLVER).$(RPMARCH).rpm
+	@if [ -f ./metahtml-iodbc-$(MHTMLVER).$(RPMARCH).rpm ]; then \
+	  $(RPMINST) metahtml-iodbc-$(MHTMLVER).$(RPMARCH).rpm; \
+	 fi
+	@if [ -f ./metahtml-mysql-$(MHTMLVER).$(RPMARCH).rpm ]; then \
+	  $(RPMINST) metahtml-mysql-$(MHTMLVER).$(RPMARCH).rpm; \
+	  if [ ! -f /usr/lib/mysql/libmysqlclient.so ]; then \
+	    if [ -f ./MySQL-shared-$(MYSQLVER).$(RPMARCH).rpm ]; then \
+	      $(RPMINST) MySQL-shared-$(MYSQLVER).$(RPMARCH).rpm; \
+	    fi; \
+	  fi; \
+	 fi
+	@if [ -f ./metahtml-msql-$(MHTMLVER).$(RPMARCH).rpm ]; then \
+	  $(RPMINST) metahtml-msql-$(MHTMLVER).$(RPMARCH).rpm; \
+	 fi
+	@if [ -f ./metahtml-pgsql-$(MHTMLVER).$(RPMARCH).rpm ]; then \
+	  $(RPMINST) metahtml-pgsql-$(MHTMLVER).$(RPMARCH).rpm; \
+	 fi
+	@if [ -f ./metahtml-sybase-$(MHTMLVER).$(RPMARCH).rpm ]; then \
+	  $(RPMINST) metahtml-sybase-$(MHTMLVER).$(RPMARCH).rpm; \
+	 fi
+	@if [ -f ./metahtml-oracle-$(MHTMLVER).$(RPMARCH).rpm ]; then \
+	  $(RPMINST) metahtml-oracle-$(MHTMLVER).$(RPMARCH).rpm; \
+	 fi
+	@if [ -f ./metahtml-dbi-$(MHTMLVER).$(RPMARCH).rpm ]; then \
+	  $(RPMINST) metahtml-dbi-$(MHTMLVER).$(RPMARCH).rpm; \
+	 fi
+	@if [ -f ./metahtml-machine-$(MHTMLVER).$(RPMARCH).rpm ]; then \
+	  $(RPMINST) metahtml-machine-$(MHTMLVER).$(RPMARCH).rpm; \
+	 fi
+	@if [ -f ./metahtml-compiler-$(MHTMLVER).$(RPMARCH).rpm ]; then \
+	  $(RPMINST) metahtml-compiler-$(MHTMLVER).$(RPMARCH).rpm; \
+	 fi
+	(dir=$$(/bin/pwd); (cd /home/mhttpd/docs; tar -zxf $$dir/metahtml-docroot.tar.gz))
+	(dir=$$(/bin/pwd); (cd /home/mhttpd/docs; tar -zxf $$dir/metahtml-examples.tar.gz))
+	if [ ! -f /home/mhttpd/docs/release/sql-rolodex ]; then \
+	  (cd /home/mhttpd/docs/release; \
+	   ln -s ../applications/sql-rolodex .); \
+	fi
+	if [ ! -f /home/mhttpd/docs/release/sql-browser ]; then \
+	  (cd /home/mhttpd/docs/release; \
+	   ln -s ../applications/sql-browser .); \
+	fi
+	(cd /home/mhttpd/docs; chown -R mhttpd.wwwadmin *)
+	(cd /home/mhttpd/docs; chmod -R g+w *)
+	/etc/rc.d/init.d/mhttpd start
+
+metahtml-uninstall: FORCE
+	-rpm -e metahtml-devel
+	-rpm -e metahtml-modules
+	-rpm -e metahtml-iodbc
+	-rpm -e metahtml-odbc
+	-rpm -e metahtml-compiler
+	-rpm -e metahtml-machine
+	-rpm -e metahtml-mysql
+	-rpm -e metahtml-msql
+	-rpm -e metahtml-pgsql
+	-rpm -e metahtml
+
+metahtml-wipe: metahtml-uninstall
+	-/usr/sbin/userdel mhttpd
+	-rm -rf /usr/lib/metahtml
+	-rm -rf /home/mhttpd
+	-rm -rf /www/bin /www/lib
+	-rm -f /etc/sysconfig/mhttpd /etc/sysconfig/MHTTPD
+	-rm -f /usr/sbin/mhttpd /usr/bin/mhttpd 
+	-rm -f /usr/sbin/metahtml-engine  /usr/bin/metahtml-engine
+	-rm -f /usr/sbin/metahtml-fcgi-engine /usr/bin/metahtml-fcgi-engine
+
+mysql-install: FORCE
+	if [ -x /etc/rc.d/init.d/mysql ]; then \
+	  /etc/rc.d/init.d/mysql stop 2>/dev/null; \
+	fi
+	@if [ ! -x /etc/rc.d/init.d/mysql ]; then \
+	  rpm -ivh MySQL-$(MYSQLVER).$(RPMARCH).rpm; \
+	  rpm -ivh MySQL-client-$(MYSQLVER).$(RPMARCH).rpm; \
+	  rpm -ivh MySQL-devel-$(MYSQLVER).$(RPMARCH).rpm; \
+	  if [ -f MySQL-shared-$(MYSQLVER).$(RPMARCH).rpm; \
+	    then rpm -ivh MySQL-shared-$(MYSQLVER).$(RPMARCH).rpm; \
+	  fi; \
+	fi
+	if [ -x /usr/bin/mysql-user.mhc ]; then \
+	  /usr/bin/mysql-user.mhc bfox@localhost; \
+	  /usr/bin/mysql-user.mhc www@localhost; \
+	  /usr/bin/mysqladmin reload; \
+	else \
+	  /etc/rc.d/init.d/mysql start; \
+	fi
+
+mysql-clients: FORCE
+	if [ -f MySQL-client-$(MYSQLVER).$(RPMARCH).rpm; \
+	  then rpm -ivh --nodeps MySQL-client-$(MYSQLVER).$(RPMARCH).rpm; \
+	fi
+	if [ -f MySQL-devel-$(MYSQLVER).$(RPMARCH).rpm; \
+	  then rpm -ivh --nodeps MySQL-devel-$(MYSQLVER).$(RPMARCH).rpm; \
+	fi
+	if [ -f MySQL-shared-$(MYSQLVER).$(RPMARCH).rpm; \
+	  then rpm -ivh --nodeps MySQL-shared-$(MYSQLVER).$(RPMARCH).rpm; \
+	fi
+
+mysql-uninstall: FORCE
+	-rpm -e MySQL-devel
+	-rpm -e MySQL-shared
+	-rpm -e MySQL-client
+	-rpm -e MySQL
+
+install: FORCE
+	 make metahtml-install
+
+clean: FORCE
+	rm -rf apache_$(APACHEVER)
+	rm -rf openssl-$(OPENSSLVER)
+	rm -rf mod_ssl-$(MODSSLVER)
+
+uninstall distclean: clean metahtml-uninstall FORCE
+	rm -f *~ *.BAK
+
+FORCE:

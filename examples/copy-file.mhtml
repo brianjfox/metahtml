@@ -1,0 +1,25 @@
+;;; copy-file.mhtml: -*- Meta-HTML -*-  Copy a file.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Feb  6 04:49:42 1996.
+
+;;; <copy-file from to>
+<defun copy-file from to>
+  ;;; Read the existing stream.
+  <with-open-stream src <get-var from> type=file mode=read>
+    <stream-get-contents src file-contents>
+  </with-open-stream>
+
+  ;;; Find out how big the file is.
+  <set-var size=<content-length file-contents>>
+
+  ;;; If the file existed, and/or it had some size, write the output file.
+  <when <gt size 0>>
+    <with-open-stream dst <get-var to> type=file mode=write-create>
+      <stream-put-contents dst file-contents>
+    </with-open-stream>
+    <get-var size> bytes transferred.
+  </when>
+</defun>
+
+    

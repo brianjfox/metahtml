@@ -1,0 +1,60 @@
+;;; testmap.mhtml: -*- Meta-HTML -*-  Example of using Imagemaps.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Feb  6 16:28:39 1996.
+
+<set-var title="Test Imagemap Code">
+<include header.mhtml>
+
+<layout::page>
+<h3> Click on one of the shapes below. </h3>
+
+<center>
+  <a href="/cgi-bin/imagemap<get-var mhtml::relative-prefix>/maps/testmap.map">
+    <img src="<get-var mhtml::images>testmap.gif" border=0 ISMAP></a>
+  <br>
+</center>
+
+<when <get-var click>>
+  <p>
+  Your click, <i>(<get-var x>, <get-var y>)</i> was
+  apparently on or near the <b><get-var click></b>.
+  <p>
+</when>
+
+<br><br>
+<when <not <get-var showmap>>>
+  <h3>
+  Click <a href="<thisdoc>?showmap=true">
+    for the source of the testmap.map
+  </a> file.
+  </h3>
+</when>
+
+<when <not <get-var showsource>>>
+  <h3>
+  Click <a href="<thisdoc>?showsource=true">
+    for the <meta-html> source
+  </a>
+  of this page.
+  </h3>
+</when>
+  
+<when <get-var showmap>>
+  <set-var contents =
+    <include maps/testmap.map verbatim>>
+  <pre>
+<get-var contents>
+  </pre>
+</when>
+
+<when <get-var showsource>>
+  <set-var contents =
+    <include <get-var mhtml::current-doc> verbatim>>
+  <subst-in-var contents "&" "&amp;" "<" "&lt;" ">" "&gt;">
+  <pre>
+<get-var-once contents>
+  </pre>
+</when>
+</layout::page>
+<include footer.mhtml>

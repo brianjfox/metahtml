@@ -1,0 +1,26 @@
+;;; base-defsubst.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 14:19:54 1996.
+
+Result: "Function Definition Works": <defsubst test-subst>Function Definition Works</defsubst><test-subst>
+Result: "Function Definition Works:<br>arg0": <defsubst test-subst>Function Definition Works:<br>%0</defsubst><test-subst "arg0">
+Result: "Function Definition Works:   <br>   arg0": <defsubst test-subst>
+Function Definition Works:   <br>   %0 %1   
+</defsubst><test-subst arg0>
+Result: "Function Definition Works:   <br>   arg0 value": <defsubst test-subst whitespace=delete>
+Function Definition Works:   <br>   %0 %1
+   
+</defsubst><set-var var2=value><test-subst arg0 <get-var var2>>
+Result: "Function Definition Works:   <br>Variables: value1 value2": <defsubst test-subst var1 var2 whitespace=delete>
+
+Function Definition Works:   <br>
+
+Variables: <get-var var1> <get-var var2>   
+</defsubst><test-subst value1 value2>
+Result: "Function Definition Works:   <br>Variables: value1  value3": <defsubst test-subst var1 var2 var3 whitespace=delete>
+
+Function Definition Works:   <br>
+
+Variables: <get-var var1> <get-var var2> <get-var var3>
+</defsubst><test-subst value1 "" value3>

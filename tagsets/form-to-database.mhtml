@@ -1,0 +1,77 @@
+;;; form-to-database.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jul 19 09:10:09 1996.
+;;;
+
+<defmacro form-to-database database &key dbname key redirect-to action-name>
+  ;;; DOC_SECTION (MISCELLANEOUS-TAGS)
+  ;;; Used almost exactly like <code>FORM</code>, this stores the
+  ;;; values entered into the form into the specified database.  Takes
+  ;;; keyword arguments of <var dbname>, <var key>, <var redirect-to>,
+  ;;; and <var action-name>.
+  ;;;
+  ;;; <ul>
+  ;;; <li> <var dbname>
+  ;;; The name of the database to store the results in.  If it
+  ;;; isn't supplied, "anonymous.db" is used.  The name of the
+  ;;; database file is always relative to the current directory.
+  ;;;
+  ;;; <li> <var key>
+  ;;; The name of the input field which contains the unique key
+  ;;; for this record.  For example, this might be "name" for a
+  ;;; rolodex application which asked for that information field.
+  ;;;
+  ;;; <li> <var redirect-to>
+  ;;; The URL of the page to go to after the data is stored.
+  ;;; If this is not specified, the user remains on the page
+  ;;; containing this form.
+  ;;;
+  ;;; <li> <var action-name>
+  ;;; The text to place in the button which submits the form.
+  ;;; Defaults to "Submit Form".
+  ;;;</ul>
+  <defvar database <get-var dbname>>
+  <FORM METHOD="POST" ACTION="<thisdoc>">
+    %body
+    <p>
+    <INPUT TYPE="SUBMIT" NAME="ACTION"
+	   VALUE="<or <get-var action-name> "Submit Form">">
+    <INPUT TYPE="SUBMIT" NAME="ACTION" VALUE="Cancel">
+  </FORM>
+
+  <when <string-eq <get-var-once posted::action> Cancel>>
+    <if <get-var-once cancel>
+	<redirect <get-var cancel>>>
+  </when>
+
+  <when <string-eq <get-var-once posted::action>
+		   <or <get-var action-name> "Submit Form">>>
+    <when <not <get-var-once <get-var key>>>>
+      <div align=left>
+      <ptext>
+	I'm sorry, but you must supply the field <b><get-var key></b>
+	to continue, or click <b>Cancel</b> if you don't wish to
+	submit your information.
+      </ptext>
+      </div>
+    </when>
+
+    <when <get-var-once posted::<get-var key>>>
+      <with-open-database db <thisdir>/<or <get-var database> anonymous.db>
+			  mode=write-create>
+	<unset-var posted::action>
+	<in-package local>
+	  <alist-to-package <package-to-alist posted>>
+	  <in-package local>
+	    <set-var x =
+	      <database-save-package
+	       ^^::db <get-var ^::<get-var ^^::key>> ^ strip=t>>
+	  </in-package>
+	</in-package>
+      </with-open-database>
+      <if <get-var redirect-to>
+	  <redirect <get-var redirect-to>>>
+    </when>
+  </when>
+</defmacro>

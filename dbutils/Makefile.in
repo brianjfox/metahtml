@@ -1,0 +1,130 @@
+# Makefile.in: -*- Text -*-  Source for configure to make a Makefile from.
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+#
+# You should have received a copy of the UAI Free Software License
+# along with this program; if you have not, you may obtain one by
+# writing to:
+#
+# Universal Access Inc.
+# 129 El Paseo Court
+# Santa Barbara, CA
+# 93101
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+GDBMLIB = @GDBMLIB@
+GDBM_IN = @GDBM_IN@
+DBINC	= $(GDBM_IN)
+DBLIB	= $(GDBMLIB)
+
+OS_LIBS = @OS_LIBS@
+EXE	= @EXE@
+
+WEBBASEDIR = @WEBBASEDIR@
+WEBDEF	= -DWEBBASEDIR='"$(WEBBASEDIR)"'
+VERSDEF = -DMHTML_VERSION_STRING='"$(MHTML_VERSION)"'
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+bindir	= $(exec_prefix)/bin
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+
+# You cannot compile with anything other than GNU C.
+CC		 = gcc $(GCC_WARN)
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+# OPTIMIZE_FLAGS	= -O69
+INCLUDE_FLAGS	= @EXTRAINC@ -I.. -I../libutils -I../libmhtml $(DBINC)
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(PCFLAGS) $(INCLUDE_FLAGS)
+LDFLAGS		= $(DEBUG_FLAGS)
+
+LIBUTILS	= ../libutils/libutils.a
+DATABASE_O	= ../libmhtml/database.o
+DATABASE_C	= ../libmhtml/database.c
+
+DBPACK		= dbpack$(EXE)
+DBDUMP		= dbdump$(EXE)
+DBDELETE	= dbdelete$(EXE)
+DBGET		= dbget$(EXE)
+DBCREATE	= dbcreate$(EXE)
+
+PROGS		= $(DBPACK) $(DBDUMP) $(DBDELETE) $(DBGET) $(DBCREATE)
+REQLIBS		= $(DATABASE_O) $(LIBUTILS) $(GDBMLIB)
+TARGETS		= $(PROGS)
+
+.c.o:
+	@echo Compiling $@ from $<
+	@$(CC) $(CFLAGS) $(DEFS) $(VERSDEF) $(INCLUDE_FLAGS) -c $<
+
+all:	$(TARGETS)
+
+$(LIBUTILS):
+	(cd ../libutils; $(MAKE) $@)
+
+$(DATABASE_O): $(DATABASE_C)
+	(cd ../libmhtml; $(MAKE) $@)
+
+$(PROGS): $(LIBUTILS) $(DATABASE_O)
+
+$(DBPACK): dbpack.o
+	$(CC) $(LDFLAGS) -o $@ dbpack.o $(REQLIBS) $(DBLIB) $(OS_LIBS)
+
+$(DBDUMP): dbdump.o
+	$(CC) $(LDFLAGS) -o $@ dbdump.o $(REQLIBS) $(DBLIB) $(OS_LIBS)
+
+$(DBDELETE): dbdelete.o
+	$(CC) $(LDFLAGS) -o $@ dbdelete.o $(REQLIBS) $(DBLIB) $(OS_LIBS)
+
+$(DBGET): dbget.o
+	$(CC) $(LDFLAGS) -o $@ dbget.o $(REQLIBS) $(DBLIB) $(OS_LIBS)
+
+$(DBCREATE): dbcreate.o
+	$(CC) $(LDFLAGS) -o $@ dbcreate.o $(REQLIBS) $(DBLIB) $(OS_LIBS)
+
+Makefile: Makefile.in
+	(cd ..; ./config.status)
+
+install: $(TARGETS)
+	for file in $(PROGS); do \
+	  $(INSTALL) $$file $(bindir)/$$file; \
+	done
+
+clean-executables: FORCE
+	$(RM) $(TARGETS) mhc.o
+
+clean:  FORCE
+	$(RM) *.o $(TARGETS)
+
+distclean realclean: clean
+	$(RM) *.cache *.log Makefile
+
+tags TAGS: FORCE
+	(cd ..; $(MAKE) $@)
+
+FORCE:

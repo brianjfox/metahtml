@@ -1,0 +1,100 @@
+;;; make-mdb-printable.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Apr 21 13:45:20 1998.
+<set-var title="Make Debugger Manual"
+  footer-already-included=true
+  printing=true>
+<include header.mhtml>
+<include texinfo.mhtml>
+SYSTEM:ERRORS:??<SYSTEM-ERROR-OUTPUT>??
+
+<defsubst write-output>
+  <subst-in-var %1 "&amp;" "&" "&lt;" "<" "&gt;" ">" "\n[ \t\r\n]*\n" "\n\n">
+  <stream-put %0 <get-var-once %1>>
+</defsubst>
+
+<defvar output-stream /tmp/mdb.texi>
+
+<with-open-stream s <get-var output-stream> type=file mode=write-create>
+  <texinfo-write-header
+   stream=<get-var default::s>
+   filename=mdb.info
+   title="Meta-HTML Debugger Reference"
+   author[0]="Brian J. Fox"
+   description = <prog
+		   This document describes the interactive debugger for the
+		   Meta-HTML Programming Language, called MDB.  Meta-HTML is
+		   a language specifically designed for writing applications
+		   for the World Wide Web.>
+
+   draft=""
+   version=1.0>
+  <stream-put s <include mdb-prologue.texi verbatim>>
+
+  <set-var output=<concat "\n@node A Quick Overview of MDB"
+			  "\nsection A Quick Overview of MDB"
+			  "\n\n"
+			  <include mdb-overview.mhtml>>>
+  <write-output s output>
+
+  <set-var output=<concat "\n@node Commands .vs. Statements"
+			  "\nsection Commands .vs. Statements"
+			  "\n\n"
+			  <include mdb-commands.mhtml>>>
+  <write-output s output>
+
+  <set-var output=<concat "\n@node Completing on Symbol and File Names"
+			  "\nsection Completing on Symbol and File Names"
+			  "\n\n"
+			  <include mdb-completion.mhtml>>>
+  <write-output s output>
+
+  <set-var output=<concat "\n@node Testing Individual Statements"
+			  "\nsection Testing Individual Statements"
+			  "\n\n"
+			  <include mdb-testing.mhtml>>>
+  <write-output s output>
+
+  <set-var output=<concat "\n@node Loading a File into MDB"
+			  "\nsection Loading a File into MDB"
+			  "\n\n"
+			  <include mdb-loading.mhtml>>>
+  <write-output s output>
+
+  <set-var output=<concat "\n@node Using Breakpoints"
+			  "\nsection Using Breakpoints"
+			  "\n\n"
+			  <include mdb-breakpoints.mhtml>>>
+  <write-output s output>
+
+  <set-var output=<concat "\n@node Examining Data"
+			  "\nsection Examining Data"
+			  "\n\n"
+			  <include mdb-examining.mhtml>>>
+  <write-output s output>
+
+  <set-var output=<concat "\n@node Advanced Debugging"
+			  "\nsection Advanced Debugging"
+			  "\n\n"
+			  <include mdb-advanced.mhtml>>>
+  <write-output s output>
+  <stream-put s <concat "\n@node Function Index"
+			"\n@appendix Function Index"
+			"\n@printindex fn"
+			"\n"
+			 "\n@node Variable Index"
+			"\n@appendix Variable Index"
+			"\n@printindex vr"
+			"\n"
+			"\n@node Contents"
+			"\n@contents"
+			"\n@bye\n">>
+</with-open-stream>
+Done.
+<unset-var mhtml::cacheable>
+
+
+
+
+

@@ -1,0 +1,32 @@
+#!../../mhc/mhc
+;;; make-static: -*- Meta-HTML -*-  Build static HTML Manual.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Jun 16 14:25:35 1997.
+<set-var mhc::explicit-output-only=true>
+
+<defun print>
+  <with-open-stream s *standard-output* mode=write-create>
+    <stream-put s <concat <prog %body> "\n">>
+  </with-open-stream>
+</defun>
+
+<set-var continue=true>
+
+;;; Make this environment look just like the canonical source one.
+<include canonical-source.mhtml>
+<set-var
+  MHTML::CURRENT-DOC = "make-static.mhtml"
+  MHTML::FULL-URL = "http://localhost.ua.com/documentation/manual/make-static.mhtml"
+  MHTML::FULL-URL-SANS-SID = "http://localhost.ua.com/documentation/manual/make-static.mhtml"
+  MHTML::LOCATION = "/documentation/manual/make-static.mhtml"
+  MHTML::LOCATION-SANS-SID = "/documentation/manual/make-static.mhtml"
+  MHTML::URL-TO-DIR = "http://localhost.ua.com/documentation/manual"
+  MHTML::URL-TO-DIR-SANS-SID = "http://localhost.ua.com/documentation/manual">
+  
+<print Building HTML Pages from the existing databases...>
+<include make-static.mhtml
+	 alt = <prog
+		 <print "Cannot Find make-static.mhtml!">
+		 <unset-var continue>>>
+<print Done.>

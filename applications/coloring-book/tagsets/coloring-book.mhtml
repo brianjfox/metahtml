@@ -1,0 +1,212 @@
+;;; coloring-book.mhtml: -*- Meta-HTML -*-  Functions for the coloring book.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jan 31 13:09:02 1997.
+;;; The information for each image is stored as an alist in a
+;;; variable called CBOOK::<image-name>.
+
+<set-var cbook::colors[] =
+  <prog
+    FF0000,Red
+    00FF00,Green
+    0000FF,Blue
+    FFFF00,Yellow
+    020202,Black
+    FFFFFF,White
+    F0D0D0,Pink
+    FF00FF,Purple
+    A52A2A,Brown
+    >>
+<set-var cbook::colors[20] = "909090,Undo">
+
+<defun cbook::crayon-gif index>
+  <set-var name=<downcase <cbook::color-name <get-var index>>>>
+  <set-var file="<thisdir>/images/crayons/<get-var name>.gif">
+  <set-var url="<get-var mhtml::url-to-dir>/images/crayons/<get-var name>.gif">
+
+  ;;; If this crayon doesn't exist, then make it.
+  <when <not <file-exists <get-var-once file>>>>
+    <set-var rgb=<cbook::color-rgb <get-var-once index>>>
+    <image::create crayon src=<thisdir>/images/crayons/crayon.template>
+    <image::fill crayon x=7 y=12 color=<get-var-once rgb>>
+    <image::fill crayon x=4 y=18 color=<get-var-once rgb>>
+    <image::fill crayon x=5 y=23 color=<get-var-once rgb>>
+    <image::fill crayon x=5 y=23 color=<get-var-once rgb>>
+    <image::fill crayon x=14 y=286 color=<get-var-once rgb>>
+    <set-var written? = <image::write crayon <get-var-once file>>>
+  </when>
+  <get-var-once url>
+</defun>
+
+<defun cbook::initialize>
+  <session-import cbook cbook>
+  <unset-var cbook-local::modified>
+  <defvar cbook::bookfile-image-directory
+    <concat <get-var-once mhtml::include-prefix>
+	    <get-var-once mhtml::relative-prefix>
+	    /images>>
+</defun>
+
+<defun cbook::bookfile image>
+  <get-var-once cbook::bookfile-image-directory>/<get-var-once image>.gif
+</defun>
+
+<defun cbook::points-of-image image>
+  <alist-to-package <get-var-once cbook::<get-var-once image>> "">
+  <get-var-once points[]>
+</defun>
+
+<defun cbook::clear-image image>
+  <set-var cbook::<get-var-once image>-undo =
+    <get-var-once cbook::<get-var-once image>>>
+  <alist-to-package <get-var-once cbook::<get-var-once image>> "">
+  <set-var points[]="" index="">
+  <set-var cbook::<get-var-once image> = <package-to-alist>>
+  <set-var cbook-local::modified=true>
+</defun>
+
+<defun cbook::colored-image image>
+  <set-var points[] = <cbook::points-of-image <get-var-once image>>>
+  <concat "color-gif.mhtml?<cgi-encode image points>">
+</defun>
+
+<defun cbook::add-point point image>
+  <alist-to-package <get-var-once cbook::<get-var-once image>> "">
+  <set-var points[index] = <get-var-once point>>
+  <increment index>
+  <unset-var point>
+  <set-var cbook::<get-var-once image> = <package-to-alist>>
+  <unset-var cbook::<cbook::current-image>-undo>
+  <unset-session-var cbook::<get-var-once image>-undo>
+  <set-var cbook-local::modified=true>
+</defun>
+
+<defun cbook::delete-point image>
+  <alist-to-package <get-var-once cbook::<get-var-once image>> "">
+  <if <gt index 0> <decrement index>>
+  <set-var points[index]="">
+  <unset-var point>
+  <set-var cbook::<get-var-once image> = <package-to-alist>>
+  <set-var cbook-local::modified=true>
+</defun>
+
+<defun cbook::remember-click where>
+  <set-var x-and-y[]=<subst-in-string <get-var-once where> "," "\n">>
+  <set-var point =
+    <concat
+     <get-var-once x-and-y[0]>,
+     <get-var-once x-and-y[1]>,
+     <cbook::color-rgb <cbook::current-color>>>>
+  <cbook::add-point <get-var-once point> <cbook::current-image>>
+  <unset-var cbook::<cbook::current-image>-undo>
+  <unset-session-var cbook::<get-var-once image>-undo>
+</defun>
+
+<defun cbook::undo image>
+  <if <get-var-once cbook::<get-var-once image>-undo>
+      <concat
+	<set-var cbook::<get-var-once image> =
+	  <get-var-once cbook::<get-var-once image>-undo>>
+	<unset-var cbook::<get-var-once image>-undo>
+	<unset-session-var cbook::<get-var-once image>-undo>
+	<set-var cbook-local::modified=true>>
+    <cbook::delete-point <get-var-once image>>>
+</defun>
+
+<defun cbook::color-rgb index>
+  <set-var values[] =
+    <subst-in-string <get-var-once cbook::colors[index]> "," "\n">>
+  <get-var-once values[0]>
+</defun>
+
+<defun cbook::color-name index>
+  <set-var values[] =
+    <subst-in-string <get-var-once cbook::colors[index]> "," "\n">>
+  <get-var-once values[1]>
+</defun>
+
+<defun cbook::current-color>
+  <or <get-var-once cbook::current-color> 0>
+</defun>
+
+<defun cbook::set-color index>
+  <set-var cbook::current-color = <get-var-once index>>
+  <set-var cbook-local::modified = true>
+</defun>
+
+<defun cbook::save-changes>
+  <if <get-var-once cbook-local::modified>
+      <session-export cbook cbook>>
+</defun>
+
+<defun cbook::current-image>
+  <get-var-once cbook::current-image>
+</defun>
+
+<defun cbook::set-image image>
+  <cbook::save-changes>
+  <set-var cbook::current-image = <get-var-once image>>
+  <set-var cbook-local::modified=true>
+</defun>
+
+<defun cbook::colorblock color make-link-p action name>
+  <defvar action set-color>
+  <table border cellspacing=0 cellpadding=0>
+    <tr>
+      <td align=center>
+	<table cellspacing=0 cellpadding=0>
+	  <tr>
+	    <td width=24 height=24
+		bgcolor="#<cbook::color-rgb <get-var-once color>>">
+	      <if <get-var-once make-link-p>
+		  <concat
+		   <a href="<thisdoc>?<cgi-encode action color>">
+		   <img src="trans.gif" width=20 height=20>
+		   </a>>
+		<img src="trans.gif" width=20 height=20>>
+	    </td>
+	  </tr>
+	</table>
+	<defvar name <cbook::color-name <get-var-once color>>>
+	<if <get-var-once make-link-p>
+	    <concat <a href="<thisdoc>?<cgi-encode action color>">
+		    <b><get-var-once name></b>
+		    </a>>
+	  <concat <b><get-var-once name></b>>>
+      </td>
+    </tr>
+  </table>
+</defun>
+
+<defun cbook::save-image image-name user-name save-name>
+  <set-var dir=<thisdir>/user-images/<get-var-once user-name>>
+  <set-var file=<get-var-once dir>/<get-var-once save-name>>
+  <make-directories <get-var-once dir>>
+  <set-var points[] = <cbook::points-of-image <get-var-once image-name>>>
+  <with-open-stream s <get-var-once file> mode=write-create>
+    <stream-put s ";">
+    <stream-put s ";; <get-var-once save-name>: A saved Image file for ">
+    <stream-put s "<get-var-once user-name>.\n;">
+    <stream-put s ";; Saved on <date>, on host <get-var-once env::server_name>\n;">
+    <stream-put s ";; Browser: <get-var-once env::http_user_agent>\n;">
+    <stream-put s ";;    Host::<get-var-once env::remote_host>\n">
+    <stream-put s "<verbatim><set-var points[] = <prog</verbatim>\n">
+    <stream-put s <get-var-once points[]>>
+    <stream-put s ">\nimage=<get-var-once image-name>>\n">
+  </with-open-stream>
+</defun>
+
+<defun cbook::load-image user-name load-name>
+  <include <concat  <get-var-once mhtml::relative-prefix>
+		    /user-images/<get-var-once user-name>
+		    /<get-var-once load-name>>
+	   alt="">
+  <when <get-var-once image>>
+    <cbook::set-image <get-var-once image>>
+    <set-var index = <array-size points>>
+    <unset-var user-name load-name>
+    <set-var cbook::<get-var-once image> = <package-to-alist>>
+    <set-var cbook-local::modified=true>
+    <cbook::save-changes>
+  </when>
+</defun>

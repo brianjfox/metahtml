@@ -1,0 +1,579 @@
+;;; image-builder.mhtml: How to make banners and buttons dynamically.
+;;;
+;;;
+;;; <set-var image-builder::use-alchemy = true>
+;;; <set-var image-builder::wrap-words = true>
+
+<defun image-builder::make-text-gif text halign valign width height
+				    font font-size font-color base-image>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Make a gif from <var text> and <var base-image> using the given
+  ;;; parameters.
+  ;;;
+  ;;; <var halign> is horizontal alignment of the text in the image.  It can
+  ;;; have one of the following values: Left, Center, Right.
+  ;;;
+  ;;; <var valign> is vertical alignment of the text in the image; it can have
+  ;;; one of the following values:  "Top", "Middle", or "Bottom".
+  ;;; Default: "Middle".
+  ;;;
+  ;;; <var width> and <var height> are the dimensions in pixels of the base
+  ;;; image, if known.  Defaults are 468 and 60 respectively.
+  ;;;
+  ;;; <var font> is the name of the Postscript font to use to render the text.
+  ;;; <var font-size> is the size of the font, in points.
+  ;;; <var font-color> is a 6 character RGB string specifying the color to draw
+  ;;; the text in.
+  ;;;
+  ;;; Returns the full path of the generated GIF image.
+  ;;;
+  <unset-var image-builder::errors>
+  <defvar halign right>
+  <defvar valign middle>
+  <defvar width 468>
+  <defvar height 60>
+  <defvar right-margin 4>
+  <defvar left-margin 4>
+  <defvar top-margin 4>
+  <defvar bottom-margin 4>
+  <defvar font-color 000000>
+  <set-var halign=<downcase <get-var halign>>>
+  <set-var valign=<downcase <get-var valign>>>
+  <subst-in-var font-size "[PpTt]" "">
+  ;;; <defvar font Utopia-BoldItalic>
+  ;;; Another good default looks like NetObjects Fusion Fonts.
+  <defvar font NimbusSansL-Regular>
+  <defvar font-size 48>
+  <subst-in-var font-color "[# \t\r\n]+" "">
+  <set-var font-color = <or <color::hex-value <get-var font-color>>
+			    <get-var font-color>>>
+  <if <not <match <get-var font-color> "^[0-9A-Fa-f]+$">>
+      <set-var font-color="000000">>
+
+  <set-var
+      red = <color::parse-hex-pair <substring <get-var font-color> 0 2>>
+    green = <color::parse-hex-pair <substring <get-var font-color> 2 4>>
+     blue = <color::parse-hex-pair <substring <get-var font-color> 4 6>>
+     tred=254 tgreen=254 tblue=254>
+
+    <when <get-var image-builder::use-alchemy>>
+      <if <get-var base-image>
+	  <set-var alchemy::extra-args = "-Zm2 -Za3">
+	<set-var red=255 green=255 blue=255 tred=0 tgreen=0 tblue=0
+	  alchemy::extra-code =
+	  "; recolor /tmp/foo.gif 000000:FEFEFE FFFFFF:<get-var font-color>">>
+    </when>
+
+  <subst-in-var text ")" "\\)" "\\(" "\\(">
+  <set-var postscript-input = /tmp/<make-identifier>.ps>
+  <when <get-var base-image>>
+    <defvar image-builder::giftopnm  <path::find-executable giftopnm>>
+    <defvar image-builder::pnmtops  <path::find-executable pnmtops>>
+    <if <and <not <get-var-once image-builder::giftopnm>>
+	     <not <get-var-once image-builder::giftopnm-error>>>
+	<concat
+	 <page-debug "Error: Required program `giftopnm' not found!">
+	 <set-var image-builder::giftopnm-error = true>>>
+    <if <and <not <get-var-once image-builder::pnmtops>>
+	     <not <get-var-once image-builder::pnmtops-error>>>
+	<concat
+	 <page-debug "Error: Required program `pnmtops' not found!">
+	 <set-var image-builder::pnmtops-error = true>>>
+    <set-var base-image-data[] =
+      <cgi-exec
+       <get-var-once image-builder::giftopnm> <get-var-once base-image>
+       "2>/dev/null" |
+       <get-var-once image-builder::pnmtops> -dpi 72 -noturn "2>/dev/null">>
+    <set-var limit=<array-size base-image-data>>
+    <when <gt limit 13>>
+      <set-var i=0>
+      <while <lt i 20 >>
+	<set-var base-image-data[i] =
+	  <subst-in-string <get-var-once base-image-data[i]> "^%.*$" ""
+			   ".*translate.*" "">>
+	<increment i>
+      </while>
+      <set-var i=<sub limit 2>>
+      <set-var base-image-data[i]="" base-image-data[<add i 1>] = "">
+    </when>
+    <if <lt limit 14> <unset-var base-image>>
+  </when>
+  <with-open-stream s <get-var-once postscript-input> mode=write-create>
+    <stream-put s "%!PS-Adobe-2.0 EPSF-2.0\n">
+    <stream-put
+     s <prog
+	 <if <get-var-once image-builder::wrap-words>
+	     <image-builder::ps-break-into-lines>>
+	 <if <get-var-once base-image>
+	     <get-var-once base-image-data[]>>
+	 gsave
+	 0 setlinewidth 0 0 0 setrgbcolor
+	 <if <not <get-var-once base-image>>
+	     <prog
+	       0 0 moveto
+	       0 <get-var-once height> lineto
+	       <get-var-once width> <get-var-once height> lineto
+	       <get-var-once width> 0 lineto
+	       0 0 lineto
+	       <get-var-once tred> 255 div
+	       <get-var-once tgreen> 255 div
+	       <get-var-once tblue> 255 div
+	       setrgbcolor fill>>
+	 <get-var-once red>   255 div
+	 <get-var-once green> 255 div
+	 <get-var-once blue>  255 div setrgbcolor
+	 /<get-var-once font> findfont <get-var-once font-size> scalefont
+	 /textfont exch def textfont setfont
+	 textfont /FontBBox get dup
+	 1 get /textdescent exch def 3 get /textascent exch def
+	 0 textdescent textfont /FontMatrix get dtransform
+	 neg /textdescent exch def pop
+	 0 textascent textfont /FontMatrix get dtransform
+	 /textascent exch def pop
+	 (<get-var-once text>) stringwidth /textwidthy exch def
+	 /textwidth exch def
+	 <var-case
+	   halign=right  <prog <sub width right-margin> textwidth sub>
+	   halign=center <prog <div width 2> textwidth 2 div sub>
+	   halign=middle <prog <div width 2> textwidth 2 div sub>
+	   halign=left   <get-var-once left-margin>
+	   default	 <if <number? <get-var halign>>
+			     <if <lt halign 0>
+				 <sub width right-margin halign>
+			       <get-var-once halign>>>>
+	 /textx exch def
+	 <var-case
+	   valign=top    <prog <get-var-once height> textascent sub>
+	   valign=middle <prog <get-var-once height> textascent sub
+			   textdescent sub 2 div textdescent add>
+	   valign=center <prog <get-var-once height> textascent sub
+			   textdescent sub 2 div textdescent add>
+	   valign=bottom <get-var-once bottom-margin>
+	   default	 <if <number? <get-var valign>>
+			     <if <lt valign 0>
+				 <sub height valign>
+			       <get-var-once valign>>>>
+	 /texty exch def
+	 textx texty moveto (<get-var-once text>) show
+	 grestore
+	 showpage>>
+  </with-open-stream>
+  <set-var the-image=/tmp/<make-identifier>.gif>
+  <if <get-var image-builder::use-alchemy>
+      <cgi-exec
+       alchemy <get-var-once postscript-input> -o
+       <get-var-once alchemy::extra-args>
+       -Q -Zd 72 72 -Zi <get-var-once width>p <get-var-once height>p
+       -g <get-var-once the-image> <get-var-once alchemy::extra-code>
+       errors=image-builder::errors output=output>
+    <cgi-exec gs -q -dNOPAUSE -r72 -g<get-var-once width>x<get-var-once height>
+	      "-sDEVICE=ppm" "-SOutputFile=-"
+	      -- <get-var-once postscript-input>
+	      | (ppmtogif "2>/dev/null ><get-var-once the-image>")>>
+  <if <not <get-var-once :debug-level>>
+      <cgi-exec rm -f <get-var-once postscript-input>>>
+  <get-var-once the-image>
+</defun>
+
+<set-var image-builder::FontNames[]=
+  <prog
+    AvantGarde-Book
+    AvantGarde-BookOblique
+    AvantGarde-Demi
+    AvantGarde-DemiOblique
+
+    Bookman-Light
+    Bookman-LightItalic
+    Bookman-Demi
+    Bookman-DemiItalic
+
+    Charter-Roman
+    Charter-Italic
+    Charter-Bold
+    Charter-BoldItalic
+
+    Courier
+    Courier-Italic
+    Courier-Bold
+    Courier-BoldItalic
+    Courier-Oblique
+    Courier-BoldOblique
+
+    Cyrillic
+    Cyrillic-Italic
+
+    Helvetica
+    Helvetica-Oblique
+    Helvetica-Bold
+    Helvetica-BoldOblique
+    Helvetica-Narrow
+    Helvetica-Narrow-Bold
+
+    Hershey-Gothic-English
+    Hershey-Gothic-English-Bold
+    Hershey-Gothic-English-Oblique
+    Hershey-Gothic-German
+    Hershey-Gothic-German-Bold
+    Hershey-Gothic-German-Oblique
+    Hershey-Gothic-Italian
+    Hershey-Gothic-Italian-Bold
+    Hershey-Gothic-Italian-Oblique
+    Hershey-Greek-Complex
+    Hershey-Greek-Simplex
+    Hershey-Plain
+    Hershey-Plain-Bold
+    Hershey-Plain-Oblique
+    Hershey-Plain-Simplex
+    Hershey-Plain-Simplex-Bold
+    Hershey-Plain-Simplex-Bold-Oblique
+    Hershey-Plain-Simplex-Oblique
+    Hershey-Plain-Triplex
+    Hershey-Plain-Triplex-Italic
+    Hershey-Plain-Triplex-Bold
+    Hershey-Plain-Triplex-Bold-Italic
+
+    Hershey-Script-Complex
+    Hershey-Script-Complex-Bold
+    Hershey-Script-Complex-Oblique
+    Hershey-Script-Simplex
+    Hershey-Script-Simplex-Bold
+    Hershey-Script-Simplex-Oblique
+    Hershey-Symbol
+
+    NewCenturySchlbk-Roman
+    NewCenturySchlbk-Italic
+    NewCenturySchlbk-Bold
+    NewCenturySchlbk-BoldItalic
+
+    NimbusSansL-Regular
+    NimbusRomanNo9L-Regular
+
+    Palatino-Roman
+    Palatino-Italic
+    Palatino-Bold
+    Palatino-BoldItalic
+
+    Symbol
+
+    Times-Roman
+    Times-Italic
+    Times-Bold
+    Times-BoldItalic
+
+    URWAntiquaT-RegularCondensed
+    URWGroteskT-Bold
+
+    Utopia-Regular
+    Utopia-Italic
+    Utopia-Bold
+    Utopia-BoldItalic
+
+    ZapfChancery
+    ZapfChancery-Oblique
+    ZapfChancery-Bold>>
+
+<set-var image-builder::alchemy-fonts[] =
+  <prog
+    AGaramond-Semibold
+    AvantGarde-Book
+    AvantGarde-BookOblique
+    AvantGarde-Demi
+    AvantGarde-DemiOblique
+    Bookman-Demi
+    Bookman-DemiItalic
+    Bookman-Light
+    Bookman-LightItalic
+    Bookwoman-DemiItalicSH
+    Bookwoman-DemiSH
+    Bookwoman-LightItalicSH
+    Bookwoman-LightSH
+    Courier
+    Courier-Bold
+    Courier-BoldOblique
+    Courier-BoldObliqueSH
+    Courier-BoldSH
+    Courier-Oblique
+    Courier-ObliqueSH
+    Courier-SH
+    Forefront-BookObliqueSH
+    Forefront-BookSH
+    Forefront-DemiObliqueSH
+    Forefront-DemiSH
+    Garamond
+    Heavenetica-BoldObliqueSH
+    Heavenetica-BoldSH
+    Heavenetica-NarrowBoldObliqueSH
+    Heavenetica-NarrowBoldSH
+    Heavenetica-NarrowObliqueSH
+    Heavenetica-NarrowSH
+    Heavenetica-ObliqueSH
+    HeaveneticaSH
+    Helvetica
+    Helvetica-Bold
+    Helvetica-BoldOblique
+    Helvetica-Narrow
+    Helvetica-Narrow-Bold
+    Helvetica-Narrow-BoldOblique
+    Helvetica-Narrow-Oblique
+    Helvetica-Oblique
+    LatinoPal-BoldItalicSH
+    LatinoPal-BoldSH
+    LatinoPal-ItalicSH
+    LatinoPal-RomanSH
+    NewCenturySchlbk-Bold
+    NewCenturySchlbk-BoldItalic
+    NewCenturySchlbk-Italic
+    NewCenturySchlbk-Roman
+    NewMilleniumSchlbk-BoldItalicSH
+    NewMilleniumSchlbk-BoldSH
+    NewMilleniumSchlbk-ItalicSH
+    NewMilleniumSchlbk-RomanSH
+    Officina
+    OfficinaSans-Bold
+    Palatino-Bold
+    Palatino-BoldItalic
+    Palatino-Italic
+    Palatino-Roman
+    Retro
+    Script
+    Script
+    ScriptMTBold
+    Symbol
+    SymbolSH
+    Temps-BoldItalicSH
+    Temps-BoldSH
+    Temps-ItalicSH
+    Temps-RomanSH
+    Times-Bold
+    Times-BoldItalic
+    Times-Italic
+    Times-Roman
+    Torino
+    Torino-Normal
+    WingedBatsSH
+    ZapfChancery-MediumItalic
+    ZapfDingbats
+    ZappedChancellor-MedItalicSH
+    r-MedItalicSH>>
+
+<defun image-builder::select-font varname>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Produce a <example code><select ...> ... </select></example> tag
+  ;;; displaying the fonts which are available on the current system.
+  ;;; The displayed fonts may be used to create text on top of
+  ;;; dynamically created banners, buttons, or tabs.
+  <if <get-var-once image-builder::use-alchemy>
+      <copy-var image-builder::alchemy-fonts fontnames>
+    <copy-var image-builder::FontNames fontnames>>
+  <set-var passed-name = <get-var-once varname>>
+  <parser::canonicalize-var varname>
+  <when <not <get-var-once <get-var-once varname>>>>
+    <set-var <get-var-once varname>=NimbusSansL-Regular>
+  </when>
+  <select name=<get-var-once passed-name>>
+    <foreach fontname fontnames>
+      <select-option ^<get-var-once varname> <get-var-once fontname>>
+      <concat "\n">
+    </foreach>
+  </select>
+</defun>
+
+<defun image-builder::select-from-choices varname choices[] default>
+  <set-var passed-name = <get-var varname>>
+  <parser::canonicalize-var varname default>
+  <when <not <get-var <get-var varname>>>>
+    <set-var <get-var varname>=<get-var default>>
+  </when>
+  <select name=<get-var passed-name>>
+    <set-var i=0>
+    <while <get-var choices[i]>>
+      <concat
+       "<option value=\"<get-var choices[i]>\""
+       <if <string-eq <get-var choices[i]>
+		      <get-var <get-var varname>>>
+	   " SELECTED">
+       ">"
+       <get-var choices[i]>
+       "\n		">
+      <increment i>
+    </while>
+  </select>
+</defun>
+
+<defun image-builder::select-halign varname>
+  <image-builder::select-from-choices
+   <get-var-once varname> "Left\nCenter\nRight" Right>
+</defun>
+
+<defun image-builder::select-valign varname>
+  <image-builder::select-from-choices
+   <get-var-once varname> "Top\nCenter\nBottom" Center>
+</defun>
+
+<defun image-builder::select-font-size varname>
+  <image-builder::select-from-choices
+   <get-var-once varname>
+   "8pt\n9pt\n10pt\n11pt\n12pt\n14pt\n16pt\n18pt\n20pt\n24pt\n28pt\n32pt
+    34pt\n36pt\n38pt\n40pt\n44pt\n48pt"
+   "24pt">
+</defun>
+
+<defun image-builder::select-font-color varname>
+  <set-var choices[]=<get-var-once color::color-names[]>>
+  <sort choices>
+  <image-builder::select-from-choices
+   <get-var-once varname>
+   <get-var-once choices[]>>
+</defun>
+
+<defun image-builder::select-base-image type varname &key js>
+  <defvar type banner>
+  <set-var passed-name = <get-var-once varname>>
+  <parser::canonicalize-var varname default>
+
+  <package-delete sbi-files>
+  <if <defined? site::web-image>
+      <set-var dir = <site::web-image>>
+    <if <defined? <site::system-prefix>>
+	<set-var dir = <site::system-prefix>>>>
+  <set-var dir = <concat <get-var-once dir>
+			 /images/base-images/<get-var-once type>s/>>
+
+  <directory-contents
+   <concat <get-var-once mhtml::include-prefix> <get-var-once dir>>
+   sbi-files matching="-<get-var-once type>\\.gif$">
+
+  <set-var varnames[]=<package-vars sbi-files>>
+  <sort varnames>
+  <select name=<get-var-once passed-name> <get-var-once js>>
+    <set-var i=0>
+    <while <get-var-once varnames[i]>>
+      <set-var
+	name=<alist-get-var <get-var-once varnames[i]> NAME>
+	path=<alist-get-var <get-var-once varnames[i]> FULL-NAME>>
+      <concat
+       "<option value=<get-var-once path>"
+       <if <string-eq <get-var-once path>
+		      <get-var-once <get-var-once varname>>>
+	   " SELECTED">
+       ">"
+       <capitalize <subst-in-string
+		    <get-var-once name>
+		    "_" " " "-<get-var-once type>.gif$" "">>
+       "\n		">
+      <increment i>
+    </while>
+  </select>
+</defun>
+
+<defun image-builder::select-banner varname>
+  <image-builder::select-base-image banner <get-var-once varname>>
+</defun>
+
+<defun image-builder::select-button varname>
+  <image-builder::select-base-image button <get-var-once varname>>
+</defun>
+
+<defun image-builder::select-tab varname &key js>
+  <image-builder::select-base-image tab <get-var-once varname>
+				    js=<get-var-once js>>
+</defun>
+
+<defun image-builder::graphically-select-base-image type varname>
+  <defvar type banner>
+  <set-var passed-name = <get-var-once varname>>
+  <parser::canonicalize-var varname default>
+
+  <package-delete sbi-files>
+  <directory-contents <concat <get-var-once mhtml::include-prefix>
+			      <site::system-prefix>
+			      /images/base-images/<get-var-once type>s/>
+		      sbi-files matching="-<get-var-once type>\\.gif$">
+  <set-var varnames[]=<package-vars sbi-files>>
+  <sort varnames>
+  <table>
+    <set-var i=0>
+    <while <get-var-once varnames[i]>>
+      <set-var path=<alist-get-var <get-var-once varnames[i]> FULL-NAME>>
+      <set-var name=<alist-get-var <get-var-once varnames[i]> NAME>>
+      <tr>
+	<td align=left>
+	  <input type=radio name="<get-var-once passed-name>"
+		 value="<get-var-once path>"
+		 <if <string-eq <get-var-once path>
+				<get-var-once <get-var varname>>>
+		     CHECKED>>
+	  <img src=<concat <site::system-prefix>/images/base-images/
+			   <get-var-once type>s/<get-var-once name>>>
+	</td>
+      </tr>
+      <concat "\n">
+      <increment i>
+    </while>
+  </table>
+</defun>
+
+<defun image-builder::graphically-select-banner varname>
+  <image-builder::graphically-select-base-image banner <get-var-once varname>>
+</defun>
+
+<defun image-builder::graphically-select-button varname>
+  <image-builder::graphically-select-base-image button <get-var-once varname>>
+</defun>
+
+<defun image-builder::graphically-select-tab varname>
+  <image-builder::graphically-select-base-image tab <get-var-once varname>>
+</defun>
+
+<defun image-builder::select-rotation varname>
+  <set-var passed-name = <get-var-once varname>>
+  <parser::canonicalize-var varname default>
+  <select name="<get-var passed-name>">
+    <concat "<option value=0 "
+	    <if <string-eq None <get-var-once <get-var-once varname>>>
+		" SELECTED">
+	    ">None\n	">
+    <concat "<option value=90 "
+	    <if <string-eq 90 <get-var-once <get-var-once varname>>>
+		" SELECTED">
+	    ">90 Degrees\n	">
+    <concat "<option value=180 "
+	    <if <string-eq 180 <get-var-once <get-var-once varname>>>
+		" SELECTED">
+	    ">180 Degrees\n	">
+    <concat "<option value=270 "
+	    <if <string-eq 270 <get-var-once <get-var-once varname>>>
+		" SELECTED">
+	    ">270 Degrees\n	">
+  </select>
+</defun>
+
+<defsubst image-builder::ps-break-into-lines>
+  /wordbreak () def
+  /BreakIntoLines
+  {/proc exch def
+   /linewidth exch def
+   /textstring exch def
+   /breakwidth wordbreak stringwidth pop def
+   /curwidth 0 def
+   /lastwordbreak 0 def
+   /startchar 0 def
+   /restoftext textstring def
+   { restoftext wordbreak search
+     {/nextword exch def pop
+      /wordwidth nextword stringwidth pop def
+      curwidth wordwidth add linewidth gt
+       { textstring startchar lastwordbreak startchar sub getinterval proc
+         /startchar lastwordbreak def
+	 /curwidth wordwidth breakwidth add def
+       }
+       {/curwidth curwidth wordwidth add breakwidth add def }
+       ifelse
+      /lastwordbreak lastwordbreak nextword length add 1 add def
+     }
+    { pop exit }
+   } loop
+  /lastchar textstring length def
+  textstring startchar lastchar startchar sub getinterval proc
+  } def
+</defsubst>

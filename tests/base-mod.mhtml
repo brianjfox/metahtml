@@ -1,0 +1,15 @@
+;;; base-mod.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sat Oct 26 21:24:38 1996.
+
+Result: 2: <mod 102 50>
+Result: 2: <mod 5 3>
+Result: -2: <mod -5 3>
+Result: -2: <mod -5 -3.0>
+Result: -2: <mod -5.0 3.000>
+Result: -1.9999: <mod -5 -3.0001>
+Result: -3: <mod -9.0003 3.0001>
+Result: -1.5: <mod -1.5 -3.0>
+Result: -0.75: <mod -0.75 3.5>
+Result: -2: <mod -5 -3.0>

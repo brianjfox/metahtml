@@ -1,0 +1,275 @@
+;;; basic-auth.mhtml: -*- Meta-HTML -*-  Handle basic authorization.
+;;; 
+;;;  Copyright (c) 1997, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jul  4 16:44:20 1997.
+;;;
+;;; Your server must pass the client's basic authorization string through,
+;;; at least for Meta-HTML pages.  This happens automatically with the
+;;; Meta-HTML server, is a simple hack for the Apache server, and is
+;;; automatically part of the code for the NSAPI module that is
+;;; delivered with Meta-HTML.
+;;;
+<defun basic-auth::authorization-database filename type>
+  ;;; DOC_SECTION (AUTHORIZATION-TAGS)
+  ;;; When passed FILENAME, sets the default authorization database
+  ;;; file to be that fully qualified pathname.  When passed an empty
+  ;;; FILENAME, returns the current pathname of the authorization
+  ;;; database.
+  ;;;
+  ;;; The default authorization database used is the standard Meta-HTML
+  ;;; PowerStrip database.  Note that authorizing based on this method
+  ;;; does not log the user into the PowerStrip system, it simply
+  ;;; authenticates them against that database.
+  ;;;
+  ;;; If <var type> is set to "Meta-HTML" (the default), then the
+  ;;; database is assumed to be a standard Meta-HTML/GDBM database,
+  ;;; with a key value of the username, and a field called PASSWORD.
+  ;;; The password field will be decoded as a unix based password.
+  ;;;
+  ;;; If <var type> is set to "Unix", then the authorization database
+  ;;; is treated as if it were a standard Unix password file (/etc/passwd).
+  ;;;
+  ;;; If <var type> is set to anything else, then it is assumed to be one
+  ;;; of the valid SQL database types for your Meta-HTML installation, and
+  ;;; <var filename> is treated as the <b>DSN</b> to use to talk to that
+  ;;; database.  The table which is searched is called <b>AUTH</b>, and it
+  ;;; must contain <b>username</b> and <b>password</b> fields.
+  <alist-set-var
+   result
+   orig-database = <get-var-once basic-auth::authorization-database>
+   orig-type = <get-var-once basic-auth::authorization-type>>
+  <when <get-var-once filename>>
+    <set-var basic-auth::authorization-database = <get-var-once filename>>
+    <defvar type <or <get-var-once orig-type> Unix>>
+    <set-var basic-auth::authorization-type =
+      <downcase <subst-in-string <get-var-once type> "[-_0-9 \t\r\n]+" "">>>
+  </when>
+  <get-var-once result>
+</defun>
+
+<defun basic-auth::get-auth-info>
+  ;;; DOC_SECTION (AUTHORIZATION-TAGS)
+  ;;; Retrieves the authorization info passed to the server from the browser.
+  ;;; Places the base 64 decoded username in <var basic-auth::username> and
+  ;;; the base 64 decoded password in <var basic-auth::password>.
+  ;;;
+  ;;; You probably don't want to use this function directly.  See
+  ;;; <funref AUTHORIZATION-TAGS basic-auth::require-authorization> instead.
+  <set-var x =
+    <or <get-var-once mhttpd-received-headers::mhtml-authorization>
+	<get-var-once mhttpd-received-headers::authorization>
+	<get-var-once env::http_authorization>>>
+  <set-var name-and-pass[] =
+    <subst-in-string
+     <base64decode <subst-in-string <get-var-once x>
+				    "Basic" ""
+				    "[ \t\r\n]+" "">>
+     ":" "\n">>
+  <set-var basic-auth::username=<get-var-once name-and-pass[0]>>
+  <set-var basic-auth::password=<get-var-once name-and-pass[1]>>
+</defun>
+
+<defun basic-auth::unix-authorize username password>
+  ;;; DOC_SECTION (AUTHORIZATION-TAGS)
+  ;;; Authorize <var username> and <var password> against the Unix style
+  ;;; password file in <var basic-auth::authorization-database> (usually,
+  ;;; /etc/passwd).
+  ;;;
+  ;;; Returns "true" if the authentication succeeds, otherwise the empty
+  ;;; string.
+  <package-delete auth-info>
+  <with-open-stream s <get-var-once basic-auth::authorization-database>>
+    <stream-get-contents s passwords>
+  </with-open-stream>
+  <coerce-var passwords type=array>
+  <foreach line passwords>
+    <unset-var info>
+    <set-var info=<subst-in-string <get-var-once line> ":" "\n">>
+    <coerce-var info type=array>
+    <when <string-eq <get-var-once username> <get-var-once info[0]>>>
+      <set-var pass = <unix::crypt <get-var-once password>
+				   <substring <get-var-once info[1]> 0 2>>>
+      <set-var result = <string-eq <get-var-once pass> <get-var-once info[1]>>>
+      <if <get-var-once result>
+	  <set-var
+	    auth-info::password = <get-var-once password>
+	    auth-info::username = <get-var-once username>>>
+      <break>
+    </when>
+  </foreach>
+  <get-var-once result>
+</defun>
+
+<defun basic-auth::sql-authorize username password>
+  ;;; DOC_SECTION (AUTHORIZATION-TAGS)
+  ;;; Authorize <var username> and <var password> against the SQL style
+  ;;; database whose DSN is in <var basic-auth::authorization-database>.
+  ;;;
+  ;;; The database must contain a table called <code>AUTH</code>, and that
+  ;;; table must have fields of <code>username</code>, and
+  ;;; <code>password</code>.
+  ;;;
+  ;;; The <code>password</code> field should be stored already encrypted,
+  ;;; using standard Unix-style encyption.
+  ;;;
+  ;;; Returns "true" if the authentication succeeds, otherwise the empty
+  ;;; string.
+  <set-var orig-type = <sql::get-database-type>>
+  <sql::set-database-type <get-var-once basic-auth::authorization-type>>
+  <package-delete auth-info>
+  <when <defined? sql::with-open-database>>
+    <sql::with-open-database
+     db DSN=<get-var-once basic-auth::authorization-database>>
+      <set-var loaded? =
+	<sql::database-load-record db <get-var-once username> package=auth-info
+				   keyname=username table=AUTH>>
+    </sql::with-open-database>
+    <when <get-var-once loaded?>>
+      <set-var pass =
+	<unix::crypt <get-var-once password>
+		     <substring <get-var-once auth-info::password> 0 2>>>
+      <set-var result = <string-eq <get-var-once pass> <get-var-once info[1]>>>
+    </when>
+  </when>
+  <if <get-var-once orig-type>
+      <sql::set-database-type <get-var-once orig-type>>>
+  <get-var-once result>
+</defun>
+
+<defun basic-auth::gdbm-authorize username password>
+  ;;; DOC_SECTION (AUTHORIZATION-TAGS)
+  ;;; Authorize <var username> and <var password> against the GDBM style
+  ;;; database specified in <var basic-auth::authorization-database>.
+  ;;;
+  ;;; The database must contain fields of <code>username</code>, and
+  ;;; <code>password</code>.  The password field should be encrypted
+  ;;; in the fashion normal for that system (i.e., unix::crypt).
+  ;;;
+  ;;; Returns "true" if the authentication succeeds, otherwise the empty
+  ;;; string.
+  <package-delete auth-info>
+  <with-open-database db <basic-auth::authorization-database> mode=read>
+    <set-var loaded? = <database-load-record db <get-var-once username>
+			 package=auth-info>>
+  </with-open-database>
+
+  <when <get-var-once loaded?>>
+    <set-var pass = <unix::crypt <get-var-once password>
+				 <substring <get-var-once auth-info::password>
+					    0 2>>>
+    <set-var result = <string-eq <get-var-once pass> <get-var-once info[1]>>>
+  </when>
+  <get-var-once result>
+</defun>
+
+<defun basic-auth::require-authorization for-realm bad-login-page>
+  ;;; DOC_SECTION (AUTHORIZATION-TAGS)
+  ;;; Force the connecting browser to be authenticated against the local
+  ;;; authentication database or display a popup window asking the user
+  ;;; for a username and password.
+  ;;;
+  ;;; <var for-realm> is a string to print at the top of the popup.
+  ;;;
+  ;;; <var  bad-login-page> is the name of a page to redirect to when
+  ;;; authorization has completely failed.
+  ;;;
+  ;;; The entire authorization step is bypassed if the variable
+  ;;; <b><code>basic-auth::skip-auth</code></b> is set to a non-empty value.
+  ;;;
+  ;;; Please read the description of <funref authorization-tags
+  ;;; basic-auth::authorization-database> for more details.
+  <when <not <get-var-once basic-auth::skip-auth>>>
+    <basic-auth::get-auth-info>
+    <when <get-var-once basic-auth::username>>
+      ;;;
+      ;;; Look up name and pass in a database.
+      <set-var
+	type = <get-var-once basic-auth::authorization-type>
+	user = <get-var-once basic-auth::username>
+	pass = <get-var-once basic-auth::password>
+	authorized? =
+	<var-case
+	  type=metahtml	<basic-auth::gdbm-authorize <get-var-once user>
+						    <get-var-once pass>>
+	  type=gdbm	<basic-auth::gdbm-authorize <get-var-once user>
+						    <get-var-once pass>>
+	  type=unix	<basic-auth::unix-authorize <get-var-once user>
+						    <get-var-once pass>>
+	  default	<basic-auth::sql-authorize <get-var-once user>
+						   <get-var-once pass>>>>
+    </when>
+    <when <or <not <get-var-once authorized?>>
+	      <get-session-var auth::force-login>>>
+      ;;; Default value for FOR-REALM is "This Site Area"
+      <defvar for-realm "This Site Area">
+      <defvar bad-login-page <get-var-once mhtml::relative-prefix>/bad-login>
+      <set-var basic-auth::skip-auth = true>
+      <set-var content = <include <get-var-once bad-login-page>>>
+      <coerce-var content type=binary>
+      <session-destroy-package auth>
+      <basic-auth::force-login-popup <get-var-once for-realm> content>
+    </when>
+  </when>
+</defun>
+
+<defun basic-auth::force-login-popup realm page-var>
+  ;;; DOC_SECTION (AUTHORIZATION-TAGS)
+  ;;; Force the appearance of a popup dialog on the user's screen which asks
+  ;;; for a username and password.
+  ;;;
+  ;;; <var realm> is a string which is displayed at the top of the popup
+  ;;; dialog -- it is the variable text in "Enter username for <var realm>".
+  ;;;
+  ;;; <var page-var> is the name of a binary variable which contains the
+  ;;; contents of the page to display in case the user clicks the "Cancel"
+  ;;; button in the dialog box.
+  <parser::canonicalize-var page-var>
+  <copy-var <get-var-once page-var> body>
+  <array-append <concat
+		 <get-var-once mhttpd::protocol>/
+		 <get-var-once mhttpd::protocol-version>
+		 " 401 UNAUTHORIZED"> contents>
+  <array-append "Mime-Version: 1.0" contents>
+  <array-append "Content-type: text/html" contents>
+  <array-append "Content-length: 0" contents>
+  <when <not <get-var-once default::sid>>>
+    <set-var anonymous=anonymous>
+    <create-session-anonymous allow-multiple>
+    <set-session-timeout 200>
+    <set-session-var client=<get-var-once env::remote_host>>
+    <set-session-var user-agent=<get-var-once env::http_user_agent>>
+    <set-var session::new-arrival=true>
+  </when>
+  <if <get-var-once session::new-arrival>
+      <array-append <concat
+		     "Set-Cookie: SID=<get-var-once default::sid>; "
+		     "path=/; expires="
+		     <date gmt=true
+			   <add <time>
+				<mul 10 *date*::seconds-per-year>>>>
+		    contents>>
+  <array-append
+   <concat "WWW-authenticate: basic realm=\"<get-var-once realm>\"">
+   contents>
+  <array-append "" contents>
+  <coerce-var contents type=binary>
+  <binary-concat contents body>
+  <replace-page contents=contents>
+</defun>
+
+<defun basic-auth::powerstrip-login>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  <when <not <get-session-var site::user-id>>>
+    <with basic-auth::authorization-database=<site::user-db> metahtml>
+      <basic-auth::require-authorization PowerStrip /access-denied.mhtml>
+    </with>
+    <when <get-var-once basic-auth::authorized>>
+      <set-session-var
+	site::user-id=<get-var-once auth-info::user-id>
+	site::user-real-name=<get-var-once auth-info::user-real-name>
+	site::user-station=<get-var-once env::remote_host>
+	site::user-acl=<get-var-once auth-info::acl>
+	site::e-mail=<get-var-once auth-info::e-mail>>
+    </when>
+  </when>
+</defun>

@@ -1,0 +1,236 @@
+# This Makefile.in for libutils combines the utilities here into one library.
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+#
+# You should have received a copy of the UAI Free Software License
+# along with this program; if you have not, you may obtain one by
+# writing to:
+#
+# Universal Access Inc.
+# 129 El Paseo Court
+# Santa Barbara, CA
+# 93101
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+LIBREGEX = @LIBREGEX@
+LIBMALLOC = @LIBMALLOC@
+REGEX_H	 = @REGEX_H@
+REGEX_IN = @REGEX_IN@
+LIBCOMPAT = @LIBCOMPAT@
+COMPAT_H  = @COMPAT_H@
+INSTALL = @INSTALL@
+OS_NAME = @OS_NAME@
+OS_LIBS = @OS_LIBS@
+PLATFORM= @PLATFORM@
+EXE	= @EXE@
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+
+bindir	= $(exec_prefix)/bin
+libdir	= $(exec_prefix)/lib
+incdir	= $(prefix)/include
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+MKDIR	= mkdir
+TAR	= tar
+
+VERSION = 1.0
+DISTNAME = libutils-$(VERSION)
+
+RXDIR = rx-1.5
+
+CC = gcc
+# PROFILE_FLAGS = -pg
+DEBUG_FLAGS    = -g $(PROFILE_FLAGS)
+OPTIMIZE_FLAGS = -O69
+LDFLAGS = $(PROFILE_FLAGS)
+WARNING_FLAGS  = -Wall -Wstrict-prototypes
+OPTIONAL_CFLAGS = $(REGEX_IN)
+# OPTIONAL_ASSIGN =  REGEXLIB=$(REGEXLIB) COMPATLIB=$(COMPATLIB)
+REQUIRED_ASSIGN = RM='$(RM)' RANLIB='$(RANLIB)' AR='$(AR)'
+CFLAGS = $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(WARNING_FLAGS)
+PASSED_CFLAGS = CC='$(CC)' LDFLAGS='$(LDFLAGS)' CFLAGS='$(CFLAGS) -I.. -I../.. $(OPTIONAL_CFLAGS)' DEFS='$(DEFS)' EXE='$(EXE)'
+SUBMAKE_FLAGS = $(PASSED_CFLAGS) $(OPTIONAL_ASSIGN) $(REQUIRED_ASSIGN)
+
+TARGET_LIB = libutils.a
+
+TARGET_ARCS = bprintf/libbprintf.a wisper/libwisper.a $(LIBCOMPAT) \
+	      $(LIBREGEX) xmalloc/libxmalloc.a $(LIBMALLOC) tcp/libtcp.a 
+
+TARGET_HDR = utils.h
+TARGET_HDR_DEPS = xmalloc/xmalloc.h $(COMPAT_H) $(REGEX_H) bprintf/bprintf.h \
+		  wisper/wisp.h tcp/tcp.h
+
+DIRECTORIES = bprintf wisper compat xmalloc malloc tcp
+
+all: $(TARGET_LIB) $(TARGET_HDR)
+
+$(TARGET_HDR): $(TARGET_HDR_DEPS)
+	$(RM) $@
+	echo "/* utils.h: All utility library include files. */" >$@
+	echo "" >>$@
+	echo "#include <stdarg.h>" >>$@
+	cat $(TARGET_HDR_DEPS) >>$@
+
+$(TARGET_LIB): $(TARGET_ARCS)
+	-$(RM) -rf temp
+	$(MKDIR) temp
+	cp $(TARGET_ARCS) temp
+	(cd temp; \
+	   for file in *.a; do $(AR) x $$file; done; \
+	   $(AR) cq $@ *.o; \
+	   $(RANLIB) $@)
+	mv temp/$@ .
+	$(RM) -rf temp
+
+bprintf/libbprintf.a: xmalloc/libxmalloc.a $(LIBCOMPAT)
+reader/libreader.a: xmalloc/libxmalloc.a $(LIBCOMPAT)
+wisper/libwisper.a: xmalloc/libxmalloc.a $(LIBCOMPAT)
+
+regex/libregex.a: $(RXDIR)/rx/librx.a #new-regex
+	-mkdir regex #new-regex
+	$(CP) $(RXDIR)/rx/librx.a regex/libregex.a #new-regex
+	$(CP) $(RXDIR)/rx/inst-rxposix.h regex/regex.h #new-regex
+
+#gnu-regex regex/libregex.a: FORCE
+#gnu-regex 	(cd regex; $(MAKE))
+
+#spencer-regex regex/libregex.a: FORCE
+#spencer-regex 	(cd regex; $(MAKE) $(SUBMAKE_FLAGS))
+
+$(RXDIR)/Makefile: $(RXDIR)/Makefile.in
+	(cd $(RXDIR); ./configure)
+
+$(RXDIR)/rx/librx.a: $(RXDIR)/Makefile
+	(cd $(RXDIR); $(MAKE))
+
+compat/libcompat.a: FORCE
+	(cd compat; $(MAKE) $(SUBMAKE_FLAGS))
+
+xmalloc/libxmalloc.a: FORCE
+	(cd xmalloc; $(MAKE) $(SUBMAKE_FLAGS))
+
+wisper/libwisper.a: FORCE
+	(cd wisper; $(MAKE) $(SUBMAKE_FLAGS))
+
+reader/libreader.a: FORCE
+	(cd reader; $(MAKE) $(SUBMAKE_FLAGS))
+
+bprintf/libbprintf.a: FORCE
+	(cd bprintf; $(MAKE) $(SUBMAKE_FLAGS))
+
+malloc/libmalloc.a: FORCE
+	(cd malloc; $(MAKE) $(SUBMAKE_FLAGS))
+
+rmalloc/librmalloc.a: FORCE
+	(cd rmalloc; $(MAKE) $(SUBMAKE_FLAGS))
+
+tcp/libtcp.a: FORCE
+	(cd tcp; $(MAKE) $(SUBMAKE_FLAGS))
+
+install:
+	@echo "To install the libmhtml library, type \"make install-libs\"."
+
+install-libs: libutils.a
+	$(INSTALL) libutils.a $(libdir)/libutils.a
+	$(INSTALL) utils.h $(incdir)/utils.h
+
+clean: FORCE
+	$(RM) *.a *.o $(TARGET_HDR)
+	for dir in `echo *`; do \
+	  if [ $$dir != "." -a -d $$dir ]; then \
+	    if [ -f $$dir/Makefile ]; then \
+	      (cd $$dir; $(MAKE) $(SUBMAKE_FLAGS) $@); \
+            fi; \
+	  fi; \
+	done
+
+distclean realclean: clean
+	for dir in `echo *`; do \
+	  if [ $$dir != "." -a -d $$dir ]; then \
+	    if [ -f $$dir/Makefile ]; then \
+	      (cd $$dir; $(MAKE) $(SUBMAKE_FLAGS) $@); \
+            fi; \
+	  fi; \
+	done
+	-if [ "$(RXDIR)" ]; then $(RM) -rf regex; fi
+	$(RM) Makefile Makefile.in
+
+Makefile: Makefile.in-SHIPPED
+	(cd ..; ./config.status)
+
+dist: DISTFILES
+	$(RM) -rf $(DISTNAME)
+	$(MKDIR) $(DISTNAME)
+	for d in `find . -type d -print`; do \
+	  if [ "$$d" != "./$(DISTNAME)" -a "$$d" != "." ]; then \
+	    echo "Making directory $(DISTNAME)/$$d"; \
+	    $(MKDIR) $(DISTNAME)/$$d; \
+	  fi; \
+	done
+	for f in `cat DISTFILES`; do \
+	   $(LN) $(srcdir)/$$f $(DISTNAME)/$$f || \
+		{ echo copying $$f; cp -rp $(srcdir)/$$f $(DISTNAME)/$$f ; } \
+	done
+	-(cd $(DISTNAME); make distclean)
+	$(TAR) chvf - $(DISTNAME) | gzip >$(DISTNAME).tar.gz
+	$(RM) -rf $(DISTNAME)
+
+# Gets rid of most of the unwanted files.  Verify manually (if necessary)
+# that this produces a list of all the files desired in the distribution. 
+DISTFILES: FORCE
+	$(RM) -rf $(DISTNAME)
+	(cd $(srcdir); find . ! -type d -print) \
+	| sed  '/\/RCS\//d; \
+	       /\/EMACS-BACKUPS\//d; \
+	       /\.tar.*/d; \
+	       /~$$/d; /\.o$$/d; /\/.*\.a$$/d; \
+	       /\/.*\.BAK$$/d; \
+	       /\/TAGS$$/d; \
+	       /\/core$$/d; \
+	       /\/[a-z]*\.core$$/d; \
+	       /\/core\.[a-z]*$$/d; \
+	       /\/a.out$$/d; \
+	       /\/=/d; \
+	       /\/conftest\.c$$/d; \
+	       /\/DISTFILES$$/d; \
+	       /\.toc$$/d; \
+	       /\.aux$$/d; /\.log$$/d; \
+	       /\.cps$$/d; /\.cp$$/d; \
+	       /\.fns$$/d; /\.fn$$/d; \
+	       /\.tps$$/d; /\.tp$$/d; \
+	       /\.vrs$$/d; /\.vr$$/d; \
+	       /\.pgs$$/d; /\.pg$$/d; \
+	       /\.kys$$/d; /\.ky$$/d; \
+	       s/^.\///; /^\.$$/d;' \
+	| sort | uniq > DISTFILES
+
+tags TAGS: FORCE
+	etags `find . -name '*.[ch]' -print`
+
+FORCE:

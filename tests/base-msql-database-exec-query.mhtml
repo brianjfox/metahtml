@@ -1,0 +1,7 @@
+;;; base-msql-database-exec-query.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 22:57:24 1996.
+
+Result: "true Jarlath (805) 7307775": <set-var findname="Jarlath"><set-var query="select name,phone from test where name='<get-var findname>'"><msql::with-open-database db database=test host=localhost><msql::database-exec-query db <get-var query> cursor=dbcursor><msql::database-next-record dbcursor> <get-var name> <get-var phone></msql::with-open-database>
+Result: : <set-var findname="Jarl"><set-var query="select name,phone from test where name='<get-var findname>'"><msql::with-open-database db database=test host=localhost><msql::database-exec-query db <get-var query> cursor-dbcursor><msql::database-next-record dbcursor><get-var name phone></msql::with-open-database>

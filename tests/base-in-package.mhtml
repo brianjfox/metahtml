@@ -1,0 +1,7 @@
+;;; base-in-package.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 01:04:21 1996.
+
+Result:  "Test inside: value1 Test outside with package name: value1": <in-package tmp><set-var var1=value1> Test inside: <get-var var1></in-package> Test outside with package name: <get-var tmp::var1>
+Result: "<tmp::test-subst>": <in-package tmp><defsubst test-subst>package macro definition</defsubst></in-package><tmp::test-subst>

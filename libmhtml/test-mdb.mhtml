@@ -1,0 +1,389 @@
+;;; mdb.mhtml: -*- Meta-HTML -*-  Tags which aid Mdb in the display of docs.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jun 10 11:25:11 1998.
+
+<defun mdb::find-callers forfun>
+  ;;; Return an array of the functions which call <var forfun>.
+  <set-var allfuns[]=<package-vars *user-functions* strip=true>>
+  <foreach fun allfuns>
+    <set-var funtext=<function-def <get-var-once fun>>>
+    <if <match <get-var-once funtext> "<\\<get-var-once forfun>[ \t\n>]"
+	       caseless=true>
+	<array-append <get-var-once fun> callers>>
+  </foreach>
+  <get-var-once callers[]>
+</defun>
+
+<defun mdb::find-documentation-db &optional db-name>
+  <set-var dirs[]=<get-var-once mhtml::module-directories[]>>
+  <array-append /www/src/metahtml/doc/manual dirs>
+  <array-append /www/lib dirs>
+  <array-append /www/bin dirs>
+  <array-append /www/modules dirs>
+  <array-append /www/metahtml/lib dirs>
+  <array-append /www/metahtml/bin dirs>
+  <array-append /www/metahtml/src dirs>
+  <array-append /www/mhtml/lib dirs>
+  <array-append /www/mhtml/bin dirs>
+  <array-append /www/mhtml/etc dirs>
+  <array-append /opt/metahtml/lib dirs>
+  <array-append /opt/metahtml/bin dirs>
+  <array-append /opt/metahtml/etc dirs>
+  <array-append /opt/mhtml/lib dirs>
+  <array-append /opt/mhtml/bin dirs>
+  <array-append /opt/mhtml/etc dirs>
+  <array-append /main/mhtml/lib dirs>
+  <array-append /main/mhtml/bin dirs>
+  <array-append /main/mhtml/etc dirs>
+  <array-append /usr/lib/metahtml dirs>
+  <defvar db-name functions.db>
+  <foreach dir dirs>
+    <if <file-exists <get-var-once dir>/<get-var-once db-name>>
+	<concat
+	 <set-var result = <get-var-once dir>/<get-var-once db-name>>
+	 <break>>>
+  </foreach>
+  <get-var-once result>
+</defun>
+
+<defun mdb::find-function-db>
+  <mdb::find-documentation-db functions.db>
+</defun>
+
+<defun mdb::find-section-db>
+  <mdb::find-documentation-db sections.db>
+</defun>
+
+<defun mdb::function-db>
+  <or <get-var-once mdb::function-db>
+      <concat
+       <set-var mdb::function-db = <mdb::find-function-db>>
+       <get-var-once mdb::function-db>>
+      /www/lib/functions.db>
+</defun>
+
+<defun mdb::section-db>
+  <or <get-var-once mdb::section-db>
+      <concat
+       <set-var mdb::section-db = <mdb::find-section-db>>
+       <get-var-once mdb::section-db>>
+      /www/lib/sections.db>
+</defun>
+
+<defun mdb::var &body body>
+  <upcase <get-var-once body>>
+</defun>
+
+<defun mdb::tripsemi>
+  <set-var semi=";">
+  <get-var-once semi semi semi>
+</defun>
+
+<defun mdb::tag &rest args>
+  <concat
+   <b>
+   "<"
+   <get-var-once args>
+   ">"
+   </b>>
+</defun>
+
+<defmacro mdb::pre &body &unevalled -body whitespace=delete>
+  <%%eval <get-var-once -body>>
+</defmacro>
+
+<defmacro mdb::ol &body &unevalled -body whitespace=delete>
+  <with mdb-doc-env=ordered-list ol-index=1>
+    <%%eval <get-var-once -body>>
+  </with>
+</defmacro>
+
+<defmacro mdb::ul &body &unevalled -body whitespace=delete>
+  <with mdb-doc-env=unordered-list>
+    <%%eval <get-var-once -body>>
+  </with>
+</defmacro>
+
+<defsubst mdb::li whitespace=delete>
+  <if <string-eq <get-var-once mdb-doc-env> "ordered-list">
+      <concat <pad <get-var-once ol-index> 4 align=right> ": "
+	      <increment ol-index>>
+    <concat "    * ">>
+</defsubst>
+
+<defun mdb::br></defun>
+<defmacro mdb::html-complete-example &body &unevalled body>
+Calling Example:
+<get-var-once body>
+</defmacro>
+
+<defmacro mdb::example &optional code &unevalled &body body whitespace=delete>
+  <get-var-once body>
+</defmacro>
+
+<defmacro mdb::complete-example &body &unevalled body whitespace=delete>
+  <concat "The Code:\n\n"
+	  <get-var-once body>
+	  "\n\nProduces:\n\n"
+	  <%%eval <get-var-once body>>>
+</defmacro>
+
+<defun mdb::funref section function>
+  <concat <upcase <get-var-once function>>
+	  " (from <get-var-once section>) ">
+</defun>
+
+<defmacro mdb::sup &body &unevalled -body whitespace=delete></defmacro>
+
+<defun mdb::varref variable>
+  <upcase <get-var-once variable>>
+</defun>
+
+<defmacro mdb::i &body body>
+  `<upcase <get-var-once body>>'
+</defmacro>
+
+<defmacro mdb::b &body body whitespace=delete>
+  `<upcase <get-var-once body>>'
+</defmacro>
+
+<defmacro mdb::code &body body whitespace=delete>
+  `<get-var-once body>'
+</defmacro>
+
+<defmacro mdb::font &body body whitespace=delete>
+  <get-var-once body>
+</defmacro>
+
+<defmacro mdb::a &body body whitespace=delete>
+  <get-var-once body>
+</defmacro>
+
+<set-var *mdb*::doc-functions[] =
+  <prog
+    example
+    html-complete-example
+    complete-example
+    tripsemi
+    funref
+    varref
+    font
+    code
+    var
+    sup
+    pre
+    tag
+    ul
+    ol
+    li
+    br
+    i
+    b>>
+
+<defmacro mdb::with-doc-functions &body &unevalled body whitespace=delete>
+  <unset-var mdb::saved-doc-funs>
+  <foreach fun *mdb*::doc-functions>
+    <when <user-function? <get-var-once fun>>>
+      <array-append <get-var-once fun> mdb::saved-doc-funs>
+      <copy-var *user-functions*::<get-var-once fun>
+		mdb-saved-fun::<get-var-once fun>>
+    </when>
+    <copy-var *user-functions*::mdb::<get-var-once fun>
+	      *user-functions*::<get-var-once fun>>
+  </foreach>
+  <%%eval <get-var-once body>>
+  <foreach fun *mdb*::doc-functions>
+    <undef <get-var-once fun>>
+    <if <array-member <get-var-once fun> mdb::saved-doc-funs>
+	<copy-var mdb-saved-fun::<get-var-once fun>
+		  *user-functions*::<get-var-once fun>>>
+  </foreach>
+</defmacro>
+
+<defun mdb::fundoc-from-db fun &optional database pack>
+  <defvar database <mdb::function-db>>
+  <with-open-database db <get-var-once database> mode=read>
+    <set-var loaded? =
+      <database-load-record db <upcase <get-var-once fun>>
+	package=<get-var-once pack>>>
+  </with-open-database>
+
+  <when <get-var-once loaded?>>
+    <mdb::with-doc-functions>
+      <if <not <get-var-once pack>>
+	  <%%eval <get-var-once short-desc>>
+	<%%eval <get-var-once <get-var-once pack>::short-desc>>>
+    </mdb::with-doc-functions>
+  </when>
+</defun>
+
+<defun mdb::secdoc-from-db section database &optional pack>
+  <with-open-database db <get-var-once database> mode=read>
+    <set-var loaded? =
+      <database-load-record db <upcase <get-var-once section>>
+	package=<get-var-once pack>>>
+  </with-open-database>
+
+  <when <get-var-once loaded?>>
+    <mdb::with-doc-functions>
+      <if <not <get-var-once pack>>
+	  <prog
+	    <%%eval <get-var-once short-desc>>
+	    <%%eval <get-var-once long-desc>>>
+	<prog
+	  <%%eval <get-var-once <get-var-once pack>::short-desc>>
+	  <%%eval <get-var-once <get-var-once pack>::long-desc>>>>
+    </mdb::with-doc-functions>
+  </when>
+</defun>
+
+<defun mdb::function-documentation function>
+  <package-delete *mdb-doc*>
+  <set-var doc=<or <%%function-documentation <get-var-once function>>
+		   <mdb::fundoc-from-db <get-var-once function>
+					<mdb::function-db>
+					*mdb-doc*>>>
+  <when <get-var-once doc>>
+    <if <get-var-once *mdb-doc*::source-file>
+	<set-var extra-info =
+	  <concat
+	   "  [ "
+	   <if <string-eq <get-var-once *mdb-doc*::funtype> "variable">
+	       "Variable defined at ">
+	   "line <get-var-once *mdb-doc*::line-number> of "
+	   "<get-var-once *mdb-doc*::source-file> ]\n">>>
+
+    <get-var-once extra-info>
+    <subst-in-var doc "\\.blank" "">
+    <get-var-once doc>
+  </when>
+</defun>
+
+<defun mdb::function-args-from-db fun database &optional pack>
+  <with-open-database db <get-var-once database> mode=read>
+    <set-var loaded? =
+      <database-load-record db <upcase <get-var-once fun>>
+	package=<get-var-once pack>>>
+  </with-open-database>
+
+  <if <get-var-once loaded?>
+    <mdb::function-arg-string <package-to-alist <get-var-once pack>>>>
+</defun>
+
+<defun mdb::section-info-from-db section database &optional pack>
+  <with-open-database db <get-var-once database> mode=read>
+    <set-var loaded? =
+      <database-load-record db <upcase <get-var-once section>>
+	package=<get-var-once pack>>>
+  </with-open-database>
+  <when <get-var-once loaded?>>
+    <if <get-var-once pack> true <package-to-alist>>
+  </when>
+</defun>
+
+<defun mdb::function-arg-string alist>
+  <alist-to-package <get-var-once alist strip=true>>
+  ;;; Clean up the required args.  They may contain new style "&foo" args.
+  <copy-var req-args required>
+  <unset-var req-args>
+  <set-var gather = req-args>
+
+  <foreach arg required>
+    <if <string-eq <downcase <get-var-once arg>> "&rest">
+	<set-var gather = rest-args>
+      <if <string-eq <downcase <get-var-once arg>> "&body">
+	  <set-var gather = body-args>
+	<if <string-eq <downcase <get-var-once arg>> "&key">
+	    <set-var gather = key-args>
+	  <if <string-eq <downcase <get-var-once arg>> "&optional">
+	      <set-var gather = opt-args>
+	    <array-append <get-var-once arg> <get-var-once gather>>>>>>
+  </foreach>
+
+  <when <get-var-once req-args>>
+    <foreach arg req-args>
+      <concat " " <get-var-once arg>>
+    </foreach>
+  </when>
+
+  <when <get-var-once opt-args>>
+    <concat " &optional">
+    <foreach arg opt-args>
+      <concat " " <get-var-once arg>>
+    </foreach>
+  </when>
+
+  <when <get-var-once key-args>>
+    <concat " &key">
+    <foreach arg key-args>
+      <concat " " <get-var-once arg>>
+    </foreach>
+  </when>
+
+  <when <get-var-once body-args>>
+    <concat " &body">
+    <foreach arg body-args>
+      <concat " " <get-var-once arg>>
+    </foreach>
+  </when>
+
+  <when <get-var-once rest-args>>
+    <concat " &rest">
+    <foreach arg rest-args>
+      <concat " " <get-var-once arg>>
+    </foreach>
+  </when>
+</defun>
+
+<defun mdb::usage-string function>
+  <set-var falist = <%%function-alist <get-var-once function>>>
+  <when <user-function? <get-var-once function>>>
+    <set-var req-args = <%%function-arguments <get-var-once function>>>
+    <subst-in-var req-args "\n+" " ">
+    <set-var arg-string = <mdb::function-arg-string <package-to-alist>>>
+  </when>
+  <when <not <get-var-once arg-string>>>
+    <package-delete *mdb-doc*>
+    <set-var arg-string =
+      <mdb::function-args-from-db <get-var-once function>
+				  <mdb::function-db>
+				  *mdb-doc*>>
+  </when>
+
+  <if <match <alist-get-var falist type> MACRO>
+      <set-var extra-info =
+	<concat "  " "%" "body" "  "
+		"</<downcase <alist-get-var falist name>>>">>>
+  <concat "<"
+	  <downcase <alist-get-var falist name>>
+	  <get-var-once arg-string>
+	  ">"
+	  <get-var-once extra-info>>
+</defun>
+
+<defun mdb::describe-function function>
+  <when <defined? <get-var-once function>>>
+    <concat
+     <mdb::usage-string <get-var-once function>>
+     "\n"
+     <mdb::function-documentation <get-var-once function>>>
+    </when>
+  <when <not <defined? <get-var-once function>>>>
+    <set-var result = <mdb::function-documentation <get-var-once function>>>
+    <when <not <get-var-once result>>>
+      <set-var result[]=<mdb::secdoc-from-db <get-var-once function>
+					     <mdb::section-db>>>
+      <when <not <get-var-once result>>>
+	<set-var result[]=<apropos <get-var-once function>>>
+	<when <eq 1 <array-size result>>>
+	  <set-var result=
+	    <mdb::describe-function
+	     <subst-in-string <get-var-once result> "^[^:]+::" "">>>
+	</when>
+      </when>
+    </when>
+    <get-var-once result[]>
+  </when>
+</defun>
+

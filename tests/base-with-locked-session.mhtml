@@ -1,0 +1,6 @@
+;;; base-with-locked-session.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 16:04:39 1996.
+
+Result: "Locked Session Test Worked": <set-var mhttpd::session-database-file="/tmp/test-sessions.db"><set-var anonymous=anonymous><create-session anonymous allow-multiple><with-locked-session><set-session-var tmp="Locked Session Test Worked"><get-session-var tmp></with-locked-session><delete-session <get-var SID>><unset-var SID>

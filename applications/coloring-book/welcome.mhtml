@@ -1,0 +1,54 @@
+;;; welcome.mhtml: -*- Meta-HTML -*-  Choose a picture to color.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jan 31 10:43:01 1997.
+<set-var title="Coloring book example">
+<include header.mhtml>
+<unset-var mhtml::cacheable>
+<require coloring-book>
+<cbook::initialize>
+
+<package-delete images>
+<directory-contents <get-var cbook::bookfile-image-directory> images
+		    matching=".*\\.[Gg][Ii][Ff]$">
+<layout::page>
+  <center>
+    <plain-text>
+      <h3>What picture do you want to color?</h3>
+
+      <set-var cols=3 i=0 vars[]=<package-vars images>>
+      <sort vars>
+      <table width=100%>
+	<while <get-var vars[i]>>
+	  <set-var col=0>
+	  <tr valign=bottom>
+	    <while <and <get-var vars[i]> <lt col cols>>>
+	      <package-delete temp>
+	      <alist-to-package <get-var <get-var vars[i]>> temp>
+	      <set-var name =
+		<match <get-var temp::name> "[^/]+[a-zA-Z]+\\.[Gg][Ii][Ff]$"
+		       action=extract>
+		name=<subst-in-string <get-var name> "\\.[Gg][Ii][Ff]$" "">
+		dname=<subst-in-string <get-var name> "[-_.]" " ">>
+	      <td align=center width=<div 100 cols>%>
+		<concat
+		 <a href="color.mhtml?action=set-pict&pict=<get-var name>">
+		 <img src="<cbook::colored-image <get-var-once name>>"
+		      border=0 height=125>
+		 </a>>
+		<br>
+		<a href="color.mhtml?action=set-pict&pict=<get-var-once name>">
+		  <b><capitalize <get-var-once dname>></b>
+		</a>
+	      </td>
+	      <increment i>
+	      <increment col>
+	    </while>
+	  </tr>
+	</while>
+      </table>
+    </plain-text>
+  </center>
+</layout::page>
+
+<include footer.mhtml>

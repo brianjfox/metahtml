@@ -1,0 +1,75 @@
+;;; cart-display.mhtml: -*- Meta-HTML -*-
+;;; <include> this to display the contents of the shopping cart, for
+;;; browsers which do not support HTML Tables.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox, Jarlath O' Carroll
+;;; Authors: Brian J. Fox (bfox@ua.com) Sat Oct 21 14:07:12 1995.
+;;;          Jarlath O' Carroll (jarlath@ua.com) Sat Oct 21
+;;;
+;;; You must have already included substs and cart-substs,
+;;; and read the contents of the cart into the contents array.
+
+<set-var output[]="" output-index=0>
+<defsubst add-to-output>
+  <set-var output[output-index]="%body">
+  <increment output-index>
+</defsubst>
+
+<when <get-var contents[0]>>
+  <set-var i=0 total=0 num-items=0 names[]=<package-vars cart>>
+  <set-var line =
+    <b><concat <pad "X" 2 align=right>
+	    <pad Quantity 12 align=middle>
+	    <pad "Item Name" 15 align=middle>
+	    <pad Price 9 align=middle>
+	    <pad Total 9 align=middle>
+	    <pad Remarks 25 align=left>
+	    </b><hr>>>
+  <add-to-output <get-var line>>
+  <while <get-var contents[i]>>
+    <breakout-contents contents[i]>
+    <load-item>
+
+    ;;; Okay.  CLASS, KEY, QUANTITY, and INFO have been set
+    ;;; up, and the info about this item has been loaded.  Display
+    ;;; a row if this item has a quantity greater than 0.
+    <set-var mhtml::decimal-places=2>
+    <set-var real-price=<mul quantity unit-price>>
+
+    <set-var line=
+      <concat <pad <tab> 5 align=left>
+       <pad <input type=checkbox name="DELETE::<get-var i>"> align=middle>
+       <pad <tab> 8 align=left>
+       <pad <input name="QUANTITY::<get-var i>" value="<get-var quantity>" size=3> align=left>
+       <pad <tab> 7 align=left>
+       <pad <get-var product-name> 17 align=left truncate>
+       <pad <get-var unit-price> 7 align=right>
+       <pad <get-var real-price> 9 align=right>
+       <pad <get-var info> 30 align=middle>>>
+
+    <add-to-output <get-var line>>
+
+    <set-var total=<add total real-price>>
+    <unset-var mhtml::decimal-places>
+    <set-var num-items=<add num-items quantity>>
+
+    <increment i>
+  </while>
+
+  <set-var output[<sub output-index 1>] =
+    "<get-var output[<sub output-index 1>]><br>">
+
+  <set-var line=
+    <concat <b><pad <b>Total</b> 13 align=left>
+	    <pad <get-var num-items> align=left></b>
+	    <pad - 16 align=middle>
+	    <b><pad "$<get-var total>" 9 align=right></b>
+	    <hr>>>
+
+  <add-to-output <get-var line>>
+</when>
+
+<pre>
+<get-var output[]>
+</pre>
+

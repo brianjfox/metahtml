@@ -1,0 +1,22 @@
+;;; call411.mhtml: -*- Meta-HTML -*- 
+;;; Use www.Four11.com to get detailed listings
+;;;
+;;; Copyright (c) 1998 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Thu Aug 13 10:46:44 1998.
+
+<set-var 
+  411::FirstName	= Brian
+  411::LastName		= Fox
+  411::City		= "Santa Barbara"
+  411::State		= CA
+  411::Search		= Search
+  411::HasSmartName	= yes
+  411::SmartName	= yes>
+
+<set-var page =
+  <http::post http://www.four11.com/cgi-bin/Four11Main?PhoneResults 411>>
+
+<get-var-once page>
+
+
+

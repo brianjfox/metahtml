@@ -1,0 +1,91 @@
+;;; toc-frame.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul  3 13:09:34 1996.
+
+<when <get-var search-string>>
+  <set-var title="Results of Keyword Search">
+  <set-var hacking-frames=true>
+  <include header.mhtml>
+
+  <unset-var links>
+  <with-open-database db <metahtml::function-db> mode=read>
+    <database-query db <match <get-var key keywords>
+			      <get-var default::search-string> caseless=true>
+      sort=key keys=keys>
+  </with-open-database>
+
+  <with-open-database db <metahtml::section-db> mode=read>
+    <database-query db <match <get-var key keywords>
+			      <get-var default::search-string> caseless=true>
+      sort=key keys=secs>
+  </with-open-database>
+
+  <center>
+    <set-var count=0>
+    <while <get-var keys[count]>>
+      <set-var keys[count] = <downcase <get-var keys[count]>>>
+      <increment count>
+    </while>
+
+    <sort secs>
+    <set-var i=0>
+    <while <get-var secs[i]>>
+      <set-var secs[i] =
+	<capitalize <subst-in-string <get-var secs[i]> "-" " ">>>
+      <increment i>
+    </while>
+
+    <set-var found = <add count i>>
+
+    <b>
+    <if <eq found 0>
+	No
+      <get-var found>>
+    match<if <not <eq found 1>> es> found for `<get-var search-string>'.
+    </b>
+    <p>
+
+    <vertical-table default::keys 3
+		    <get-var mhtml::url-to-dir>/man-page-frame.mhtml>
+
+    <vertical-table default::secs 3
+		    <get-var mhtml::url-to-dir>/view-section-frame.mhtml>
+  </center>
+  <include footer.mhtml>
+</when>
+
+<when <not <get-var search-string>>>
+  <set-var title="Table Of Contents">
+  <set-var hacking-frames=true>
+  <include header.mhtml>
+
+  <with-open-database db <metahtml::section-db> mode=read>
+    <database-query db true keys=keys>
+  </with-open-database>
+
+  <sort keys>
+  <set-var i=0>
+  <while <get-var keys[i]>>
+    <set-var keys[i]=<capitalize <subst-in-string <get-var keys[i]> "-" " ">>>
+    <increment i>
+  </while>
+  <center>
+    <h2>Section Index</h2>
+    <p>
+    <form method=post action="<thisdoc>" target="manpage-frame">
+      <b>Keyword Search:</b> <input type=text size=20 name=search-string>
+    </form>
+    <p>
+    <vertical-table default::keys 3
+		    <get-var mhtml::url-to-dir>/view-section-frame.mhtml
+		    target=manpage-frame>
+    <p>
+    <a href="<get-var mhtml::url-to-dir>/function-index-frame.mhtml">
+    Function Index</a>
+    <br>
+    <a href="<get-var mhtml::url-to-dir>/variable-index-frame.mhtml">
+    Variable Index</a>
+  </center>
+  <include footer.mhtml>
+</when>

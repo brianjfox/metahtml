@@ -1,0 +1,7 @@
+;;; base-get-file-properties-test.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 18:19:28 1996.
+
+;;; Just used to test get-file-properties in conjunction with
+;;; base-get-file-properties.mhtml

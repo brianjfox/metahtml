@@ -1,0 +1,13 @@
+;;; footer.mhtml: -*- Meta-HTML -*-
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Tue Sep 12 16:23:07 1995.
+<p>
+<font size=+2>B</font>ack to
+<a href="<get-var mhtml::http-prefix shopping::dir>/">
+  <small-caps><b>OnLine Shopping</b></small-caps>
+</a>
+.
+<p>
+<font size=-1><i>You <if <not <get-var db-changeable>> " <b>do not</b>">
+ <b>have</b> access to change databases.</font>
+<include ../footer.mhtml>

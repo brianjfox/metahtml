@@ -1,0 +1,867 @@
+<set-var title="Regex - Common Operators">
+<include header.mhtml>
+<layout::page>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_2.mhtml">previous</A>, <A HREF="regex_4.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC7" HREF="welcome.mhtml#TOC7">Common Operators</A></H1>
+
+<P>
+You compose regular expressions from operators.  In the following
+sections, we describe the regular expression operators specified by
+POSIX; GNU also uses these.  Most operators have more than one
+representation as characters.  See section <A HREF="regex_2.mhtml#SEC2">Regular Expression Syntax</A>, for
+what characters represent what operators under what circumstances.
+
+</P>
+<P>
+For most operators that can be represented in two ways, one
+representation is a single character and the other is that character
+preceded by <SAMP>`\'</SAMP>.  For example, either <SAMP>`('</SAMP> or <SAMP>`\('</SAMP>
+represents the open-group operator.  Which one does depends on the
+setting of a syntax bit, in this case <CODE>RE_NO_BK_PARENS</CODE>.  Why is
+this so?  Historical reasons dictate some of the varying
+representations, while POSIX dictates others.  
+
+</P>
+<P>
+Finally, almost all characters lose any special meaning inside a list
+(see section <A HREF="regex_3.mhtml#SEC17">List Operators (<CODE>[</CODE> ... <CODE>]</CODE> and <CODE>[^</CODE> ... <CODE>]</CODE>)</A>).
+
+</P>
+
+
+
+<H2><A NAME="SEC8" HREF="welcome.mhtml#TOC8">The Match-self Operator (<VAR>ordinary character</VAR>)</A></H2>
+
+<P>
+This operator matches the character itself.  All ordinary characters
+(see section <A HREF="regex_2.mhtml#SEC2">Regular Expression Syntax</A>) represent this operator.  For
+example, <SAMP>`f'</SAMP> is always an ordinary character, so the regular
+expression <SAMP>`f'</SAMP> matches only the string <SAMP>`f'</SAMP>.  In
+particular, it does <EM>not</EM> match the string <SAMP>`ff'</SAMP>.
+
+</P>
+
+
+<H2><A NAME="SEC9" HREF="welcome.mhtml#TOC9">The Match-any-character Operator (<CODE>.</CODE>)</A></H2>
+
+<P>
+<A NAME="IDX29"></A>
+
+</P>
+<P>
+This operator matches any single printing or nonprinting character
+except it won't match a:
+
+</P>
+<DL COMPACT>
+
+<DT>newline
+<DD>
+if the syntax bit <CODE>RE_DOT_NEWLINE</CODE> isn't set.
+
+<DT>null
+<DD>
+if the syntax bit <CODE>RE_DOT_NOT_NULL</CODE> is set.
+
+</DL>
+
+<P>
+The <SAMP>`.'</SAMP> (period) character represents this operator.  For example,
+<SAMP>`a.b'</SAMP> matches any three-character string beginning with <SAMP>`a'</SAMP>
+and ending with <SAMP>`b'</SAMP>.
+
+</P>
+
+
+<H2><A NAME="SEC10" HREF="welcome.mhtml#TOC10">The Concatenation Operator</A></H2>
+
+<P>
+This operator concatenates two regular expressions <VAR>a</VAR> and <VAR>b</VAR>.
+No character represents this operator; you simply put <VAR>b</VAR> after
+<VAR>a</VAR>.  The result is a regular expression that will match a string if
+<VAR>a</VAR> matches its first part and <VAR>b</VAR> matches the rest.  For
+example, <SAMP>`xy'</SAMP> (two match-self operators) matches <SAMP>`xy'</SAMP>.
+
+</P>
+
+
+<H2><A NAME="SEC11" HREF="welcome.mhtml#TOC11">Repetition Operators</A></H2>
+
+<P>
+Repetition operators repeat the preceding regular expression a specified
+number of times.
+
+</P>
+
+
+
+<H3><A NAME="SEC12" HREF="welcome.mhtml#TOC12">The Match-zero-or-more Operator (<CODE>*</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX30"></A>
+
+</P>
+<P>
+This operator repeats the smallest possible preceding regular expression
+as many times as necessary (including zero) to match the pattern.
+<SAMP>`*'</SAMP> represents this operator.  For example, <SAMP>`o*'</SAMP>
+matches any string made up of zero or more <SAMP>`o'</SAMP>s.  Since this
+operator operates on the smallest preceding regular expression,
+<SAMP>`fo*'</SAMP> has a repeating <SAMP>`o'</SAMP>, not a repeating <SAMP>`fo'</SAMP>.  So,
+<SAMP>`fo*'</SAMP> matches <SAMP>`f'</SAMP>, <SAMP>`fo'</SAMP>, <SAMP>`foo'</SAMP>, and so on.
+
+</P>
+<P>
+Since the match-zero-or-more operator is a suffix operator, it may be
+useless as such when no regular expression precedes it.  This is the
+case when it:
+
+</P>
+
+<UL>
+<LI>
+
+is first in a regular expression, or
+
+<LI>
+
+follows a match-beginning-of-line, open-group, or alternation
+operator.
+
+</UL>
+
+<P>
+Three different things can happen in these cases:
+
+</P>
+
+<OL>
+<LI>
+
+If the syntax bit <CODE>RE_CONTEXT_INVALID_OPS</CODE> is set, then the
+regular expression is invalid.
+
+<LI>
+
+If <CODE>RE_CONTEXT_INVALID_OPS</CODE> isn't set, but
+<CODE>RE_CONTEXT_INDEP_OPS</CODE> is, then <SAMP>`*'</SAMP> represents the
+match-zero-or-more operator (which then operates on the empty string).
+
+<LI>
+
+Otherwise, <SAMP>`*'</SAMP> is ordinary.
+
+</OL>
+
+<P>
+<A NAME="IDX31"></A>
+The matcher processes a match-zero-or-more operator by first matching as
+many repetitions of the smallest preceding regular expression as it can.
+Then it continues to match the rest of the pattern.  
+
+</P>
+<P>
+If it can't match the rest of the pattern, it backtracks (as many times
+as necessary), each time discarding one of the matches until it can
+either match the entire pattern or be certain that it cannot get a
+match.  For example, when matching <SAMP>`ca*ar'</SAMP> against <SAMP>`caaar'</SAMP>,
+the matcher first matches all three <SAMP>`a'</SAMP>s of the string with the
+<SAMP>`a*'</SAMP> of the regular expression.  However, it cannot then match the
+final <SAMP>`ar'</SAMP> of the regular expression against the final <SAMP>`r'</SAMP> of
+the string.  So it backtracks, discarding the match of the last <SAMP>`a'</SAMP>
+in the string.  It can then match the remaining <SAMP>`ar'</SAMP>.
+
+</P>
+
+
+
+<H3><A NAME="SEC13" HREF="welcome.mhtml#TOC13">The Match-one-or-more Operator (<CODE>+</CODE> or <CODE>\+</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX32"></A>
+
+</P>
+<P>
+If the syntax bit <CODE>RE_LIMITED_OPS</CODE> is set, then Regex doesn't recognize
+this operator.  Otherwise, if the syntax bit <CODE>RE_BK_PLUS_QM</CODE> isn't
+set, then <SAMP>`+'</SAMP> represents this operator; if it is, then <SAMP>`\+'</SAMP>
+does.
+
+</P>
+<P>
+This operator is similar to the match-zero-or-more operator except that
+it repeats the preceding regular expression at least once;
+see section <A HREF="regex_3.mhtml#SEC12">The Match-zero-or-more Operator (<CODE>*</CODE>)</A>, for what it operates on, how some
+syntax bits affect it, and how Regex backtracks to match it.
+
+</P>
+<P>
+For example, supposing that <SAMP>`+'</SAMP> represents the match-one-or-more
+operator; then <SAMP>`ca+r'</SAMP> matches, e.g., <SAMP>`car'</SAMP> and
+<SAMP>`caaaar'</SAMP>, but not <SAMP>`cr'</SAMP>.
+
+</P>
+
+
+<H3><A NAME="SEC14" HREF="welcome.mhtml#TOC14">The Match-zero-or-one Operator (<CODE>?</CODE> or <CODE>\?</CODE>)</A></H3>
+<P>
+<A NAME="IDX33"></A>
+
+</P>
+<P>
+If the syntax bit <CODE>RE_LIMITED_OPS</CODE> is set, then Regex doesn't
+recognize this operator.  Otherwise, if the syntax bit
+<CODE>RE_BK_PLUS_QM</CODE> isn't set, then <SAMP>`?'</SAMP> represents this operator;
+if it is, then <SAMP>`\?'</SAMP> does.
+
+</P>
+<P>
+This operator is similar to the match-zero-or-more operator except that
+it repeats the preceding regular expression once or not at all;
+see section <A HREF="regex_3.mhtml#SEC12">The Match-zero-or-more Operator (<CODE>*</CODE>)</A>, to see what it operates on, how
+some syntax bits affect it, and how Regex backtracks to match it.
+
+</P>
+<P>
+For example, supposing that <SAMP>`?'</SAMP> represents the match-zero-or-one
+operator; then <SAMP>`ca?r'</SAMP> matches both <SAMP>`car'</SAMP> and <SAMP>`cr'</SAMP>, but
+nothing else.
+
+</P>
+
+
+<H3><A NAME="SEC15" HREF="welcome.mhtml#TOC15">Interval Operators (<CODE>{</CODE> ... <CODE>}</CODE> or <CODE>\{</CODE> ... <CODE>\}</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX34"></A>
+<A NAME="IDX35"></A>
+<A NAME="IDX36"></A>
+<A NAME="IDX37"></A>
+<A NAME="IDX38"></A>
+
+</P>
+<P>
+If the syntax bit <CODE>RE_INTERVALS</CODE> is set, then Regex recognizes
+<STRONG>interval expressions</STRONG>.  They repeat the smallest possible preceding
+regular expression a specified number of times.
+
+</P>
+<P>
+If the syntax bit <CODE>RE_NO_BK_BRACES</CODE> is set, <SAMP>`{'</SAMP> represents
+the <STRONG>open-interval operator</STRONG> and <SAMP>`}'</SAMP> represents the
+<STRONG>close-interval operator</STRONG> ; otherwise, <SAMP>`\{'</SAMP> and <SAMP>`\}'</SAMP> do.
+
+</P>
+<P>
+Specifically, supposing that <SAMP>`{'</SAMP> and <SAMP>`}'</SAMP> represent the
+open-interval and close-interval operators; then:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>{<VAR>count</VAR>}</CODE>
+<DD>
+matches exactly <VAR>count</VAR> occurrences of the preceding regular
+expression.
+
+<DT><CODE>{<VAR>min,</VAR>}</CODE>
+<DD>
+matches <VAR>min</VAR> or more occurrences of the preceding regular
+expression.
+
+<DT><CODE>{<VAR>min, max</VAR>}</CODE>
+<DD>
+matches at least <VAR>min</VAR> but no more than <VAR>max</VAR> occurrences of
+the preceding regular expression.
+
+</DL>
+
+<P>
+The interval expression (but not necessarily the regular expression that
+contains it) is invalid if:
+
+</P>
+
+<UL>
+<LI>
+
+<VAR>min</VAR> is greater than <VAR>max</VAR>, or 
+
+<LI>
+
+any of <VAR>count</VAR>, <VAR>min</VAR>, or <VAR>max</VAR> are outside the range
+zero to <CODE>RE_DUP_MAX</CODE> (which symbol <TT>`regex.h'</TT>
+defines).
+
+</UL>
+
+<P>
+If the interval expression is invalid and the syntax bit
+<CODE>RE_NO_BK_BRACES</CODE> is set, then Regex considers all the
+characters in the would-be interval to be ordinary.  If that bit
+isn't set, then the regular expression is invalid.
+
+</P>
+<P>
+If the interval expression is valid but there is no preceding regular
+expression on which to operate, then if the syntax bit
+<CODE>RE_CONTEXT_INVALID_OPS</CODE> is set, the regular expression is invalid.
+If that bit isn't set, then Regex considers all the characters--other
+than backslashes, which it ignores--in the would-be interval to be
+ordinary.
+
+</P>
+
+
+
+<H2><A NAME="SEC16" HREF="welcome.mhtml#TOC16">The Alternation Operator (<CODE>|</CODE> or <CODE>\|</CODE>)</A></H2>
+
+<P>
+<A NAME="IDX39"></A>
+<A NAME="IDX40"></A>
+<A NAME="IDX41"></A>
+<A NAME="IDX42"></A>
+
+</P>
+<P>
+If the syntax bit <CODE>RE_LIMITED_OPS</CODE> is set, then Regex doesn't
+recognize this operator.  Otherwise, if the syntax bit
+<CODE>RE_NO_BK_VBAR</CODE> is set, then <SAMP>`|'</SAMP> represents this operator;
+otherwise, <SAMP>`\|'</SAMP> does.
+
+</P>
+<P>
+Alternatives match one of a choice of regular expressions:
+if you put the character(s) representing the alternation operator between
+any two regular expressions <VAR>a</VAR> and <VAR>b</VAR>, the result matches
+the union of the strings that <VAR>a</VAR> and <VAR>b</VAR> match.  For
+example, supposing that <SAMP>`|'</SAMP> is the alternation operator, then
+<SAMP>`foo|bar|quux'</SAMP> would match any of <SAMP>`foo'</SAMP>, <SAMP>`bar'</SAMP> or
+<SAMP>`quux'</SAMP>.
+
+</P>
+
+<P>
+The alternation operator operates on the <EM>largest</EM> possible
+surrounding regular expressions.  (Put another way, it has the lowest
+precedence of any regular expression operator.)
+Thus, the only way you can
+delimit its arguments is to use grouping.  For example, if <SAMP>`('</SAMP> and
+<SAMP>`)'</SAMP> are the open and close-group operators, then <SAMP>`fo(o|b)ar'</SAMP>
+would match either <SAMP>`fooar'</SAMP> or <SAMP>`fobar'</SAMP>.  (<SAMP>`foo|bar'</SAMP> would
+match <SAMP>`foo'</SAMP> or <SAMP>`bar'</SAMP>.)
+
+</P>
+<P>
+<A NAME="IDX43"></A>
+The matcher usually tries all combinations of alternatives so as to 
+match the longest possible string.  For example, when matching
+<SAMP>`(fooq|foo)*(qbarquux|bar)'</SAMP> against <SAMP>`fooqbarquux'</SAMP>, it cannot
+take, say, the first ("depth-first") combination it could match, since
+then it would be content to match just <SAMP>`fooqbar'</SAMP>.  
+
+</P>
+
+
+
+<H2><A NAME="SEC17" HREF="welcome.mhtml#TOC17">List Operators (<CODE>[</CODE> ... <CODE>]</CODE> and <CODE>[^</CODE> ... <CODE>]</CODE>)</A></H2>
+
+<P>
+<A NAME="IDX44"></A>
+<A NAME="IDX45"></A>
+<A NAME="IDX46"></A>
+<A NAME="IDX47"></A>
+<A NAME="IDX48"></A>
+<A NAME="IDX49"></A>
+<A NAME="IDX50"></A>
+<A NAME="IDX51"></A>
+<A NAME="IDX52"></A>
+<A NAME="IDX53"></A>
+
+</P>
+<P>
+<STRONG>Lists</STRONG>, also called <STRONG>bracket expressions</STRONG>, are a set of one or
+more items.  An <STRONG>item</STRONG> is a character,
+a character class expression, or a range expression.  The syntax bits
+affect which kinds of items you can put in a list.  We explain the last
+two items in subsections below.  Empty lists are invalid.
+
+</P>
+<P>
+A <STRONG>matching list</STRONG> matches a single character represented by one of
+the list items.  You form a matching list by enclosing one or more items
+within an <STRONG>open-matching-list operator</STRONG> (represented by <SAMP>`['</SAMP>)
+and a <STRONG>close-list operator</STRONG> (represented by <SAMP>`]'</SAMP>).  
+
+</P>
+<P>
+For example, <SAMP>`[ab]'</SAMP> matches either <SAMP>`a'</SAMP> or <SAMP>`b'</SAMP>.
+<SAMP>`[ad]*'</SAMP> matches the empty string and any string composed of just
+<SAMP>`a'</SAMP>s and <SAMP>`d'</SAMP>s in any order.  Regex considers invalid a regular
+expression with a <SAMP>`['</SAMP> but no matching
+<SAMP>`]'</SAMP>.
+
+</P>
+<P>
+<STRONG>Nonmatching lists</STRONG> are similar to matching lists except that they
+match a single character <EM>not</EM> represented by one of the list
+items.  You use an <STRONG>open-nonmatching-list operator</STRONG> (represented by
+<SAMP>`[^'</SAMP><A NAME="DOCF2" HREF="regex_foot.mhtml#FOOT2">(2)</A>) instead of an open-matching-list operator to start a
+nonmatching list.  
+
+</P>
+<P>
+For example, <SAMP>`[^ab]'</SAMP> matches any character except <SAMP>`a'</SAMP> or
+<SAMP>`b'</SAMP>.  
+
+</P>
+<P>
+If the <CODE>posix_newline</CODE> field in the pattern buffer (see section <A HREF="regex_7.mhtml#SEC45">GNU Pattern Buffers</A> is set, then nonmatching lists do not match a newline.
+
+</P>
+<P>
+Most characters lose any special meaning inside a list.  The special
+characters inside a list follow.
+
+</P>
+<DL COMPACT>
+
+<DT><SAMP>`]'</SAMP>
+<DD>
+ends the list if it's not the first list item.  So, if you want to make
+the <SAMP>`]'</SAMP> character a list item, you must put it first.
+
+<DT><SAMP>`\'</SAMP>
+<DD>
+quotes the next character if the syntax bit <CODE>RE_BACKSLASH_ESCAPE_IN_LISTS</CODE> is
+set.
+
+<DT><SAMP>`[:'</SAMP>
+<DD>
+represents the open-character-class operator (see section <A HREF="regex_3.mhtml#SEC18">Character Class Operators (<CODE>[:</CODE> ... <CODE>:]</CODE>)</A>) if the syntax bit <CODE>RE_CHAR_CLASSES</CODE> is set and what
+follows is a valid character class expression.
+
+<DT><SAMP>`:]'</SAMP>
+<DD>
+represents the close-character-class operator if the syntax bit
+<CODE>RE_CHAR_CLASSES</CODE> is set and what precedes it is an
+open-character-class operator followed by a valid character class name.
+
+<DT><SAMP>`-'</SAMP>
+<DD>
+represents the range operator (see section <A HREF="regex_3.mhtml#SEC19">The Range Operator (<CODE>-</CODE>)</A>) if it's
+not first or last in a list or the ending point of a range.
+
+</DL>
+
+<P>
+All other characters are ordinary.  For example, <SAMP>`[.*]'</SAMP> matches 
+<SAMP>`.'</SAMP> and <SAMP>`*'</SAMP>.  
+
+</P>
+
+
+
+<H3><A NAME="SEC18" HREF="welcome.mhtml#TOC18">Character Class Operators (<CODE>[:</CODE> ... <CODE>:]</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX54"></A>
+<A NAME="IDX55"></A>
+<A NAME="IDX56"></A>
+
+</P>
+<P>
+If the syntax bit <CODE>RE_CHARACTER_CLASSES</CODE> is set, then Regex
+recognizes character class expressions inside lists.  A <STRONG>character
+class expression</STRONG> matches one character from a given class.  You form a
+character class expression by putting a character class name between an
+<STRONG>open-character-class operator</STRONG> (represented by <SAMP>`[:'</SAMP>) and a
+<STRONG>close-character-class operator</STRONG> (represented by <SAMP>`:]'</SAMP>).  The
+character class names and their meanings are:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>alnum</CODE>
+<DD>
+letters and digits
+
+<DT><CODE>alpha</CODE>
+<DD>
+letters
+
+<DT><CODE>blank</CODE>
+<DD>
+system-dependent; for GNU, a space or tab
+
+<DT><CODE>cntrl</CODE>
+<DD>
+control characters (in the ASCII encoding, code 0177 and codes
+less than 040)
+
+<DT><CODE>digit</CODE>
+<DD>
+digits
+
+<DT><CODE>graph</CODE>
+<DD>
+same as <CODE>print</CODE> except omits space
+
+<DT><CODE>lower</CODE>
+<DD>
+lowercase letters
+
+<DT><CODE>print</CODE>
+<DD>
+printable characters (in the ASCII encoding, space 
+tilde--codes 040 through 0176)
+
+<DT><CODE>punct</CODE>
+<DD>
+neither control nor alphanumeric characters
+
+<DT><CODE>space</CODE>
+<DD>
+space, carriage return, newline, vertical tab, and form feed
+
+<DT><CODE>upper</CODE>
+<DD>
+uppercase letters
+
+<DT><CODE>xdigit</CODE>
+<DD>
+hexadecimal digits: <CODE>0</CODE>--<CODE>9</CODE>, <CODE>a</CODE>--<CODE>f</CODE>, <CODE>A</CODE>--<CODE>F</CODE>
+
+</DL>
+
+<P>
+These correspond to the definitions in the C library's <TT>`&#60;ctype.h&#62;'</TT>
+facility.  For example, <SAMP>`[:alpha:]'</SAMP> corresponds to the standard
+facility <CODE>isalpha</CODE>.  Regex recognizes character class expressions
+only inside of lists; so <SAMP>`[[:alpha:]]'</SAMP> matches any letter, but
+<SAMP>`[:alpha:]'</SAMP> outside of a bracket expression and not followed by a
+repetition operator matches just itself.
+
+</P>
+
+
+<H3><A NAME="SEC19" HREF="welcome.mhtml#TOC19">The Range Operator (<CODE>-</CODE>)</A></H3>
+
+<P>
+Regex recognizes <STRONG>range expressions</STRONG> inside a list. They represent
+those characters
+that fall between two elements in the current collating sequence.  You
+form a range expression by putting a <STRONG>range operator</STRONG> between two 
+characters.<A NAME="DOCF3" HREF="regex_foot.mhtml#FOOT3">(3)</A> <SAMP>`-'</SAMP> represents the range operator.  For example,
+<SAMP>`a-f'</SAMP> within a list represents all the characters from <SAMP>`a'</SAMP>
+through <SAMP>`f'</SAMP>
+inclusively.
+
+</P>
+<P>
+If the syntax bit <CODE>RE_NO_EMPTY_RANGES</CODE> is set, then if the range's
+ending point collates less than its starting point, the range (and the
+regular expression containing it) is invalid.  For example, the regular
+expression <SAMP>`[z-a]'</SAMP> would be invalid.  If this bit isn't set, then
+Regex considers such a range to be empty.
+
+</P>
+<P>
+Since <SAMP>`-'</SAMP> represents the range operator, if you want to make a
+<SAMP>`-'</SAMP> character itself
+a list item, you must do one of the following:
+
+</P>
+
+<UL>
+<LI>
+
+Put the <SAMP>`-'</SAMP> either first or last in the list.
+
+<LI>
+
+Include a range whose starting point collates strictly lower than
+<SAMP>`-'</SAMP> and whose ending point collates equal or higher.  Unless a
+range is the first item in a list, a <SAMP>`-'</SAMP> can't be its starting
+point, but <EM>can</EM> be its ending point.  That is because Regex
+considers <SAMP>`-'</SAMP> to be the range operator unless it is preceded by
+another <SAMP>`-'</SAMP>.  For example, in the ASCII encoding, <SAMP>`)'</SAMP>,
+<SAMP>`*'</SAMP>, <SAMP>`+'</SAMP>, <SAMP>`,'</SAMP>, <SAMP>`-'</SAMP>, <SAMP>`.'</SAMP>, and <SAMP>`/'</SAMP> are
+contiguous characters in the collating sequence.  You might think that
+<SAMP>`[)-+--/]'</SAMP> has two ranges: <SAMP>`)-+'</SAMP> and <SAMP>`--/'</SAMP>.  Rather, it
+has the ranges <SAMP>`)-+'</SAMP> and <SAMP>`+--'</SAMP>, plus the character <SAMP>`/'</SAMP>, so
+it matches, e.g., <SAMP>`,'</SAMP>, not <SAMP>`.'</SAMP>.
+
+<LI>
+
+Put a range whose starting point is <SAMP>`-'</SAMP> first in the list.
+
+</UL>
+
+<P>
+For example, <SAMP>`[-a-z]'</SAMP> matches a lowercase letter or a hyphen (in
+English, in ASCII).
+
+</P>
+
+
+
+<H2><A NAME="SEC20" HREF="welcome.mhtml#TOC20">Grouping Operators (<CODE>(</CODE> ... <CODE>)</CODE> or <CODE>\(</CODE> ... <CODE>\)</CODE>)</A></H2>
+
+<P>
+<A NAME="IDX57"></A>
+<A NAME="IDX58"></A>
+<A NAME="IDX59"></A>
+<A NAME="IDX60"></A>
+<A NAME="IDX61"></A>
+<A NAME="IDX62"></A>
+<A NAME="IDX63"></A>
+
+</P>
+<P>
+A <STRONG>group</STRONG>, also known as a <STRONG>subexpression</STRONG>, consists of an
+<STRONG>open-group operator</STRONG>, any number of other operators, and a
+<STRONG>close-group operator</STRONG>.  Regex treats this sequence as a unit, just
+as mathematics and programming languages treat a parenthesized
+expression as a unit.
+
+</P>
+<P>
+Therefore, using <STRONG>groups</STRONG>, you can:
+
+</P>
+
+<UL>
+<LI>
+
+delimit the argument(s) to an alternation operator (see section <A HREF="regex_3.mhtml#SEC16">The Alternation Operator (<CODE>|</CODE> or <CODE>\|</CODE>)</A>) or a repetition operator (see section <A HREF="regex_3.mhtml#SEC11">Repetition Operators</A>).
+
+<LI>
+
+keep track of the indices of the substring that matched a given group.
+See section <A HREF="regex_7.mhtml#SEC52">Using Registers</A>, for a precise explanation.
+This lets you:
+
+
+<UL>
+<LI>
+
+use the back-reference operator (see section <A HREF="regex_3.mhtml#SEC21">The Back-reference Operator (<STRONG>\</STRONG><VAR>digit</VAR>)</A>).
+
+<LI>
+
+use registers (see section <A HREF="regex_7.mhtml#SEC52">Using Registers</A>).
+
+</UL>
+
+</UL>
+
+<P>
+If the syntax bit <CODE>RE_NO_BK_PARENS</CODE> is set, then <SAMP>`('</SAMP> represents
+the open-group operator and <SAMP>`)'</SAMP> represents the
+close-group operator; otherwise, <SAMP>`\('</SAMP> and <SAMP>`\)'</SAMP> do.
+
+</P>
+<P>
+If the syntax bit <CODE>RE_UNMATCHED_RIGHT_PAREN_ORD</CODE> is set and a
+close-group operator has no matching open-group operator, then Regex
+considers it to match <SAMP>`)'</SAMP>.
+
+</P>
+
+
+
+<H2><A NAME="SEC21" HREF="welcome.mhtml#TOC21">The Back-reference Operator (<STRONG>\</STRONG><VAR>digit</VAR>)</A></H2>
+
+<P>
+<A NAME="IDX64"></A>
+
+</P>
+<P>
+If the syntax bit <CODE>RE_NO_BK_REF</CODE> isn't set, then Regex recognizes
+back references.  A back reference matches a specified preceding group.
+The back reference operator is represented by <SAMP>`\<VAR>digit</VAR>'</SAMP>
+anywhere after the end of a regular expression's <VAR>digit</VAR>-th
+group (see section <A HREF="regex_3.mhtml#SEC20">Grouping Operators (<CODE>(</CODE> ... <CODE>)</CODE> or <CODE>\(</CODE> ... <CODE>\)</CODE>)</A>).
+
+</P>
+<P>
+<VAR>digit</VAR> must be between <SAMP>`1'</SAMP> and <SAMP>`9'</SAMP>.  The matcher assigns
+numbers 1 through 9 to the first nine groups it encounters.  By using
+one of <SAMP>`\1'</SAMP> through <SAMP>`\9'</SAMP> after the corresponding group's
+close-group operator, you can match a substring identical to the
+one that the group does.
+
+</P>
+<P>
+Back references match according to the following (in all examples below,
+<SAMP>`('</SAMP> represents the open-group, <SAMP>`)'</SAMP> the close-group, <SAMP>`{'</SAMP>
+the open-interval and <SAMP>`}'</SAMP> the close-interval operator):
+
+</P>
+
+<UL>
+<LI>
+
+If the group matches a substring, the back reference matches an
+identical substring.  For example, <SAMP>`(a)\1'</SAMP> matches <SAMP>`aa'</SAMP> and
+<SAMP>`(bana)na\1bo\1'</SAMP> matches <SAMP>`bananabanabobana'</SAMP>.  Likewise,
+<SAMP>`(.*)\1'</SAMP> matches any (newline-free if the syntax bit
+<CODE>RE_DOT_NEWLINE</CODE> isn't set) string that is composed of two
+identical halves; the <SAMP>`(.*)'</SAMP> matches the first half and the
+<SAMP>`\1'</SAMP> matches the second half.
+
+<LI>
+
+If the group matches more than once (as it might if followed
+by, e.g., a repetition operator), then the back reference matches the
+substring the group <EM>last</EM> matched.  For example,
+<SAMP>`((a*)b)*\1\2'</SAMP> matches <SAMP>`aabababa'</SAMP>; first group 1 (the
+outer one) matches <SAMP>`aab'</SAMP> and group 2 (the inner one) matches
+<SAMP>`aa'</SAMP>.  Then group 1 matches <SAMP>`ab'</SAMP> and group 2 matches
+<SAMP>`a'</SAMP>.  So, <SAMP>`\1'</SAMP> matches <SAMP>`ab'</SAMP> and <SAMP>`\2'</SAMP> matches
+<SAMP>`a'</SAMP>.
+
+<LI>
+
+If the group doesn't participate in a match, i.e., it is part of an
+alternative not taken or a repetition operator allows zero repetitions
+of it, then the back reference makes the whole match fail.  For example,
+<SAMP>`(one()|two())-and-(three\2|four\3)'</SAMP> matches <SAMP>`one-and-three'</SAMP>
+and <SAMP>`two-and-four'</SAMP>, but not <SAMP>`one-and-four'</SAMP> or
+<SAMP>`two-and-three'</SAMP>.  For example, if the pattern matches
+<SAMP>`one-and-'</SAMP>, then its group 2 matches the empty string and its
+group 3 doesn't participate in the match.  So, if it then matches
+<SAMP>`four'</SAMP>, then when it tries to back reference group 3---which it
+will attempt to do because <SAMP>`\3'</SAMP> follows the <SAMP>`four'</SAMP>---the match
+will fail because group 3 didn't participate in the match.
+
+</UL>
+
+<P>
+You can use a back reference as an argument to a repetition operator.  For
+example, <SAMP>`(a(b))\2*'</SAMP> matches <SAMP>`a'</SAMP> followed by two or more
+<SAMP>`b'</SAMP>s.  Similarly, <SAMP>`(a(b))\2{3}'</SAMP> matches <SAMP>`abbbb'</SAMP>.
+
+</P>
+<P>
+If there is no preceding <VAR>digit</VAR>-th subexpression, the regular
+expression is invalid.
+
+</P>
+
+
+
+<H2><A NAME="SEC22" HREF="welcome.mhtml#TOC22">Anchoring Operators</A></H2>
+
+<P>
+<A NAME="IDX65"></A>
+<A NAME="IDX66"></A>
+
+</P>
+<P>
+These operators can constrain a pattern to match only at the beginning or
+end of the entire string or at the beginning or end of a line.
+
+</P>
+
+
+
+<H3><A NAME="SEC23" HREF="welcome.mhtml#TOC23">The Match-beginning-of-line Operator (<CODE>^</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX67"></A>
+<A NAME="IDX68"></A>
+<A NAME="IDX69"></A>
+
+</P>
+<P>
+This operator can match the empty string either at the beginning of the
+string or after a newline character.  Thus, it is said to <STRONG>anchor</STRONG>
+the pattern to the beginning of a line.
+
+</P>
+<P>
+In the cases following, <SAMP>`^'</SAMP> represents this operator.  (Otherwise,
+<SAMP>`^'</SAMP> is ordinary.)
+
+</P>
+
+<UL>
+
+<LI>
+
+It (the <SAMP>`^'</SAMP>) is first in the pattern, as in <SAMP>`^foo'</SAMP>.
+
+<A NAME="IDX70"></A>
+<LI>
+
+The syntax bit <CODE>RE_CONTEXT_INDEP_ANCHORS</CODE> is set, and it is outside
+a bracket expression.
+
+<A NAME="IDX71"></A>
+<A NAME="IDX72"></A>
+<LI>
+
+It follows an open-group or alternation operator, as in <SAMP>`a\(^b\)'</SAMP>
+and <SAMP>`a\|^b'</SAMP>.  See section <A HREF="regex_3.mhtml#SEC20">Grouping Operators (<CODE>(</CODE> ... <CODE>)</CODE> or <CODE>\(</CODE> ... <CODE>\)</CODE>)</A>, and section <A HREF="regex_3.mhtml#SEC16">The Alternation Operator (<CODE>|</CODE> or <CODE>\|</CODE>)</A>.
+
+</UL>
+
+<P>
+These rules imply that some valid patterns containing <SAMP>`^'</SAMP> cannot be
+matched; for example, <SAMP>`foo^bar'</SAMP> if <CODE>RE_CONTEXT_INDEP_ANCHORS</CODE>
+is set.
+
+</P>
+<P>
+<A NAME="IDX73"></A>
+If the <CODE>not_bol</CODE> field is set in the pattern buffer (see section <A HREF="regex_7.mhtml#SEC45">GNU Pattern Buffers</A>), then <SAMP>`^'</SAMP> fails to match at the beginning of the
+string.  See section <A HREF="regex_7.mhtml#SEC57">POSIX Matching</A>, for when you might find this useful.
+
+</P>
+<P>
+<A NAME="IDX74"></A>
+If the <CODE>newline_anchor</CODE> field is set in the pattern buffer, then
+<SAMP>`^'</SAMP> fails to match after a newline.  This is useful when you do not
+regard the string to be matched as broken into lines.
+
+</P>
+
+
+
+<H3><A NAME="SEC24" HREF="welcome.mhtml#TOC24">The Match-end-of-line Operator (<CODE>$</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX75"></A>
+<A NAME="IDX76"></A>
+<A NAME="IDX77"></A>
+
+</P>
+<P>
+This operator can match the empty string either at the end of
+the string or before a newline character in the string.  Thus, it is
+said to <STRONG>anchor</STRONG> the pattern to the end of a line.
+
+</P>
+<P>
+It is always represented by <SAMP>`$'</SAMP>.  For example, <SAMP>`foo$'</SAMP> usually
+matches, e.g., <SAMP>`foo'</SAMP> and, e.g., the first three characters of
+<SAMP>`foo\nbar'</SAMP>.
+
+</P>
+<P>
+Its interaction with the syntax bits and pattern buffer fields is
+exactly the dual of <SAMP>`^'</SAMP>'s; see the previous section.  (That is,
+"beginning" becomes "end", "next" becomes "previous", and
+"after" becomes "before".)
+
+</P>
+
+<P><HR><P>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_2.mhtml">previous</A>, <A HREF="regex_4.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+</layout::page>
+<include footer.mhtml>

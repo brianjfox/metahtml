@@ -1,0 +1,8 @@
+;;; base-set-var.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 18:37:04 1996.
+
+Result: value1: <set-var var1=value1><get-var var1>
+Result: "String Value": <set-var var1="String Value"><get-var var1>
+Result: "String Value 999": <set-var var1="String Value 999"><get-var var1>

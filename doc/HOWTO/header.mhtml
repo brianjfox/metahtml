@@ -1,0 +1,15 @@
+;;; header.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Apr  5 08:56:48 1997.
+
+<set-var dir-here =
+  <match <get-var mhtml::relative-prefix> "/[^/]+$" action=extract>>
+<set-var dir-here = <substring <get-var dir-here> 1>>
+
+<when <not <string-eq <get-var dir-here> "HOWTO">>>
+  <set-var title="<get-var dir-here>: HOWTO">
+</when>
+
+<set-var site::area=<get-var title>>
+<include ../header.mhtml>

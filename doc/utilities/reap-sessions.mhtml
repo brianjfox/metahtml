@@ -1,0 +1,33 @@
+;;; reap-sessions.mhtml: -*- Meta-HTML -*-  Man Page for
+;;; reap-sessions utility.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 11:56:29 1996.
+;;;
+<set-var title="reap-sessions: Meta-HTML Utility">
+<include header.mhtml>
+
+<layout::page>
+  <h3> Reap Timed Out Sessions </h3>
+  <ptext>
+    <synopsis reap-sessions [-f session-db]>
+
+    <code>reap-sessions</code> causes all timed-out entries in the session
+    database to be deleted.  It is not normally necessary to call this
+    command directly, since each time a new session is created, the
+    session database is examined for timed-out sessions, and any found are
+    removed.
+
+    However, while debugging your new <meta-html> application, you may
+    find it useful to call this command line version.
+
+    If you are utilizing a session database which is not stored in the
+    usual location (<code>/tmp/sessions.db</code>), you may give the
+    <code>-f <i>FILENAME</i></code> argument, where
+    <code><i>FILENAME</i></code> is the path to the file containing the
+    session database.
+
+    Also see: <a href="gc-database.mhtml"><code>gc-database</a>.
+  </ptext>
+</layout::page>
+<include footer.mhtml>

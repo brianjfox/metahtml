@@ -1,0 +1,39 @@
+;;; index.mhtml: -*- Meta-HTML -*-  Documentation on Meta-HTML or Utilities.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Feb  6 08:53:04 1996.
+;;;
+<set-var title="Meta-HTML Documentation">
+<include header.mhtml>
+
+<layout::page>
+
+<plain-text first-char=<font size="+2">>
+  Hi!
+
+  If you don't know anything about <meta-html>, you should probably go
+  straight to:
+
+  <center>
+    <a href="man-welcome.mhtml"><b>An Introduction to <meta-html></b></a>
+  </center>
+</plain-text>
+<p>
+<defun link url text>
+  <concat <a href="<get-var mhtml::url-to-dir>/<get-var url>">
+	  <get-var text>
+	  </a>>
+</defun>
+
+<h2>Documentation Available Here:</h2>
+<ul>
+  <li> <link manual/ "Language Reference">
+  <li> <link debugger/ "MDB: The <meta-html> Debugger">
+  <li> <link server/ "<meta-html> Server Reference">
+  <li> <link manual/hiding.mhtml "<meta-html> CGI Engine Reference">
+  <li> <link utilities/ "Useful Utilities for <meta-html>">
+  <li> <link regex/regex_3.mhtml "Regular Expressions in <Meta-HTML>">
+</ul>
+
+</layout::page>
+<include footer.mhtml>

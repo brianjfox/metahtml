@@ -1,0 +1,49 @@
+;;; navbar.mhtml: -*- Meta-HTML -*-  Navigating the Online-Shopping Site.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep 10 08:38:28 1995.
+
+<defsubst http-full-path whitespace=delete>
+  <get-var mhtml::http-to-host mhtml::relative-prefix>/%0
+</defsubst>
+
+<defsubst navigate whitespace=delete>
+  <if <not <string-eq <get-var mhtml::current-doc> "%0">>
+      <prog
+	<set-var arg="%1">
+	[<a href="<http-full-path %0>"><b><get-var arg></b></a>]>>
+</defsubst>
+
+;;;
+;;; Usage: <loop index array element> body </loop>
+;;;
+;;; Iterate over the elements of ARRAY using INDEX.
+;;; ELEMENT is set to the current element before executing BODY.
+;;; 
+<defmacro loop whitespace=delete>
+  <set-var %0=0 "%2"=<get-var %1[0]>>
+  <while <get-var "%2">>
+    %body
+    <increment %0>
+    <set-var "%2"=<get-var "%1[%0]">>
+  </while>
+</defmacro>
+
+<br clear>
+<p>
+<center>
+  <with-open-database db <concat <get-var mhtml::include-prefix>
+				 <get-var mhtml::relative-prefix>
+				 /catalog/classes.db>>
+    <database-query db true keys=classes sort=class>
+  </with-open-database>
+  <loop i classes class>
+    <navigate list-class.mhtml?<cgi-encode class> <get-var class>>
+  </loop>
+  <br>
+  <navigate cart.mhtml     Cart>
+  <navigate shipping.mhtml Shipping>
+  <navigate session.mhtml Session>
+  <navigate maintenance.mhtml Maintenance>
+</center>
+

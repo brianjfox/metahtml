@@ -1,0 +1,28 @@
+<set-var title="Regex - What Gets Matched?">
+<include header.mhtml>
+<layout::page>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_5.mhtml">previous</A>, <A HREF="regex_7.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC42" HREF="welcome.mhtml#TOC42">What Gets Matched?</A></H1>
+
+<P>
+Regex usually matches strings according to the "leftmost longest"
+rule; that is, it chooses the longest of the leftmost matches.  This
+does not mean that for a regular expression containing subexpressions
+that it simply chooses the longest match for each subexpression, left to
+right; the overall match must also be the longest possible one.
+
+</P>
+<P>
+For example, <SAMP>`(ac*)(c*d[ac]*)\1'</SAMP> matches <SAMP>`acdacaaa'</SAMP>, not
+<SAMP>`acdac'</SAMP>, as it would if it were to choose the longest match for the
+first subexpression.
+
+</P>
+
+<P><HR><P>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_5.mhtml">previous</A>, <A HREF="regex_7.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+</layout::page>
+<include footer.mhtml>

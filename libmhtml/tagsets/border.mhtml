@@ -1,0 +1,311 @@
+;;; border.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon May 20 15:06:32 1996.
+;;;
+;;;
+<defun layout::initialize &key debugging debugging-output>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Call <code>layout::initialize</code> after loading this package,
+  ;;; and after  setting the variables which define the type of layout
+  ;;; that you would like.  Those variables are:
+  ;;;
+  ;;; <ul>
+  ;;;   <li> <b>LAYOUT::LAYOUT</b><br>
+  ;;;	One of "plain", "bordered-left", "bordered-right", or
+  ;;;     "bordered-right-and-left".
+  ;;;
+  ;;;   <li> <b>LAYOUT::LEFT-BORDER-WIDTH</b><br>
+  ;;;     An absolute number which determines the width of the left
+  ;;;     border.  Only has an effect when the layout actually contains
+  ;;;     a left border.
+  ;;;
+  ;;;   <li> <b>LAYOUT::RIGHT-BORDER-WIDTH</b><br>
+  ;;;     An absolute number which determines the width of the right
+  ;;;     border.  Only has an effect when the layout actually contains
+  ;;;     a right border.
+  ;;; </ul>
+  ;;;
+  ;;; Then, in the page itself, you can use:
+  ;;;
+  ;;; <example>
+  ;;;          <layout::page> html </layout::page>
+  ;;;   <layout::left-border> html </layout::left-border>
+  ;;;  <layout::right-border> html </layout::right-border>
+  ;;; </example>
+  ;;;
+  ;;; Those tags place the HTML that you specify in the indicated region
+  ;;; of the page.
+  ;;;
+  ;;; Finally, make sure that you call
+  ;;; <funref powerstrip-system-tags layout::resolve-contents> before
+  ;;; the page returns.  A complete invocation might look like:
+  ;;;
+  ;;; <example>
+  ;;; <defvar layout::layout bordered-left>
+  ;;; <layout::initialize>
+  ;;; <layout::default-header>
+  ;;;
+  ;;; <layout::page>
+  ;;;   This is in the page.
+  ;;; </layout::page>
+  ;;;
+  ;;; <layout::left-border>
+  ;;;   This is in the left border.
+  ;;; </layout::left-border>
+  ;;;
+  ;;; <layout::resolve-contents>
+  ;;; </example>
+  <defvar layout::cellpadding 0>
+  <defvar layout::cellspacing 0>
+  <defvar layout::debug-border <if <get-var-once debugging> 1 0>>
+  <defvar layout::layout plain>
+  <defvar layout::left-border-width 130>
+  <defvar layout::right-border-width 120>
+  <defvar layout::left-align left>
+  <defvar layout::page-align left>
+  <defvar layout::right-align left>
+  ;;; Netscape doesn't let you display anything but background in the
+  ;;; xxx pixels of the left or right hand side of the page.  So,
+  ;;; our border values have to be corrected in order to make the image
+  ;;; and the text layout evenly.  Here it is:
+  <defvar layout::border-fudge-factor 0>
+
+  <when <or <not <get-var-once layout::layout>>
+	    <string-eq <get-var layout::layout> plain caseless=true>>>
+    <defmacro layout::left-border &body body>
+      <get-var-once body>
+    </defmacro>
+    <defmacro layout::page &body body><get-var-once body></defmacro>
+    <defmacro layout::right-border &body body>
+      <get-var-once body>
+    </defmacro>
+    <defun layout::default-header &key debugging-output>
+      <defvar debugging-output <DEBUGGING-OUTPUT>>
+      <SYSTEM-ERROR-OUTPUT>
+      <get-var-once debugging-output>
+    </defun>
+  </when>
+
+  <when <string-eq <get-var layout::layout> bordered-left caseless=true>>
+    <defmacro layout::left-border &body body whitespace=delete>
+      <set-var layout::left-border-contents[layout::left-border-index] =
+	<get-var-once body>>
+      <increment layout::left-border-index>
+    </defmacro>
+    
+    <defmacro layout::page &body body whitespace=delete>
+      <set-var layout::page-contents[layout::page-index] = <get-var-once body>>
+      <increment layout::page-index>
+    </defmacro>
+    
+    <defmacro layout::right-border &body body><get-var-once body></defmacro>
+
+    <defun layout::default-header &key debugging-output>
+      <defvar debugging-output <DEBUGGING-OUTPUT>>
+      <layout::page>
+        <SYSTEM-ERROR-OUTPUT>
+        <get-var-once debugging-output>
+      </layout::page>
+      <table border=<get-var layout::debug-border>
+	     cellpadding=<get-var layout::cellpadding>
+	     cellspacing=<get-var layout::cellspacing>
+	     width=<or <get-var layout::screen-width> "100%">>
+	<tr valign=top>
+	  <td width=<add layout::left-border-width
+			 layout::border-fudge-factor>
+	      align=<get-var layout::left-align>
+	      <if <get-var layout::left-border-color>
+		  <prog bgcolor=<get-var layout::left-border-color>>>>
+	    <transparent-align height=2 align=left
+		 width=<get-var layout::left-border-width>>
+	    <br clear=left>
+	    %LEFT-BORDER-CONTENTS%
+	  </td>
+	  <td <if <get-var layout::screen-width>
+		  <prog width=<sub layout::screen-width
+				   <add layout::left-border-width
+					layout::border-fudge-factor>>>>
+	      align=<get-var layout::page-align>>
+	    %PAGE-CONTENTS%
+	  </td>
+	</tr>
+      </table>
+    </defun>
+  </when>
+
+  <when <string-eq <get-var-once layout::layout> bordered-right caseless=true>>
+    <defmacro layout::left-border &body body><get-var-once body></defmacro>
+
+    <defmacro layout::page &body body whitespace=delete>
+      <set-var layout::page-contents[layout::page-index] = <get-var-once body>>
+      <increment layout::page-index>
+    </defmacro>
+    
+    <defmacro layout::right-border &body body whitespace=delete>
+      <set-var layout::right-border-contents[layout::right-border-index] =
+	<get-var-once body>
+      <increment layout::right-border-index>
+    </defmacro>
+    
+    <defun layout::default-header &key debugging-output>
+      <defvar debugging-output <DEBUGGING-OUTPUT>>
+      <layout::page>
+        <SYSTEM-ERROR-OUTPUT>
+        <get-var-once debugging-output>
+      </layout::page>
+      <table border=<get-var layout::debug-border>
+	     cellpadding=<get-var layout::cellpadding>
+	     cellspacing=<get-var layout::cellspacing>
+	     width=<or <get-var layout::screen-width> "100%">>
+	<tr valign=top>
+	  <td align=<get-var layout::page-align>>
+	    %PAGE-CONTENTS%
+	  </td>
+	  <td width=<add layout::right-border-width
+			 layout::border-fudge-factor>
+	      align=<get-var layout::right-align>
+	      <if <get-var layout::right-border-color>
+		  <prog bgcolor=<get-var layout::right-border-color>>>>
+	    <transparent-align height=2 align=left
+		 width=<get-var layout::right-border-width>>
+	    %RIGHT-BORDER-CONTENTS%
+	  </td>
+	</tr>
+      </table>
+    </defun>
+  </when>
+
+  <when <string-eq <get-var layout::layout> bordered-right-and-left
+		   caseless=true>>
+    <defmacro layout::left-border &body body whitespace=delete>
+      <set-var layout::left-border-contents[layout::left-border-index] =
+	<get-var-once body>>
+      <increment layout::left-border-index>
+    </defmacro>
+    
+    <defmacro layout::page &body body whitespace=delete>
+      <set-var layout::page-contents[layout::page-index] = <get-var-once body>>
+      <increment layout::page-index>
+    </defmacro>
+    
+    <defmacro layout::right-border &body body whitespace=delete>
+      <set-var layout::right-border-contents[layout::right-border-index] =
+	<get-var-once body>>
+      <increment layout::right-border-index>
+    </defmacro>
+    
+    <defun layout::default-header &key debugging-output>
+      <defvar debugging-output <DEBUGGING-OUTPUT>>
+      <layout::page>
+        <SYSTEM-ERROR-OUTPUT>
+        <get-var-once debugging-output>
+      </layout::page>
+      <table border=<get-var layout::debug-border>
+	     cellspacing=<get-var layout::cellspacing>
+	     cellpadding=<get-var layout::cellpadding>
+	     width=<or <get-var layout::screen-width> "100%">>
+	<tr valign=top>
+	  <td width=<add layout::left-border-width
+			 layout::border-fudge-factor>
+	      align=<get-var layout::left-align>
+	      <if <get-var layout::left-border-color>
+		  <prog bgcolor=<get-var layout::left-border-color>>>>
+	    <transparent-align height=2 align=left
+		 width=<get-var layout::left-border-width>>
+	    <br clear=left>
+	    %LEFT-BORDER-CONTENTS%
+	  </td>
+	  <td align=<get-var layout::page-align>>
+	    %PAGE-CONTENTS%
+	  </td>
+	  <td width=<add layout::right-border-width
+			 layout::border-fudge-factor>
+	      align=<get-var layout::right-align>
+	      <if <get-var layout::right-border-color>
+		  <prog bgcolor=<get-var layout::right-border-color>>>>
+	    <transparent-align height=2 align=left
+		 width=<get-var layout::right-border-width>>
+	    <br clear=left>
+	    %RIGHT-BORDER-CONTENTS%
+	  </td>
+	</tr>
+      </table>
+    </defun>
+  </when>
+
+  <defun layout::resolve-contents>
+    ;;; See documentation for layout::initialize.
+    <subst-in-page
+     %LEFT-BORDER-CONTENTS%  <get-var-once layout::left-border-contents[]>
+     %PAGE-CONTENTS%	     <get-var-once layout::page-contents[]>
+     %RIGHT-BORDER-CONTENTS% <get-var-once layout::right-border-contents[]>>
+  </defun>
+  <defun layout::clear-contents>
+    <set-var
+      layout::left-border-contents[]=""
+      layout::page-contents[]=""
+      layout::right-border-contents[]=""
+      layout::left-border-index = 0
+      layout::page-index = 0
+      layout::right-border-index = 0>
+  </defun>
+</defun>
+
+<defmacro layout::page &body &unevalled body>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Append <var body> to the portion of the resultant page which
+  ;;; appears between the left and the right borders.
+  ;;; Please see <funref POWERSTRIP-SYSTEM-TAGS layout::initialize>
+  ;;; for more information.
+  <%%eval <get-var-once body>>
+</defmacro>
+
+<defmacro layout::left-border &body &unevalled body>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Append <var body> to the portion of the resultant page which
+  ;;; appears in the left border.
+  ;;; Please see <funref POWERSTRIP-SYSTEM-TAGS layout::initialize>
+  ;;; for more information.
+  <%%eval <get-var-once body>>
+</defmacro>
+
+<defmacro layout::right-border &body &unevalled body>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Append <var body> to the portion of the resultant page which
+  ;;; appears in the right border.
+  ;;; Please see <funref POWERSTRIP-SYSTEM-TAGS layout::initialize>
+  ;;; for more information.
+  <%%eval <get-var-once body>>
+</defmacro>
+
+<defun layout::clear-contents>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Discard any content that has been previously assigned to the
+  ;;; left border, right border, or page contents areas.  Such content
+  ;;; was presumably prepared using
+  ;;; <funref POWERSTRIP-SYSTEM-TAGS layout::left-border>,
+  ;;; <funref POWERSTRIP-SYSTEM-TAGS layout::page>, or
+  ;;; <funref POWERSTRIP-SYSTEM-TAGS layout::right-border>.
+  ;;;
+  ;;; Please see <funref POWERSTRIP-SYSTEM-TAGS layout::initialize>
+  ;;; for more information.
+</defun>
+
+<defun layout::resolve-contents>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Resolve the contents of the page according to the layout that
+  ;;; you have specified by setting the variable
+  ;;; <code>layout::layout</code>.  Please see <funref
+  ;;; POWERSTRIP-SYSTEM-TAGS layout::initialize>.
+</defun>
+
+<defun layout::default-header>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; Produces the HTML which implements the appropriate table
+  ;;; structure for the type of layout that you have specified by
+  ;;; setting the variable <code>layout::layout</code>.
+  ;;; Please see <funref POWERSTRIP-SYSTEM-TAGS layout::initialize>.
+  <SYSTEM-ERROR-OUTPUT>
+  <DEBUGGING-OUTPUT>
+</defun>

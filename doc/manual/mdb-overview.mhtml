@@ -1,0 +1,12 @@
+;;; mdb-overview.mhtml: -*- Meta-HTML -*-  A Quick Overview of MDB.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Apr 24 11:35:00 1998.
+<set-var
+  title="A Quick Overview of MDB"
+  prev-page="mdb-intro.mhtml" prev-title="MDB Introduction"
+  next-page="mdb-commands.mhtml" nex-title="Commands/Statements">
+
+<include mdb-header.mhtml>
+<set-var mhtml::cacheable=true>
+<set-var files-are-included=true>

@@ -1,0 +1,40 @@
+;;; dbpack.mhtml: -*- Meta-HTML -*-  Man Page for dbpack.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 02:38:57 1996.
+<set-var title="dbpack: Convert Databases to/from ASCII">
+<include header.mhtml>
+
+<layout::page>
+  <h3> Transportable Databases </h3>
+  <ptext>
+    <synopsis dbpack filename.db...
+dbpack filename.db.packed...>
+
+    Converts from a machine dependent format to a machine independent
+    format, and back.  The machine independent format is only useful for
+    transporting the database from one type of processor to the next; the
+    <meta-html> database routines cannot read the independent format.
+
+    The independent format is an ASCII representation of the contents of
+    the database, and may be directly edited with your favorite text
+    editor.  Lisp aficianados will recognize the format easily.
+
+    When given an input file called "foo.db", <code>dbpack</code> creates
+    an output file called "foo.db.packed".  This is the machine
+    independent format.
+
+    When given an input file called "foo.db.packed", <code>dbpack</code>
+    modifies or creates the output file "foo.db", which is in machine
+    dependent format.
+
+    <b>Caveat:</b>
+    <ul>
+      Care should be taken when modifying an existing database with
+      <code>dbpack</code>.  Especially note that the permissions for the
+      created database should match those of the running HTTP server.
+    </ul>
+  </ptext>
+</layout::page>
+
+<include footer.mhtml>

@@ -1,0 +1,77 @@
+;;; list-class.mhtml: -*- Meta-HTML -*-  List of items of class CLASS.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep 10 08:53:56 1995.
+
+;;; It is assumed that the session is active, and that the
+;;; session variable CURRENT-CLASS is set.
+
+<if <get-var posted::class>
+    <set-session-var current-class=<get-var posted::class>>>
+<if <not <get-var class>>
+    <set-var class=<get-session-var current-class>>>
+
+<set-var title="Select <get-var class>">
+<include header.mhtml>
+<include tagsets/cart-substs.mhtml>
+<include tagsets/image-substs.mhtml>
+<include tagsets/action-buttons.mhtml>
+
+<p>
+<br>
+<font size=+2>
+The Following <get-var Class> Items are available:
+</font>
+<p>
+
+;;; Get and format the data.
+<hr size=6 width=60%>
+<form 
+<p>
+<with-open-database db <db-of-class <get-var class>>>
+  <set-var side=right>
+  <database-query db true
+    format =
+      <prog
+	<a href="<get-var mhtml::url-to-dir>/list-item.mhtml?<cgi-encode class key>">
+	  <img  src="<gif-key>" alt="Product Image" hspace=10
+		align=<get-var default::side>>
+	</a>
+	<set-var default::side=<if <string-eq <get-var default::side> "right">
+				   left right>>
+	<a href="<get-var mhtml::url-to-dir>/list-item.mhtml?<cgi-encode class key>">
+	  <small-caps upper=+0 lower=-1 other=+0>
+	  <b><get-var Product-Name></b>
+	  </small-caps>
+	</a>
+	<set-var foo="YOW!plain-text first-char=<font size=+2>>
+		      <get-var Product-Description>
+		     </plain-text>">
+	<subst-in-var foo "YOW!" "<">
+	<get-var foo>
+	<br>
+	<if <get-var Attributes>
+	    <prog
+	      <parse-attributes>
+	      <br clear>
+	      <ifeq <get-var default::side> right <br>>
+	      <set-var i=0>
+	      <while <lt i pa-index>>
+		<set-var attribute-list[]=<get-var attributes[i]>>
+		Available <get-var attribute-list[0]>s: 
+		<set-var j=1>
+		<while <get-var attribute-list[j]>>
+		  <set-var char=<if <get-var attribute-list[<add j 1>]> , .>>
+		  <get-var attribute-list[j]><get-var char>
+		  <increment j>
+		</while>
+		<br>
+		<increment i>
+	      </while>>>
+	<b><i>Only </i></b><get-var unit-price>
+	<br clear=all>
+	<center><hr width=40%></center>
+	<br>>>
+</with-open-database>
+<hr size=6 width=60%>
+<include footer.mhtml>

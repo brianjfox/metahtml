@@ -1,0 +1,34 @@
+;;; base-match.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sat Oct 26 23:16:09 1996.
+
+Result: true: <match 9 9>
+Result: true: <match "gugudolls" "(gu){2}.*">
+Result: true: <match "This that THESE those" "THESE">
+Result: true: <match "This that THESE those" "these">
+Result: true: <match "construction,^M" "^M">
+Result: true: <match "construction,^M" "\r">
+Result: true: <match "construction,
+                      advertising and marketing" "\n">
+Result: true: <match "jarlath@ua.com" 
+		     "^[-_\\.[:alnum:]]+@[-_[:alnum:]]+\\.[[:alnum:]]+">
+Result: true: <match "1134057.0997@compuserve.com"
+		     "^[-_[:alnum:]]+@[-_[:alnum:]]+\\.[[:alnum:]]+">
+Result: : <match "1134057.=0997@compuserve.com"
+		 "^[-_[:alnum:]]+@[-_[:alnum:]]+\\.[[:alnum:]]+">
+Result: true: <match "$50.95" "^[$]?[0-9]+(\\.[0-9][0-9]?)?$">
+Result: : <match "$50.950" "^[$]?[0-9]+(\\.[0-9][0-9]?)?$">
+Result: : <match "50.950" "^[$]?[0-9]+(\\.[0-9][0-9]?)?$">
+Result: : <match "fifty dollars and ninety five cents"
+		 "^[$]?[0-9]+(\\.[0-9][0-9]?)?$">
+Result: 50: <match "50.950" "^[$]?[0-9]+" action=extract>
+Result: : <match "fifty dollars and ninety five cents" 
+		 "^[$]?[0-9]+" action=extract>
+Result: .950: <match "50.950" "^[$]?[0-9]+" action=delete>
+Result: fifty dollars and ninety five cents: <match 
+	"fifty dollars and ninety five cents" "^[$]?[0-9]+" action=delete>
+Result: 30: <match "This is a string of characters" action=length>
+Result: 1: <match "Fifteen  characters" action=startpos>
+Result: 30: <match "Fifteen  characters" action=endpos>
+Result: 0: <match "" action=length>

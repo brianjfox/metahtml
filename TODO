@@ -1,0 +1,99 @@
+List of things that should be done:
+
+[ (bfox@ai.mit.edu) I have implemented this in <database_query ...> ]
+   * Generic database query mechanism.
+
+[ (bfox@ai.mit.edu) I have implemented this via PATH_TRANSLATIONS ]
+   * Script Aliases and Translations.  Allow (via configuration file)
+     random string transformations such as "/ais/" -> "/foo/cgi-bin/ais/".
+
+[ (bfox@ai.mit.edu) I have implemented this, and tested it by hacking
+   cookies into the NCSA server.  Now running on www.datawave.net. ]
+   * Test and verify sessions using build-page with Netscape server
+     and client.  I'm sure this currently does not work.
+
+[ (bfox@ai.mit.edu) Rewritten.  Now works as advertised. ]
+   * Test and verify correctness of polygon test in src/imagemap.c.
+     It occurs to me that I may have coded the initial triangle
+     similarity algorithm using the Cartesian coordinate system,
+     instead of the fucked up inverted Y coordinate system that idiot
+     graphic systems use.  If this is the case, the algorithm should
+     produce YES for the vertically and horizontally flipped mirror
+     images of a given polygon.
+
+   * Write shared memory functions for the session database.
+     Alternatively, make the session database have a TCP/IP interface,
+     so that multiple machines can share users.  This, or something
+     like it, will probably be necessary in the future.
+
+[ (bfox@ai.mit.edu) This is implemented through the use of
+   package-to-alist and alist-to-package.  See macros/session-substs.mhtml. ]
+   * Implement direct installation of a session with data.  The idea
+     is that a user session state could be saved in a permanent
+     database indefinitely, and then restored when the user signs back
+     on.  This could be done by creating a new session, but it would
+     be simpler and more elegant to have a <session-resume SID>
+     command.  Think of it as saving your Emacs state across logins.
+
+[ (bfox@ai.mit.edu) Implemented in elisp/mhtml.el ]
+   * Design and implement Emacs Meta-HTML mode.
+
+[ (bfox@ai.mit.edu) I have implemented user-defined macros and substs. ]
+   * Implement user-defined macros.  Since each invocation of
+     build-page is a single run of a program, the user-defined macros
+     will have to be read for every invocation.  This may be too
+     expensive.  On the other hand, it is a necessity for implementing
+     a Meta-HTML Web server.
+
+   * Implement an on-the-fly byte-compiler.  This would prefer (for
+     example) *.mhtmlc over *.mhtml if the .mhtmlc file were newer.
+     If the .mhtmlc file was older, or non-existant, the interpreter
+     could lock the .mhtmlc file, byte compile the .mhtml file, and
+     then return the page.  Subsequent calls would get the .mhtmlc
+     file.
+
+   * Along the lines of byte-compiling, we could compile Meta-HTML
+     files into C programs.  Because of the way the interpreter is
+     implemented, open coding is an easy and simple win here.  I may
+     pursue this before anything else, since that may obviate the need
+     to ever write a CGI program in C again.
+
+[ (bfox@ai.mit.edu, hqm@ua.com) Implemented for MSQL ]
+   * Consider the implementation of a genuine relational database as
+     an integrated part of Meta-HTML.  The existing kludge works for
+     simple cases, such as my toy Rolodex applet, but is meaningless
+     in the real world of database manipulations.  About the most you
+     can do with this is to save a user session state in a permanent
+     fashion.
+
+[ (bfox@ai.mit.edu) Implemented in examples/mastermind ]
+    * An implementation of the MasterMind game where there are five hidden
+      pegs, each of which can be of various colors, and the contestant
+      tries to guess what the order and colors of the pegs are in a
+      limited number of moves.  The response for each guess is the number
+      of pegs guessed right, and the number in the correct position.
+
+    * A central repository for the full documentation of the GNU project.
+      This could work either by reading the Info documents, or by
+      running the documents through Makeinfo, or Texi2HTML.
+
+    * A System Administration page, from which many common functions
+      could be run, including ps, DNS management functions, user
+      management functions, etc.
+
+    * Dynamically changing billboard advertising; something that could
+      be placed at the top of any page.  This would display an
+      advertisement chosen at random from some known list of ads.
+      The frequency of a particular ad's appearance could be a function
+      of how much money the advertiser paid.
+
+    * On-line credit verification:  You type in your credit card number,
+      someone's social security number, and you get their loan-worthiness
+      or whatever, from TRW, digitally signed.  Or your own credit report.
+
+    * Reservations and ticketing systems, especially airlines, but the
+      system could work for anything.
+
+    * Real-estate on line.
+
+

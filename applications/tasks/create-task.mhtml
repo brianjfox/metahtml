@@ -1,0 +1,56 @@
+;;; modify-task.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Universal Access Inc.
+;;;  Author: Henry Minsky (hqm@ua.com) Fri Sep  6 16:50:54 1996.
+
+<set-var title="Create Task">
+<include header.mhtml>
+<include tasks.mhtml>
+
+<require-tasks-login>
+
+<h1>Create Task</h1>
+
+<b>Task Title:</b> <get-var task-name>
+
+<when <match <get-var posted::action> "Create">>
+  <add-task <get-var task-name> 
+	    <get-var owner>
+	    <get-var priority>
+	    <get-var status>
+	    <get-var text>>
+  <redirect "welcome.mhtml">
+
+</when>
+
+
+<defsubst create-task>
+  <form action="<get-var mhtml::current-doc>" method=post>
+    <b>Name:</b> <input type=text name="task-name" size=48><br>
+    <b>Created:</b> 
+    <set-var creation-time <time>>
+    <date <get-var creation-time>><br>
+    
+    <b>Owner</b> <input type-text name=owner size=20><br>
+
+    <b>Priority:</b> <show-popup-priority <get-var priority>>
+    <p>
+    <b>Description:</b><br>
+    <textarea name=text cols=48 rows=4></textarea>
+    <p>
+    <b>Status:</b><br>
+    <textarea name="status" cols=48 rows=4>incomplete</textarea>
+    <br>
+    <input type=hidden name="creation-time" value=<get-var creation-time>>
+    <center>
+      <input type=submit name=action value="Create">
+      <input type=submit name=action value="Cancel">
+    </center>
+  </form>
+</defsubst>
+
+<create-task>
+
+
+
+<include footer.mhtml>

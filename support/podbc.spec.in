@@ -1,0 +1,11 @@
+%package podbc
+Summary: PostGres ODBC based connectivity module for Meta-HTML.
+Group: Applications/WWW
+Requires: metahtml
+
+%description podbc
+Using modpodbc.so, you can enable the connection of Meta-HTML to PostGres
+databases, by simply saying <sql::set-datbase-type podbc>.
+
+%files podbc
+/usr/lib/metahtml/modpodbc.so

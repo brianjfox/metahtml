@@ -1,0 +1,90 @@
+;;; gather-fields.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu May 15 00:54:55 1997.
+<if <string-eq <get-var-once posted::action> "Cancel">
+    <redirect describe-table.mhtml>>
+<set-var title="Build Database Table">
+<include header.mhtml>
+
+<when <and <string-eq <get-var posted::action> "snarf">
+	   <get-var gsql::database-table>>>
+  <unset-var gsql::tfield-data>
+  <set-var columns[]=<gsql::database-columns> i=0>
+  <gsql::with-open-database>
+  <foreach column columns>
+    <package-delete temp record>
+    <alist-to-package
+     <sql::database-column-info db <get-var gsql::database-table>
+				<get-var column>>
+     temp>
+    <set-var record::name=<get-var column>>
+    <set-var record::type=<downcase <subst-in-string <get-var temp::type>
+						     "GSQL_" "">>>
+    <set-var record::size=<get-var temp::length>>
+    <set-var record::unique?=<get-var temp::is_unique>>
+    <set-var gsql::tfield-data[i]=<package-to-alist record strip=true>>
+    <increment i>
+  </foreach>
+  </gsql::with-open-database>
+  <session-export gsql gsql>
+</when>
+
+<when <string-eq <get-var posted::action> "Create">>
+  <gsql::tfield-add
+   <get-var name> <get-var type> <get-var size> <get-var unique?>>
+</when>
+
+<when <string-eq <get-var posted::action> "Remove">>
+  <gsql::tfield-delete <get-var index>>
+</when>
+
+<when <string-eq <get-var posted::action> "Modify">>
+  <gsql::tfield-modify
+   <get-var index> <get-var name> <get-var type>
+   <get-var size> <get-var unique?>>
+</when>
+
+<when <string-eq <get-var posted::action> "Create Table Structure">>
+  <gsql::delete-database <get-var gsql::database>>
+  <gsql::create-database <get-var gsql::database>>
+  <gsql::with-open-database>
+  <sql::database-exec-sql db <gsql::table-creation-string>>
+  <gsql::make-indices>
+  </gsql::with-open-database>
+  <defvar table <or <get-var gsql::database-table>
+		    <get-var gsql::database>_fields>>
+  <redirect describe-table.mhtml?<cgi-encode table>>
+</when>
+
+<when <string-eq <get-var posted::action> "Reset All Fields">>
+  <unset-session-var gsql::tfield-data>
+  <unset-var gsql::tfield-data>
+</when>
+
+<layout::page>
+  <p>
+  <font size="+1"><b>
+  Gathering Fields For Table
+  <a href="describe-table.mhtml">
+    <small-caps><get-var gsql::database-table></small-caps></a>
+  In <small-caps><get-var gsql::database></small-caps>
+  </b></font>
+  <p>
+  <center>
+    <set-var i=0>
+    <foreach alist gsql::tfield-data>
+      <gsql::tfield-display <get-var alist> <get-var i> true true>
+      <increment i>
+    </foreach>
+    <gsql::tfield-display>
+    <p>
+    <form method=post action=<thisdoc>>
+      <input type=submit name=action value="Create Table Structure">
+      <input type=submit name=action value="Reset All Fields">
+      <input type=submit name=action value="Cancel">
+    </form>
+  </center>
+</layout::page>
+
+<include footer.mhtml>

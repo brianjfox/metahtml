@@ -1,0 +1,177 @@
+;;; apache-fastcgi.mhtml: How to configure for the Apache server with FastCGI.
+<set-var
+  title="Configuring for FastCGI Apache"
+  prev-page="apache.mhtml" prev-title="Apache Configuration"
+  next-page="ncsa.mhtml" next-title="Configuring NCSA">
+<include header.mhtml>
+
+<defmacro step short-desc>
+  <increment step::counter>
+  <li> <b><get-var short-desc></b><br>
+  %body
+</defmacro>
+
+<layout::page>
+  <plain-text>
+    The fastest and simplest way to setup your Apache Web server to run
+    <Meta-HTML> as a <a href="http://www.fastcgi.com/">FastCGI</a>
+    application is to download the <Meta-HTML> Apache FastCGI Kit from
+
+    <a href="ftp://ftp.metahtml.com/APACHE-FASTCGI/metahtml-apache-kit.tar.gz">
+      <code>ftp://ftp.metahtml.com/APACHE-FASTCGI/metahtml-apache-kit.tar.gz</code></a>
+
+    Unpack the file, and follow the instructions found in the
+    <code>INSTALL</code> file.
+
+  Here are step-by-step instructions for setting up <Meta-HTML> under
+  the <a href="http://www.apache.org">Apache Web server</a>
+  as a <a href="http://www.fastcgi.com">FastCGI</a> application.
+
+  <ol>
+    <step "Download a new version of the Apache source (at least 1.2.4)">
+    In order to run the FastCGI version of the <Meta-HTML> engine, you
+    will need a version of Apache that has both
+    <code>mod_fastcgi</code> and <code>mod_mhtml</code> compiled into
+    it.  This means that you should get a recent version of the Apache
+    source so that you can add these modules.
+
+    The source to the Apache Web server can be downloaded from
+    <a href="ftp://ftp.apache.org/apache/dist/">
+      <code>ftp://ftp.apache.org/apache/dist/</code></a>, which is
+    where the latest releases are stored.  We maintain a mirror of
+    this version at
+    <a href="ftp://ftp.metahtml.com/pub/APACHE-FASTCGI/apache_1.2.4.tar.gz">
+    <code>ftp://ftp.metahtml.com/pub/APACHE-FASTCGI/apache_1.2.4.tar.gz</code></a>.
+    </step>
+    
+    <step "Download apache-fastcgi.tar.Z">
+    This is the <a href="http://www.fastcgi.com">FastCGI</a> module
+    source code for Apache versions 1.2 and greater.  It is available
+    from
+    <a href="http://www.fastcgi.com/servers/apache/2.0/apache-fastcgi.tar.Z">
+      <code>http://www.fastcgi.com/servers/apache/2.0/apache-fastcgi.tar.Z</code></a>.
+    </step>
+
+    <step "Unpack the Apache sources">
+    Typically, you will have downloaded a GNU zipped TAR file
+      (extension of "<code>.tar.gz</code>").  The command to unpack
+    this file looks like:
+
+    <code>gzip -d <apache_1.2.4.tar.gz | tar -xf -</code>
+    </step>
+
+    <step "Unpack the apache-fastcgi.tar.Z file">
+    The commands for doing this are as follows:
+    <ol>
+    <li> <code> mv apache-fastcgi.tar.Z apache_1.2.4/</code>
+    <li> <code> cd apache_1.2.4 </code>
+    <li> <code> uncompress <apache-fastcgi.tar.Z | tar -xf -</code>
+    </ol>
+    </step>
+
+    <step "Copy <code>mod_fastcgi.c</code> to the Apache
+    <code>src</code> directory.">
+
+    <code>  cp apache-fastcgi/src/mod_fastcgi.c src/ </code>
+    </step>
+
+    <step "Copy <code>mod_mhtml.c</code> to the Apache
+    <code>src</code> directory">
+    </step>
+
+    <li> You can <a href="#action">run only <Meta-HTML>
+    documents through the <Meta-HTML> CGI Engine</a>, foregoing the
+    ability to use statefull sessions with non-cookie capable
+    browsers.  If you never use statefull sessions, or, if you only
+    have cookie-capable clients connecting to your server (e.g.,
+    Netscape, MSIE), this solution is completely reasonable, and
+    totally painless.
+
+    <li> You can <a href="#compile">run only <Meta-HTML>
+    documents through the <Meta-HTML> CGI Engine</a>, handling the
+    case of non-cookie capable browsers co-existing with statefull
+    sessions.  This is our recommended configuration.
+  </ol>
+
+  <br>
+  <h3>Step 1: Install the Engine:</h3>
+  In order for the Engine to operate under Apache, you must place it
+  in your <code>cgi-bin</code> directory, and make it executable.  For
+  example, if your <code>srm.conf</code> file contained:
+  <pre>
+   ScriptAlias /cgi-bin/ /www/htdocs/cgi-bin/</pre>
+  then you would copy the Engine and its config file to that directory:
+  <pre>
+   user@host$ cp engine/engine /www/htdocs/cgi-bin/nph-engine
+   user@host$ cp engine/engine.conf /www/htdocs/cgi-bin/</pre>
+
+  <br>
+  <h3>Step 2: Edit the <code>engine.conf</code> file:</h3>
+  Now edit the <code>engine.conf</code> file in
+  <code>/www/htdocs/cgi-bin</code>, simply by reading the comments.
+  For most installations, you won't actually need to change any of the
+  parameters defined within -- the saavy site administrator may wish
+  to add special behaviour, or to modify the existing behaviour.
+
+  <br>
+  <h3>Step 3: Edit the Apache <code>srm.conf</code> file:</h3>
+  Now edit the <code>srm.conf</code> for your Apache server.
+  There are two possible edits:
+
+  <ol>
+    <a name="every"></a>
+    <b><li>Running Every Document Through the Engine</b>
+
+    Add the following line before all of your other <code>ScriptAlias</code>
+    lines:
+    <pre>
+     ScriptAlias / /cgi-bin/nph-engine
+    </pre>
+
+    <a name="action"></a>
+    <b><li>Running Only <Meta-HTML> Documents Through the Engine</b>
+
+    Add the following lines to the <code>srm.conf</code> file, before
+    all other <code>ScriptAlias</code> lines:
+    <pre>
+     AddType metahtml/interpreted .mhtml
+     Action metahtml/interpreted /cgi-bin/nph-engine
+    </pre>
+  </ol>
+
+  <a name="compile"></a>
+  <br>
+  <h3>Step 4: Compiling Apache 1.1.1 With the <Meta-HTML> "mini-module":</h3>
+  If you want to make sure that non-cookie capable browsers can have
+  statefull sessions, you will need to recompile your 1.1.1 server
+  with the <Meta-HTML> mini-module installed.  Here is how to do that:
+
+  <ol>
+    <b><li></b>
+    Place the following line in <code>src/Configuration</code> (in
+    your Apache 1.1.1 source tree)
+    <pre>
+     Module mhtml_module           mod_mhtml.o</pre>
+
+    <b><li></b>
+    Copy the <code>mod_mhtml.c</code> file to the <code>src</code>
+    directory of your Apache 1.1.1 source tree.
+
+    <b><li></b>
+    Reconfigure the compilation of your server by typing
+    <code>./Configure</code> from the <code>src</code> directory of
+    your Apache 1.1.1 source tree.
+
+    <b><li></b>
+    Recompile the Apache server by typing <code>make</code>, and then
+    copy the <code>httpd</code> file to whereever you have installed
+    the previous version of the Apache server.
+  </ol>
+
+  <h3>That's it!</h3>
+  Congratulations!  You have configured the <Meta-HTML> Engine to work
+  with your Apache server!
+</plain-text>
+</layout::page>
+<include footer.mhtml>
+

@@ -1,0 +1,18 @@
+;;; footer.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Universal Access Inc.
+;;;  Author: Henry Minsky (hqm@ua.com) Fri Sep  6 18:26:35 1996.
+
+<p>
+<hr width=100%>
+<hr width=75%>
+<hr width=50%>
+<hr width=25%>
+<center>
+  <font size="-1">
+  Copyright <copyright> 1996
+  <a href="http://www.ua.com/">Universal Access Inc.</a>
+  <br>
+  Implemented in <a href="http://www.metahtml.com/"><meta-html></a>
+  </font>
+</center>

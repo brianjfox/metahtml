@@ -1,0 +1,318 @@
+;;; make-printable.mhtml: -*- Meta-HTML -*- Make a printed version of the
+;;; manual.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Aug 14 18:39:54 1996.
+<set-var title="Make Printable" footer-already-included=true printing=true>
+<include header.mhtml>
+<include texinfo.mhtml>
+SYSTEM:ERRORS:??<SYSTEM-ERROR-OUTPUT>??
+
+<defsubst write-output>
+  <subst-in-var %1 "&amp;" "&" "&lt;" "<" "&gt;" ">" "\n[ \t\r\n]*\n" "\n\n">
+  <stream-put %0 <get-var-once %1>>
+</defsubst>
+
+<defvar output-stream /tmp/metahtml.texi>
+
+<with-open-stream s <get-var output-stream> type=file mode=write-create>
+  <texinfo-write-header
+   stream=<get-var default::s>
+   filename=metahtml.info
+   title="The Meta-HTML Reference Manual"
+   author[0]="Brian J. Fox, Universal Access Inc."
+   description = <prog
+		   This document describes the Meta-HTML Programming Language,
+		   a language specifically designed for writing applications
+		   for the World Wide Web.>
+
+   draft=""
+   version="2.0 for <get-var-once mhtml::version>">
+  <stream-put s <include manual-prologue.texinfo verbatim>>
+
+  <set-var output=<concat "\n@node The Purpose of Meta-HTML"
+			  "\n@section The Purpose of Meta-HTML"
+			  "\n\n"
+			  <include purpose.mhtml>>>
+  <write-output s output>
+  <set-var output=<concat "\n@node Implementation Design"
+			  "\n@section Implementation Design"
+			  "\n\n"
+			  <include implementation.mhtml>>>
+  <write-output s output>
+  <set-var output=<concat "\n@node Language Syntax"
+			  "\n@section Language Syntax"
+			  "\n\n"
+			  <include syntax.mhtml>>>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Essential Language Features"
+			"\n@chapter Essential Language Features\n">>
+
+  <set-var output=<texinfo-format-section "Variables">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Arrays">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Packages">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Alists"
+					  "Association Lists">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Flow Control">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Language Operators"
+					  "Convenience Primitives">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Strings and Numbers"
+			"\n@chapter Strings and Numbers\n">>
+  <set-var output=<texinfo-format-section "String Operators">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Arithmetic Operators">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Relational Operators">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Input and Output"
+			"\n@chapter Input and Output\n">>
+  <set-var output=<texinfo-format-section "File Operators">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Stream Operators">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Defining New Tags"
+			"\n@chapter Defining New Tags\n">>
+  <set-var output=<texinfo-format-section "Macro Commands">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Managing the Page"
+			"\n@chapter Managing the Page\n">>
+  <set-var output=<texinfo-format-section "Page Operators">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Page Variables">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Authorization Tags">>
+  <write-output s output>
+
+  ;;; Get all of the page variable references.
+  <with-open-database db <metahtml::function-db> mode=read>
+    <database-query db
+      <and <string-eq <get-var-once funtype> variable>
+	   <string-eq <get-var-once section> page-variables>>
+      keys=vars>
+    <set-var i=0>
+    <sort vars>
+    <while <get-var vars[i]>>
+      <package-delete var>
+      <set-var x=<database-load-record db <get-var vars[i]> package=var>>
+      <subst-in-var var::short-desc "\r\n" "\n" "-->" "==&gt;">
+      <subst-in-var var::long-desc "\r\n" "\n" "-->" "==&gt;">
+      <subst-in-var var::long-desc "\\.blank" "">
+      <set-var output=<concat "\n\n@defvr {@i{Page Variable}} {<get-var var::name>}"
+			      "\n<get-var var::short-desc>\n"
+			      "\n<get-var var::long-desc>\n"
+			      "@end defvr\n">>
+      <write-output s output>
+      <increment i>
+    </while>
+  </with-open-database>
+
+  ;;; <set-var output=<texinfo-format-section "Block Commands">>
+  ;;; <write-output s output>
+
+  <stream-put s <concat "\n@node Working with Sessions"
+			"\n@chapter Working with Sessions\n">>
+  <set-var output=<texinfo-format-section "Session Operators">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Working with Databases"
+			"\n@chapter Working with Databases\n">>
+  <set-var output=<texinfo-format-section "Generic SQL Interface"
+					  "The Generic SQL Interface">>
+  <write-output s output>
+
+  <set-var output=<texinfo-format-section "Database Commands"
+					  "GDBM Based Records">>
+  <write-output s output>
+
+<comment>
+  <set-var output=<texinfo-format-section "Direct Dbm Access"
+					  "Database Commands">>
+  <write-output s output>
+</comment>
+
+  <stream-put s <concat "\n@node Debugging Your Programs"
+			"\n@chapter Debugging Your Programs">>
+  <set-var output=<texinfo-format-section "Debugging Commands">>
+  <write-output s output>
+
+  <set-var output=<texinfo-format-section "Dates and Times"
+					  "Dates and Times">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Working with the Server"
+			"\n@chapter Working with the Server\n">>
+  <set-var output=<texinfo-format-section "Server Variables">>
+  <write-output s output>
+
+  ;;; Get all of the server variable references.
+  <with-open-database db <metahtml::function-db> mode=read>
+    <database-query db
+      <and <string-eq <get-var-once funtype> variable>
+	   <string-eq <get-var-once section> server-variables>>
+      keys=vars>
+    <set-var i=0>
+    <sort vars>
+    <while <get-var vars[i]>>
+      <package-delete var>
+      <set-var x=<database-load-record db <get-var vars[i]> package=var>>
+      <subst-in-var var::short-desc "\r\n" "\n" "-->" "==&gt;">
+      <subst-in-var var::long-desc "\r\n" "\n" "-->" "==&gt;">
+      <set-var output=<concat "\n\n@defvr {@i{Server Variable}} {<get-var var::name>}"
+			      "\n<get-var var::short-desc>\n"
+			      "\n<get-var var::long-desc>\n"
+			      "@end defvr\n">>
+      <write-output s output>
+      <increment i>
+    </while>
+  </with-open-database>
+
+
+  <stream-put s <concat "\n@node Working with Modules"
+			"\n@chapter Working with Modules\n">>
+  <set-var output=<texinfo-format-section "Dynamic Modules">>
+  <write-output s output>
+  
+  <stream-put s <concat "\n@node Installation Guide"
+			"\n@chapter Installation Guide\n">>
+
+  <set-var output=<concat "\n@node Installing the Server"
+			  "\n@section Installing the Server"
+			  "\n\n"
+			  <include server-install.mhtml>>>
+  <write-output s output>
+
+  <set-var i=0 pages[]=<prog
+			 Apache
+			 Netscape
+			 NSAPI
+			 NCSA
+			 CERN
+			 PLEXUS>>
+  <while <get-var pages[i]>>
+    <set-var ipage=<include <downcase <get-var pages[i]>>.mhtml verbatim>>
+    <subst-in-var ipage "@" "@@">
+    <set-var output =
+      <concat "\n@node Configuring the <get-var pages[i]> Server"
+	      "\n@section Configuring the <get-var pages[i]> Server"
+	      "\n\n"
+	      <get-var ipage>>>
+    <write-output s output>
+    <increment i>
+  </while>
+
+  <stream-put s <concat "\n@node Networking With Meta-HTML"
+			"\n@appendix Networking With Meta-HTML\n">>
+  <set-var output=<texinfo-format-section "Network Appendix">>
+  <write-output s output>
+  <set-var output=<texinfo-format-section "Meta-HTML TCP/IP Servers"
+					  "Meta-HTML TCP/IP Servers">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node HTML Color Manipulation"
+			"\n@appendix HTML Color Manipulation\n">>
+  <set-var output=<texinfo-format-section "Color Manipulation">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node HTML Helper Tags"
+			"\n@appendix HTML Helper Tags\n">>
+  <set-var output=<texinfo-format-section "HTML Helpers">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node PAGECOUNT: Tracking Page Hits"
+			"\n@appendix PAGECOUNT: Tracking Page Hits\n">>
+  <set-var output=<texinfo-format-section "Pagecount Appendix">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Dynamic Image Creation"
+			"\n@appendix Dynamic Image Creation\n">>
+  <set-var output=<texinfo-format-section "Dynamic Images">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Using GNUPlot"
+			"\n@appendix Using GNUPlot\n">>
+  <set-var output=<texinfo-format-section "Using GNUPlot">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node PowerStrip System Tags"
+			"\n@appendix PowerStrip System Tags\n">>
+  <set-var output=<texinfo-format-section "PowerStrip System Tags">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Other Miscellaneous Tags"
+			"\n@appendix Other Miscellaneous Tags\n">>
+  <set-var output=<texinfo-format-section "Miscellaneous Tags">>
+  <write-output s output>
+
+  <stream-put s <concat "\n@node Misc. Meta-HTML Modules"
+			"\n@appendix Misc. Meta-HTML Modules\n">>
+
+  ;;; Get all of the references to module sections..
+  <unset-var modules>
+  <with-open-database db <metahtml::function-db> mode=read>
+    <database-query db <match <get-var-once section> "-MODULE$">
+      format =
+      <array-add-unique <get-var-once section> ^::modules>>
+  </with-open-database>
+  <sort modules>
+  <foreach section modules>
+    <set-var module-title =
+      <concat "The "
+	      <capitalize <subst-in-string <get-var-once section>
+					   "-" " "
+					   " MODULE$" "">>
+	      " Module">>
+    <set-var output =
+      <texinfo-format-section <get-var-once section>
+			      <get-var-once module-title>
+			      section-word=appendixsec>>
+    <write-output s output>
+  </foreach>
+
+  <stream-put s <concat "\n@node Defined Meta-HTML Variables"
+			"\n@appendix Defined Meta-HTML Variables\n">>
+
+  ;;; Get all of the variable references.
+  <with-open-database db <metahtml::function-db> mode=read>
+    <database-query db <string-eq <get-var-once funtype> variable> keys=vars>
+    <set-var i=0>
+    <sort vars>
+    <while <get-var vars[i]>>
+      <package-delete var>
+      <set-var x=<database-load-record db <get-var vars[i]> package=var>>
+      <subst-in-var var::short-desc "\r\n" "\n" "-->" "==&gt;">
+      <subst-in-var var::long-desc "\r\n" "\n" "-->" "==&gt;">
+      <set-var output=<concat "\n\n@defvr {@i{Variable}} {<get-var var::name>}"
+			      "\n<get-var var::short-desc>\n"
+			      "\n<get-var var::long-desc>\n"
+			      "@end defvr\n">>
+      <write-output s output>
+      <increment i>
+    </while>
+  </with-open-database>
+
+  <stream-put s <concat "\n@node Function Index"
+			"\n@appendix Function Index"
+			"\n@printindex fn"
+			"\n"
+			 "\n@node Variable Index"
+			"\n@appendix Variable Index"
+			"\n@printindex vr"
+			"\n"
+			"\n@node Contents"
+			"\n@contents"
+			"\n@bye\n">>
+</with-open-stream>
+
+Done.
+<unset-var mhtml::cacheable>

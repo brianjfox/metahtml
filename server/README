@@ -1,0 +1,17 @@
+
+			   Meta-HTML Server
+	 Copyright 1995, 1998 Brian J. Fox (bfox@ai.mit.edu)
+
+This directory contains the Meta-HTML server daemon, called Mhttpd.
+
+To install the server by itself, use "./INSTALL".
+
+To install the entire suite of Meta-HTML utilities and goodies, use
+the script located one directory level about this one, called
+"Install".
+
+When you use either script, you are prompted for the values we need to
+know in order to successfully install a web server -- it is easy and
+painless to abort the installation at any time, right up until the
+final confirmation.
+

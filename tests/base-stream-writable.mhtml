@@ -1,0 +1,6 @@
+;;; base-stream-writable.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 20:51:40 1996.
+
+Result: true: <with-open-stream stream base-stream-put-test.mhtml type=file mode=write-create><stream-writable stream></with-open-stream>

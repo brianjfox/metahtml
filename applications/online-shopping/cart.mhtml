@@ -1,0 +1,72 @@
+;;; cart.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Fri Oct 20 22:42:29 1995.
+
+<set-var title="Your Cart">
+<include header.mhtml>
+<include tagsets/cart-substs.mhtml>
+<include tagsets/action-buttons.mhtml>
+
+<read-cart>
+<cart-to-array contents>
+
+<form METHOD=POST action="cart-action.mhtml">
+
+<when <not <get-var contents[0]>>>
+  <h2>Your Basket Contains No Items</h2>
+  <plain-text first-char=<font size="+2">>
+  Currently, your shopping basket is empty.
+
+  You may place items into your basket by clicking on the name of an
+  item in the list of items, and then specifying the quantity, size,
+  and color.  At that time, clicking on "Place In Cart" will put
+  the selected item in your basket.
+  </plain-text>
+</when>
+
+;;;
+;;; CONTENTS is now an array of shopping cart items, in the form:
+;;;
+;;;    ("Clothing::C119" 3 SIZE=XXL COLOR=Black)
+;;;
+;;; Cycle through the elements, printing them in a table.
+;;; List the contents of the shopping cart by iterating over all of
+;;; the product ID variables stored therein.
+
+<when <get-var contents[0]>>
+  <h2>Currently, Your Cart Contains:</h2>
+  <p>
+  <hr size=6 width=60%>
+ 
+
+  <if <browser-supports-tables>
+      <prog <p> <include cart-modify.mhtml>>
+    <include cart-modify-nt.mhtml>>
+
+  <h3> <get-var num-items> item<if <not <eq num-items 1>> s>
+       totalling $<get-var total>
+  </h3>
+  <hr size=6 width=60%>
+
+  <plain-text first-char=<font size=+2>>
+  To purchase these items, click on <b>Purchase</b>.  This gives you a
+  chance to fill in your shipping info, and to select a method of
+  purchase.
+
+  To ``unorder'' a particular item, click on the <i>Cancel</i> box to
+  the left of that item.  The item is returned to the shelf when you
+  click on <b>Update Cart</b>, below.
+  </plain-text>
+</when>
+<plain-text first-char=<font size=+2>>
+Click on <b>Continue Shopping</b> to return to Online Shopping.
+</plain-text>
+<p>
+<center>
+  <if <get-var contents[0]>
+      <action-buttons "Purchase" "Update Cart" "Continue Shopping">
+    <action-buttons "Continue Shopping">>
+</center>
+</form>
+<include footer.mhtml>

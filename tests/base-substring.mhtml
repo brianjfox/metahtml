@@ -1,0 +1,9 @@
+;;; base-substring.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 02:05:53 1996.
+
+Result: "THIS that These thOSe": <substring "THIS that These thOSe" 0>
+Result: "These thOSe": <substring "THIS that These thOSe" 10>
+Result: "that ": <substring "THIS that These thOSe" 5 10>
+Result: "ese thOSe": <substring "THIS that These thOSe" 12 21>

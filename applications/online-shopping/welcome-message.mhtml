@@ -1,0 +1,29 @@
+;;; welcome-message.mhtml: -*- Meta-HTML -*-  Message for the welcome page.
+;;;
+;;;  Copyright (c) 1995 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Nov 21 10:06:44 1995.
+
+<plain-text first-char=<font size="+2">>
+  Welcome to the world of <small-caps><b>Online-Shopping</b></small-caps>!
+
+  This application presents a catalog of products, and allows a consumer
+  to peruse information about the products, place specific products
+  into a <b>shopping cart</b>, and ultimately, purchase the items
+  that have been selected.
+  
+  During this process, the consumer may see the total cost of the
+  products selected so far, the amount of tax that might be charged,
+  and the contents of his or her shopping cart.
+
+  When the shopping cart is filled to the satisfaction of the consumer,
+  the contents of the cart may be purchased immediately, saved away
+  under a username/password pair for later purchase, or discarded.
+
+  Thus, this application provides the consumer with a stress-free
+  shopping environment in which various ``what-if'' possibilities can be
+  explored, and provides the merchant with an interactive sales tool
+  which doesn't require human intervention.
+</plain-text>
+
+<hr size=4 width=40%>
+

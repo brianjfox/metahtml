@@ -1,0 +1,9 @@
+;;; tabs.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Jun 15 08:56:57 1997.
+<include /includes/tabs.mhtml>
+<set-var Tabs::base-Tab-image=thin_maroon-tab.gif>
+<tab welcome.mhtml "This Release">
+<tab Changes.mhtml "What's New">
+<tab instant-odbc.mhtml "Instant ODBC">

@@ -1,0 +1,8 @@
+;;; base-require.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 16:57:25 1996.
+
+Result: "
+
+Require Works": <require base-require-test.mhtml><test-require>

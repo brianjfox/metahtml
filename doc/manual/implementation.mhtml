@@ -1,0 +1,45 @@
+;;; implementation.mhtml: -*- Meta-HTML -*- About the implementation.
+<if <not <get-var files-are-included>>
+    <prog
+      <set-var
+       title="Implementation Model"
+       prev-page="purpose.mhtml" prev-title="Purpose"
+       next-page="syntax.mhtml"  next-title="Syntax">
+      <include header.mhtml>>
+  <prog <h2>Implementation</h2>>>
+<set-var mhtml::cacheable=true>
+
+<ptext>
+Initially, the vast majority of World Wide Web (<strong>WWW</strong>)
+documents consisted of static <emph>pages</emph> of text and images,
+which were described using <b>HTML</b>, and displayed using a
+<emph>browser</emph> which understood only the <b>HTML</b> language.  The
+nature of a WWW connection is <emph>stateless</emph> by definition; each
+request for information is not associated in any way with any previous
+request for information, even when from the same source.
+
+Connections are made from a browser to a WWW <emph>server</emph>, in
+which the browser requests a particular item of data by specifying a
+<emph>Universal Resource Locator</emph> (<strong>URL</strong>).  The
+server looks up the URL, and then returns the data contained within.
+While most URLs are static <b>HTML</b> documents, there exists a mechanism
+in which a program can be run.  The output of such a program is an
+<b>HTML</b> document, and  such programs are referred to as
+<strong><emph>Common Gateway Interface</emph></strong>, or
+<strong>CGI</strong> programs.
+
+<meta-html> is currently implemented as a CGI program which can be
+executed every time the server is ready to retrieve a document.  As
+before, the document to be retrieved can be a file of <b>HTML</b>, an
+image, or a CGI program to be executed.  However, the document can
+also be a file of <meta-html> code, in which case the benefits of
+dynamic variables and flow-control statements are fully realized.
+
+Although this implementation method is not server-specific, you still
+must make a couple of configuration changes to your HTTP server in
+order to hide the <meta-html> program from the user.  Details are in
+the <a href="install.mhtml#serverconf">Installation Guide</a>.
+</ptext>
+
+<if <not <get-var files-are-included>>
+    <include footer.mhtml>>

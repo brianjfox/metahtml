@@ -1,0 +1,13 @@
+("HP9000/380" (("Class" . "Systems")("Product-ID" . "hp9000/380")("Product-Name" . "HP 9000/380")("Unit-Price" . "1200.00")("Attributes" . "")("Short-Description" . "Hewlett Packard 68040 at fast clock speed")("Product-Description" . "Although most people feel this machine is a dog,
+we have been using it for a long time to build
+software, such as the Meta-HTML engine.
+
+Buy it from me, and make me a happy man.
+")("Information-URL" . "")))("DELL-486/25S" (("Class" . "Systems")("Product-ID" . "DELL-486/25s")("Product-Name" . "Dell 486/25s")("Unit-Price" . "500.00")("Attributes" . "")("Short-Description" . "DELL Intel 486, w 8mb ram, floppy, CD rom")("Product-Description" . "This machine really is a dog.  So don't buy
+it.  Instead, purchase one of the new p133 
+machines.")("Information-URL" . "")))("FOX-2P133" (("Class" . "Systems")("Product-ID" . "FOX-2P133")("Product-Name" . "Dual P133 System")("Unit-Price" . "4200.00")("Attributes" . "")("Short-Description" . "What do you need to know? 2 Pentium 133's.")("Product-Description" . "The screaming speed of this super-fast machine
+will leave you gasping for breath.
+
+Complete with 10 PCI slots, 4 ISA slots, and
+1 BMF, this blazing machine makes work a fun
+thing.")("Information-URL" . "")))

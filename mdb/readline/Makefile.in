@@ -1,0 +1,166 @@
+## -*- text -*- ####################################################
+#								   #
+# Makefile.in for the GNU Readline and History Libraries.	   #
+#								   #
+####################################################################
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+LIBREGEX = @LIBREGEX@
+LIBMALLOC = @LIBMALLOC@
+REGEX_H	 = @REGEX_H@
+REGEX_IN = @REGEX_IN@
+LIBCOMPAT = @LIBCOMPAT@
+COMPAT_H  = @COMPAT_H@
+INSTALL = @INSTALL@
+INSTALL_DATA = $(INSTALL)
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+
+bindir	= $(exec_prefix)/bin
+libdir	= $(exec_prefix)/lib
+incdir	= $(prefix)/include
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+MKDIR	= mkdir
+TAR	= tar
+
+# See the file STANDALONE for the -D defines that readline understands
+DEFS = @DEFS@
+
+# For libraries which include headers from other libraries.
+LOCAL_INCLUDES = -I. -I.. -I../..
+LOCAL_DEFINES = 
+
+CPPFLAGS = $(DEFS) $(LOCAL_DEFINES) $(LOCAL_INCLUDES)
+
+# Here is a rule for making .o files from .c files that doesn't force
+# the type of the machine (like -sun3) into the flags.
+.c.o:
+	@echo compiling $< into $@
+	@$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+
+CC = gcc
+# PROFILE_FLAGS = -pg
+DEBUG_FLAGS    = -g $(PROFILE_FLAGS)
+OPTIMIZE_FLAGS = -O69
+LDFLAGS = $(PROFILE_FLAGS)
+WARNING_FLAGS  = -Wall -Wstrict-prototypes
+OPTIONAL_CFLAGS = $(REGEX_IN)
+# OPTIONAL_ASSIGN =  REGEXLIB=$(REGEXLIB) COMPATLIB=$(COMPATLIB)
+REQUIRED_ASSIGN = RM='$(RM)' RANLIB='$(RANLIB)' AR='$(AR)'
+CFLAGS = $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(WARNING_FLAGS) $(DEFS)
+PASSED_CFLAGS = CC='$(CC)' LDFLAGS='$(LDFLAGS)' CFLAGS='$(CFLAGS) -I.. $(OPTIONAL_CFLAGS)'
+SUBMAKE_FLAGS = $(PASSED_CFLAGS) $(OPTIONAL_ASSIGN) $(REQUIRED_ASSIGN)
+
+# The name of the main library target.
+LIBRARY_NAME = libreadline.a
+
+# The C code source files for this library.
+CSOURCES = $(srcdir)readline.c $(srcdir)funmap.c $(srcdir)keymaps.c \
+	   $(srcdir)vi_mode.c $(srcdir)parens.c $(srcdir)rltty.c \
+	   $(srcdir)complete.c $(srcdir)bind.c $(srcdir)isearch.c \
+	   $(srcdir)display.c $(srcdir)signals.c $(srcdir)emacs_keymap.c \
+	   $(srcdir)vi_keymap.c $(srcdir)history.c $(srcdir)tilde.c
+
+# The header files for this library.
+HSOURCES = readline.h rldefs.h chardefs.h keymaps.h history.h \
+	   posixstat.h tilde.h rlconf.h
+
+OBJECTS = readline.o vi_mode.o funmap.o keymaps.o parens.o search.o \
+	  rltty.o complete.o bind.o isearch.o display.o signals.o \
+	  history.o tilde.o
+
+# The texinfo files which document this library.
+DOCSOURCE = doc/rlman.texinfo doc/rltech.texinfo doc/rluser.texinfo
+DOCOBJECT = doc/readline.dvi
+DOCSUPPORT = doc/Makefile
+DOCUMENTATION = $(DOCSOURCE) $(DOCOBJECT) $(DOCSUPPORT)
+
+SUPPORT = Makefile.in ChangeLog $(DOCSUPPORT) examples/[-a-z.]*
+
+SOURCES  = $(CSOURCES) $(HSOURCES) $(DOCSOURCE)
+
+THINGS_TO_TAR = $(SOURCES) $(SUPPORT)
+
+##########################################################################
+
+all: libreadline.a libhistory.a
+
+libreadline.a: $(OBJECTS)
+	$(RM) -f $@
+	$(AR) cq $@ $(OBJECTS)
+	-[ -n "$(RANLIB)" ] && $(RANLIB) $@
+
+libhistory.a: history.o
+	$(RM) -f $@
+	$(AR) cq $@ history.o
+	-[ -n "$(RANLIB)" ] && $(RANLIB) $@
+
+documentation: force
+	[ ! -d doc ] && mkdir doc
+	(if [ -d doc ]; then cd doc; $(MAKE) $(MFLAGS); fi)
+
+force:
+
+# The rule for 'includes' is written funny so that the if statement
+# always returns TRUE unless there really was an error installing the
+# include files.
+install: installdirs libreadline.a
+	${INSTALL_DATA} readline.h keymaps.h chardefs.h history.h \
+		$(incdir)/readline
+	-${MV} $(libdir)/libreadline.a $(libdir)/libreadline.old
+	${INSTALL_DATA} libreadline.a $(bindir)/libreadline.a
+	-[ -n "$(RANLIB)" ] && $(RANLIB) -t $(bindir)/libreadline.a
+
+installdirs:
+	if [ ! -d $(incdir)/readline ]; then \
+	  mkdir $(incdir)/readline && chmod 755 $(incdir)/readline; \
+	fi
+
+uninstall:
+	cd $(incdir)/readline && ${RM} -f ${INSTALLED_HEADERS}
+	cd $(libdir) && ${RM} -f libreadline.a libreadline.old
+
+clean:
+	rm -f $(OBJECTS) *.a
+	(if [ -d doc ]; then cd doc; $(MAKE) $(MFLAGS) $@; fi)
+
+tags:	force
+	etags $(CSOURCES) $(HSOURCES)
+
+TAGS:	force
+	ctags -x $(CSOURCES) $(HSOURCES) > $@
+
+readline: readline.h rldefs.h chardefs.h
+readline: $(OBJECTS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(READLINE_DEFINES) \
+	  $(LOCAL_INCLUDES) -DTEST -o readline readline.c vi_mode.o funmap.o \
+	  keymaps.o -ltermcap
+
+mostlyclean: clean
+distclean realclean: clean
+	$(RM) Makefile
+
+# Dependencies
+readline.o: readline.c readline.h rldefs.h rlconf.h chardefs.h
+readline.o: keymaps.h history.h
+vi_mode.o:  rldefs.h rlconf.h readline.h history.h
+funmap.o:   funmap.c readline.h rlconf.h
+keymaps.o:  keymaps.c emacs_keymap.c vi_keymap.c keymaps.h chardefs.h rlconf.h
+history.o: history.h memalloc.h
+isearch.o: memalloc.h readline.h history.h
+search.o: memalloc.h readline.h history.h
+display.o: readline.h history.h rldefs.h rlconf.h
+complete.o: readline.h rldefs.h rlconf.h
+rltty.o: rldefs.h rlconf.h readline.h
+bind.o: rldefs.h rlconf.h readline.h history.h
+signals.o: rldefs.h rlconf.h readline.h history.h
+parens.o: readline.h

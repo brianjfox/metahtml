@@ -1,0 +1,10 @@
+;;; base-var-case.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 21:53:06 1996.
+
+Result: "Save Form Contents": <set-var var1=Save>
+<var-case 
+  var1="Cancel" <prog Cancel Form Submission>
+  var1="Save" <prog Save Form Contents>
+  var3="Continue" <prog Continue to Next Form>>

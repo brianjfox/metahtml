@@ -1,0 +1,1280 @@
+<set-var title="Regex - Programming with Regex">
+<include header.mhtml>
+<layout::page>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_6.mhtml">previous</A>, <A HREF="regex_8.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC43" HREF="welcome.mhtml#TOC43">Programming with Regex</A></H1>
+
+<P>
+Here we describe how you use the Regex data structures and functions in
+C programs.  Regex has three interfaces: one designed for GNU, one
+compatible with POSIX and one compatible with Berkeley UNIX.
+
+</P>
+
+
+
+<H2><A NAME="SEC44" HREF="welcome.mhtml#TOC44">GNU Regex Functions</A></H2>
+
+<P>
+If you're writing code that doesn't need to be compatible with either
+POSIX or Berkeley UNIX, you can use these functions.  They
+provide more options than the other interfaces.
+
+</P>
+
+
+
+<H3><A NAME="SEC45" HREF="welcome.mhtml#TOC45">GNU Pattern Buffers</A></H3>
+
+<P>
+<A NAME="IDX89"></A>
+<A NAME="IDX90"></A>
+<A NAME="IDX91"></A>
+
+</P>
+<P>
+To compile, match, or search for a given regular expression, you must
+supply a pattern buffer.  A <STRONG>pattern buffer</STRONG> holds one compiled
+regular expression.<A NAME="DOCF4" HREF="regex_foot.mhtml#FOOT4">(4)</A>
+
+</P>
+<P>
+You can have several different pattern buffers simultaneously, each
+holding a compiled pattern for a different regular expression.
+
+</P>
+<P>
+<TT>`regex.h'</TT> defines the pattern buffer <CODE>struct</CODE> as follows:
+
+</P>
+
+<PRE>
+        /* Space that holds the compiled pattern.  It is declared as
+          `unsigned char *' because its elements are
+           sometimes used as array indexes.  */
+  unsigned char *buffer;
+
+        /* Number of bytes to which `buffer' points.  */
+  unsigned long allocated;
+
+        /* Number of bytes actually used in `buffer'.  */
+  unsigned long used;   
+
+        /* Syntax setting with which the pattern was compiled.  */
+  reg_syntax_t syntax;
+
+        /* Pointer to a fastmap, if any, otherwise zero.  re_search uses
+           the fastmap, if there is one, to skip over impossible
+           starting points for matches.  */
+  char *fastmap;
+
+        /* Either a translate table to apply to all characters before
+           comparing them, or zero for no translation.  The translation
+           is applied to a pattern when it is compiled and to a string
+           when it is matched.  */
+  char *translate;
+
+        /* Number of subexpressions found by the compiler.  */
+  size_t re_nsub;
+
+        /* Zero if this pattern cannot match the empty string, one else.
+           Well, in truth it's used only in `re_search_2', to see
+           whether or not we should use the fastmap, so we don't set
+           this absolutely perfectly; see `re_compile_fastmap' (the
+           `duplicate' case).  */
+  unsigned can_be_null : 1;
+
+        /* If REGS_UNALLOCATED, allocate space in the `regs' structure
+             for `max (RE_NREGS, re_nsub + 1)' groups.
+           If REGS_REALLOCATE, reallocate space if necessary.
+           If REGS_FIXED, use what's there.  */
+#define REGS_UNALLOCATED 0
+#define REGS_REALLOCATE 1
+#define REGS_FIXED 2
+  unsigned regs_allocated : 2;
+
+        /* Set to zero when `regex_compile' compiles a pattern; set to one
+           by `re_compile_fastmap' if it updates the fastmap.  */
+  unsigned fastmap_accurate : 1;
+
+        /* If set, `re_match_2' does not return information about
+           subexpressions.  */
+  unsigned no_sub : 1;
+
+        /* If set, a beginning-of-line anchor doesn't match at the
+           beginning of the string.  */ 
+  unsigned not_bol : 1;
+
+        /* Similarly for an end-of-line anchor.  */
+  unsigned not_eol : 1;
+
+        /* If true, an anchor at a newline matches.  */
+  unsigned newline_anchor : 1;
+
+</PRE>
+
+
+
+<H3><A NAME="SEC46" HREF="welcome.mhtml#TOC46">GNU Regular Expression Compiling</A></H3>
+
+<P>
+In GNU, you can both match and search for a given regular
+expression.  To do either, you must first compile it in a pattern buffer
+(see section <A HREF="regex_7.mhtml#SEC45">GNU Pattern Buffers</A>).
+
+</P>
+<P>
+<A NAME="IDX92"></A>
+<A NAME="IDX93"></A>
+Regular expressions match according to the syntax with which they were
+compiled; with GNU, you indicate what syntax you want by setting
+the variable <CODE>re_syntax_options</CODE> (declared in <TT>`regex.h'</TT> and
+defined in <TT>`regex.c'</TT>) before calling the compiling function,
+<CODE>re_compile_pattern</CODE> (see below).  See section <A HREF="regex_2.mhtml#SEC3">Syntax Bits</A>, and
+section <A HREF="regex_2.mhtml#SEC4">Predefined Syntaxes</A>.
+
+</P>
+<P>
+You can change the value of <CODE>re_syntax_options</CODE> at any time.
+Usually, however, you set its value once and then never change it.
+
+</P>
+<P>
+<A NAME="IDX94"></A>
+<CODE>re_compile_pattern</CODE> takes a pattern buffer as an argument.  You
+must initialize the following fields:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>translate initialization</CODE>
+<DD>
+<DT><CODE>translate</CODE>
+<DD>
+<A NAME="IDX95"></A>
+Initialize this to point to a translate table if you want one, or to
+zero if you don't.  We explain translate tables in section <A HREF="regex_7.mhtml#SEC51">GNU Translate Tables</A>.
+
+<DT><CODE>fastmap</CODE>
+<DD>
+<A NAME="IDX96"></A>
+Initialize this to nonzero if you want a fastmap, or to zero if you
+don't.
+
+<DT><CODE>buffer</CODE>
+<DD>
+<DT><CODE>allocated</CODE>
+<DD>
+<A NAME="IDX97"></A>
+<A NAME="IDX98"></A>
+<A NAME="IDX99"></A>
+If you want <CODE>re_compile_pattern</CODE> to allocate memory for the
+compiled pattern, set both of these to zero.  If you have an existing
+block of memory (allocated with <CODE>malloc</CODE>) you want Regex to use,
+set <CODE>buffer</CODE> to its address and <CODE>allocated</CODE> to its size (in
+bytes).
+
+<CODE>re_compile_pattern</CODE> uses <CODE>realloc</CODE> to extend the space for
+the compiled pattern as necessary.
+
+</DL>
+
+<P>
+To compile a pattern buffer, use:
+
+</P>
+<P>
+<A NAME="IDX100"></A>
+
+<PRE>
+char * 
+re_compile_pattern (const char *<VAR>regex</VAR>, const int <VAR>regex_size</VAR>, 
+                    struct re_pattern_buffer *<VAR>pattern_buffer</VAR>)
+</PRE>
+
+<P>
+<VAR>regex</VAR> is the regular expression's address, <VAR>regex_size</VAR> is its
+length, and <VAR>pattern_buffer</VAR> is the pattern buffer's address.
+
+</P>
+<P>
+If <CODE>re_compile_pattern</CODE> successfully compiles the regular
+expression, it returns zero and sets <CODE>*<VAR>pattern_buffer</VAR></CODE> to the
+compiled pattern.  It sets the pattern buffer's fields as follows:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>buffer</CODE>
+<DD>
+<A NAME="IDX101"></A>
+to the compiled pattern.
+
+<DT><CODE>used</CODE>
+<DD>
+<A NAME="IDX102"></A>
+to the number of bytes the compiled pattern in <CODE>buffer</CODE> occupies.
+
+<DT><CODE>syntax</CODE>
+<DD>
+<A NAME="IDX103"></A>
+to the current value of <CODE>re_syntax_options</CODE>.
+
+<DT><CODE>re_nsub</CODE>
+<DD>
+<A NAME="IDX104"></A>
+to the number of subexpressions in <VAR>regex</VAR>.
+
+<DT><CODE>fastmap_accurate</CODE>
+<DD>
+<A NAME="IDX105"></A>
+to zero on the theory that the pattern you're compiling is different
+than the one previously compiled into <CODE>buffer</CODE>; in that case (since
+you can't make a fastmap without a compiled pattern), 
+<CODE>fastmap</CODE> would either contain an incompatible fastmap, or nothing
+at all.
+
+</DL>
+
+<P>
+If <CODE>re_compile_pattern</CODE> can't compile <VAR>regex</VAR>, it returns an
+error string corresponding to one of the errors listed in section <A HREF="regex_7.mhtml#SEC56">POSIX Regular Expression Compiling</A>.
+
+</P>
+
+
+
+<H3><A NAME="SEC47" HREF="welcome.mhtml#TOC47">GNU Matching</A></H3>
+
+<P>
+<A NAME="IDX106"></A>
+
+</P>
+<P>
+Matching the GNU way means trying to match as much of a string as
+possible starting at a position within it you specify.  Once you've compiled
+a pattern into a pattern buffer (see section <A HREF="regex_7.mhtml#SEC46">GNU Regular Expression Compiling</A>), you can ask the matcher to match that pattern against a
+string using:
+
+</P>
+<P>
+<A NAME="IDX107"></A>
+
+<PRE>
+int
+re_match (struct re_pattern_buffer *<VAR>pattern_buffer</VAR>, 
+          const char *<VAR>string</VAR>, const int <VAR>size</VAR>, 
+          const int <VAR>start</VAR>, struct re_registers *<VAR>regs</VAR>)
+</PRE>
+
+<P>
+<VAR>pattern_buffer</VAR> is the address of a pattern buffer containing a
+compiled pattern.  <VAR>string</VAR> is the string you want to match; it can
+contain newline and null characters.  <VAR>size</VAR> is the length of that
+string.  <VAR>start</VAR> is the string index at which you want to
+begin matching; the first character of <VAR>string</VAR> is at index zero.
+See section <A HREF="regex_7.mhtml#SEC52">Using Registers</A>, for a explanation of <VAR>regs</VAR>; you can safely
+pass zero.
+
+</P>
+<P>
+<CODE>re_match</CODE> matches the regular expression in <VAR>pattern_buffer</VAR>
+against the string <VAR>string</VAR> according to the syntax in
+<VAR>pattern_buffers</VAR>'s <CODE>syntax</CODE> field.  (See section <A HREF="regex_7.mhtml#SEC46">GNU Regular Expression Compiling</A>, for how to set it.)  The function returns
+@math{-1} if the compiled pattern does not match any part of
+<VAR>string</VAR> and @math{-2} if an internal error happens; otherwise, it
+returns how many (possibly zero) characters of <VAR>string</VAR> the pattern
+matched.
+
+</P>
+<P>
+An example: suppose <VAR>pattern_buffer</VAR> points to a pattern buffer
+containing the compiled pattern for <SAMP>`a*'</SAMP>, and <VAR>string</VAR> points
+to <SAMP>`aaaaab'</SAMP> (whereupon <VAR>size</VAR> should be 6). Then if <VAR>start</VAR>
+is 2, <CODE>re_match</CODE> returns 3, i.e., <SAMP>`a*'</SAMP> would have matched the
+last three <SAMP>`a'</SAMP>s in <VAR>string</VAR>.  If <VAR>start</VAR> is 0,
+<CODE>re_match</CODE> returns 5, i.e., <SAMP>`a*'</SAMP> would have matched all the
+<SAMP>`a'</SAMP>s in <VAR>string</VAR>.  If <VAR>start</VAR> is either 5 or 6, it returns
+zero.
+
+</P>
+<P>
+If <VAR>start</VAR> is not between zero and <VAR>size</VAR>, then
+<CODE>re_match</CODE> returns @math{-1}.
+
+</P>
+
+
+
+<H3><A NAME="SEC48" HREF="welcome.mhtml#TOC48">GNU Searching</A></H3>
+
+<P>
+<A NAME="IDX108"></A>
+
+</P>
+<P>
+<STRONG>Searching</STRONG> means trying to match starting at successive positions
+within a string.  The function <CODE>re_search</CODE> does this.
+
+</P>
+<P>
+Before calling <CODE>re_search</CODE>, you must compile your regular
+expression.  See section <A HREF="regex_7.mhtml#SEC46">GNU Regular Expression Compiling</A>.
+
+</P>
+<P>
+Here is the function declaration:
+
+</P>
+<P>
+<A NAME="IDX109"></A>
+
+<PRE>
+int 
+re_search (struct re_pattern_buffer *<VAR>pattern_buffer</VAR>, 
+           const char *<VAR>string</VAR>, const int <VAR>size</VAR>, 
+           const int <VAR>start</VAR>, const int <VAR>range</VAR>, 
+           struct re_registers *<VAR>regs</VAR>)
+</PRE>
+
+<P>
+<A NAME="IDX110"></A>
+<A NAME="IDX111"></A>
+whose arguments are the same as those to <CODE>re_match</CODE> (see section <A HREF="regex_7.mhtml#SEC47">GNU Matching</A>) except that the two arguments <VAR>start</VAR> and <VAR>range</VAR>
+replace <CODE>re_match</CODE>'s argument <VAR>start</VAR>.
+
+</P>
+<P>
+If <VAR>range</VAR> is positive, then <CODE>re_search</CODE> attempts a match
+starting first at index <VAR>start</VAR>, then at @math{<VAR>start</VAR> + 1} if
+that fails, and so on, up to @math{<VAR>start</VAR> + <VAR>range</VAR>}; if
+<VAR>range</VAR> is negative, then it attempts a match starting first at
+index <VAR>start</VAR>, then at @math{<VAR>start</VAR> -1} if that fails, and so
+on.  
+
+</P>
+<P>
+If <VAR>start</VAR> is not between zero and <VAR>size</VAR>, then <CODE>re_search</CODE>
+returns @math{-1}.  When <VAR>range</VAR> is positive, <CODE>re_search</CODE>
+adjusts <VAR>range</VAR> so that @math{<VAR>start</VAR> + <VAR>range</VAR> - 1} is
+between zero and <VAR>size</VAR>, if necessary; that way it won't search
+outside of <VAR>string</VAR>.  Similarly, when <VAR>range</VAR> is negative,
+<CODE>re_search</CODE> adjusts <VAR>range</VAR> so that @math{<VAR>start</VAR> +
+<VAR>range</VAR> + 1} is between zero and <VAR>size</VAR>, if necessary.
+
+</P>
+<P>
+If the <CODE>fastmap</CODE> field of <VAR>pattern_buffer</VAR> is zero,
+<CODE>re_search</CODE> matches starting at consecutive positions; otherwise,
+it uses <CODE>fastmap</CODE> to make the search more efficient.
+See section <A HREF="regex_7.mhtml#SEC50">Searching with Fastmaps</A>.
+
+</P>
+<P>
+If no match is found, <CODE>re_search</CODE> returns @math{-1}.  If
+a match is found, it returns the index where the match began.  If an
+internal error happens, it returns @math{-2}.
+
+</P>
+
+
+
+<H3><A NAME="SEC49" HREF="welcome.mhtml#TOC49">Matching and Searching with Split Data</A></H3>
+
+<P>
+Using the functions <CODE>re_match_2</CODE> and <CODE>re_search_2</CODE>, you can
+match or search in data that is divided into two strings.  
+
+</P>
+<P>
+The function:
+
+</P>
+<P>
+<A NAME="IDX112"></A>
+
+<PRE>
+int
+re_match_2 (struct re_pattern_buffer *<VAR>buffer</VAR>, 
+            const char *<VAR>string1</VAR>, const int <VAR>size1</VAR>, 
+            const char *<VAR>string2</VAR>, const int <VAR>size2</VAR>, 
+            const int <VAR>start</VAR>, 
+            struct re_registers *<VAR>regs</VAR>, 
+            const int <VAR>stop</VAR>)
+</PRE>
+
+<P>
+is similar to <CODE>re_match</CODE> (see section <A HREF="regex_7.mhtml#SEC47">GNU Matching</A>) except that you
+pass <EM>two</EM> data strings and sizes, and an index <VAR>stop</VAR> beyond
+which you don't want the matcher to try matching.  As with
+<CODE>re_match</CODE>, if it succeeds, <CODE>re_match_2</CODE> returns how many
+characters of <VAR>string</VAR> it matched.  Regard <VAR>string1</VAR> and
+<VAR>string2</VAR> as concatenated when you set the arguments <VAR>start</VAR> and
+<VAR>stop</VAR> and use the contents of <VAR>regs</VAR>; <CODE>re_match_2</CODE> never
+returns a value larger than @math{<VAR>size1</VAR> + <VAR>size2</VAR>}.  
+
+</P>
+<P>
+The function:
+
+</P>
+<P>
+<A NAME="IDX113"></A>
+
+<PRE>
+int
+re_search_2 (struct re_pattern_buffer *<VAR>buffer</VAR>, 
+             const char *<VAR>string1</VAR>, const int <VAR>size1</VAR>, 
+             const char *<VAR>string2</VAR>, const int <VAR>size2</VAR>, 
+             const int <VAR>start</VAR>, const int <VAR>range</VAR>, 
+             struct re_registers *<VAR>regs</VAR>, 
+             const int <VAR>stop</VAR>)
+</PRE>
+
+<P>
+is similarly related to <CODE>re_search</CODE>.
+
+</P>
+
+
+
+<H3><A NAME="SEC50" HREF="welcome.mhtml#TOC50">Searching with Fastmaps</A></H3>
+
+<P>
+<A NAME="IDX114"></A>
+If you're searching through a long string, you should use a fastmap.
+Without one, the searcher tries to match at consecutive positions in the
+string.  Generally, most of the characters in the string could not start
+a match.  It takes much longer to try matching at a given position in the
+string than it does to check in a table whether or not the character at
+that position could start a match.  A <STRONG>fastmap</STRONG> is such a table.
+
+</P>
+<P>
+More specifically, a fastmap is an array indexed by the characters in
+your character set.  Under the ASCII encoding, therefore, a fastmap
+has 256 elements.  If you want the searcher to use a fastmap with a
+given pattern buffer, you must allocate the array and assign the array's
+address to the pattern buffer's <CODE>fastmap</CODE> field.  You either can
+compile the fastmap yourself or have <CODE>re_search</CODE> do it for you;
+when <CODE>fastmap</CODE> is nonzero, it automatically compiles a fastmap the
+first time you search using a particular compiled pattern.  
+
+</P>
+<P>
+To compile a fastmap yourself, use:
+
+</P>
+<P>
+<A NAME="IDX115"></A>
+
+<PRE>
+int
+re_compile_fastmap (struct re_pattern_buffer *<VAR>pattern_buffer</VAR>)
+</PRE>
+
+<P>
+<VAR>pattern_buffer</VAR> is the address of a pattern buffer.  If the
+character <VAR>c</VAR> could start a match for the pattern,
+<CODE>re_compile_fastmap</CODE> makes
+<CODE><VAR>pattern_buffer</VAR>-&#62;fastmap[<VAR>c</VAR>]</CODE> nonzero.  It returns
+@math{0} if it can compile a fastmap and @math{-2} if there is an
+internal error.  For example, if <SAMP>`|'</SAMP> is the alternation operator
+and <VAR>pattern_buffer</VAR> holds the compiled pattern for <SAMP>`a|b'</SAMP>, then
+<CODE>re_compile_fastmap</CODE> sets <CODE>fastmap['a']</CODE> and
+<CODE>fastmap['b']</CODE> (and no others).
+
+</P>
+<P>
+<CODE>re_search</CODE> uses a fastmap as it moves along in the string: it
+checks the string's characters until it finds one that's in the fastmap.
+Then it tries matching at that character.  If the match fails, it
+repeats the process.  So, by using a fastmap, <CODE>re_search</CODE> doesn't
+waste time trying to match at positions in the string that couldn't
+start a match.
+
+</P>
+<P>
+If you don't want <CODE>re_search</CODE> to use a fastmap,
+store zero in the <CODE>fastmap</CODE> field of the pattern buffer before
+calling <CODE>re_search</CODE>.
+
+</P>
+<P>
+Once you've initialized a pattern buffer's <CODE>fastmap</CODE> field, you
+need never do so again--even if you compile a new pattern in
+it--provided the way the field is set still reflects whether or not you
+want a fastmap.  <CODE>re_search</CODE> will still either do nothing if
+<CODE>fastmap</CODE> is null or, if it isn't, compile a new fastmap for the
+new pattern.
+
+</P>
+
+
+<H3><A NAME="SEC51" HREF="welcome.mhtml#TOC51">GNU Translate Tables</A></H3>
+
+<P>
+If you set the <CODE>translate</CODE> field of a pattern buffer to a translate
+table, then the GNU Regex functions to which you've passed that
+pattern buffer use it to apply a simple transformation
+to all the regular expression and string characters at which they look.
+
+</P>
+<P>
+A <STRONG>translate table</STRONG> is an array indexed by the characters in your
+character set.  Under the ASCII encoding, therefore, a translate
+table has 256 elements.  The array's elements are also characters in
+your character set.  When the Regex functions see a character <VAR>c</VAR>,
+they use <CODE>translate[<VAR>c</VAR>]</CODE> in its place, with one exception: the
+character after a <SAMP>`\'</SAMP> is not translated.  (This ensures that, the
+operators, e.g., <SAMP>`\B'</SAMP> and <SAMP>`\b'</SAMP>, are always distinguishable.)
+
+</P>
+<P>
+For example, a table that maps all lowercase letters to the
+corresponding uppercase ones would cause the matcher to ignore
+differences in case.<A NAME="DOCF5" HREF="regex_foot.mhtml#FOOT5">(5)</A>  Such a table would map all characters except lowercase letters
+to themselves, and lowercase letters to the corresponding uppercase
+ones.  Under the ASCII encoding, here's how you could initialize
+such a table (we'll call it <CODE>case_fold</CODE>):
+
+</P>
+
+<PRE>
+for (i = 0; i &#60; 256; i++)
+  case_fold[i] = i;
+for (i = 'a'; i &#60;= 'z'; i++)
+  case_fold[i] = i - ('a' - 'A');
+</PRE>
+
+<P>
+You tell Regex to use a translate table on a given pattern buffer by
+assigning that table's address to the <CODE>translate</CODE> field of that
+buffer.  If you don't want Regex to do any translation, put zero into
+this field.  You'll get weird results if you change the table's contents
+anytime between compiling the pattern buffer, compiling its fastmap, and
+matching or searching with the pattern buffer.
+
+</P>
+
+
+<H3><A NAME="SEC52" HREF="welcome.mhtml#TOC52">Using Registers</A></H3>
+
+<P>
+A group in a regular expression can match a (posssibly empty) substring
+of the string that regular expression as a whole matched.  The matcher
+remembers the beginning and end of the substring matched by
+each group.
+
+</P>
+<P>
+To find out what they matched, pass a nonzero <VAR>regs</VAR> argument to a
+GNU matching or searching function (see section <A HREF="regex_7.mhtml#SEC47">GNU Matching</A> and
+section <A HREF="regex_7.mhtml#SEC48">GNU Searching</A>), i.e., the address of a structure of this type, as
+defined in <TT>`regex.h'</TT>:
+
+</P>
+
+<PRE>
+<A NAME="IDX116"></A><A NAME="IDX117"></A><A NAME="IDX118"></A><A NAME="IDX119"></A>struct re_registers
+{
+  unsigned num_regs;
+  regoff_t *start;
+  regoff_t *end;
+};
+</PRE>
+
+<P>
+Except for (possibly) the <VAR>num_regs</VAR>'th element (see below), the
+<VAR>i</VAR>th element of the <CODE>start</CODE> and <CODE>end</CODE> arrays records
+information about the <VAR>i</VAR>th group in the pattern.  (They're declared
+as C pointers, but this is only because not all C compilers accept
+zero-length arrays; conceptually, it is simplest to think of them as
+arrays.)
+
+</P>
+<P>
+The <CODE>start</CODE> and <CODE>end</CODE> arrays are allocated in various ways,
+depending on the value of the <CODE>regs_allocated</CODE>
+<A NAME="IDX120"></A>
+field in the pattern buffer passed to the matcher.
+
+</P>
+<P>
+The simplest and perhaps most useful is to let the matcher (re)allocate
+enough space to record information for all the groups in the regular
+expression.  If <CODE>regs_allocated</CODE> is <CODE>REGS_UNALLOCATED</CODE>,
+<A NAME="IDX121"></A>
+the matcher allocates @math{1 + <VAR>re_nsub</VAR>} (another field in the
+pattern buffer; see section <A HREF="regex_7.mhtml#SEC45">GNU Pattern Buffers</A>).  The extra element is set
+to @math{-1}, and sets <CODE>regs_allocated</CODE> to <CODE>REGS_REALLOCATE</CODE>.
+<A NAME="IDX122"></A>
+Then on subsequent calls with the same pattern buffer and <VAR>regs</VAR>
+arguments, the matcher reallocates more space if necessary.
+
+</P>
+<P>
+It would perhaps be more logical to make the <CODE>regs_allocated</CODE> field
+part of the <CODE>re_registers</CODE> structure, instead of part of the
+pattern buffer.  But in that case the caller would be forced to
+initialize the structure before passing it.  Much existing code doesn't
+do this initialization, and it's arguably better to avoid it anyway.
+
+</P>
+<P>
+<CODE>re_compile_pattern</CODE> sets <CODE>regs_allocated</CODE> to
+<CODE>REGS_UNALLOCATED</CODE>,
+so if you use the GNU regular expression
+functions, you get this behavior by default.
+
+</P>
+<P>
+xx document re_set_registers
+
+</P>
+<P>
+POSIX, on the other hand, requires a different interface:  the
+caller is supposed to pass in a fixed-length array which the matcher
+fills.  Therefore, if <CODE>regs_allocated</CODE> is <CODE>REGS_FIXED</CODE> 
+<A NAME="IDX123"></A>
+the matcher simply fills that array.
+
+</P>
+<P>
+The following examples illustrate the information recorded in the
+<CODE>re_registers</CODE> structure.  (In all of them, <SAMP>`('</SAMP> represents the
+open-group and <SAMP>`)'</SAMP> the close-group operator.  The first character
+in the string <VAR>string</VAR> is at index 0.)
+
+</P>
+
+
+<UL>
+
+<LI>
+
+If the regular expression has an <VAR>i</VAR>-th
+group not contained within another group that matches a
+substring of <VAR>string</VAR>, then the function sets
+<CODE><VAR>regs</VAR>-&#62;start[<VAR>i</VAR>]</CODE> to the index in <VAR>string</VAR> where
+the substring matched by the <VAR>i</VAR>-th group begins, and
+<CODE><VAR>regs</VAR>-&#62;end[<VAR>i</VAR>]</CODE> to the index just beyond that
+substring's end.  The function sets <CODE><VAR>regs</VAR>-&#62;start[0]</CODE> and
+<CODE><VAR>regs</VAR>-&#62;end[0]</CODE> to analogous information about the entire
+pattern.
+
+For example, when you match <SAMP>`((a)(b))'</SAMP> against <SAMP>`ab'</SAMP>, you get:
+
+
+<UL>
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[0]</CODE> and 2 in <CODE><VAR>regs</VAR>-&#62;end[0]</CODE> 
+
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[1]</CODE> and 2 in <CODE><VAR>regs</VAR>-&#62;end[1]</CODE> 
+
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[2]</CODE> and 1 in <CODE><VAR>regs</VAR>-&#62;end[2]</CODE> 
+
+<LI>
+
+1 in <CODE><VAR>regs</VAR>-&#62;start[3]</CODE> and 2 in <CODE><VAR>regs</VAR>-&#62;end[3]</CODE> 
+</UL>
+
+<LI>
+
+If a group matches more than once (as it might if followed by,
+e.g., a repetition operator), then the function reports the information
+about what the group <EM>last</EM> matched.
+
+For example, when you match the pattern <SAMP>`(a)*'</SAMP> against the string
+<SAMP>`aa'</SAMP>, you get:
+
+
+<UL>
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[0]</CODE> and 2 in <CODE><VAR>regs</VAR>-&#62;end[0]</CODE> 
+
+<LI>
+
+1 in <CODE><VAR>regs</VAR>-&#62;start[1]</CODE> and 2 in <CODE><VAR>regs</VAR>-&#62;end[1]</CODE> 
+</UL>
+
+<LI>
+
+If the <VAR>i</VAR>-th group does not participate in a
+successful match, e.g., it is an alternative not taken or a
+repetition operator allows zero repetitions of it, then the function
+sets <CODE><VAR>regs</VAR>-&#62;start[<VAR>i</VAR>]</CODE> and
+<CODE><VAR>regs</VAR>-&#62;end[<VAR>i</VAR>]</CODE> to @math{-1}.
+
+For example, when you match the pattern <SAMP>`(a)*b'</SAMP> against
+the string <SAMP>`b'</SAMP>, you get:
+
+
+<UL>
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[0]</CODE> and 1 in <CODE><VAR>regs</VAR>-&#62;end[0]</CODE> 
+
+<LI>
+
+@math{-1} in <CODE><VAR>regs</VAR>-&#62;start[1]</CODE> and @math{-1} in <CODE><VAR>regs</VAR>-&#62;end[1]</CODE> 
+</UL>
+
+<LI>
+
+If the <VAR>i</VAR>-th group matches a zero-length string, then the
+function sets <CODE><VAR>regs</VAR>-&#62;start[<VAR>i</VAR>]</CODE> and
+<CODE><VAR>regs</VAR>-&#62;end[<VAR>i</VAR>]</CODE> to the index just beyond that
+zero-length string.  
+
+For example, when you match the pattern <SAMP>`(a*)b'</SAMP> against the string
+<SAMP>`b'</SAMP>, you get:
+
+
+<UL>
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[0]</CODE> and 1 in <CODE><VAR>regs</VAR>-&#62;end[0]</CODE> 
+
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[1]</CODE> and 0 in <CODE><VAR>regs</VAR>-&#62;end[1]</CODE> 
+</UL>
+
+<LI>
+
+If an <VAR>i</VAR>-th group contains a <VAR>j</VAR>-th group 
+in turn not contained within any other group within group <VAR>i</VAR> and
+the function reports a match of the <VAR>i</VAR>-th group, then it
+records in <CODE><VAR>regs</VAR>-&#62;start[<VAR>j</VAR>]</CODE> and
+<CODE><VAR>regs</VAR>-&#62;end[<VAR>j</VAR>]</CODE> the last match (if it matched) of
+the <VAR>j</VAR>-th group.
+
+For example, when you match the pattern <SAMP>`((a*)b)*'</SAMP> against the
+string <SAMP>`abb'</SAMP>, group 2 last matches the empty string, so you
+get what it previously matched:
+
+
+<UL>
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[0]</CODE> and 3 in <CODE><VAR>regs</VAR>-&#62;end[0]</CODE> 
+
+<LI>
+
+2 in <CODE><VAR>regs</VAR>-&#62;start[1]</CODE> and 3 in <CODE><VAR>regs</VAR>-&#62;end[1]</CODE> 
+
+<LI>
+
+2 in <CODE><VAR>regs</VAR>-&#62;start[2]</CODE> and 2 in <CODE><VAR>regs</VAR>-&#62;end[2]</CODE> 
+</UL>
+
+When you match the pattern <SAMP>`((a)*b)*'</SAMP> against the string
+<SAMP>`abb'</SAMP>, group 2 doesn't participate in the last match, so you
+get:
+
+
+<UL>
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[0]</CODE> and 3 in <CODE><VAR>regs</VAR>-&#62;end[0]</CODE> 
+
+<LI>
+
+2 in <CODE><VAR>regs</VAR>-&#62;start[1]</CODE> and 3 in <CODE><VAR>regs</VAR>-&#62;end[1]</CODE> 
+
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[2]</CODE> and 1 in <CODE><VAR>regs</VAR>-&#62;end[2]</CODE> 
+</UL>
+
+<LI>
+
+If an <VAR>i</VAR>-th group contains a <VAR>j</VAR>-th group
+in turn not contained within any other group within group <VAR>i</VAR>
+and the function sets 
+<CODE><VAR>regs</VAR>-&#62;start[<VAR>i</VAR>]</CODE> and 
+<CODE><VAR>regs</VAR>-&#62;end[<VAR>i</VAR>]</CODE> to @math{-1}, then it also sets
+<CODE><VAR>regs</VAR>-&#62;start[<VAR>j</VAR>]</CODE> and
+<CODE><VAR>regs</VAR>-&#62;end[<VAR>j</VAR>]</CODE> to @math{-1}.
+
+For example, when you match the pattern <SAMP>`((a)*b)*c'</SAMP> against the
+string <SAMP>`c'</SAMP>, you get:
+
+
+<UL>
+<LI>
+
+0 in <CODE><VAR>regs</VAR>-&#62;start[0]</CODE> and 1 in <CODE><VAR>regs</VAR>-&#62;end[0]</CODE> 
+
+<LI>
+
+@math{-1} in <CODE><VAR>regs</VAR>-&#62;start[1]</CODE> and @math{-1} in <CODE><VAR>regs</VAR>-&#62;end[1]</CODE> 
+
+<LI>
+
+@math{-1} in <CODE><VAR>regs</VAR>-&#62;start[2]</CODE> and @math{-1} in <CODE><VAR>regs</VAR>-&#62;end[2]</CODE> 
+</UL>
+
+</UL>
+
+
+
+<H3><A NAME="SEC53" HREF="welcome.mhtml#TOC53">Freeing GNU Pattern Buffers</A></H3>
+
+<P>
+To free any allocated fields of a pattern buffer, you can use the
+POSIX function described in section <A HREF="regex_7.mhtml#SEC60">Freeing POSIX Pattern Buffers</A>,
+since the type <CODE>regex_t</CODE>---the type for POSIX pattern
+buffers--is equivalent to the type <CODE>re_pattern_buffer</CODE>.  After
+freeing a pattern buffer, you need to again compile a regular expression
+in it (see section <A HREF="regex_7.mhtml#SEC46">GNU Regular Expression Compiling</A>) before passing it to
+a matching or searching function.
+
+</P>
+
+
+
+<H2><A NAME="SEC54" HREF="welcome.mhtml#TOC54">POSIX Regex Functions</A></H2>
+
+<P>
+If you're writing code that has to be POSIX compatible, you'll need
+to use these functions. Their interfaces are as specified by POSIX,
+draft 1003.2/D11.2.
+
+</P>
+
+
+
+<H3><A NAME="SEC55" HREF="welcome.mhtml#TOC55">POSIX Pattern Buffers</A></H3>
+
+<P>
+To compile or match a given regular expression the POSIX way, you
+must supply a pattern buffer exactly the way you do for GNU
+(see section <A HREF="regex_7.mhtml#SEC45">GNU Pattern Buffers</A>).  POSIX pattern buffers have type
+<CODE>regex_t</CODE>, which is equivalent to the GNU pattern buffer
+type <CODE>re_pattern_buffer</CODE>.
+
+</P>
+
+
+
+<H3><A NAME="SEC56" HREF="welcome.mhtml#TOC56">POSIX Regular Expression Compiling</A></H3>
+
+<P>
+With POSIX, you can only search for a given regular expression; you
+can't match it.  To do this, you must first compile it in a
+pattern buffer, using <CODE>regcomp</CODE>.
+
+</P>
+
+<P>
+To compile a pattern buffer, use:
+
+</P>
+<P>
+<A NAME="IDX124"></A>
+
+<PRE>
+int
+regcomp (regex_t *<VAR>preg</VAR>, const char *<VAR>regex</VAR>, int <VAR>cflags</VAR>)
+</PRE>
+
+<P>
+<VAR>preg</VAR> is the initialized pattern buffer's address, <VAR>regex</VAR> is
+the regular expression's address, and <VAR>cflags</VAR> is the compilation
+flags, which Regex considers as a collection of bits.  Here are the
+valid bits, as defined in <TT>`regex.h'</TT>:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>REG_EXTENDED</CODE>
+<DD>
+<A NAME="IDX125"></A>
+says to use POSIX Extended Regular Expression syntax; if this isn't
+set, then says to use POSIX Basic Regular Expression syntax.
+<CODE>regcomp</CODE> sets <VAR>preg</VAR>'s <CODE>syntax</CODE> field accordingly.
+
+<DT><CODE>REG_ICASE</CODE>
+<DD>
+<A NAME="IDX126"></A>
+<A NAME="IDX127"></A>
+says to ignore case; <CODE>regcomp</CODE> sets <VAR>preg</VAR>'s <CODE>translate</CODE>
+field to a translate table which ignores case, replacing anything you've
+put there before.
+
+<DT><CODE>REG_NOSUB</CODE>
+<DD>
+<A NAME="IDX128"></A>
+says to set <VAR>preg</VAR>'s <CODE>no_sub</CODE> field; see section <A HREF="regex_7.mhtml#SEC57">POSIX Matching</A>,
+for what this means.
+
+<DT><CODE>REG_NEWLINE</CODE>
+<DD>
+<A NAME="IDX129"></A>
+says that a:
+
+
+<UL>
+
+<LI>
+
+match-any-character operator (see section <A HREF="regex_3.mhtml#SEC9">The Match-any-character Operator (<CODE>.</CODE>)</A>) doesn't match a newline.
+
+<LI>
+
+nonmatching list not containing a newline (see section <A HREF="regex_3.mhtml#SEC17">List Operators (<CODE>[</CODE> ... <CODE>]</CODE> and <CODE>[^</CODE> ... <CODE>]</CODE>)</A>) matches a newline.
+
+<LI>
+
+match-beginning-of-line operator (see section <A HREF="regex_3.mhtml#SEC23">The Match-beginning-of-line Operator (<CODE>^</CODE>)</A>) matches the empty string immediately after a newline,
+regardless of how <CODE>REG_NOTBOL</CODE> is set (see section <A HREF="regex_7.mhtml#SEC57">POSIX Matching</A>, for
+an explanation of <CODE>REG_NOTBOL</CODE>).
+
+<LI>
+
+match-end-of-line operator (see section <A HREF="regex_3.mhtml#SEC23">The Match-beginning-of-line Operator (<CODE>^</CODE>)</A>) matches the empty string immediately before a newline,
+regardless of how <CODE>REG_NOTEOL</CODE> is set (see section <A HREF="regex_7.mhtml#SEC57">POSIX Matching</A>,
+for an explanation of <CODE>REG_NOTEOL</CODE>).
+
+</UL>
+
+</DL>
+
+<P>
+If <CODE>regcomp</CODE> successfully compiles the regular expression, it
+returns zero and sets <CODE>*<VAR>pattern_buffer</VAR></CODE> to the compiled
+pattern. Except for <CODE>syntax</CODE> (which it sets as explained above), it
+also sets the same fields the same way as does the GNU compiling
+function (see section <A HREF="regex_7.mhtml#SEC46">GNU Regular Expression Compiling</A>).
+
+</P>
+<P>
+If <CODE>regcomp</CODE> can't compile the regular expression, it returns one
+of the error codes listed here.  (Except when noted differently, the
+syntax of in all examples below is basic regular expression syntax.)
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>REG_BADRPT</CODE>
+<DD>
+For example, the consecutive repetition operators <SAMP>`**'</SAMP> in
+<SAMP>`a**'</SAMP> are invalid.  As another example, if the syntax is extended
+regular expression syntax, then the repetition operator <SAMP>`*'</SAMP> with
+nothing on which to operate in <SAMP>`*'</SAMP> is invalid.
+
+<DT><CODE>REG_BADBR</CODE>
+<DD>
+For example, the <VAR>count</VAR> <SAMP>`-1'</SAMP> in <SAMP>`a\{-1'</SAMP> is invalid.
+
+<DT><CODE>REG_EBRACE</CODE>
+<DD>
+For example, <SAMP>`a\{1'</SAMP> is missing a close-interval operator.
+
+<DT><CODE>REG_EBRACK</CODE>
+<DD>
+For example, <SAMP>`[a'</SAMP> is missing a close-list operator.
+
+<DT><CODE>REG_ERANGE</CODE>
+<DD>
+For example, the range ending point <SAMP>`z'</SAMP> that collates lower than
+does its starting point <SAMP>`a'</SAMP> in <SAMP>`[z-a]'</SAMP> is invalid.  Also, the
+range with the character class <SAMP>`[:alpha:]'</SAMP> as its starting point in
+<SAMP>`[[:alpha:]-|]'</SAMP>.
+
+<DT><CODE>REG_ECTYPE</CODE>
+<DD>
+For example, the character class name <SAMP>`foo'</SAMP> in <SAMP>`[[:foo:]'</SAMP> is
+invalid.
+
+<DT><CODE>REG_EPAREN</CODE>
+<DD>
+For example, <SAMP>`a\)'</SAMP> is missing an open-group operator and <SAMP>`\(a'</SAMP>
+is missing a close-group operator.
+
+<DT><CODE>REG_ESUBREG</CODE>
+<DD>
+For example, the back reference <SAMP>`\2'</SAMP> that refers to a nonexistent
+subexpression in <SAMP>`\(a\)\2'</SAMP> is invalid.
+
+<DT><CODE>REG_EEND</CODE>
+<DD>
+Returned when a regular expression causes no other more specific error.
+
+<DT><CODE>REG_EESCAPE</CODE>
+<DD>
+For example, the trailing backslash <SAMP>`\'</SAMP> in <SAMP>`a\'</SAMP> is invalid, as is the
+one in <SAMP>`\'</SAMP>.
+
+<DT><CODE>REG_BADPAT</CODE>
+<DD>
+For example, in the extended regular expression syntax, the empty group
+<SAMP>`()'</SAMP> in <SAMP>`a()b'</SAMP> is invalid.
+
+<DT><CODE>REG_ESIZE</CODE>
+<DD>
+Returned when a regular expression needs a pattern buffer larger than
+65536 bytes.
+
+<DT><CODE>REG_ESPACE</CODE>
+<DD>
+Returned when a regular expression makes Regex to run out of memory.
+
+</DL>
+
+
+
+<H3><A NAME="SEC57" HREF="welcome.mhtml#TOC57">POSIX Matching</A></H3>
+
+<P>
+Matching the POSIX way means trying to match a null-terminated
+string starting at its first character.  Once you've compiled a pattern
+into a pattern buffer (see section <A HREF="regex_7.mhtml#SEC56">POSIX Regular Expression Compiling</A>), you
+can ask the matcher to match that pattern against a string using:
+
+</P>
+<P>
+<A NAME="IDX130"></A>
+
+<PRE>
+int
+regexec (const regex_t *<VAR>preg</VAR>, const char *<VAR>string</VAR>, 
+         size_t <VAR>nmatch</VAR>, regmatch_t <VAR>pmatch</VAR>[], int <VAR>eflags</VAR>)
+</PRE>
+
+<P>
+<VAR>preg</VAR> is the address of a pattern buffer for a compiled pattern.
+<VAR>string</VAR> is the string you want to match.  
+
+</P>
+<P>
+See section <A HREF="regex_7.mhtml#SEC59">Using Byte Offsets</A>, for an explanation of <VAR>pmatch</VAR>.  If you
+pass zero for <VAR>nmatch</VAR> or you compiled <VAR>preg</VAR> with the
+compilation flag <CODE>REG_NOSUB</CODE> set, then <CODE>regexec</CODE> will ignore
+<VAR>pmatch</VAR>; otherwise, you must allocate it to have at least
+<VAR>nmatch</VAR> elements.  <CODE>regexec</CODE> will record <VAR>nmatch</VAR> byte
+offsets in <VAR>pmatch</VAR>, and set to @math{-1} any unused elements up to
+@math{<VAR>pmatch</VAR><CODE>[<VAR>nmatch</VAR>]</CODE> - 1}.
+
+</P>
+<P>
+<VAR>eflags</VAR> specifies <STRONG>execution flags</STRONG>---namely, the two bits
+<CODE>REG_NOTBOL</CODE> and <CODE>REG_NOTEOL</CODE> (defined in <TT>`regex.h'</TT>).  If
+you set <CODE>REG_NOTBOL</CODE>, then the match-beginning-of-line operator
+(see section <A HREF="regex_3.mhtml#SEC23">The Match-beginning-of-line Operator (<CODE>^</CODE>)</A>) always fails to match.
+This lets you match against pieces of a line, as you would need to if,
+say, searching for repeated instances of a given pattern in a line; it
+would work correctly for patterns both with and without
+match-beginning-of-line operators.  <CODE>REG_NOTEOL</CODE> works analogously
+for the match-end-of-line operator (see section <A HREF="regex_3.mhtml#SEC24">The Match-end-of-line Operator (<CODE>$</CODE>)</A>); it exists for symmetry.
+
+</P>
+<P>
+<CODE>regexec</CODE> tries to find a match for <VAR>preg</VAR> in <VAR>string</VAR>
+according to the syntax in <VAR>preg</VAR>'s <CODE>syntax</CODE> field.
+(See section <A HREF="regex_7.mhtml#SEC56">POSIX Regular Expression Compiling</A>, for how to set it.)  The
+function returns zero if the compiled pattern matches <VAR>string</VAR> and
+<CODE>REG_NOMATCH</CODE> (defined in <TT>`regex.h'</TT>) if it doesn't.
+
+</P>
+
+
+<H3><A NAME="SEC58" HREF="welcome.mhtml#TOC58">Reporting Errors</A></H3>
+
+<P>
+If either <CODE>regcomp</CODE> or <CODE>regexec</CODE> fail, they return a nonzero
+error code, the possibilities for which are defined in <TT>`regex.h'</TT>.
+See section <A HREF="regex_7.mhtml#SEC56">POSIX Regular Expression Compiling</A>, and section <A HREF="regex_7.mhtml#SEC57">POSIX Matching</A>, for
+what these codes mean.  To get an error string corresponding to these
+codes, you can use:
+
+</P>
+<P>
+<A NAME="IDX131"></A>
+
+<PRE>
+size_t
+regerror (int <VAR>errcode</VAR>,
+          const regex_t *<VAR>preg</VAR>,
+          char *<VAR>errbuf</VAR>,
+          size_t <VAR>errbuf_size</VAR>)
+</PRE>
+
+<P>
+<VAR>errcode</VAR> is an error code, <VAR>preg</VAR> is the address of the pattern
+buffer which provoked the error, <VAR>errbuf</VAR> is the error buffer, and
+<VAR>errbuf_size</VAR> is <VAR>errbuf</VAR>'s size.
+
+</P>
+<P>
+<CODE>regerror</CODE> returns the size in bytes of the error string
+corresponding to <VAR>errcode</VAR> (including its terminating null).  If
+<VAR>errbuf</VAR> and <VAR>errbuf_size</VAR> are nonzero, it also returns in
+<VAR>errbuf</VAR> the first @math{<VAR>errbuf_size</VAR> - 1} characters of the
+error string, followed by a null.  
+<VAR>errbuf_size</VAR> must be a nonnegative number less than or equal to the
+size in bytes of <VAR>errbuf</VAR>.
+
+</P>
+<P>
+You can call <CODE>regerror</CODE> with a null <VAR>errbuf</VAR> and a zero
+<VAR>errbuf_size</VAR> to determine how large <VAR>errbuf</VAR> need be to
+accommodate <CODE>regerror</CODE>'s error string.
+
+</P>
+
+
+<H3><A NAME="SEC59" HREF="welcome.mhtml#TOC59">Using Byte Offsets</A></H3>
+
+<P>
+In POSIX, variables of type <CODE>regmatch_t</CODE> hold analogous
+information, but are not identical to, GNU's registers (see section <A HREF="regex_7.mhtml#SEC52">Using Registers</A>).  To get information about registers in POSIX, pass to
+<CODE>regexec</CODE> a nonzero <VAR>pmatch</VAR> of type <CODE>regmatch_t</CODE>, i.e.,
+the address of a structure of this type, defined in
+<TT>`regex.h'</TT>:
+
+</P>
+<P>
+<A NAME="IDX132"></A>
+
+<PRE>
+typedef struct
+{
+  regoff_t rm_so;
+  regoff_t rm_eo;
+} regmatch_t;
+</PRE>
+
+<P>
+When reading in section <A HREF="regex_7.mhtml#SEC52">Using Registers</A>, about how the matching function
+stores the information into the registers, substitute <VAR>pmatch</VAR> for
+<VAR>regs</VAR>, <CODE><VAR>pmatch</VAR>[<VAR>i</VAR>]-&#62;rm_so</CODE> for
+<CODE><VAR>regs</VAR>-&#62;start[<VAR>i</VAR>]</CODE> and
+<CODE><VAR>pmatch</VAR>[<VAR>i</VAR>]-&#62;rm_eo</CODE> for
+<CODE><VAR>regs</VAR>-&#62;end[<VAR>i</VAR>]</CODE>.
+
+</P>
+
+
+<H3><A NAME="SEC60" HREF="welcome.mhtml#TOC60">Freeing POSIX Pattern Buffers</A></H3>
+
+<P>
+To free any allocated fields of a pattern buffer, use:
+
+</P>
+<P>
+<A NAME="IDX133"></A>
+
+<PRE>
+void 
+regfree (regex_t *<VAR>preg</VAR>)
+</PRE>
+
+<P>
+<VAR>preg</VAR> is the pattern buffer whose allocated fields you want freed.
+<CODE>regfree</CODE> also sets <VAR>preg</VAR>'s <CODE>allocated</CODE> and <CODE>used</CODE>
+fields to zero.  After freeing a pattern buffer, you need to again
+compile a regular expression in it (see section <A HREF="regex_7.mhtml#SEC56">POSIX Regular Expression Compiling</A>) before passing it to the matching function (see section <A HREF="regex_7.mhtml#SEC57">POSIX Matching</A>).
+
+</P>
+
+
+
+<H2><A NAME="SEC61" HREF="welcome.mhtml#TOC61">BSD Regex Functions</A></H2>
+
+<P>
+If you're writing code that has to be Berkeley UNIX compatible,
+you'll need to use these functions whose interfaces are the same as those
+in Berkeley UNIX.  
+
+</P>
+
+
+
+<H3><A NAME="SEC62" HREF="welcome.mhtml#TOC62">BSD Regular Expression Compiling</A></H3>
+
+<P>
+With Berkeley UNIX, you can only search for a given regular
+expression; you can't match one.  To search for it, you must first
+compile it.  Before you compile it, you must indicate the regular
+expression syntax you want it compiled according to by setting the 
+variable <CODE>re_syntax_options</CODE> (declared in <TT>`regex.h'</TT> to some
+syntax (see section <A HREF="regex_2.mhtml#SEC2">Regular Expression Syntax</A>).
+
+</P>
+<P>
+To compile a regular expression use:
+
+</P>
+<P>
+<A NAME="IDX134"></A>
+
+<PRE>
+char *
+re_comp (char *<VAR>regex</VAR>)
+</PRE>
+
+<P>
+<VAR>regex</VAR> is the address of a null-terminated regular expression.
+<CODE>re_comp</CODE> uses an internal pattern buffer, so you can use only the
+most recently compiled pattern buffer.  This means that if you want to
+use a given regular expression that you've already compiled--but it
+isn't the latest one you've compiled--you'll have to recompile it.  If
+you call <CODE>re_comp</CODE> with the null string (<EM>not</EM> the empty
+string) as the argument, it doesn't change the contents of the pattern
+buffer.
+
+</P>
+<P>
+If <CODE>re_comp</CODE> successfully compiles the regular expression, it
+returns zero.  If it can't compile the regular expression, it returns
+an error string.  <CODE>re_comp</CODE>'s error messages are identical to those
+of <CODE>re_compile_pattern</CODE> (see section <A HREF="regex_7.mhtml#SEC46">GNU Regular Expression Compiling</A>).
+
+</P>
+
+
+<H3><A NAME="SEC63" HREF="welcome.mhtml#TOC63">BSD Searching</A></H3>
+
+<P>
+Searching the Berkeley UNIX way means searching in a string
+starting at its first character and trying successive positions within
+it to find a match.  Once you've compiled a pattern using <CODE>re_comp</CODE>
+(see section <A HREF="regex_7.mhtml#SEC62">BSD Regular Expression Compiling</A>), you can ask Regex
+to search for that pattern in a string using:
+
+</P>
+<P>
+<A NAME="IDX135"></A>
+
+<PRE>
+int
+re_exec (char *<VAR>string</VAR>)
+</PRE>
+
+<P>
+<VAR>string</VAR> is the address of the null-terminated string in which you
+want to search.
+
+</P>
+<P>
+<CODE>re_exec</CODE> returns either 1 for success or 0 for failure.  It
+automatically uses a GNU fastmap (see section <A HREF="regex_7.mhtml#SEC50">Searching with Fastmaps</A>).
+
+</P>
+
+<P><HR><P>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_6.mhtml">previous</A>, <A HREF="regex_8.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+</layout::page>
+<include footer.mhtml>

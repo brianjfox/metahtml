@@ -1,0 +1,6 @@
+;;; base-subst-in-page.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 20:53:28 1996.
+
+Result: "Old String Replaced": Replace this with that <subst-in-page "Replace this with that" "Old String Replaced">

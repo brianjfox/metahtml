@@ -1,0 +1,310 @@
+;;; filter.mhtml: -*- Meta-HTML -*-  Macros which allow PAGE filtering!
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep  1 11:34:02 1996.
+;;;					    Wed Nov 15 13:14:04 2000
+;;;
+;;; This file is part of <Meta-HTML>(tm), a system for the rapid
+;;; deployment of Internet and Intranet applications via the use
+;;; of the Meta-HTML language.
+;;; 
+;;; Copyright (c) 1995, 2000, Brian J. Fox (bfox@ai.mit.edu).
+;;; 
+;;; Meta-HTML is free software; you can redistribute it and/or modify
+;;; it under the terms of the GNU  Free Software License as published
+;;; by the Free Software Foundation; either version 1, or (at your
+;;; option) any later version.
+;;; 
+;;; This program is distributed in the hope that it will be useful,
+;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;; License for more details.
+;;; 
+;;; You should have received a copy of the License along with this
+;;; program; if you have not, you may obtain one by sending E-mail
+;;; to hqm@ai.mit.edu.
+
+<defun filter::emit-attributes alist>
+  ;;; Re-emit the attribute list from a tag.
+  <set-var vars[]=<alist-package-vars alist> result[]="">
+  <foreach var vars>
+    <set-var
+      output = <get-var-once var>
+      val = <alist-get-var alist <get-var-once var>>>
+    <if <get-var-once val>
+	<set-var output =
+	  <concat <get-var-once output>
+		  "="
+		  <%%quote-for-set-var <get-var-once val>>>>>
+    <array-append <get-var-once output> result>
+  </foreach>
+  <subst-in-string <get-var-once result[]> "\n" " ">
+</defun>
+
+<defun filter::make-filtered-url url filter-url pagehost pagebase>
+  ;;; Prefix the filter-URL to a URL.
+  ;;; [1] Replace leading site-absolute URLs, i.e. which start
+  ;;; with leading slashes, with /filter-URL/host/path
+  <if <match <get-var-once url> "^/.*">
+      <set-var url = <concat
+		      <get-var-once filter-url>
+		      "/"
+		      <get-var-once pagehost>
+		      <get-var-once url>>>
+    <if <match <get-var-once url> "^http://.*" caseless=true>
+	<set-var url = <concat <get-var-once filter-url>
+			       "/"
+			       <get-var-once url>>>
+      <if <not <match <get-var-once url>
+		      "(^[Ff][Tt][Pp]:)|(^[Mm][Aa][Ii][Ll][Tt][Oo]:)">>
+	  <set-var url = <concat
+			  <get-var-once filter-url>
+			  "/"
+			  <get-var-once pagebase>
+			  "/"
+			  <get-var-once url>>>>>>
+  <get-var-once url>
+</defun>
+
+<defun filter::make-absolute-url url pagehost pagebase>
+  ;;; This is used for IMG SRC=x.
+  ;;; [1] Replace leading site-absolute URLs, i.e. which start
+  ;;; with leading slashes, with host/path
+  <if <match <get-var-once url> "^/.*">
+      <set-var url = <concat <get-var-once pagehost> <get-var-once url>>>
+    <if <not <match <get-var-once url> "^http://.*" caseless=true>>
+	<set-var url = <concat
+			<get-var-once pagebase> "/" <get-var-once url>>>>>
+  <get-var-once url>
+</defun>
+
+<defun FILTER::A &attributes attr>
+  ;;; Convert all HREFS to absolute filtered URLS.
+  <apply set-var <get-var-once attr>>
+  <subst-in-var href "[\n\r\t ]" "">
+  <set-var href=<filter::make-filtered-url 
+		 <get-var-once href>
+		 <get-var-once filter::filter-url>
+		 <get-var-once filter::page-host>
+		 <get-var-once filter::page-base-url>>>
+  <unset-var attr>
+  <concat "<" "A " <filter::emit-attributes <package-to-alist>> ">">
+</defun>
+
+<defun FILTER::AREA &attributes attr>
+  <apply set-var <get-var-once attr>>
+  <subst-in-var href "[\n\r\t ]" "">
+  <set-var href=<filter::make-filtered-url 
+		 <get-var-once href>
+		 <get-var-once filter::filter-url>
+		 <get-var-once filter::page-host>
+		 <get-var-once filter::page-base-url>>>
+  <unset-var attr>
+  <concat "<" "AREA " <filter::emit-attributes <package-to-alist>> ">">
+</defun>
+
+<defun FILTER::IMG &attributes attr>
+  <apply set-var <get-var-once attr>>
+  <subst-in-var src "[\n\r\t ]" "">
+  <set-var src=<filter::make-absolute-url 
+		<get-var-once src>
+		<get-var-once filter::page-host>
+		<get-var-once filter::page-base-url>>>
+  <when <get-var-once lowsrc>>
+    <subst-in-var lowsrc "[\n\r\t ]" "">
+    <set-var lowsrc = <filter::make-absolute-url 
+		       <get-var-once lowsrc>
+		       <get-var-once filter::page-host>
+		       <get-var-once filter::page-base-url>>>
+  </when>
+  <unset-var attr>
+  <concat "<" "IMG " <filter::emit-attributes <package-to-alist>> ">">
+</defun>
+
+<defun FILTER::APPLET &attributes attr>
+  <apply set-var <get-var-once attr>>
+  <if <get-var-once codebase>
+      <set-var codebase=<filter::make-absolute-url
+			 <get-var-once base>
+			 <get-var-once filter::page-host>
+			 <get-var-once filter::page-base-url>>>
+    <set-var codebase=<get-var-once filter::page-base-url>>>
+  <unset-var attr>
+  <concat "<" "APPLET "  <filter::emit-attributes <package-to-alist>> ">">
+</defun>
+
+<defun FILTER::INPUT &attributes attr>
+  <apply set-var <get-var-once attr>>
+  <subst-in-var src "[\n\r\t ]" "">
+  <set-var src=<filter::make-absolute-url 
+		 <get-var-once src>
+		 <get-var-once filter::page-host>
+		 <get-var-once filter::page-base-url>>>
+  <unset-var attr>
+  <concat "<" "INPUT " <filter::emit-attributes <package-to-alist>> ">">
+</defun>
+
+<defun FILTER::BODY &attributes attr>
+  <apply set-var <get-var-once attr>>
+  <when <get-var-once background>>
+    <subst-in-var background "[\n\r\t ]" "">
+    <set-var background=<filter::make-absolute-url 
+			 <get-var-once background>
+			 <get-var-once filter::page-host>
+			 <get-var-once filter::page-base-url>>>
+  </when>
+  <unset-var attr>
+  <concat "<" "BODY " <filter::emit-attributes <package-to-alist>> ">">
+</defun>
+
+<defun FILTER::FORM &attributes attr>
+  <subst-in-var action "[\n\r\t ]" "">
+  <set-var action=<filter::make-filtered-url 
+		   <get-var-once action>
+		   <get-var-once filter::filter-url>
+		   <get-var-once filter::page-host>
+		   <get-var-once filter::page-base-url>>>
+  <unset-var attr>
+  <concat "<" "FORM " <filter::emit-attributes <package-to-alist>> ">">
+</defun>
+
+<defun FILTER::FRAME &attributes attr>
+  <subst-in-var src "[\n\r\t ]" "">
+  <set-var src=<filter::make-filtered-url 
+		<get-var-once src>
+		<get-var-once filter::filter-url>
+		<get-var-once filter::page-host>
+		<get-var-once filter::page-base-url>>>
+  <unset-var attr>
+  <concat "<" "FRAME " <filter::emit-attributes <package-to-alist>> ">">
+</defun>
+
+;;; Remove the first character of URL if it is a slash character (/).
+<defun filter::strip-leading-slash url>
+  <if <string-eq <substring  <get-var-once url> 0 1> "/">
+      <substring <get-var-once url> 1>
+    <get-var-once url>>
+</defun>
+
+;;; If the URL has no HTTP (protocol), then add one.
+<defun filter::add-protocol-if-needed url>
+  <if <not <match <get-var-once url> "^(http|ftp|file):" caseless=true>>
+      <set-var url=<concat http:// <get-var-once url>>>>
+  <subst-in-var url ":///" "://">
+  <get-var-once url>
+</defun>
+
+<defun filter::strip-protocol-and-host url>
+  <subst-in-string <get-var-once url>
+		   "(^[^:]+:)([/]+[^/]+)(.*$)" "\\3">
+</defun>
+
+<defun filter::get-path url>
+  ;;; Removes the protocol and hostname portion from the URL,
+  ;;; leaving only the pathname (suitable for passing to 
+  ;;; the HTTP GET routine)
+  <set-var
+    host=<match <get-var url> "http://[^/]+" action=extract>
+    path=<match <get-var url> <get-var host> action=delete>>
+  <or <get-var path> "/">
+</defun>
+
+<defun filter::get-base-url url>
+  ;;; If this has a slash, then a filename with no "." in it, assume
+  ;;; it is a directory name.
+  <if <not <match <get-var-once url> ".*/[^\.]+\\..*">>
+      <get-var-once url>
+
+    ;;; If the url has no trailing slash, and is only a hostname, return it. 
+    ;;; Otherwise strip off everything after the last trailing slash.
+    <if <match <get-var-once url> "^[^:]+://[^/]+$">
+	<get-var-once url>
+      <subst-in-string <get-var-once url>  "(.*)/[^/]*" "\\1">>>
+</defun>
+
+<defun filter::parse-url-components url>
+  <set-var
+    filter::filter-url = <concat <get-var-once mhtml::http-to-host>
+				 <get-var-once mhtml::relative-prefix>/
+				 <get-var-once mhtml::current-doc>>
+
+    filter::pageurl = <filter::add-protocol-if-needed
+		       <filter::strip-leading-slash <get-var-once url>>>
+    
+    filter::page-host = <match <get-var-once filter::pageurl> 
+			       "http://[^/]+" action=extract>
+    
+    filter::pagepath = <filter::strip-protocol-and-host
+			<get-var-once filter::pageurl>>
+    filter::page-base-url=<filter::get-base-url <get-var-once filter::pageurl>>
+    filter::host = <http::host-part <get-var-once filter::page-host>>
+    filter::port = <http::port-part <get-var-once filter::page-host>>>
+</defun>
+
+<defsubst filter::california-filter whitespace=delete>
+  ;;; Here is a sample filter function.  It takes the name of a variable
+  ;;; which contains the page source as an argument, and modifies that
+  ;;; source.  This one makes the text something that a californian might
+  ;;; say.
+  <subst-in-var %0 "[Uu]niversal" "Total"
+		"," ", like"
+		"( in | [Ww]ith )" "\\1like "
+		"[.][ \t\r\n]" ", know what I mean? "
+		";" ".  Anyway, dude, like ">
+</defsubst>
+
+<defun filter::page-filter url &optional filter-function>
+  ;;; Fetch <var url>, and filter it using <var filter-function>
+  <filter::parse-url-components <get-var-once url>>
+
+  ;;; Remember which URLs have already been visited.
+  <unset-var already-visited>
+
+  ;;; Actually fetch the URL using HTTP.
+  <set-var fetched? = 
+    <http::get-document
+     <get-var-once filter::host>
+     <get-var-once filter::port> 
+     <concat <get-var-once filter::pagepath>
+	     <if <get-var-once env::query_string>
+		 "?<get-var-once env::query_string>">>
+     var=filter::pagesrc
+     strip-headers=true>>
+
+  ;;; If we got redirected, we need to recompute the various
+  ;;; URL paths and pieces.
+  <if <get-var-once http::redirected-url>
+      <filter::parse-url-components <get-var-once http::redirected-url>>>
+
+  ;;; There is a bad ambiguity here:
+  ;;; If we get a URL like http://foo.com/bar/baz
+  ;;; is the last component a directory or a filename to be stripped off?
+  ;;;
+  ;;; We use the heuristic that if it has no "." in it, the last component
+  ;;; is in fact a directory, and should be left in the base url address.
+
+  ;;; Now, disable dangerous commands, so we can do substitutions
+  ;;; of our commands into the HTML text, and then evaluate it.
+  <coerce-var filter::pagesrc type=string>
+  <subst-in-var filter::pagesrc "(<)(with|cgi|dir|http)" "&lt;\\2">
+
+  ;;; Prepare to call our URL fixup functions.
+  <subst-in-var filter::pagesrc
+		"(<)[fF][rR][aA][mM][eE][\t\r\n ]" "\\1FILTER::FRAME "
+		"(<)[bB][oO][dD][yY][\t\r\n ]" "\\1FILTER::BODY "
+		"(<)[aA][\t\r\n ]" "\\1FILTER::A "
+		"(<)[iI][mM][gG][\t\r\n ]" "\\1FILTER::IMG "
+		"(<)[fF][oO][rR][mM][\t\r\n ]" "\\1FILTER::FORM "
+		"(<)[iI][nN][pP][uU][tT][\t\r\n ]" "\\1FILTER::INPUT "
+		"(<)[aA][rR][eE][aA][\t\r\n ]" "\\1FILTER::AREA "
+		"(<)[aA][pP][pP][lL][eE][tT][\t\r\n ]" "\\1FILTER::APPLET ">
+
+  ;;; Fixup URLs and other links.
+  <set-var filter::pagesrc = <%%eval <get-var-once filter::pagesrc>>>
+
+  ;;; Filter the page, using the caller's filter function.
+  <apply <get-var-once filter-function> filter::pagesrc>
+
+  ;;; Return the results!
+  <get-var-once filter::pagesrc>
+</defun>

@@ -1,0 +1,7 @@
+;;; base-random.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Nov  5 13:49:22 1996.
+
+Result: true: <if <match <random 10> "[0-9]"> true>
+Result: true: <set-var rdm=<random 10000>><if <or <eq rdm 0> <and <gt rdm 0> <lt rdm 10000>>> true>

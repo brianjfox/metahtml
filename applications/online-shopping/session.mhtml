@@ -1,0 +1,112 @@
+;;; session/session-action.mhtml: -*- Meta-HTML -*-
+;;;
+;;; Allow the user to save or restore a particular session.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Sat Sep 16 08:31:03 1995.
+;;;
+<set-var title="Save/Restore Session">
+<include header.mhtml>
+
+<when <get-var posted::action>>
+  ;;; Some macros for dealing with session state.
+  ;;;
+  ;;; Saves all of the session variables under SESSION-STATE-KEY.
+  ;;; At a later date, this information can be reloaded to restore a
+  ;;; session.  Returns "true" if the state was saved.
+  <defsubst save-session-state whitespace=delete>
+    <session-import "" state-info>
+    <unset-var state-info::maintenance-password>
+    <set-var state-info::saver-id =
+      "<get-var env::remote_host>[<get-var env::remote_addr>]:<get-var env::remote_user>, using <get-var env::http_user_agent>">
+    <set-var state-info = <package-to-alist state-info>>
+    <with-open-database db <database saved-sessions> mode=write-create>
+      <database-save-record db <get-var session-state-key> state-info>
+    </with-open-database>
+  </defsubst>
+
+  ;;;
+  ;;; Restores all of the session variables saved under SESSION-STATE-KEY.
+  ;;; Returns "true" if the state was saved.
+  <defsubst restore-session-state whitespace=delete>
+    <with-open-database db <database saved-sessions> mode=read>
+      <set-var x::result =
+	<database-load-record db <get-var session-state-key>>>
+    </with-open-database>
+    <if <get-var x::result>
+	<prog
+	  <alist-to-package <get-var state-info> state-info>
+	  <set-var x::i=0 x::names[]=<package-vars state-info>>
+	  <while <get-var x::names[x::i]>>
+	  <set-session-var "<var-name x::names[x::i]>" =
+	    <get-var "<get-var x::names[x::i]>">>
+	  <increment x::i>
+	  </while>
+	  <get-var x::result>>>
+  </defsubst>
+
+  <if <not <get-var "Your Name" "Your Password">>
+      <prog
+	<p>
+	You must supply both <b>Your Name</b> and <b>Your Password</b>.>
+    <prog
+      <set-var session-state-key = <get-var "Your Name" "Your Password">>
+
+      <set-session-var
+	"Your Name" = <get-var "posted::Your Name">
+	"Your Password" = <get-var "posted::Your Password">>
+
+      <var-case
+	action="Save Session"
+	<prog
+	  <set-var saved-p = <save-session-state>>
+	  <p>
+	  Your session state has <if <not <get-var saved-p>> <b>not</b>>
+	  been saved.
+	  <p>
+	  <redirect "<get-var mhtml::url-to-dir>/">>
+
+	action="Restore Session"
+	<prog
+	  <set-var restored-p = <restore-session-state>>
+	  <p>
+	  Your session state has <if <not get-var restored-p> <b>not</b>>
+	  been restored.
+	  <p>
+	  <redirect "<get-var mhtml::url-to-dir>/">>>>>
+</when>
+
+<ptext>
+  You may save or restore the state of your current session.
+
+  A saved session will only last about 48 hours, so if you spend more
+  time than that in between connections to Online Shopping, you will
+  have to start over again on your shopping spree.
+  </ptext>
+  <p>
+  <form method=POST action="<thisdoc>">
+    <center>
+      <table> 
+	<tr>
+	  <td align=right><b>Your Name:</b></td>
+	  <td align=left>
+	    <input type=text size=30 name="Your Name"
+		   value="<get-var "Your Name">">
+	  </td>
+	</tr>
+	<tr>
+	  <td align=right><b>Your Password:</b></td>
+	  <td align=left>
+	    <input type=text size=30 name="Your Password"
+		   value="<get-var "Your Password">">
+	  </td>
+	</tr>
+      </table>
+      <p>
+      <input type=submit name=action value="Save Session">
+      <input type=submit name=action value="Restore Session">
+    </center>
+  </form>
+
+<include footer.mhtml>
+

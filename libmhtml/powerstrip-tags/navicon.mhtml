@@ -1,0 +1,18 @@
+;;; navicon.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Jun 18 22:03:46 1996.
+<defun navicon image url status-info>
+  <if <not <match <get-var url> "^http://" caseless=true>>
+      <if <not <match <get-var url> "^/">>
+	  <set-var url = <concat <get-var mhtml::url-to-dir>/<get-var url>>>
+	<set-var url = <concat <get-var mhtml::http-prefix url>>>>>
+  <concat
+   <a href="<get-var url>" <if <get-var ibis::frames> "target=main">
+      OnMouseOver="window.status='<get-var status-info>'; return true;">
+   <img src="<site::image <get-var image>>"
+	alt="<capitalize <get-var image>>" align=top border=0>
+   </a>>
+  <if <not <match <get-var layout::navigation-buttons> horizontal>>
+      <p>>
+</defun>

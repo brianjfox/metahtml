@@ -1,0 +1,211 @@
+;;; quicktalk.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Aug 16 20:21:37 1996.
+
+<defun chat::initialize>
+  <set-var chat-internal::room-names[]=
+    <prog
+      <include chat.rooms>
+      <include temp.rooms>>>
+  <set-var chat-internal::privileged-users[]=<include chat.priv>>
+  <defvar chat::highlight-self true>
+</defun>
+
+<defun quicktalk>
+  <b><small-caps upper="+1" lower="-1">QuickTalk</small-caps></b>
+</defun>
+
+;;; <make-innocuous [package]> turns the contents of PACKAGE into
+;;; non-executable text.
+<defun make-innocuous package>
+  <set-var names[]=<package-vars <get-var package>>>
+  <set-var i=0>
+  <while <get-var-once names[i]>>
+    <subst-in-var <get-var-once names[i]> "&" "&amp;" "<" "&lt;" ">" "&gt;">
+    <increment i>
+  </while>
+</defun>
+
+<defun chat::database room>
+  <if <not <get-var room>> <set-var room=chatdata>>
+  <subst-in-var room "^[ \t\n\r]+" "" "[ \t\r\n]+$" "" "[\"'`,.~|]" ""
+		"[ \t\r\n]+" "-">
+  <get-var mhtml::include-prefix mhtml::relative-prefix>/<get-var room>.db
+</defun>
+
+<defun chat::add-to-history data>
+  <with-open-database db <chat::database <get-var chat::current-room>>
+					 mode=write-create>
+    <database-query db true keys=keys>
+    <set-var length=<array-size keys>>
+    <when <gt length 100>>
+      ;;; Only keep the most recent 100.
+      <sort keys descending=true>
+      <set-var i=100>
+      <while <get-var keys[i]>>
+	<set-var x=<database-delete-record db <get-var keys[i]>>>
+	<unset-var keys[i]>
+	<increment i>
+      </while>
+    </when>
+
+    ;;; Add the new data.
+    <set-var handle=<get-var chat::handle>>
+    <set-var time=<time>>
+    <set-var x=<database-save-record db <get-var time> time handle data>>
+  </with-open-database>
+</defun>
+
+<defun mhtml::unexecutable data>
+  <set-var names=<package-vars *meta-html* strip=true> i=0>
+  <while <get-var names[i]>>
+    <subst-in-var data "<([/]*<get-var names[i]>)" "&lt;\\1">
+    <increment i>
+  </while>
+</defun>
+
+<defun chat::chat-history count>
+  <set-var count = <or <get-var count> 40>>
+  <with-open-database db <chat::database <get-var chat::current-room>>
+		      mode=read>
+    <database-query db true keys=keys>
+    <sort keys descending=true>
+    <set-var i=<get-var count>>
+    <while <get-var keys[i]>>
+      <set-var keys[i]="">
+      <increment i>
+    </while>
+    <set-var keys[]=<get-var keys[]>>
+    <sort keys>
+
+    ;;; Output the data.
+    <table width=100%>
+      <set-var i=0>
+      <while <get-var-once keys[i]>>
+	<set-var x=<database-load-record db <get-var keys[i]>>>
+	<set-var hwidth=10 date="">
+	<when <get-var chat::show-times>>
+	  <set-var date=<substring <date <get-var keys[i]>> 0 20>>
+	  <set-var hwidth=35>
+	</when>
+
+	<tr valign=top>
+	  <td align=right width=<get-var hwidth>%>
+	    <if <and <get-var chat::highlight-self>
+		     <string-eq <get-var chat::handle> <get-var handle>>>
+		<font color="#D02020">>
+	    <concat <i><get-var-once handle>
+		    <if <get-var date>
+			<prog <font size=-1>[<get-var date>]</font>>>
+		    :</i>>
+	    <if <and <get-var chat::highlight-self>
+		     <string-eq <get-var chat::handle> <get-var handle>>>
+		</font>>
+	  </td>
+	  <td align=left width=<sub 100 hwidth>%>
+	    <if <and <get-var chat::highlight-self>
+		     <string-eq <get-var chat::handle> <get-var handle>>>
+		<font color="#D02020">>
+	    <get-var-once data>
+	    <if <and <get-var chat::highlight-self>
+		     <string-eq <get-var chat::handle> <get-var handle>>>
+		</font>>
+	  </td>
+	</tr>
+	<increment i>
+      </while>
+    </table>
+  </with-open-database>
+</defun>
+
+<defun chat::mail-hist to count>
+  <set-var count = <or <get-var count> 40>>
+  <with-open-database db <chat::database <get-var chat::current-room>>
+		      mode=read>
+    <database-query db true keys=keys>
+    <sort keys descending=true>
+    <set-var i=<get-var count>>
+    <while <get-var keys[i]>>
+      <set-var keys[i]="">
+      <increment i>
+    </while>
+    <set-var keys[]=<get-var keys[]>>
+    <sort keys>
+
+    ;;; Make the lines.
+    <set-var output-lines[]="" i=0>
+    <while <get-var-once keys[i]>>
+      <set-var x=<database-load-record db <get-var keys[i]>>>
+      <set-var data[]=<word-wrap <get-var data> width=60>>
+      <set-var data[0]="<pad <get-var-once handle> 10 truncate=t>: <get-var data[0]>">
+      <set-var j=1>
+      <while <get-var data[j]>>
+	<set-var data[j]="               <get-var data[j]>">
+	<increment j>
+      </while>
+      <set-var output-lines[<mul i 2>] = <get-var data[]>>
+      <increment i>
+    </while>
+  </with-open-database>
+
+  ;;; Have all the lines.  Mail the data.
+  <with-open-stream s localhost:25 type=tcp mode=write-create>
+    <stream-put s "HELO <get-var env::server_name>\n">
+    <stream-put s "MAIL FROM: chat@metahtml.com\n">
+    <stream-put s "RCPT TO: <get-var to>\n">
+    <stream-put s "DATA\n">
+    <stream-put s "From chat@metahtml.com\n">
+    <stream-put s "Errors-to: bfox@ua.com\n">
+    <stream-put s "Date: <date>\n">
+    <stream-put s "To: <get-var to>\n">
+    <stream-put s "Subject: Chat History from <get-var chat::current-room>\n">
+    <stream-put s "\n">
+
+    <set-var j=0>
+    <while <lt j i>>
+      <stream-put s "   <get-var output-lines[j]>\n">
+      <increment j>
+    </while>
+    <stream-put s "\n.\n">
+    <stream-put s "QUIT\n">
+    <stream-get-contents s ignore>
+  </with-open-stream>
+</defun>
+  
+<defsubst chat::select-room>
+  <tr>
+    <td align=right> <b>Room:</b> </td>
+    <td align=left colspan=2>
+      <with-local-package>
+	<set-var i=0>
+	<set-var room=<get-var chat::current-room>>
+	<select name=room>
+	  <while <get-var chat-internal::room-names[i]>>
+	    <select-option room <get-var chat-internal::room-names[i]>>
+	    <increment i>
+	  </while>
+	</select>
+      </with-local-package>
+    </td>
+  </tr>
+</defsubst>
+
+<defun chat::chatter-list>
+  <set-var sids[]=<sessions-of-key>>
+  <set-var i=0 j=0 chat::chatter-list[]="">
+  <while <get-var sids[i]>>
+    <package-delete temp>
+    <alist-to-package <session-data-alist <get-var sids[i]>> temp>
+    <if <get-var temp::current-room>
+	<prog
+	  <set-var chat::chatter-list[j]=<package-to-alist temp strip=true>>
+	  <increment j>>>
+    <increment i>
+  </while>
+</defun>
+
+<defun chat::notify from to subject message>
+  <cgi-exec echo '<get-var message>' |
+	    /bin/mail -s '<get-var subject>' '<get-var to>' &>
+</defun>

@@ -1,0 +1,34 @@
+;;; gc-database-var.mhtml: -*- Meta-HTML -*-  Man Page for
+;;; gc-database utility.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 11:56:29 1996.
+;;;
+<set-var title="gc-database: Meta-HTML Utility">
+<include header.mhtml>
+
+<layout::page>
+  <h3> Collect Unused Entries </h3>
+  <ptext>
+    <synopsis gc-database [database-file-name]>
+
+    <code>gc-database</code> allows the server administrator to reorganize
+    an existing <meta-html> database on the fly.
+
+    Invoking <code>gc-database</code> without arguments reorganizes the
+    session database information, thus reducing the amount of disk space
+    that it uses.  This program should be run periodically, depending on
+    your site and usage.
+
+    Without an argument, <code>gc-database</code> tries to reorganize the
+    file <code>/tmp/sessions.db</code>.  Given a database filename, it
+    reorganizes that database instead.
+
+    <meta-html> databases only need reorganizing when many additions and
+    deletions are made.  For databases containing mostly static data, such
+    as an address book, or product catalog, reorganization is unnecessary.
+
+    Also see: <a href="reap-sessions.mhtml"><code>reap-sessions</a>.
+  </ptext>
+</layout::page>
+<include footer.mhtml>

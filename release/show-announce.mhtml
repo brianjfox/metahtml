@@ -1,0 +1,15 @@
+;;; show-announce.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jun 20 10:06:25 1997.
+<set-var title="Release Announcement for v<get-var mhtml::version>">
+<include header.mhtml>
+
+<set-var doc=<include ANNOUNCE-<get-var-once mhtml::version> verbatim>>
+<subst-in-var doc "&" "&amp;" "<" "&lt;" ">" "&gt;" "\n" "<br>\n">
+
+<plain-text>
+<get-var-once doc>
+</plain-text>
+
+<include footer.mhtml>

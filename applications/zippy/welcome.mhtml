@@ -1,0 +1,348 @@
+;;; welcome.mhtml -*- Mode: Meta-HTML; -*-
+;;; Zippy Homepage
+;;;
+;;;  Copyright (c) 1996 Universal Access Inc.
+;;;  Author: Henry Minsky (hqm@ua.com)
+;;;  Changes: Jarlath O'Carroll (jarlath@oisin.com) Thu May  2 00:27:08 1996
+;;;  More Changes: Brian J. Fox (bfox@ua.com) Sun Jun 23 14:29:30 1996
+
+<defvar layout::layout plain>
+<defvar site::background white>
+<defvar site::inhibit-navigation true>
+<require tagsets/border>
+
+;;; A few simple macros make the world a better place.
+<defmacro simple-body title>
+  <html>
+  <head> <title> <get-var title> </title> </head>
+  <body bgcolor="#FFFFFF">
+  <layout::page>
+    <plain-text>
+      %body
+    </plain-text>
+    <p>
+    <center>
+      <font size=-1>
+      Designed by <a href="http://www.ua.com/">Universal Access Inc.</a>
+      <br>
+      Implemented in <a href="http://www.metahtml.com/">
+      <font size="-1">Meta-HTML</font></a>
+      </font>
+    </center>
+  </layout::page>
+  </body>
+  </html>
+</defmacro>
+
+<defun zippy url>
+  <get-var mhtml::url-to-dir>/zippy.mhtml/<get-var-once url>
+</defun>
+
+<defun zref host>
+  <concat 
+   <a href="<zippy http://<get-var host>/>">
+   <get-var host>
+   </a>>
+</defun>
+
+<if <get-var-once posted::url> <redirect <zippy <get-var posted::url>>>>
+
+<simple-body "Zippy meets Meta-HTML">
+  <h2>Zippy Meets Meta-HTML</h2>
+  <hr>
+  <img align=right src="<get-var mhtml::url-to-dir>/images/zippy.gif">
+  <concat <a href="<zippy http://www.microsoft.com/>">
+	  <img align=right src="<get-var mhtml::url-to-dir>/images/week.gif">
+	  </a>>
+
+    Are you tired of the same old content at those same old web sites?
+    The <b><Meta-HTML> Active Filter</b> freshens up any Web page!
+
+    Simply type the URL of your favorite web site into the box below, and
+    click on the Zippy quote. This works well with corporate sites such as
+    a <a href="<zippy http://www.ibm.com/lvg/annual96.html>">
+    speech from IBM's CEO</a>, <zref www.eds.com>, or government sites
+    such as <zref www.house.gov>.
+    Once you have fetched a page, try following some of the links on
+    it, and they will be, uh, fixed, too.
+
+    <hr>
+    <br clear=all>
+    <form method="post" action="<get-var mhtml::current-doc>">
+      <center>
+	The URL: <input name="url" type="text" value="" maxlength="1024"
+			size="50">
+
+	<input name="action" value="Bo Derek ruined my life!" type="submit">
+      </center>
+    </form>
+
+    <h2>Other Starting Points</h2>
+    <font size=+2>
+    <ul>
+      <li> <a href="<zippy http://www.yahoo.com/>">Yahoo Directory</a>
+      <li>
+      <a href="<zippy http://home.netscape.com/home/internet-search.html>">
+	Netscape Net Search
+      </a>
+    </ul>
+
+    </font>
+    <h3>Best responses so far to the Zippy filter</h3>
+
+<pre>
+From: starlite@nando.net
+Date: Thu, 05 Oct 95 19:52:04
+To: &lt;hqm@ua.com&gt;
+Subject: Stupid sayings
+X-Mailer: IBM WebExplorer
+
+What is the meaning of all these stupid quotes thrown in the middle of
+everything?
+
+I do not find this amusing and may not visit this site again! If I
+want to read stupid jokes, I'll read my own comic books. I came here
+to read about dodge trucks, not meaningless and dumb commentary
+remarks!
+
+Grow up!!!
+
+<hr>
+
+Date: Wed, 25 Oct 95 07:55:56 -0700
+From: Rich Bennett &lt;74644.2176@compuserve.com&gt;
+Organization: indirect.com
+To: hqm@ua.com
+
+I've been using your active filter while perusing various religious
+web sites and the experience has been... surreal.
+
+Absolutely mind-boggling when a Zippy quote comes up in the middle of
+a right-wing tirade. You just never know when it is real or Zippy -
+especially the one about the nuns and teen appeal.
+
+Rich Bennett
+
+<hr>
+
+Date: Sat, 13 Jan 96 08:51:20 -0800
+From: Jim Lynch &lt;jlynch@computek.net&gt;
+Organization: Compu-Tek International
+To: hqm@ua.com
+
+&gt; --------------------------------------------------------------------
+&gt; 
+&gt; HTML Active Filter by (hqm@ua.com)
+&gt; Quotes from various comic books and strips by Bill Griffith
+&gt; 
+&gt; Enter URL:
+
+What is this?
+What am I supposed to do?
+
+
+Date: 14 Jan 1996 18:14:50 U
+From: "Tom Purcell" &lt;tom@invitrogen.com&gt;
+Subject: Well done
+To: "Zippy the Pinhead" &lt;hqm@ua.com&gt;
+
+Your Zippy filter is the first thing on the web that ever made me wet
+my pants!  It did wonders to my company's web page.  Remember:
+Frivolty is a stern taskmaster.
+
+Love, Tommy
+
+<hr>
+
+Date: Tue, 16 Jan 96 20:17 IST
+To: hqm@ua.com
+From: Jim Lynch &lt;jlynch@computek.net&gt;
+Subject: Help!
+
+Do you have any idea what this form is (see bottom of message)? It
+appears whenever I try to download some software from a sharware site
+- such as from 'http://web-proto.ua.com19730/cgi-bin/sfx/http://cwsapps.texas.net/image.html'
+
+What URL is it looking for? Is this form really necessary? I suspect
+that one of the kids pushed some button causing this form to be
+activated because it just started appearing a couple of days ago. They
+don't have a clue as to what they might have done and neither do I.
+
+Any help you can provide would be greatly appreciated!
+
+<hr>
+
+Date: Sat, 20 Jan 1996 20:08:02 -0800
+From: Paul Quek &lt;firsthac@singnet.com.sg&gt;
+To: hqm@ua.com
+Subject: What's this about?
+X-URL: http://www.ua.com/cgi-bin/sfx/http://www.intac.com/~dimitri/dh/which1.html
+
+Hi,
+
+Except for the (graphic) phallic symbol and the cool picture, what's 
+does "Which mushroom will he use to end his story?" all about?
+Sorry, I am really puzzled!
+
+- Paul Quek
+
+<hr>
+
+Date: Sun, 4 Feb 1996 20:36:57 +0100
+To: hqm@ua.com
+From: marcus@student.his.se (Marcus Berglund)
+Subject: Zippy
+
+AT LAST !!
+Something on the web that really make sense!
+
+ _________________________________________________________________
+
+Marcus Berglund ph +46 500435958, +46 70 5636709
+Home - Email marcus@student.his.se Homepage
+http://www.student.his.se/~marcus
+Work - marcus@fotoslide.bmc.uu.se     http://fotoslide.bmc.uu.se
+
+<hr>
+
+Date: Tue, 13 Feb 1996 03:43:04 -0800
+From: Tom Most &lt;thedoctor@sonic.net&gt;
+Organization: Sonoma County Online
+To: hqm@ua.com
+Subject: Zippy
+
+Thanks guys!  If I can't see pictures of naked women, discuss
+abortion, or anything else that the pinheads in Washington decide may
+not fit into their propanda machine, at the very least the true and
+original Pinhead "Zippy" will spice up the resultant banalities
+guaranteed under the Telecom Bill.
+
+The Doctor
+thedoctor@socool.com
+Sonoma County Online
+http://www.socool.com/socool/
+
+<hr>
+
+Date: Sun, 25 Feb 1996 22:03:07 -0500
+From: Milton Kay &lt;miltonk@inch.com$gt;
+To: hqm@ua.com
+Subject: Question
+X-URL: http://www.ua.com/cgi-bin/sfx/http://www.tnp.com
+
+This filter is really funny.  Does it damage the original file in any
+way.
+
+Milton Kay {Voice and Data specialist in the New York City area)
+
+<hr>
+
+Date: Wed, 6 Mar 1996 00:54:56 -0600
+From: bob &lt;Robert.M.Cairo@shell.super-highway.net&gt;
+To: hqm@ua.com
+Subject: Those stupid quotes
+
+What's with all the stupid quotes embedded in everything I'm trying
+to read online?  I don't like them, and I don't appreciate their 
+presence.  Either move them to the beginning and end of the 
+documents or get rid of them!
+
+Much obliged.
+
+<hr>
+
+Date: Tue, 05 Mar 96 21:15:34 0000
+From: Josh Pettit &lt;jpettit@chaph.usc.edu&gt;
+Organization: University of Southern California
+To: hqm@ua.com
+
+I on't quite know what's going on here, but i'm Amy-Cecilia, and if
+you're the person who's been messing wiht my homepage, I'd sincerely
+appreciate it if you'd stop.  It's nice to know you bothered to think
+of "improvements" , but since it is my page, I'd like it if you stayed
+off.
+
+Thank you.
+
+Amy-Cecilia Sanders
+
+<hr>
+
+Date: Sun, 10 Mar 1996 16:07:59 -0600
+From: bob <Robert.M.Cairo@shell.super-highway.net>
+To: hqm@ua.com
+Subject: Jibberish
+
+Where do the assinine comments come from? They interrupt my 
+reading, and are not funny, if that's what they are supposed to be.
+
+Just to let you know, being on-line is not worth it with all the s--- 
+interjected into the valuable information.
+
+<hr>
+
+From: xxxx@west.net
+Date: Wed, 8 May 1996 06:36:12 -0700
+To: info@ua.com
+Subject: Universal Access Inc.
+X-Mailer: Meta-HTML mailto.mhtml
+
+ 
+Name: Xxxxx Xxxxx
+
+Email: xxx@west.net
+Add to Mailing List: Yes
+
+Comment: Someone that stores files on your server has stolen my entire
+web site and altered the pages with what they must think are funny
+jokes and put them up on your server.  I do not appreciate this! Just
+like you I'm trying to do business on the Internet and this kind of
+stuff really is uncalled for. Here is the URL of the page:
+http://www.ua.com/cgi-bin/sfx/www.west.net/~regent Their e-mail
+address is hqm@ua.com I'm sure if they are clever enough to do stuff
+like this that they can design their own page!  I would appreciate it
+if you would remove these pages from your server and ask whoever did
+it to stop mucking about with other people's pages. I have also
+e-mailed the person and have asked them to remove the pages.
+
+ 
+Name: Rich Warren
+City: Pottstown
+State: PA
+Zip: 19464
+Email: rboknows@pclogiconline.com
+Add to Mailing List: Yes
+
+Comment: 
+Man, this is truly hysterical.  I may not surf again without 
+the zippy filter!!
+
+Name: Donna-Maree Bennetts
+City: PORTLAND
+State: vi
+Zip: 3305
+Email: donnam@iconnect.net.au
+Add to Mailing List: No
+
+Comment:
+Please stopo the filter going to my page: http://www.
+iconnect.net.au/~cafe/cybercafe.html
+
+I HATED IT!
+
+Name: Bill Freese
+City: Belgrade
+State: MT
+Zip: 59714
+Email: iedbf@msu.oscs.montana.edu
+Add to Mailing List: No
+
+Comment: 
+This is almost certainly the finest thing
+I have seen on the Web. When you figure out
+how to apply this filter to the rest of the
+universe, don't tell me about it. Just do it.
+
+</pre>
+
+</simple-body>

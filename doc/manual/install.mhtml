@@ -1,0 +1,18 @@
+;;; install.mhtml: -*- Meta-HTML -*-
+;;;
+<set-var
+    title="Meta-HTML Installation Guide"
+    prev-page="features.mhtml" prev-title="Language Features"
+    files-are-included=true>
+<include header.mhtml>
+
+<a name=server-install></a>
+<include server-install.mhtml>
+
+<a name=hiding></a>
+<include hiding.mhtml>
+
+<a href=serverconf></a>
+<include serverconf.mhtml>
+
+<include footer.mhtml>

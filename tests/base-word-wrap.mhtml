@@ -1,0 +1,16 @@
+;;; base-word-wrap.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 02:20:27 1996.
+
+Result: THIS:<word-wrap THIS THaT These those width=5>
+Result: THIS
+THaT
+These
+those: <word-wrap "THIS THaT These those" width=5>
+Result: Meta-HTML is all-encompassing website development tool for
+anyone from novice to professional.  Used worldwide as the
+No.1 tool to quickly prototype and build fully functional
+web sites.  Since 1996 Meta-HTML deployment has doubled
+monthly to it's current level of 220,000 sites installed
+and using Meta-HTML products.: <word-wrap "Meta-HTML is all-encompassing website development tool for anyone from novice to professional.  Used worldwide as the No.1 tool to quickly prototype and build fully functional web sites.  Since 1996 Meta-HTML deployment has doubled monthly to it's current level of 220,000 sites installed and using Meta-HTML products." 20>

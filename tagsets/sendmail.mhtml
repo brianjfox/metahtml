@@ -1,0 +1,252 @@
+;;; sendmail.mhtml: -*- Meta-HTML -*-  Send mail.
+;;;
+;;;  Copyright (c) 1995 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Sep 29 09:07:41 1995.
+
+<defun e-mail::mailhost name>
+  <if <get-var-once name>
+      <set-var e-mail::mailhost=<get-var-once name>>
+    <get-var-once e-mail::mailhost>>
+</defun>
+
+<defun e-mail::debug-sendmail-session>
+  <get-var e-mail::debug-sendmail-session>
+</defun>
+
+<defsubst e-mail::put outgoing>
+  <if <e-mail::debug-sendmail-session>
+      <array-append <get-var-once outgoing> e-mail::sendmail-session>>
+  <stream-put stream <get-var-once outgoing>>
+</defsubst>
+
+<defsubst e-mail::converse outgoing>
+  <when <get-var-once outgoing>>
+    <if <e-mail::debug-sendmail-session>
+	<array-append <get-var-once outgoing> e-mail::sendmail-session>>
+    <stream-put stream <get-var-once outgoing>>
+  </when>
+  <set-var ignore = <stream-get stream>>
+  <if <e-mail::debug-sendmail-session>
+      <array-append <get-var-once ignore> e-mail::sendmail-session>>
+  <while <string-eq <substring <get-var-once ignore> 3 4> "-">>
+    <set-var ignore = <stream-get stream>>
+    <if <e-mail::debug-sendmail-session>
+	<array-append <get-var-once ignore> e-mail::sendmail-session>>
+  </while>
+</defsubst>
+
+<defun e-mail::sendmail from to[] cc[] bcc[] headers[] message>
+  ;;; DOC_SECTION (NETWORK-APPENDIX)
+  ;;; Send the mail message MESSAGE using a network stream from FROM to TO.
+  ;;;
+  ;;; The host used to connect to for SMTP defaults to the value of
+  ;;; the variable E-MAIL::MAILHOST, or "localhost" if that variable is
+  ;;; not defined.
+  ;;;
+  ;;; TO, CC, BCC and HEADERS are arrays containing elements of the indicated
+  ;;; type.
+  ;;;
+  ;;; <example>
+  ;;; <e-mail::sendmail webmaster@mysite.com bfox@ua.com "" ""
+  ;;;    "Subject: Testing e-mail::sendmail
+  ;;;     Reply-to: nobody@nobody.com"
+  ;;;    "This is the body of the message.">
+  ;;; </example>
+  ;;;
+  ;;; If the variable <var e-mail::debug-sendmail-session> is non-empty,
+  ;;; it says to populate the array e-mail::sendmail-session with the
+  ;;; conversation that takes place between <Meta-HTML> and the SMTP
+  ;;; server at <var e-mail::mailhost>.
+  <set-var result="">
+  <if <e-mail::debug-sendmail>
+      <set-var e-mail::sendmail-session[]="">>
+  <defvar e-mail::mailhost localhost>
+
+  <with-open-stream stream <e-mail::mailhost>:25 type=tcp mode=write-create>
+    <e-mail::converse "HELO <get-var-once env::server_name>\r\n">
+    <if <and <match <get-var-once ignore> ESMTP>
+             <not <string-eq <substring <get-var-once ignore> 3 4> "-">>>
+	<e-mail::converse>>
+
+    <e-mail::converse "MAIL FROM: \<<get-var-once from>\>\r\n">
+
+    ;;; Put the TO addresses.
+    <foreach addr to>
+      <e-mail::converse "RCPT TO: \<<get-var-once addr>\>\r\n">
+    </foreach>
+
+    ;;; Put the CC addresses.
+    <foreach addr cc>
+      <e-mail::converse "RCPT TO: \<<get-var-once addr>\>\r\n">
+    </foreach>
+
+    ;;; Put the BCC addresses.
+    <foreach addr bcc>
+      <e-mail::converse "RCPT TO: \<<get-var-once addr>\>\r\n">
+    </foreach>
+
+    ;;; Start sending the body.
+    <e-mail::converse "DATA\r\n">
+    <e-mail::put "From: <get-var-once from>\r\n">
+
+    ;;; Mention all of the TO addresses here.
+    <e-mail::put "To: <get-var-once to[0]>">
+    <foreach addr to start=1 iter=i>
+      ;;; Don't put more than 3 addresses per line.
+      <if <eq <mod i 3> 0>
+	  <e-mail::put ",\r\n\t<get-var-once addr>">
+	<e-mail::put ", <get-var-once addr>">>
+    </foreach>
+    <e-mail::put "\r\n">
+
+    ;;; Mention all of the CC addresses here.
+    <when <get-var-once cc[0]>>
+      <e-mail::put "Cc: <get-var-once cc[0]>">
+      <foreach addr cc start=1 iter=i>
+	;;; Don't put more than 3 addresses per line.
+	<if <eq <mod i 3> 0>
+	    <e-mail:::put ",\r\n\t<get-var-once addr>">
+	  <e-mail::put ", <get-var-once addr>">>
+      </foreach>
+      <e-mail::put "\r\n">
+    </when>
+
+    ;;; If there are any headers, put them here now.
+    <foreach header headers>
+      <e-mail::put "<get-var-once header>\r\n">
+    </foreach>
+
+    ;;; Put the subject if there is one.
+    <if <get-var-once subject>
+	<e-mail::put "Subject: <get-var-once subject>\r\n">>
+
+    ;;; Tell the rest of world who to blame.
+    <e-mail::put "X-Mailer: Meta-HTML Sendmail 1.0\r\n">
+
+    ;;; End of headers.
+    <e-mail::put "\r\n">
+
+    ;;; Put the message body.
+    <coerce-var message type=array>
+    <foreach line message>
+      <e-mail::put "<get-var-once line>\r\n">
+    </foreach>
+
+    ;;; End the message data.
+    <e-mail::converse "\r\n.\r\n">
+
+    ;;; Quit using sendmail.
+    <e-mail::converse "QUIT\r\n">
+  </with-open-stream>
+</defun>
+
+;;; Older stuff is on the way out.
+;;; <sendmail from to subject> body </sendmail>
+<defmacro sendmail mail::from mail::to mail::subject
+		   mail::headers[0] mail::headers[1] mail::headers[2]
+		   whitespace=delete>
+  <subst-in-var mail::from "[ \t\n]" ".">
+  <with-open-stream stream localhost:25 type=tcp mode=read-write>
+    <stream-put stream "HELO\r\n">
+    <stream-put stream "MAIL FROM: \<<get-var-once mail::from>\>\r\n">
+    <stream-put stream "RCPT TO: \<<get-var-once mail::to>\>\r\n">
+    <stream-put stream "DATA\r\n">
+    <stream-put stream "From <get-var-once mail::from>\r\n">
+    <stream-put stream "To: <get-var-once mail::to>\r\n">
+    <if <get-var-once mail::subject>
+	<stream-put stream "Subject: <get-var-once mail::subject>\r\n">>
+    <foreach mail::addr mail::headers>
+      <stream-put stream "<get-var-once mail::addr>\r\n">
+    </foreach>
+    <stream-put stream "X-Mailer: Meta-HTML mailto.mhtml\r\n\r\n">
+    <stream-put stream <subst-in-string %qbody "^[\r\n]+" "">>
+    <stream-put stream "\r\n.\r\n">
+    <stream-put stream "QUIT\r\n">
+    <stream-get-contents stream ignore>
+  </with-open-stream>
+</defmacro>
+
+<defun mailable-address addr>
+  ;;; Return "true" if ADDR appears to be a correctly formatted E-mail address.
+  <match <get-var-once addr> "^[^@ \t\r\n]+@[-_0-9a-zA-Z]+\\.[^@ \t\r\n]+*$">
+</defun>
+
+;;;
+;;; How to parse an RFC-822 message.
+;;;
+
+;;; Called when we have found the start of new header.
+;;; Saves the old one if present.
+<defsubst e-mail::save-current-header whitespace=delete>
+  <when <var-exists current-header>>
+    <set-var
+     name = <subst-in-string <get-var-once current-header>
+                             "(^[-_a-zA-Z0-9]+)(:.*$)" "\\1">
+     value = <subst-in-string <get-var-once current-header>
+                              "(^[-_a-zA-Z0-9]+:[ \t]*)(.*$)" "\\2">>
+    <array-append <get-var-once value> <get-var hpack>::<get-var name>>
+    <array-add-unique <get-var name> headers>
+    <unset-var current-header>
+  </when>
+</defsubst>
+
+<defun e-mail::parse-message msgvar>
+  ;;; DOC_SECTION (NETWORK-APPENDIX)
+  ;;; Given a complete RFC-822 E-mail message stored in <var msgvar>, this
+  ;;; function returns an alist describing the message in detail.
+  ;;;
+  ;;; The elements of the alist include the raw headers, and variables
+  ;;; called <var hdr_TO>, <var hdr_FROM>, <var hdr_SUBJECT>, <var hdr_CC>,
+  ;;; and <var hdr_DATE>, in additions to the variable <var body>.
+  ;;;
+  <parser::canonicalize-var msgvar>
+  <copy-var <get-var msgvar> contents>
+  <coerce-var contents type=array>
+  <set-var shift=0>
+  <foreach line contents>
+    <decrement shift>
+    <if <not <get-var-once line>>
+        <break>
+      <array-append <get-var-once line> raw-headers>>
+  </foreach>
+
+  <array-shift <get-var shift> contents>
+
+  <set-var hpack=<make-idenitifier>>
+  <package-delete <get-var hpack>>
+  <unset-var current-header headers>
+  <foreach line raw-headers>
+    ;;; If this line starts with alphabetics, and contains nothing other
+    ;;; then alphanumerics, underscores and hyphens until a colon is seen,
+    ;;; then it is the start of a new header.
+    <if <match <get-var-once line> "^[-_a-zA-Z0-9]+:">
+        <concat
+          <e-mail::save-current-header>
+          ;;; Create the new one.
+          <set-var current-header = <get-var-once line>>>
+      ;;; Not the start of a header.  Must be the continuation of the
+      ;;; current one.
+      <if <match <get-var-once line> "^[ \t]+">
+          <concat
+            <subst-in-var line "^[ \t]+" "">
+            <set-var current-header =
+              "<get-var-once current-header> <get-var-once line>">>>>
+  </foreach>
+  <e-mail::save-current-header>
+  <set-var mpack=<make-identifier>>
+  <package-delete <get-var mpack>>
+  <set-var
+    <get-var mpack>::hdr_TO[] = <get-var-once <get-var hpack>::to[]>
+    <get-var mpack>::hdr_FROM = <get-var-once <get-var hpack>::from>
+    <get-var mpack>::hdr_SUBJECT = <get-var-once <get-var hpack>::subject>
+    <get-var mpack>::hdr_CC[] = <get-var-once <get-var hpack>::cc[]>
+    <get-var mpack>::hdr_DATE = <get-var-once <get-var hpack>::date>
+    <get-var mpack>::headers_alist = <package-to-alist <get-var hpack> strip=t>
+    <get-var mpack>::body = <get-var-once contents[]>>
+  <set-var result = <package-to-alist <get-var mpack> strip=t>>
+  <alist-unset-var result <get-var mpack> <get-var hpack>>
+  <package-delete <get-var mpack>>
+  <package-delete <get-var hpack>>
+  <get-var-once result>
+</defun>
+

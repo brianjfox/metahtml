@@ -1,0 +1,109 @@
+
+			 Meta-HTML CGI-Engine
+	 Copyright 1995, 2000 Brian J. Fox (bfox@ai.mit.edu)
+
+This directory contains the Meta-HTML CGI Engine.
+
+Installing the Meta-HTML CGI Engine:
+------------------------------------
+
+    Installing the Meta-HTML CGI Engine is a relatively simple task for
+    any specific existing Web server, but the methods vary from server to
+    server.  Thus, we suggest that you use your browser to connect to our
+    on-line documentation discussing the specifics of server
+    configuration:
+
+	    http://www.metahtml.com/documentation/manual/install.mhtml
+
+    That document is likely to be the most up-to-date one.  However, here
+    are the instructions for installing the Engine under Apache:
+
+  There are three possibilities to choose from when configuring your
+  Apache server to work with Meta-HTML files:
+
+	1) You can run every document on your server through the
+	   Meta-HTML CGI Engine.  While there is nothing horribly
+	   wrong with this, it is essentially equivalent to running
+	   the Meta-HTML server itself, so we do not highly recommend it.
+
+	2) You can run only Meta-HTML documents through the Meta-HTML
+	   CGI Engine, foregoing the ability to use statefull sessions
+	   with non-cookie capable browsers.  If you never use
+	   statefull sessions, or, if you only have cookie-capable
+	   clients connecting to your server (e.g., Netscape, MSIE),
+	   this solution is completely reasonable, and totally painless.
+
+	3) You can run only Meta-HTML documents through the Meta-HTML
+	   CGI Engine, handling the case of non-cookie capable
+	   browsers co-existing with statefull sessions.  This is our
+	   recommended configuration.
+
+  Step 1: Install the Engine:
+
+    In order for the Engine to operate under Apache, you must place it
+    in your <code>cgi-bin</code> directory, and make it executable.  For
+    example, if your `srm.conf' file contained:
+
+	ScriptAlias /cgi-bin/ /www/htdocs/cgi-bin/
+
+    then you would copy the Engine and its config file to that directory:
+
+	user@host$ cp engine/engine /www/htdocs/cgi-bin/nph-engine
+	user@host$ cp engine/engine.conf /www/htdocs/cgi-bin/
+
+
+  Step 2: Edit the `engine.conf' file:
+
+    Now edit the engine.conf file in `/www/htdocs/cgi-bin/', simply by
+    reading the comments. For most installations, you won't actually
+    need to change any of the parameters defined within -- the saavy
+    site administrator may wish to add special behaviour, or to modify
+    the existing behaviour.
+
+
+  Step 3: Edit the Apache ``srm.conf' file:
+
+    Now edit the srm.conf for your Apache server.
+    There are two possible edits:
+
+    1) Running Every Document Through the Engine
+
+      Add the following line before all of your other "ScriptAlias" lines:
+
+	ScriptAlias / /cgi-bin/nph-engine
+
+
+    2) Running Only Meta-HTML Documents Through the Engine
+
+      Add the following lines to the `srm.conf' file, before all other
+     "ScriptAlias" lines:
+
+	AddType metahtml/interpreted .mhtml
+	Action metahtml/interpreted /cgi-bin/nph-engine
+
+
+  Step 4: Compiling Apache 1.x With the Meta-HTML "mini-module":
+
+    If you want to make sure that non-cookie capable browsers can have
+    statefull sessions, you will need to recompile your 1.x server
+    with the Meta-HTML mini-module installed.  Here is how to do that:
+
+      Place the following line in "src/Configuration" (in your Apache
+      1.x source tree)
+
+	Module mhtml_module           mod_mhtml.o
+
+      Copy the "mod_mhtml.c" file to the "src" directory of your Apache
+      1.x source tree.
+
+      Reconfigure the compilation of your server by typing:
+
+	./Configure
+
+      from the "src" directory of your Apache 1.x source tree.
+
+      Recompile the Apache server by typing `make', and then copy the
+      `httpd' file to whereever you have installed the previous version
+      of the Apache server.
+
+    That's it!

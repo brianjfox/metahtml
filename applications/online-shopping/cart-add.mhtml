@@ -1,0 +1,26 @@
+;;; cart-add.mhtml: -*- Meta-HTML -*-  Add item to the cart.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Sat Oct 21 01:24:15 1995.
+
+<include tagsets/substs.mhtml>
+<include tagsets/cart-substs.mhtml>
+
+<if <string-eq <get-var posted::action> "Continue Shopping">
+    <redirect "<get-var mhtml::url-to-dir>/welcome.mhtml">>
+
+<set-var key=<get-session-var key> class=<get-session-var class>>
+<load-item>
+<set-var quantity=<add quantity 0>>
+
+<if <eq quantity 0>
+    <prog
+      <set-session-var session-message = "You can't purchase zero items!">
+      <redirect
+       "<get-var mhtml::url-to-dir>/list-class.mhtml?<cgi-encode class>">>>
+
+<gobble-posted-attributes>
+<read-cart>
+<add-to-cart>
+<write-cart>
+<redirect "<get-var mhtml::url-to-dir>/cart.mhtml">

@@ -1,0 +1,21 @@
+;;; sessions.list: Interaction with list-sessions.
+;;;
+root@server# list-sessions -s
+Sessions in database [3]:
+  SESSION [Meta Scheduler/2498587655903]  (3570 seconds remaining)
+  SESSION [Online Shopping/25011681853662]  (3589 seconds remaining)
+  SESSION [BIX-Session/24372082538914]  (2125 seconds remaining)
+
+root@server# list-sessions 2498587655903
+Sessions in database [3]:
+  SESSION [Meta Scheduler/2498587655903]
+      sid: 2498587655903
+      key: Meta Scheduler
+    start: Wed Feb  7 11:31:05 1996
+   access: Wed Feb  7 11:31:05 1996
+  timeout: 60 minutes (56 minutes, 31 seconds remaining)
+   length: 162
+     data: (("SCHEDULER-INITIALIZED" . "true")
+            ("CONNECTED-FROM" . "nirvana.datawave.net[204.118.36.17]()")
+            ("CONNECTED-BROWSER" . "Mozilla/2.0b6a (X11; Linux 1.2.1 i386)"))
+

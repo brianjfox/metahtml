@@ -1,0 +1,75 @@
+;;; source.mhtml: -*- Meta-HTML -*-  Macros which aid in source viewing.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jul  5 09:13:05 1996.
+
+<defun source-link text>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; You write `Click <source-link here> for source.'
+  <set-var path=<subst-in-string <get-var-once mhtml::location> "\\?.+$" "">>
+  <a href="/helpers/view-file.mhtml?<cgi-encode path>">
+    <get-var-once text>
+  </a>
+</defun>
+
+<defun source-view-link link current-path>
+  <set-var disp=<get-var-once link>>
+  <when <string-neq <substring <get-var-once link> 0 1> "/">>
+    <set-var dir=<subst-in-string <get-var-once current-path> "/[^/]+$" "">>
+    <subst-in-var dir "^<get-var-once mhtml::include-prefix>" "">
+    <if <not <match <get-var-once dir> "/">> <set-var dir="">>
+    <set-var link=<get-var-once dir>/<get-var-once link>>
+  </when>
+  <set-var path = <dir::handle-dots <get-var-once link>>>
+  <a href="/helpers/view-file.mhtml?<cgi-encode path>">
+    <get-var-once disp>
+  </a>
+</defun>
+
+<defun manpage-link funname>
+  <a href=<concat "\""
+		  <get-var-once mhtml::http-prefix>
+		  /documentation/manual/man-page.mhtml
+		  "?KEY=<get-var-once funname>"
+		  "\"">>
+    <get-var-once funname>
+  </a>
+</defun>
+
+<defun source-of web-path highlight-keywords-p>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Display the contents of <var web-path> in <code>HTML</code>.
+  ;;; Use sparingly.
+  ;;; If <var highlight-keywords-p> is non-empty, then make each
+  ;;; <Meta-HTML> function in the displayed text be a link which will
+  ;;; display the contents of the the manual page for that keyword.
+  <if <string-eq <substring <get-var-once web-path> 0 1> />
+      <set-var path = <get-var-once mhtml::include-prefix web-path>>
+    <set-var path =
+      <concat <get-var-once mhtml::include-prefix mhtml::relative-prefix>/
+                    <get-var-once web-path>>>>
+
+  <with-open-stream stream <get-var-once path> mode=read>
+    <stream-get-contents stream contents>
+  </with-open-stream>
+  <coerce-var contents type=string>
+
+  <subst-in-var contents "&" "&amp;" "<" "&lt;" ">" "&gt;">
+  <subst-in-var contents "(^|[ \t\n]+)(\\;\\;\\;)([^\n]+)"
+                "\\1<i>&#059;&#059;&#059;\\3</i>">
+  <subst-in-var contents
+                "(&lt;include[ \t\n]+)([^&]+)(&gt;)"
+                "&lt;include <verbatim><source-view-link \\2 <get-var-once path\
+>></verbatim>&gt;">
+
+  ;;; Now the ridiculous part.
+  <when <get-var-once highlight-keywords-p>>
+    <set-var keywords[]=<downcase <package-vars *meta-html* strip=true>>>
+    <foreach keyword keywords>
+      <subst-in-var contents
+                    "(&lt;<get-var-once keyword>)([ \t\n])"
+                    "&lt;<manpage-link <get-var-once keyword>>\\2">
+    </foreach>
+  </when>
+  <get-var contents>
+</defun>

@@ -1,0 +1,372 @@
+;;; mandefs.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul  3 12:09:01 1996.
+
+<defun mdb><b><small-caps>MDB</small-caps></b></defun>
+
+<defun metahtml::function-db>
+  <get-var mhtml::include-prefix mhtml::relative-prefix>/functions.db
+</defun>
+
+<defun metahtml::section-db>
+  <get-var mhtml::include-prefix mhtml::relative-prefix>/sections.db
+</defun>
+
+<defsubst var>
+  <i><b><small-caps lower="+0">%body</small-caps></b></i>
+</defsubst>
+
+<defun tag &rest args>
+  <b>&lt;<get-var-once args>&gt;</b>
+</defun>
+
+<defmacro example whitespace=delete>
+  <ifeq "%0" code <set-var fmt=code> <set-var fmt=pre>>
+<<get-var fmt>><verbatim quote>%body</verbatim></<get-var fmt>>
+</defmacro>
+
+<defmacro complete-example>
+<example>
+%body
+</example>
+
+produces:<concat <set-var __result=<prog %body>>
+		 <subst-in-var __result "\\.blank" "" "^[ \n\r\t]+" "">>
+
+<pre><get-var __result></pre>
+<p>
+</defmacro>
+
+<defmacro html-complete-example>
+Example:
+<example>
+%body
+</example>
+
+produces:
+<p>
+%body
+<p>
+</defmacro>
+
+<defun tripsemi>
+  <set-var semi=;>
+  <get-var-once semi semi semi>
+</defun>
+
+;;; Use <nb [documentation]> for a Nota Bene.
+<defun nb>
+  <table>
+    <tr valign=top>
+      <td align=right><font size="-1"><i>Note:</i></font></td>
+      <td align=left>
+	<font size="-1">
+	<plain-text nobr=true>
+	  %body
+	</plain-text>
+	</font>
+      </td>
+    </tr>
+  </table>
+</defun>
+
+<set-var manual::preferred-appendix-order[]="
+Network">
+
+<set-var manual::preferred-section-order[]="
+Variables
+Arrays
+Packages
+Flow Control
+Arithmetic Operators
+Relational Operators
+String Operators
+Block Commands
+Page Operators
+File Operators
+Stream Operators
+Session Operators
+Language Operators
+Macro Commands
+Database Commands
+Generic SQL Interface
+Direct DBM Access
+Msql Database Extensions
+MySQL Database Extensions
+ODBC Database Extensions
+Debugging Commands
+Dates And Times
+Authorization Tags
+Meta HTML TCP/IP Servers
+HTML Helpers
+Color Manipulation
+Dynamic Images
+Using GNUPlot
+PowerStrip System Tags
+Dynamic Modules
+Elsewhen Module
+Profiler Module
+CSV Module
+Perl Module
+Lisp Module
+Primitive Operators
+Page Variables
+Server Variables">
+
+<set-var manual::alpha="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuv">
+
+<defun section-sorter section>
+  <set-var section=<subst-in-string <get-var section> "-" " ">>
+  <set-var index = <array-member <get-var section> caseless=true
+				 manual::preferred-section-order>>
+  <defvar index <sub <string-length <get-var-once manual::alpha>> 1>>
+  <substring <get-var manual::alpha> <get-var index> <add index 1>>
+</defun>
+
+<defun appendix-sorter appendix>
+  <set-var appendix=<capitalize <subst-in-string <get-var appendix> "-" " ">>>
+  <set-var index = <array-member <get-var appendix>
+				 manual::preferred-appendix-order>>
+  <defvar index 24>
+  <substring <get-var manual::alpha> <get-var index> <add index 1>>
+</defun>
+
+<defsubst section::get-sections>
+  <with-open-database db <metahtml::section-db> mode=read>
+    <database-query db <not <match <get-var key> "APPENDIX">> keys=sections>
+  </with-open-database>
+  <sort sections section-sorter>
+</defsubst>
+
+<defsubst section::get-appendices>
+  <with-open-database db <metahtml::section-db> mode=read>
+    <database-query db <match <get-var key> "APPENDIX"> keys=appendices>
+  </with-open-database>
+  <sort appendices appendix-sorter>
+</defsubst>
+
+<defun manpage-url arg>
+  <if <get-var default::hacking-frames>
+      <set-var page=man-page-frame.mhtml>
+    <set-var page=man-page.mhtml>>
+  <if <get-var arg>
+      <prog
+	<set-var key=<get-var arg>>
+	<set-var extra="?<cgi-encode key>">>>
+  <get-var page extra>
+</defun>
+
+<defun secpage-url arg>
+  <if <get-var default::hacking-frames>
+      <set-var page=view-section-frame.mhtml>
+    <set-var page=view-section.mhtml>>
+  <if <get-var arg>
+      <prog
+	<set-var key=<get-var arg>>
+	<set-var extra="?<cgi-encode key>">>>
+  <get-var page extra>
+</defun>
+
+<defun funindex-url>
+  <if <get-var default::hacking-frames>
+      <set-var page=function-index-frame.mhtml>
+    <set-var page=function-index.mhtml>>
+  <get-var page>
+</defun>
+
+<defun varindex-url>
+  <if <get-var default::hacking-frames>
+      <set-var page=variable-index-frame.mhtml>
+    <set-var page=variable-index.mhtml>>
+  <get-var page>
+</defun>
+
+<defun funref section function>
+  <a href="<manpage-url <get-var function>>">
+    <code><get-var function></code>
+  </a>
+</defun>
+
+<defun secref>
+  <set-var section =
+    <upcase <subst-in-string %qbody "^[ \t]+" "" "[ \t]+$" "" " +" "-">>>
+  <a href="<secpage-url <get-var section>>">
+    <capitalize <subst-in-string <get-var section> "-" " ">>
+  </a>
+</defun>
+
+<defun varref varname>
+  <a href="<manpage-url <get-var varname>>">
+    <code><get-var varname></code>
+  </a>
+</defun>
+
+<defun pformat symbol>
+  <set-var data=<get-var-once <get-var symbol>>>
+  <subst-in-var data "\r\n" "\n" "\r" "\n" "-->" "==>">
+  <set-var result = <plain-text><get-var-once data></plain-text>>
+  <subst-in-var result "\\.blank" "">
+  <get-var result>
+</defun>
+
+<defun format-template pack>
+  <code>
+
+  <if <string-eq <get-var function::funtype> variable>
+      <get-var function::name>
+    <concat "&lt;<b><downcase <get-var <get-var pack>::name>></b>">>
+
+  ;;; The required arguments.
+  <when <get-var <get-var pack>::req-args>>
+    <foreach _arg <get-var pack>::req-args>
+      &nbsp;<i><upcase <get-var _arg>></i>
+    </foreach>
+  </when>
+
+  ;;; The optional arguments.
+  <when <get-var <get-var pack>::opt-args>>
+    <concat " <i>&amp;optional</i>">
+    <foreach _arg <get-var pack>::opt-args>
+      <if <string-eq <get-var arg> "...">
+	  "<i>...</i>"
+	"&nbsp;[<i><upcase <get-var _arg>></i>]">
+    </foreach>
+  </when>
+
+  ;;; The keyword arguments.
+  <when <get-var <get-var pack>::key-args>>
+    <concat " <i>&amp;</i>key">
+    <foreach _arg <get-var pack>::key-args>
+      <if <string-eq <get-var _arg> "...">
+	  "<i>...</i>"
+	"&nbsp;[<i><upcase <get-var _arg>></i>]">
+    </foreach>
+  </when>
+
+  ;;; Any &rest arg?
+  <when <get-var <get-var pack>::rest-args>>
+    <concat " <i>&amp;rest</i>&nbsp;<get-var <get-var pack>::rest-args>">
+  </when>
+  &gt;
+
+  ;;; If this is a complex-type function, format the BODY variable.
+  <if <string-eq <get-var <get-var pack>::funtype> complex>
+      <concat
+       <br>
+       &nbsp;&nbsp;<i>body</i>
+       <br>
+       &lt;/
+       <b><downcase <get-var <get-var pack>::name>></b>
+       &gt;>>
+  </code>
+</defun>
+
+<defun format-section section &optional single-page-format?>
+  <set-var dispname=<capitalize <subst-in-string <get-var section> "-" " ">>>
+  <h2><get-var dispname></h2>
+  <package-delete section>
+  <with-open-database db <metahtml::section-db> mode=read>
+    <set-var x =
+      <database-load-record db <upcase <get-var section>> prefix=section>>
+  </with-open-database>
+
+  ;;; Get the functions which belong to this section.
+  <set-var default::x=<get-var section>>
+  <with-open-database db <metahtml::function-db> mode=read>
+    <database-query db <and
+			<string-eq <upcase <get-var-once default::x>>
+				   <upcase <get-var-once section>>>
+			<not <string-eq <get-var-once funtype> variable>>>
+      keys=functions>
+  </with-open-database>
+
+  <when <get-var single-page-format?>>
+    ;;; Get the variables which belong to this section.
+    <with-open-database db <metahtml::function-db> mode=read>
+      <database-query db <and
+			  <string-eq <get-var-once funtype> variable>
+			  <string-eq <upcase <get-var-once posted::key>>
+				     <upcase <get-var-once section>>>>
+	keys=variables>
+    </with-open-database>
+  </when>
+
+  <sort functions>
+  <sort variables>
+
+  ;;; Format the section header information.
+  <when <get-var single-page-format?>>
+    <b>Synopsis:</b><br>
+    <ul>
+      <pformat section::short-desc>
+    </ul>
+    <p>
+    <when <get-var functions[0]>>
+      <b>Commands:</b><br>
+      <ul>
+	<set-var max=0>
+	<foreach _fun functions>
+	  <array-append <downcase <get-var _fun>> keys>
+	  <set-var x=<string-length <get-var _fun>>>
+	  <if <gt x max> <set-var max=<get-var x>>>
+	</foreach>
+	<set-var w=<if <gt max 15> 3 4>>
+	<vertical-table
+	 ^::keys <get-var w>
+	 <if <get-var posted::expanded-view> # man-page.mhtml>>
+      </ul>
+      <p>
+    </when>
+
+    <when <get-var-once variables>>
+      <b>Variables:</b><br>
+      <ul>
+	<foreach _var variables>
+	  <array-append <downcase <get-var _var> vars>>
+	</foreach>
+	<vertical-table ^::variables 3 man-page.mhtml>
+      </ul>
+      <p>
+    </when>
+
+    <when <get-var-once section::long-desc>>
+      <b>More Information:</b><br>
+      <ul>
+	<pformat section::long-desc>
+      </ul>
+    </when>
+  </when>
+
+  <if <not <get-var single-page-format?>>
+      <prog
+	<pformat section::short-desc>
+	<pformat section::long-desc>>>
+
+  ;;; Format each command in this section.
+  <foreach _fun functions>
+    <package-delete function>
+    <with-open-database db <metahtml::function-db> mode=read>
+      <set-var x = <database-load-record db <get-var _fun> prefix=function>>
+    </with-open-database>
+    <p>
+    <table width=100%>
+      <tr valign=top>
+	<td align=left width=85%>
+	  <when <get-var posted::expanded-view>>
+	    <a name="<downcase <get-var function::name>>"></a>
+	  </when>
+	  <format-template function>
+	</td>
+	<td align=right>
+	  <b><i><capitalize <get-var function::funtype>></i></b>
+	</td>
+      </table>
+      <p>
+      <ul>
+	<pformat function::short-desc>
+      </ul>
+      <p>
+  </foreach>
+  <p>
+</defun>

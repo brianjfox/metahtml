@@ -1,0 +1,11 @@
+%package machine
+Summary: Meta-HTML Virtual Machine module.
+Group: Applications/WWW
+Requires: metahtml
+
+%description machine
+modmachine.so allows Meta-HTML to take advantage of code that has been
+compiled with the byte-compiler from modcompiler.so.
+
+%files machine
+/usr/lib/metahtml/modmachine.so

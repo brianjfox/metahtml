@@ -1,0 +1,10 @@
+%package compiler
+Summary: Compiler for the Meta-HTML Virtual Machine.
+Group: Applications/WWW
+Requires: metahtml machine
+
+%description compiler
+modcompiler.so contains the Meta-HTML byte-code compiler.
+
+%files compiler
+/usr/lib/metahtml/modcompiler.so

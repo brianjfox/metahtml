@@ -1,0 +1,195 @@
+;;; cart-substs.mhtml: -*- Meta-HTML -*-
+;;; Functions for manipulating the shopping cart.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Fri Sep 15 19:52:21 1995.
+
+;;; Get all of the class names.
+<defsubst get-classes>
+  <with-open-database db <database classes>>
+    <database-query db true sort=class>
+  </with-open-database>
+</defsubst>
+
+;;; Set the cart to be empty.
+<defsubst initialize-cart>
+  <set-var shopping-cart="">
+</defsubst>
+
+<defsubst add-to-cart>
+  <set-var shopping-cart=
+    "<get-var shopping-cart>
+     (\"<get-var class>::<get-var product-id>\" <get-var quantity> <get-var attributes>)">
+</defsubst>
+
+<defsubst write-cart>
+  <set-session-var shopping-cart=<get-var shopping-cart>>
+</defsubst>
+
+<defsubst read-cart>
+  <set-var shopping-cart=<get-session-var shopping-cart>>
+</defsubst>
+
+<defsubst cart-to-array whitespace=delete>
+  <subst-in-var shopping-cart
+		"\n" " "
+		"^[ \t]+" ""
+		")[ \t\n]*\\(" "\n"
+		"\\(" ""
+		")[ \t\n]*$" "">
+  <set-var %0[]=<get-var shopping-cart>>
+</defsubst>
+
+;;; <array-to-cart contents 10> --> put ten items in cart.
+<defsubst array-to-cart whitespace=delete>
+  <set-var temp="" i=0>
+  <while <lt i %1>>
+    <if <get-var %0[i]>
+	<set-var temp="<get-var temp> (<get-var %0[i]>)">>
+    <increment i>
+  </while>
+  <set-var shopping-cart=<get-var temp>>
+</defsubst>
+
+<defsubst maybe-delete-items>
+  <when <match "<package-vars posted>" "POSTED::DELETE::">>
+    <set-var mdi::names[]=<package-vars posted> mdi::i=0>
+    <while <get-var mdi::names[mdi::i]>>
+      <if <match <get-var mdi::names[mdi::i]> "^POSTED::DELETE::">
+	  <prog
+	    <set-var mdi::which =
+	      <match <get-var mdi::names[mdi::i]> "^POSTED::DELETE::"
+		     action=delete>>
+	    <set-var contents[mdi::which]="">>>
+      <increment mdi::i>
+    </while>
+  </when>
+</defsubst>
+
+<defsubst maybe-change-quantity>
+  <set-var mcq::names[]=<package-vars posted> mcq::i=0>
+  <while <get-var mcq::names[mcq::i]>>
+    <if <match <get-var mcq::names[mcq::i]> "^POSTED::QUANTITY::">
+	<prog
+	  <set-var
+	    tempn=<get-var mcq::names[mcq::i]>
+	    tempi=<match <get-var tempn> "^POSTED::QUANTITY::" action=delete>
+	    tempq=<get-var <get-var tempn>>
+	    tempe=<get-var contents[tempi]>>
+	  <if <not <eq <get-var tempq> 0>>
+	      <prog
+		<subst-in-var tempe " [0-9]+ " " <get-var tempq> ">
+		<set-var contents[tempi]=<get-var tempe>>>
+	    <set-var POSTED::DELETE::<get-var tempi>=true>>>>
+    <increment mcq::i>
+  </while>
+</defsubst>
+
+<defsubst breakout-contents whitespace=delete>
+  <set-var temp=<get-var contents[i]>>
+  <subst-in-var temp "^\\(" "" "\\($" "" "\"" "">
+  ;;; Handle the case of a package name with spaces in it here,
+  ;;; since it will be difficult later.  First, strip leading
+  ;;; whitespace.
+  <subst-in-var temp "^[ \t\n]+" "">
+  <set-var class-and-key =
+    <match <get-var temp> "^[^:]+::[^ ]+" action=extract>>
+  <set-var temp = <match <get-var temp> <get-var class-and-key> action=delete>>
+  <subst-in-var temp " " "\n">
+  <set-var 
+    temp[]=<get-var temp>
+    quantity=<get-var temp[0]>
+    info="<get-var temp[1]> <get-var temp[2]> <get-var temp[3]>"
+    class=<match <get-var class-and-key> "^[-a-zA-Z' ]+::" action=extract>
+    key=<match <get-var class-and-key> <get-var class> action=delete>>
+  <subst-in-var class "::" "">
+  <set-var class = <canonicalize <get-var class>>>
+</defsubst>
+
+<defsubst load-item whitespace=delete>
+  <with-open-database db <db-of-class <get-var class>>>
+    <set-var loaded = <database-load-record db <upcase <get-var key>>>>
+  </with-open-database>
+</defsubst>
+
+;;; The package ATTRIBUTES contains any extra attributes that have been
+;;; added to this item.  Create an attributes string from that information.
+;;; Unfortunately, the package attributes is hidden within the POSTED package.
+;;; We have to extract the package first.
+<defsubst gobble-posted-attributes whitespace=delete>
+  <set-var names[]=<package-vars posted>>
+  <set-var i=0 attributes="">
+  <while <get-var names[i]>>
+    <set-var name=<get-var names[i]> value=<get-var <get-var name>>>
+    <if <match <get-var name> "POSTED::ATTRIBUTES::">
+	<prog
+	  <subst-in-var name "POSTED::ATTRIBUTES::" "">
+	  <set-var attributes =
+	    "<get-var attributes> <get-var name>=<get-var value>">>>
+    <increment i>
+  </while>
+</defsubst>
+
+;;; For every attribute, there is a single entry in the array ATTRIBUTES.
+;;; The zeroith element is the name of the attribute, and the remaining
+;;; elements are the possible values.
+<defsubst parse-attributes whitespace=delete>
+  <set-var temp=<get-var Attributes>>
+  <subst-in-var temp ";" "\n">
+  <set-var attributes[]=<get-var temp>>
+  <set-var pa-index=0>
+  <while <get-var attributes[pa-index]>>
+    <subst-in-var attributes[pa-index] ":" "\n" "," "\n">
+    <increment pa-index>
+  </while>
+</defsubst>
+
+<defsubst table-option whitespace=delete>
+  <input type=radio name=%0 value="%1"
+	 <if <string-eq <get-var %0> "%1"> checked>>
+  %1
+</defsubst>
+
+<defsubst select-option whitespace=delete>
+  <if <string-eq <get-var %0> "%1">
+      <prog <option selected>%1>
+    <prog <option>%1>>
+</defsubst>
+
+<defsubst table-header whitespace=delete>
+  <if <browser-supports-tables>
+      <prog <td align=center><i><b>%body</b></i></td>>
+    <prog <i><b><pad "%body" align=middle></b></i>>>
+</defsubst>
+
+<defsubst calculate-tax-shipping-and-grand-total whitespace=delete>
+  <set-var grand-total=<get-var total>
+           tax-percent=""
+	   tax=""
+	   shipping="">
+  <if <match <get-var shipping-state> "[Cc][Aa]">
+      <set-var CA-RESIDENT="Yes" tax-percent=8.25>>
+
+  <if <get-var tax-percent>
+      <set-var tax = <div <mul total tax-percent> 100>
+	       grand-total = <add grand-total tax>>>
+
+  ;;; Calculate the shipping cost.
+  ;;; Merchandise Total:     Add:
+  ;;; Up to $15.00           $4.95
+  ;;; $15.01-$30.00          $5.95
+  ;;; $30.01-$50.00          $6.95
+  ;;; $50.01-$100.00         $7.95
+  ;;; $100.01-$150.00        $8.95
+  ;;; Over $150.00           $9.95
+
+  <set-var shipping-cost =
+    <if <lt total 1501> 4.95
+      <if <lt total 3001> 5.95
+	<if <lt total 5001> 6.95
+	  <if <lt total 10001> 7.95
+	    <if <lt total 15001> 8.95
+	      9.95>>>>>>
+
+  <set-var grand-total = <add grand-total shipping-cost>>
+</defsubst>

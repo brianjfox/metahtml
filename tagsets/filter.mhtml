@@ -1,0 +1,367 @@
+;;; filter.mhtml: -*- Meta-HTML -*-  Macros which allow PAGE filtering!
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep  1 11:34:02 1996.
+;;;
+;;; This file is part of <Meta-HTML>(tm), a system for the rapid
+;;; deployment of Internet and Intranet applications via the use
+;;; of the Meta-HTML language.
+;;; 
+;;; Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+;;; Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+;;; 
+;;; Meta-HTML is free software; you can redistribute it and/or modify
+;;; it under the terms of the UAI Free Software License as published
+;;; by Universal Access Inc.; either version 1, or (at your option) any
+;;; later version.
+;;; 
+;;; This program is distributed in the hope that it will be useful,
+;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;; UAI Free Software License for more details.
+;;; 
+;;; You should have received a copy of the UAI Free Software License
+;;; along with this program; if you have not, you may obtain one by
+;;; writing to:
+;;; 
+;;; Universal Access Inc.
+;;; 129 El Paseo Court
+;;; Santa Barbara, CA
+;;; 93101
+
+<defsubst filter::sizeof whitespace=delete>
+  <or <and <symbol-info "%0">
+	   <subst-in-string <symbol-info "%0"> "^[^ \t\r\n]+" "">>
+      0>
+</defsubst>
+
+;;; Parse host specifier from URL.
+<defun filter::get-host url>
+  <subst-in-string <get-var url> "(http://)([^/]+)(.*$)" "\\2">
+</defun>
+
+;;; Parse port specifier from URL.
+<defun filter::get-port url>
+  <set-var host=<filter::get-host <get-var url>>>
+  <set-var port=<if <match <get-var host> "(^[^:])(:)([0-9]+$)">
+		    <subst-in-string <get-var host>
+				     "(^[^:])(:)([0-9]+$)" "\\3">
+		  80>>
+  <get-var port>
+</defun>
+
+;;; Get an URL specified by HOST, PORT and PATH.  If we have to redirect
+;;; in order to get the final page, the variable FILTER::REDIRECTED-URL
+;;; is set to the location of the new URL.
+<defun filter::get-url host port path>
+  <set-var redirect=true>
+  <unset-var filter::redirected-url>
+  <while <get-var redirect>>
+    <unset-var redirect>
+    <unset-var filter::explanation>
+    <set-var port = <or <get-var port> 80>>
+    <subst-in-var path "[ \r\n\t]+" "">
+    <with-open-stream s <get-var host>:<get-var port> type=tcp
+		      mode=write-create>
+      <stream-put s "GET <get-var path> HTTP/1.0\n">
+      <stream-put s "USER-AGENT: <get-var env::http_user_agent>\n\n">
+      <set-var response = <stream-get s>>
+      <if <match <get-var response> "30[12]">
+	  <set-var redirect=true>
+	<prog <while <and <stream-readable s> <stream-get s>>></while>>>
+      <stream-get-contents s body>
+    </with-open-stream>
+
+    <if <eq <filter::sizeof body> 0>
+	<set-var filter::explanation =
+	  <prog
+	    Your request for the URL `<get-var path>' from the
+	    host `<get-var host>' at port `<get-var port>' failed
+	    because no server was contacted, or the resultant document
+	    contained no data.  Please try another URL.>>
+      <prog
+	<coerce-var body type=string>
+    
+	<when <get-var redirect>>
+	  ;;; BODY contains the "Location:" of the new URL.
+	  ;;; Reparse this URL, and keep trying.
+	  <set-var
+	    filter::redirected-url =
+	    <subst-in-string <get-var body>
+			     "(.*)(Location:[ ]+)([^\n]+).*$" "\\3">
+	    host = <filter::get-host <get-var filter::redirected-url>>
+	    port = <if <match <get-var host> "(^[^:])(:)([0-9]+$)">
+		       <subst-in-string <get-var host>
+					"(^[^:])(:)([0-9]+$)" "\\3">
+		     80>
+	    path = <subst-in-string <get-var filter::redirected-url>
+				    "(http://)([^/]+)(.*$)" "\\3">>
+	</when>>>
+  </while>
+  <get-var body>
+</defun>
+
+;;; Re-emit the attribute list from a tag.
+<defun filter::emit-attributes alist>
+  <package-delete pkg>
+  <alist-to-package <get-var alist> pkg>
+  <set-var vars[]=<package-vars pkg strip=true>>
+  <set-var i=0>
+  <while <get-var vars[i]>>
+    <set-var
+      name="<get-var vars[i]>"
+      val=<get-var pkg::<get-var name>>>
+    <if <get-var val>
+	<concat <get-var name> "="  "\"<get-var val>\"" " ">
+      <concat <get-var name> " ">>
+    <increment i>
+  </while>
+</defun>
+
+;;; Prefix the filter-URL to a URL
+<defun filter::make-filtered-url url filter-url pagehost pagebase>
+  ;;; [1] Replace leading site-absolute URLs, i.e. which start
+  ;;; with leading slashes, with /filter-URL/host/path
+  <if <match <get-var url> "^/.*">
+      <set-var url = "<get-var filter-url>/<get-var pagehost url>">
+    <if <match <get-var url> "^http://.*" caseless=true>
+	<set-var url = "<get-var filter-url>/<get-var url>">
+      <if <not <match <get-var url>
+		      "(^[Ff][Tt][Pp]:)|(^[Mm][Aa][Ii][Ll][Tt][Oo]:)">>
+	  <set-var url =
+	    "<get-var filter-url>/<get-var pagebase>/<get-var url>">>>>
+  <get-var url>
+</defun>
+
+;;; This is used for IMG SRC=x
+<defun filter::make-absolute-url url pagehost pagebase>
+  ;;; [1] Replace leading site-absolute URLs, i.e. which start
+  ;;; with leading slashes, with host/path
+  <if <match <get-var url> "^/.*">
+      <set-var url = "<get-var pagehost url>">
+    <if <not <match <get-var url> "^http://.*" caseless=true>>
+	<set-var url = "<get-var pagebase>/<get-var url>">>>
+  <get-var url>
+</defun>
+
+;;; Convert all hrefs to absolute filtered URLS.
+<defun FILTER::A>
+  <package-delete tmp>
+  <in-package tmp>
+  <set-var %attributes>
+  <subst-in-var href "[\n\r\t ]" "">
+  <set-var href=<filter::make-filtered-url 
+		 <get-var href>
+		 <get-var filter::filter-url>
+		 <get-var filter::page-host>
+		 <get-var filter::page-base-url>>>
+  <a <filter::emit-attributes <package-to-alist tmp>>>
+  </in-package>
+</defun>
+
+<defun FILTER::AREA>
+  <set-var %attributes>
+  <subst-in-var href "[\n\r\t ]" "">
+  <set-var href=<filter::make-filtered-url 
+		 <get-var href>
+		 <get-var filter::filter-url>
+		 <get-var filter::page-host>
+		 <get-var filter::page-base-url>
+		 >>
+  <area <filter::emit-attributes <package-to-alist "">>>
+</defun>
+
+<defun FILTER::IMG>
+  <set-var %attributes>
+  <subst-in-var src "[\n\r\t ]" "">
+
+  <set-var src=<filter::make-absolute-url 
+		<get-var src>
+		<get-var filter::page-host>
+		<get-var filter::page-base-url>>>
+  <when <get-var lowsrc>>
+    <subst-in-var lowsrc "[\n\r\t ]" "">
+    <set-var lowsrc=<filter::make-absolute-url 
+		     <get-var lowsrc>
+		     <get-var filter::page-host>
+		     <get-var filter::page-base-url>>>
+  </when>
+  <img <filter::emit-attributes <package-to-alist "">>>
+</defun>
+
+<defun FILTER::APPLET>
+  <set-var %attributes>
+  <if <get-var codebase>
+      <set-var codebase=<filter::make-absolute-url
+			 <get-var base>
+			 <get-var filter::page-host>
+			 <get-var filter::page-base-url>>>
+    <set-var codebase=<get-var filter::page-base-url>>>
+  <applet <filter::emit-attributes <package-to-alist "">>>
+</defun>
+
+<defun FILTER::INPUT>
+  <set-var %attributes>
+  <subst-in-var src "[\n\r\t ]" "">
+  <set-var src=<filter::make-absolute-url 
+		 <get-var src>
+		 <get-var filter::page-host>
+		 <get-var filter::page-base-url>>>
+  <input <filter::emit-attributes <package-to-alist "">>>
+</defun>
+
+<defun FILTER::BODY>
+  <set-var %attributes>
+  <when <get-var background>>
+    <subst-in-var background "[\n\r\t ]" "">
+    <set-var background=<filter::make-absolute-url 
+			 <get-var background>
+			 <get-var filter::page-host>
+			 <get-var filter::page-base-url>>>
+  </when>
+  <body <filter::emit-attributes <package-to-alist "">>>
+</defun>
+
+<defun FILTER::FORM>
+  <set-var %attributes>
+  <subst-in-var action "[\n\r\t ]" "">
+  <set-var action=<filter::make-filtered-url 
+		   <get-var action>
+		   <get-var filter::filter-url>
+		   <get-var filter::page-host>
+		   <get-var filter::page-base-url>>>
+  <form <filter::emit-attributes <package-to-alist "">>>
+</defun>
+
+;;; Is "src" the right attribute to modify?
+<defun FILTER::FRAME>
+  <set-var %attributes>
+  <subst-in-var src "[\n\r\t ]" "">
+  <set-var src=<filter::make-filtered-url 
+		<get-var src>
+		<get-var filter::filter-url>
+		<get-var filter::page-host>
+		<get-var filter::page-base-url>>>
+  <frame <filter::emit-attributes <package-to-alist "">>>
+</defun>
+
+
+;;; Remove the first character of URL if it is a slash character (/).
+<defun filter::strip-leading-slash url>
+  <if <string-eq <substring  <get-var url> 0 1> "/">
+      <substring <get-var url> 1>
+    <get-var url>>
+</defun>
+
+;;; If the URL has no HTTP (protocol), then add one.
+<defun filter::add-protocol-if-needed url>
+  <if <not <match <get-var url> "^[http://]" caseless=true>>
+      <set-var url=<concat http:// <get-var url>>>>
+  <get-var url>
+</defun>
+
+<defun filter::strip-protocol-and-host url>
+  <subst-in-string "<get-var url>" "(http://)([^/]+)(.*$)" "\\3">
+</defun>
+
+;;; Removes the protocol and hostname portion from the URL,
+;;; leaving only the pathname (suitable for passing to 
+;;; the HTTP GET routine)
+<defun filter::get-path url>
+  <set-var
+    host=<match <get-var url> "http://[^/]+" action=extract>
+    path=<match <get-var url> <get-var host> action=delete>>
+  <or <get-var path> "/">
+</defun>
+
+<defun filter::get-base-url url>
+  ;;; If this has a slash, then a filename with no "." in it, assume
+  ;;; it is a directory name.
+  <if <not <match <get-var url> ".*/[^\.]+\\..*">>
+      <get-var url>
+
+    ;;; If the url has no trailing slash, and is only a hostname, return it. 
+    ;;; Otherwise strip off everything after the last trailing slash.
+    <if <match <get-var url> "^http://[^/]+$">
+	<get-var url>
+      <subst-in-string <get-var url>  "(.*)/[^/]*" "\\1">>>
+</defun>
+
+<defun filter::parse-url-components url>
+  <set-var
+    filter::filter-url = <concat <get-var mhtml::http-to-host>
+				 <get-var mhtml::relative-prefix>/
+				 <get-var mhtml::current-doc>>
+
+    filter::pageurl = <filter::add-protocol-if-needed
+		       <filter::strip-leading-slash <get-var url>>>
+    
+    filter::page-host = <match <get-var filter::pageurl> 
+			       "http://[^/]+" action=extract>
+    
+    filter::pagepath = <filter::get-path <get-var filter::pageurl>>
+    filter::page-base-url = <filter::get-base-url <get-var filter::pageurl>>
+    filter::host = <filter::get-host <get-var filter::page-host>>
+    filter::port = <filter::get-port <get-var filter::page-host>>>
+</defun>
+
+;;; Here is a sample filter function.  It takes the name of a variable
+;;; which contains the page source as an argument, and modifies that
+;;; source.  This one makes the text something that a californian might
+;;; say.
+<defsubst filter::california-filter>
+  <subst-in-var %0 "[Uu]niversal" "Total"
+		"," ", like"
+		"( in | [Ww]ith )" "\\1like "
+		"[.][ \t\r\n]" ", know what I mean? "
+		";" ".  Anyway, dude, like ">
+</defsubst>
+
+<defun filter::page-filter>
+  ;;; Are we being invoked via a GET or a POST?
+  <if <get-var posted::posted-url>
+      <filter::parse-url-components <get-var posted::posted-url>>
+    <filter::parse-url-components <get-var mhtml::path-info>>>
+
+  ;;; Actually fetch the URL using HTTP.
+  <set-var filter::pagesrc =
+    <filter::get-url <get-var filter::host> <get-var filter::port> 
+		     <concat <get-var filter::pagepath>
+			     <if <get-var env::query_string>
+				 "?<get-var env::query_string>">>>>
+
+  ;;; If we got redirected, we need to recompute the various
+  ;;; URL paths and pieces.
+  <if <get-var filter::redirected-url>
+      <filter::parse-url-components <get-var filter::redirected-url>>>
+
+  ;;; There is a bad ambiguity here:
+  ;;; If we get a URL like http://foo.com/bar/baz
+  ;;; is the last component a directory or a filename to be stripped off?
+  ;;;
+  ;;; We use the heuristic that if it has no "." in it, the last component
+  ;;; is in fact a directory, and should be left in the base url address.
+
+  ;;; Now, disable dangerous commands, so we can do substitutions
+  ;;; of our commands into the HTML text, and then evaluate it.
+  <in-package *meta-html*>
+    <unset-var cgi-exec with-open-database with-open-stream>
+  </in-package>
+
+  ;;; Prepare to call our URL fixup functions.
+  <subst-in-var filter::pagesrc
+		"(<)[fF][rR][aA][mM][eE][\t\r\n ]" "\\1FILTER::FRAME "
+		"(<)[bB][oO][dD][yY][\t\r\n ]" "\\1FILTER::BODY "
+		"(<)[aA][\r\n ]" "\\1FILTER::A "
+		"(<)[iI][mM][gG][\t\r\n ]" "\\1FILTER::IMG "
+		"(<)[fF][oO][rR][mM][\t\r\n ]" "\\1FILTER::FORM "
+		"(<)[iI][nN][pP][uU][tT][\t\r\n ]" "\\1FILTER::INPUT "
+		"(<)[aA][rR][eE][aA][\t\r\n ]" "\\1FILTER::AREA "
+		"(<)[aA][pP][pP][lL][eE][tT][\t\r\n ]" "\\1FILTER::APPLET ">
+
+  ;;; Filter the page, using the caller's filter function.
+  <%0 filter::pagesrc>
+
+  ;;; Return the results!
+  <get-var filter::pagesrc>
+</defun>

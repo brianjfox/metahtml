@@ -1,0 +1,63 @@
+;;; header.mhtml -*- Mode: Meta-HTML; -*-
+;;; This header file is included at the start of every document in the
+;;; documentation directory.
+
+<include manual/substs.mhtml>
+<set-var site::background-spec =
+  <or <get-var site::background-spec>
+      <prog bgcolor="#ffffff">>>
+
+<defvar mhtml::images <get-var mhtml::url-to-dir-sans-sid>/images/>
+
+<set-var
+ mhtml::author-name="Brian J. Fox"
+ mhtml::author-email="bfox@ua.com"
+ mhtml::author-url="http://www.metahtml.com/~bfox/"
+ mhtml::manual-ref =
+ <concat <a href="manual/">
+	 <prog The <meta-html> Language Reference Manual>
+	 </a>>>
+<defsubst alt-header-mhtml>
+<html>
+<head>
+<title> <get-var title> </title>
+</head>
+
+<body <get-var site::background-spec>>
+<a href="welcome.mhtml">
+  <img src="<get-var mhtml::images>meta-logo.gif" align=left border=0>
+</a>
+<center>
+  <hr size=3 width=40%>
+  <small-caps upper="+2" lower="+1" other="+1"><get-var title></small-caps>
+  <hr size=3 width=50%>
+</center>
+<br clear>
+</defsubst>
+
+<include ../header.mhtml alt=<alt-header-mhtml>>
+<when <defined? link-menu>>
+  <layout::left-border>
+    <link-menu>
+    Reference;	/documentation/manual/
+    Debugger;	/documentation/debugger/
+    Server;	/documentation/server/
+    Engine;	/documentation/manual/hiding.mhtml
+    Utilities;	/documentation/utilities/
+    Regex Docs;	/documentation/regex/regex_3.mhtml
+    </link-menu>
+    </layout::left-border>
+  </when>
+<br>
+
+<defsubst var>
+   <i><b><small-caps lower="+0">%body</small-caps></b></i>
+</defsubst>
+
+<defmacro example whitespace=delete>
+  <if <string-eq "%0" "code">
+      <set-var fmt=code>
+    <set-var fmt=pre>>
+  <<get-var fmt>><verbatim quote>%body</verbatim></<get-var fmt>>
+</defmacro>
+<DEBUGGING-OUTPUT>

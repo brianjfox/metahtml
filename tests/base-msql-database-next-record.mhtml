@@ -1,0 +1,6 @@
+;;; base-msql-next-record.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 22:57:24 1996.
+
+Result: : <set-var query="* from test"><msql::with-open-database db database=test host=localhost><msql::database-exec-query db <get-var query> cursor=dbcursor><msql::database-next-record dbcursor></msql::with-open-database>

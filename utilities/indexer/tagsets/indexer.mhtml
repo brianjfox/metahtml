@@ -1,0 +1,285 @@
+;;; indexer.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Apr 25 23:52:05 1997.
+
+<defun .libinit>
+  <sql::set-database-type mysql>
+  <set-var config::database-admin-username = www>
+</defun>
+
+<defun db::word-index>WORDS</defun>
+
+<defun db::dsn>
+  <or <and <function-def config::dsn>
+	   <config::dsn>>
+      <concat
+       "HOST=" <or <get-var config::database-host> localhost>
+       ";DATABASE=" <or <get-var config::database-database> SITE>
+       <if <get-var config::database-admin-username>
+	   ";UID=<get-var config::database-admin-username>">
+       <if <get-var config::database-admin-password>
+	   ";PWD=<get-var config::database-admin-password>">
+       <if <get-var config::database-admin-service-type>
+	   ";SVT=<get-var config::database-admin-service-type>">>>
+</defun>
+
+<defun db::smallblob name &optional size>
+  <defvar size 512>
+  <if <string-eq <sql::get-database-type> mysql>
+      "<get-var name> mediumblob"
+    "<get-var name> char (<get-var size>)">
+</defun>
+
+<defun db::mediumblob name &optional size>
+  <if <and <get-var size>
+	   <lt size 1024>>
+      <db::smallblob <get-var name> <get-var size>>>
+  <defvar size 1024>
+  <if <string-eq <sql::get-database-type> mysql>
+      "<get-var name> mediumblob"
+    "<get-var name> char (<get-var size>)">
+</defun>
+
+<defun db::giantblob name &optional size>
+  <if <and <get-var size>
+	   <lt size 2048>>
+      <db::mediumblob <get-var name> <get-var size>>>
+  <defvar size 4096>
+  <if <string-eq <sql::get-database-type> mysql>
+      "<get-var name> blob"
+    "<get-var name> text (<get-var size>)">
+</defun>
+
+<defun indexer::initialize-word-index>
+  <unset-var db::initialization-errors>
+  <sql::with-open-database db DSN=<db::dsn> nolock=true>
+    <set-var removed? =
+      <sql::database-exec-sql db "DROP TABLE <db::word-index>">>
+    <set-var created? =
+      <sql::database-exec-sql
+       db <prog
+	    CREATE TABLE <db::word-index>
+	    ( word	    char (64) NOT NULL,
+	      filename	    char (64) NOT NULL,
+	      title	    char (64),
+	      grep_hits     int)>>>
+  </sql::with-open-database>
+  <set-var db::initialization-errors[]=<sql::sql-error-message>>
+  <debugging-output clear>
+  <get-var created?>
+</defun>
+
+<defun index-log string>
+  <with-open-stream s /tmp/index-log mode=append>
+    <stream-put s "<date>: ">
+    <stream-put s <get-var string>>
+    <stream-put s "\n">
+  </with-open-stream>
+</defun>
+
+<defun physpath file>
+  <get-var mhtml::include-prefix mhtml::relative-prefix>/<get-var file>
+</defun>
+
+<defun title-of filename>
+  <set-var data = <include <get-var filename> verbatim>>
+  <when <match <get-var-once data> "title" caseless=true>>
+    <set-var title =
+      <match <get-var-once data> "title[ \t]*=[ \t\r\n\"]*[-_a-zA-Z0-9\:. ]+"
+	     action=extract>>
+
+    <if <not <get-var title>>
+	<prog
+	  <subst-in-var
+	   data
+	   "(.*)(<[Tt][Ii][Tt][Ll][Ee]>)([^<]+)(</[Tt][Ii][Tt][Ll][Ee]>)(.*)"
+	   "\\3" "[<>]" "">
+	  <set-var title=<get-var data>>>>
+    
+    <set-var title=<subst-in-string <get-var title>
+				    "title" ""
+				    "=" "" "/" ""
+				    "^[ \t\"]+" ""
+				    "[ \t]+$" "">>
+  </when>
+  <or <get-var title> <get-var filename>>
+</defun>
+
+<set-var indexer::ignored-words[] =
+  <prog
+    [0-9]+
+    [a-z]
+    [a-z][a-z]
+    the
+    when
+    there
+    and
+    not
+    click
+    here
+    page>>
+
+<defun indexer::ignored-words-regexp>
+  <when <not <get-var indexer::ignored-words-regexp>>>
+    <set-var i=0 len=<array-size indexer::ignored-words>>
+    <set-var indexer::ignored-words-regexp = " (">
+    <while <lt i len>>
+      <set-var indexer::ignored-words-regexp =
+	<concat <get-var indexer::ignored-words-regexp>
+		<get-var indexer::ignored-words[i]>
+		<if <lt <add i 1> len> "|">>>
+      <increment i>
+    </while>
+    <set-var indexer::ignored-words-regexp = 
+      <concat <get-var indexer::ignored-words-regexp>
+	      ") ">>
+  </when>
+  <get-var indexer::ignored-words-regexp>
+</defun>
+
+<defun indexer::caseless-regexp word>
+  <subst-in-string <get-var word>
+		   "(.)" "<verbatim>[<upcase \\1><downcase \\1>]</verbatim>">
+</defun>
+
+<defsubst indexer::highlight-contents>
+  <subst-in-var %0
+		"(<indexer::caseless-regexp %1>)"
+		"<b>\\1</b>">
+</defsubst>
+
+<defun index filename title>
+  ;;; DOC_SECTION (SITE-INDEXER)
+  ;;; Add the results of indexing FILENAME with a title of TITLE to the
+  ;;; search database which is currently being built.
+  <index-log "Entering Index: <get-var filename>: <get-var title>">
+  <set-var data[]=<cgi-exec cat <physpath <get-var filename>> | strip-tags>>
+  <index-log "...starting subst-1">
+  <set-var i=0>
+  <while <get-var data[i]>>
+    <set-var data[i] =
+      <subst-in-string <downcase <get-var data[i]>> "[^a-z]+" " "
+		       "<indexer::ignored-words-regexp>| " "\n">>
+    <increment i>
+  </while>
+
+  ;;; Index the title also.
+  <set-var data[i] =
+    <subst-in-string <downcase <get-var title>> "[^a-z]+" " "
+		     "<indexer::ignored-words-regexp>| " "\n">>
+
+  ;;; Sort words, and make them unique.
+  <index-log "...starting sort">
+  <with-open-stream s /tmp/mindex.tmp mode=write-create>
+    <stream-put s <get-var data[]>>
+  </with-open-stream>
+  <set-var words[]= <cgi-exec cat /tmp/mindex.tmp | sort | uniq>>
+
+  <index-log "...starting index (<array-size words> words)">
+  ;;; Add this file to every remaining word.
+  <sql::with-open-database db DSN=<db::dsn> mode=write-create>
+    <foreach word words iter=i>
+      <package-delete temp>
+      <set-var temp::word = <get-var-once word>
+	temp::filename = <get-var-once filename>
+	temp::title = <get-var-once title>
+	x[] =
+	<or <cgi-exec cat <physpath <get-var filename>> | strip-tags |
+		      grep -c -w -i <get-var words> errors=ignore> 0>
+	temp::grep_hits = <get-var x>
+	x =
+	<sql::database-save-package
+	 db <get-var-once word> temp keyname=word table=<db::word-index>>>
+      <if <eq 0 <mod i 100>>
+	  <index-log "....<get-var i>">>
+    </foreach>
+  </sql::with-open-database>
+  <index-log "...done.">
+</defun>
+
+<defun indexer::search term-string>
+  ;;; DOC_SECTION (SITE-INDEXER)
+  ;;; Return an array of alists, ordered by the number of hits received.
+  ;;;
+  <set-var words[] =
+    <downcase <subst-in-string <get-var term-string>
+			       "[;\\:'.,?!@#$%&*\\(\\)\\<\\>+=\"]+" " "
+			       "[ \t\r\n]+" "\n">>>
+  <sql::with-open-database db DSN=<db::dsn> mode=read>
+    <sql::database-query
+     db true
+     "SELECT * FROM <db::word-index>
+       WHERE
+      <foreach word words iter=i>
+      word LIKE '%<get-var-once word>%'
+      <if <get-var-once words[<add i 1>]> AND>
+      </foreach>
+      ORDER BY grep_hits"
+     format = <array-append <package-to-alist> ^::results>>
+  </sql::with-open-database>
+  <get-var-once results[]>
+</defun>
+
+<defun indexer::show-results results[]>
+  ;;; DOC_SECTION (SITE-INDEXER)
+  ;;; Display <var results>, the results of having called INDEXER::SEARCH.
+  <ul>
+    <foreach alist results iter=i>
+      <package-delete temp>
+      <alist-to-package <get-var <get-var names[i]>> temp>
+      <add i 1>.&nbsp
+      <a href="/<get-var temp::file>"><get-var temp::title></a>
+      &nbsp;<i>(<get-var temp::hits>)</i>
+      <if <get-var temp::context>
+	  <prog <p> <ul> <i><get-var temp::context></i> </ul>>>
+      <p>
+    </foreach>
+  </ul>
+</defun>
+
+<defun indexer::search-form action label size allow-context-p>
+  ;;; DOC_SECTION (SITE-INDEXER)
+  ;;; Generate a form which accepts search terms.
+  <defvar size medium>
+  <set-var size=<downcase <get-var size>>>
+  <var-case
+    size=small	<set-var padding=5 fsize=-1>
+    size=medium	<set-var padding=10>
+    size=large	<set-var padding=10 fsize=+1>>
+  <defvar action <thisdoc>>
+  <defvar label "Search">
+  <form method=post action="<get-var action>">
+    <table bgcolor="#A080A0" cellspacing=0 cellpadding=<get-var padding>>
+      <tr>
+	<td align=left>
+	  <font color="#000000" <if <get-var fsize> "size=<get-var fsize>">>
+	  ;;; <b>Search Terms:</b><br>
+	  <input type=text size=34 name=search-terms
+		 value="<get-var default::search-terms>">
+	  &nbsp;&nbsp;
+	  <input type=submit name=action value="<get-var label>">
+	  </font>
+	</td>
+      </tr>
+      <when <get-var allow-context-p>>
+	<tr>
+	  <td align=left>
+	    <font color="#000000" <if <get-var fsize> "size=<get-var fsize>">>
+	    <i>Show Context:</i>
+	    <concat "  "
+		    <input type=radio name=show-context value="true"
+			   <if <get-var indexer::show-context>
+			       CHECKED>>
+		    "Yes   "
+		    <input type=radio name=show-context value=""
+			   <if <not <get-var indexer::show-context>>
+			       CHECKED>>
+		    "No">
+	    </font>
+	  </td>
+	</tr>
+      </when>
+    </table>
+  </form>
+</defun>

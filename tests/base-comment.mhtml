@@ -1,0 +1,6 @@
+;;; base-comment.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 03:15:30 1996.
+
+Result: "Not in comment tag.": Not in comment tag.<comment>This is a comment, it should not appear.</comment>

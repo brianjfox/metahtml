@@ -1,0 +1,8 @@
+;;; base-ifeq.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 15:43:27 1996.
+
+Result: true: <ifeq 9 9 true>
+Result: true: <ifeq 911 911 true>
+Result: true: <ifeq "String 1" "String 1" true>

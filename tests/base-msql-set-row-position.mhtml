@@ -1,0 +1,6 @@
+;;; base-msql-set-row-position.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 00:31:03 1996.
+
+Result: "true Jarlath (805) 730-8885": <set-var query="select * from test"><msql::with-open-database db database=test host=localhost><msql::database-exec-query db <get-var query> cursor=dbcursor><msql::set-row-position dbcursor 3><msql::database-next-record dbcursor> <get-var name> <get-var phone></msql::with-open-database>

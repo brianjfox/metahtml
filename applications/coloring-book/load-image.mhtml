@@ -1,0 +1,86 @@
+;;; load-image.mhtml: -*- Meta-HTML -*-  Load an already saved image.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Feb  1 19:34:03 1997.
+<set-title="Get Back a Saved Picture">
+<include header.mhtml>
+<unset-var mhtml::cacheable>
+
+<when <get-var posted::user-name>>
+  <set-session-var cbook::user-name = <get-var posted::user-name>>
+</when>
+<require coloring-book>
+<cbook::initialize>
+
+<when <string-eq <get-var posted::action> "load-image">>
+  <cbook::load-image <get-var cbook::user-name> <get-var name>>
+  <redirect color.mhtml>
+</when>
+
+<layout::page>
+  <center>
+    <h3>Load One of Your Pictures...</h3>
+  </center>
+  <p>
+  <when <not <get-var cbook::user-name>>>
+    <form method=POST action="<thisdoc>">
+      <pre>
+    What's <i>your</i> name?
+    <input type=text name=user-name size=40 value="<get-var user-name>">
+
+	<input type=submit name=action value="That's My Name!">
+      </pre>
+    </form>
+  </when>
+  <p>
+  <when <get-var cbook::user-name>>
+    <directory-contents
+     <concat <get-var mhtml::include-prefix mhtml::relative-prefix>
+	     /user-images/<get-var cbook::user-name>>
+     images matching="^[^.]">
+    <center>
+      <set-var cols=3 i=0 vars[]=<package-vars images>>
+      <set-var action=load-image>
+      <sort vars>
+      <table width=100%>
+	<while <get-var vars[i]>>
+	  <set-var col=0>
+	  <tr valign=bottom>
+	    <while <and <get-var vars[i]> <lt col cols>>>
+	      <package-delete temp>
+	      <alist-to-package <get-var <get-var vars[i]>> temp>
+	      <set-var name = <get-var temp::name>>
+	      <set-var file=<concat <get-var mhtml::relative-prefix>
+				    /user-images/<get-var cbook::user-name>
+				    /<get-var name>>>
+	      <td align=center width=<div 100 cols>%>
+		;;; Load the image parameters.
+		<package-delete file>
+		<in-package file>
+		  <include <get-var default::file>>
+		</in-package>
+		<set-var temp::saved-values=<get-var cbook::<get-var name>>>
+		<set-var cbook::<get-var name> =
+		  <package-to-alist file strip=true>>
+		<concat
+
+		 <a href="<thisdoc>?<cgi-encode action name>">
+		 <img src="<cbook::colored-image <get-var file::image>>"
+		      border=0 height=125>
+		 </a>>
+		<br>
+		<a href="<thisdoc>?<cgi-encode action name>">
+		  <b><capitalize <get-var name>></b>
+		</a>
+		<set-var cbook::<get-var name>=<get-var temp::saved-values>>
+	      </td>
+	      <increment i>
+	      <increment col>
+	    </while>
+	  </tr>
+	</while>
+      </table>
+    </center>
+  </when>
+</layout::page>
+<include footer.mhtml>

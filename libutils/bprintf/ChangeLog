@@ -1,0 +1,21 @@
+1998-05-15    <bfox@roadshow.datawave.net>
+
+	* bprintf.c (bprintf_word_wrap): Make sure that the last word in a
+	buffer is eligible for word wrapping by adding a space to the
+	end of the buffer.
+
+Mon Oct 27 20:06:10 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* bprintf.c (bprintf_insert_binary): New function allows the
+	insertion of binary data.
+
+Fri Dec  8 18:10:02 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* bprintf.c (bprintf_delete_range): Don't make unnecessary calls
+	to memmove when there is nothing to move.  Also, only move the
+	correct number of bytes, not one extra.
+
+Thu Apr 20 21:46:12 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* Birth of this library.  libbprintf.a (1.0).
+

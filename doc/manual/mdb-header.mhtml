@@ -1,0 +1,49 @@
+;;; header.mhtml: -*- Meta-HTML -*-
+;;; This header file is included at the start of every document
+;;; which describes the Meta-HTML Debugger.
+
+<when <not <get-var header-already-included>>>
+  <set-var header-already-included=true>
+  <include mandefs.mhtml>
+
+  <set-var
+    author-name="Brian J. Fox"
+    the-author=<get-var author-name>
+    author-email="bfox@ai.mit.edu"
+    author-url="http://www.metahtml.com/~bfox/"
+    manual-ref=<concat <a href="welcome.mhtml">
+		       "The <mdb> Debugger Manual"
+		       </a>>>
+  <html>
+  <head>
+  <title> <get-var title> </title>
+  </head>
+
+  <body bgcolor="#FFFFFF">
+  <when <not <get-var hacking-frames>>>
+    <table border=7 width=100%>
+      <tr>
+	<td valign=center width=35%>
+	  <concat <a href="mdb-welcome.mhtml">
+		  <img src="mdb-logo.gif" align=left
+		       border=0 alt="Top of Manual">
+		  </a>>
+	</td>
+	<td width=65%>
+	  <center>
+	    <small-caps upper=+3 lower=+2 other=+2>
+	      The <b><mdb></b> Debugger Manual
+	    </small-caps>
+	  </center>
+	</td>
+      </tr>
+    </table>
+    <br clear>
+  </when>
+
+  <include navigate.mhtml>
+  <hr size=6 width=75%>
+  <center><h2><get-var title></h2></center>
+  <p>
+  <DEBUGGING-OUTPUT>
+</when>

@@ -1,0 +1,310 @@
+;;; http.mhtml: -*- Meta-HTML -*-  Functions for hacking HTTP connections.
+;;; 
+;;;  Copyright (c) 1997, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Aug 20 04:11:38 1997.
+
+<defun http::sizeof varname>
+  <parser::canonicalize-var varname>
+  <or <alist-get-var <symbol-info <get-var-once <get-var-once varname>>> SIZE>
+      0>
+</defun>
+
+<defun http::host-part url>
+  ;;; DOC_SECTION (NETWORK-APPENDIX)
+  ;;; Return the hostname and port portion of the fully qualified <var url>.
+  ;;; <complete-example>
+  ;;; <http::host-part http://www.metahtml.com/page.mhtml>
+  ;;; </complete-example>
+  <subst-in-string <get-var-once url>
+		   "([Hh][Tt][Tt][Pp]://)([^/:]+)(.*$)" "\\2">
+</defun>
+
+<defun http::port-part url>
+  ;;; DOC_SECTION (NETWORK-APPENDIX)
+  ;;; Return the port portion of the fully qualified <var url>.
+  ;;; If the <var url> doesn't have a port specifier, the value "80" is
+  ;;; returned.
+  ;;; <complete-example>
+  ;;; <http::port-part http://www.metahtml.com:8080/page.mhtml>
+  ;;; </complete-example>
+  <set-var port =
+    <subst-in-string <get-var-once url>
+		     "([Hh][Tt][Tt][Pp]://)([^/:]+)[:]([0-9]+)*(.*$)" "\\3">>
+  <if <string-eq <get-var-once port> <get-var-once url>>
+      <set-var port = 80>>
+  <get-var-once port>
+</defun>
+
+<defun http::path-part url>
+  ;;; DOC_SECTION (NETWORK-APPENDIX)
+  ;;; Return the path portion of the fully qualified <var url>.
+  ;;; This is the part of <var url> that is meaningful to the host.
+  ;;; <complete-example>
+  ;;; <http::path-part http://www.metahtml.com:8080/page.mhtml?foo=bar>
+  ;;; </complete-example>
+  <subst-in-string <get-var-once url>
+		   "([Hh][Tt][Tt][Pp]://)([^/]+)(.*$)" "\\3">
+</defun>
+
+<defun http::query-part url>
+  ;;; DOC_SECTION (NETWORK-APPENDIX)
+  ;;; Return the query portion of the fully qualified <var url>.
+  ;;; If <var url> doesn't have a query string, the empty string
+  ;;; is returned, otherwise, that portion of <var url> following the
+  ;;; first question-mark (<code>?</code>) is returned.
+  ;;; <complete-example>
+  ;;; <http::query-part http://www.metahtml.com:8080/page.mhtml?foo=bar>
+  ;;; </complete-example>
+  <if <match <get-var-once url> "\\?">
+      <subst-in-string <get-var-once url> "(^[^?]+\\?)(.*$)" "\\2">>
+</defun>
+
+<defun http::read-until-blank-line stream>
+  <while <stream-readable stream>>
+    <if <not <stream-get stream>>
+	<break>>
+  </while>
+</defun>
+
+<defun http::get-document host port path &key strip-headers var
+  &rest headers[]>
+  ;;; DOC_SECTION (NETWORK-APPENDIX)
+  ;;; Get an HTTP document specified by <var host>, <var port> and <var path>.
+  ;;;
+  ;;; If a redirection is necessary in order to get the final
+  ;;; document, the variable <code>http::redirected-url</code> is set
+  ;;; to the fully qualified URI of the document.
+  ;;;
+  ;;; If the document could not be retrieved, the variable
+  ;;; <code>http::error-status</code> contains the word "NO-DATA", and
+  ;;; the variable <code>http::explanation</code> contains an human
+  ;;; readable string explaining the problem.
+  ;;;
+  ;;; If <var strip-headers> is given, the HTTP protocol headers are
+  ;;; stripped from the document before it is returned.
+  ;;;
+  ;;; If the keyword argument <var var> is supplied, it is the
+  ;;; name of variable that should receive the contents of the HTTP
+  ;;; document verbatim -- by necessity, this variable is binary.
+  ;;; You can use the <var content-length> function to find out the
+  ;;; length of the retrieved document.
+  ;;;
+  ;;; Finally, any extra headers that you would like to pass along may
+  ;;; be written into the call, perhaps to set a cookie for example.
+  ;;;
+  ;;; <example>
+  ;;; <http::get-document www.metahtml.com 80 "/" "Cookie: SID=829389834">
+  ;;; </example>
+  <set-var redirect=true>
+  <unset-var http::redirected-url>
+  <defvar env::http_user_agent Mozilla/3.1>
+  <while <get-var-once redirect>>
+    <unset-var redirect>
+    <unset-var http::error-status http::explanation>
+    <set-var port = <or <get-var-once port> 80>>
+    <subst-in-var path "[ \r\n\t]+" "">
+    <if <not <get-var-once path>> <set-var path=/>>
+    <if <gt :debug-level 19>
+	<page-debug
+	 Opening connection to <get-var-once host> on <get-var-once port>>>
+    <with-open-stream s <get-var-once host>:<get-var-once port>
+      type=tcp mode=read timeout=<get-var-once http::read-timeout>>
+      <if <gt :debug-level 19>
+	  <page-debug Connected: Getting <get-var-once path> HTTP/1.0>>
+      <stream-put s "GET <get-var-once path> HTTP/1.0\n">
+      <stream-put
+       s
+       <concat "USER-AGENT: "
+	       <or <get-var-once env::http_user_agent>
+		   <get-var-once http::default-user-agent>>
+	       "\n">>
+      <foreach header headers>
+	<if <gt :debug-level 19>
+	    <page-debug Sending header: `<get-var-once header>'>>
+	<stream-put s "<get-var-once header>\n">
+      </foreach>
+      <stream-put s "\n">
+      <if <gt :debug-level 19>
+	  <page-debug Waiting for response>>
+      <set-var response = <stream-get s>>
+      <if <gt :debug-level 19>
+	  <page-debug Got response: `<get-var-once response>'>>
+      <if <match <get-var-once response> "30[12]">
+	  <set-var redirect=true>
+	<if <get-var-once strip-headers>
+	    <http::read-until-blank-line <get-var-once s>>>>
+      <stream-get-contents s body>
+    </with-open-stream>
+
+    <if <or <match <get-var-once response> "404">
+	    <eq <content-length body> 0>>
+	<set-var
+	  http::error-status = NO-DATA
+	  http::explanation =
+	  <prog
+	    Your request for the URL `<get-var-once path>' from the
+	    host `<get-var-once host>' at port `<get-var-once port>' failed
+	    because no server was contacted, or the resultant document
+	    contained no data.  Please try another URL.>>
+      <concat
+       <when <get-var-once var>>
+         <parser::canonicalize-var var>
+	 <copy-var body <get-var-once var>>
+       </when>
+       <coerce-var body type=string>
+    
+       <when <get-var-once redirect>>
+	 ;;; BODY contains the "Location:" of the new URL.
+	 ;;; Reparse this URL, and keep trying.
+	 <set-var
+	   http::redirected-url =
+	   <subst-in-string <get-var-once body>
+			    "(.*)(Location:[ ]+)([^\n]+).*$" "\\3">
+	   host = <http::host-part <get-var-once http::redirected-url>>
+	   port = <if <match <get-var-once host> "(^[^:])(:)([0-9]+$)">
+		      <subst-in-string <get-var-once host>
+				       "(^[^:])(:)([0-9]+$)" "\\3">
+		    80>
+	   path = <subst-in-string <get-var-once http::redirected-url>
+				   "(http://)([^/]+)(.*$)" "\\3">>
+       </when>>>
+  </while>
+  <if <and <get-var-once var>
+	   <not <get-var-once http::error-status>>>
+      true
+    <if <not <get-var-once http::error-status>>
+	<get-var-once body>>>
+</defun>
+
+<defun http::include url &key varname &rest extra-headers[]>
+  ;;; DOC_SECTION (NETWORK-APPENDIX)
+  ;;; Include the contents of the Web document referenced by <var url>
+  ;;; in the page.  If <var varname> is supplied, it is the name of a
+  ;;; binary variable which will receive the page contents.  Otherwise,
+  ;;; the document is simply returned.
+  ;;;
+  ;;; <var extra-headers> can be supplied, perhaps to pass a cookie to
+  ;;; the server:
+  ;;;
+  ;;; <example>
+  ;;; <http::include http://www.foo.com/cgi-bin/foo.exe "Cookie: SID=10">
+  ;;; </example>
+
+  <set-var
+    host = <http::host-part <get-var-once url>>
+    port = <http::port-part <get-var-once url>>
+    path = <http::path-part <get-var-once url>>>
+  <if <get-var-once varname>
+      <parser::canonicalize-var varname>>
+  <apply http::get-document
+	 <get-var-once host>
+	 <get-var-once port>
+	 <get-var-once path>
+	 <if <get-var-once varname> "var=varname-result">
+	 "strip-headers=true"
+	 <prog
+	   <foreach h extra-headers>
+	   <%%quote-for-set-var <get-var-once h>>
+	   </foreach>>>
+  <if <get-var-once varname>
+      <copy-var varname-result <get-var-once varname>>>
+</defun>
+
+<set-var http::default-user-agent =
+  "Mozilla/4.04 [en] (X11; I; Linux 2.0.27 i686)">
+
+<defun http::post url pack &key user-agent &rest http-headers>
+  ;;; DOC_SECTION (NETWORK-APPENDIX)
+  ;;; POST the variables and values in <var pack> to the server and page
+  ;;; specified by <var url>.  If the keyword argument <var user-agent>
+  ;;; is supplied, it overides the default value, which is either the
+  ;;; value of <var env::http_user_agent>, or the string
+  ;;; <b><get-var-once http::default-user-agent></b>.
+
+  <set-var
+    host = <http::host-part <get-var-once url>>
+    port = <http::port-part <get-var-once url>>
+    path = <http::path-part <get-var-once url>>>
+  <set-var :vars[]=<package-vars <get-var-once pack>>>
+  <set-var data=<apply cgi-encode <package-vars <get-var-once pack>>
+		       "strip=t">>
+  <strings::trim data>
+  <set-var len = <string-length <get-var-once data>>>
+  <with-open-stream s <get-var-once host>:<get-var-once port>
+    type=tcp mode=write-create timeout=30>
+    <stream-put s "POST <get-var-once path> HTTP/1.0\n">
+    <stream-put s "Referer: <get-var-once url>\n">
+    <defvar user-agent <or <get-var-once env::http_user_agent>
+			   <get-var-once httpd::default-user-agent>>>
+    <stream-put s "User-agent: <get-var-once user-agent>\n">
+    <stream-put s "Host: <get-var-once host>:<get-var-once port>\n">
+    <stream-put s "Accept: image/gif, image/x-bitmap, image/jpeg, */*\n">
+    <foreach header http-headers>
+      <stream-put s "<get-var-once header>\n">
+    </foreach>
+    <stream-put s "Content-type: application/x-www-form-urlencoded\n">
+    <stream-put s "Content-length: <get-var-once len>\n\n">
+    <stream-put s "<get-var-once data>\n">
+    <stream-get-contents s result>
+  </with-open-stream>
+  <coerce-var result type=string>
+  <get-var-once result>
+</defun>
+
+<defmacro babel::translate-text from to &body &unevalled qbody whitespace=delete>
+  <package-delete trans>
+  <set-var trans::doit=done>
+  <set-var trans::urltext=<get-var-once qbody>>
+  <set-var trans::languagepair=<get-var-once from>_<get-var-once to>>
+  <set-var trans::the-trans =
+    <http::post http://babelfish.altavista.digital.com/cgi-bin/translate
+		trans>>
+  <set-var trans::endpos =
+    <match <get-var-once trans::the-trans>
+	   <concat "<" "td align=\"left\">\n\n">
+	   action=endpos>>
+  <set-var trans::translation=<substring <get-var-once trans::the-trans>
+					 <get-var-once trans::endpos>>>
+  <set-var trans::endpos =
+    <match <get-var-once trans::translation>
+	   <concat "\n</td><" "td><img"> action=startpos>>
+  <set-var trans::translation=<substring <get-var-once trans::translation>
+					 0 <get-var-once trans::endpos>>>
+  <get-var-once trans::translation>
+</defmacro>
+
+<defun babel::quick-trans from to text>
+  <package-delete :trans>
+  <set-var
+    :trans::doit=done
+    :trans::urltext=<get-var-once text>
+    :trans::languagepair=<get-var-once from>_<get-var-once to>
+    the-trans =
+    <http::post http://babelfish.altavista.digital.com/cgi-bin/translate
+		:trans>
+    endpos = <match <get-var-once the-trans>
+		    <concat "<" "td align=\"left\">\n\n">
+		    action=endpos>
+    translation = <substring <get-var-once the-trans> <get-var-once endpos>>
+    endpos = <match <get-var-once translation>
+		    <concat "\n</td><" "td><img"> action=startpos>
+    translation = <substring <get-var-once translation>
+			     0 <get-var-once endpos>>>
+  <get-var-once translation>
+</defun>
+
+<defun http::write-download-file varname &key filename type>
+  <parser::canonicalize-var varname>
+  <defvar type "application/data">
+  <defvar filename "download.csv">
+  <coerce-var <get-var-once varname> type=binary>
+  <set-var content-length = <content-length <get-var-once varname>>>
+  <array-append "HTTP/1.0 200 OK" output>
+  <array-append "Content-type: <get-var-once type>" output>
+  <array-append "Content-disposition: filename=<get-var-once filename>" output>
+  <array-append "Content-length: <get-var-once content-length>" output>
+  <array-append "" output>
+  <coerce-var output type=binary>
+  <binary-concat output <get-var-once varname>>
+  <replace-page contents=output>
+</defun>

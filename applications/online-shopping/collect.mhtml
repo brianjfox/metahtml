@@ -1,0 +1,61 @@
+;;; collect.mhtml: -*- Meta-HTML -*-
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep 10 09:27:21 1995.
+;;;
+;;; Called when the user clicks "Place in Cart" from any of the class list
+;;; screens.  Adds (or perhaps deletes) the items from the current session,
+;;; and then returns to the appropriate page.
+;;;
+<include tagsets/substs.mhtml>
+<include tagsets/action-buttons.mhtml>
+<set-var class=<get-session-var current-class>>
+
+;;; Import the session variables from this class.
+<session-import "<get-var class>" default>
+
+<defsubst session-delete-package>
+  <session-import "%0" temp-pack>
+  <set-var macro::i=0 macro::names[]=<package-vars temp-pack>>
+  <while <get-var macro::names[i]>>
+    <unset-session-var "%0::<var-name macro::names[i]>">
+    <increment i>
+  </while>
+</defsubst>
+
+;;; A function which accumulates the count of the various items in this
+;;; class.
+;;; I think that we don't want to accumulate the items.  Instead, we
+;;; should simply replace the page values with the ones loaded.
+<defsubst get-posted-items>
+  <set-var macro::names[]=<package-vars posted> i=0>
+  <while <get-var macro::names[i]>>
+    <set-var value="<get-var <get-var macro::names[i]>>">
+    ;;; <set-var size="<get-var <get-var macro::names[i]>[1]>">
+    ;;; <if <and <digits-p value>
+    ;;;     <not <eq <get-var value> 0>>>
+    ;;; <prog
+	  <set-var
+	    the-name="<get-var class>::<var-name macro::names[i]>"
+	    "<get-var the-name>"="<get-var value>"
+	    "<get-var the-name>"="<get-var value>">
+	  ;;; <increment "<get-var the-name>" by=<get-var <var-name the-name>>>
+    ;;; >>
+    <increment i>
+  </while>
+</defsubst>
+
+<action-retrieve "Place in Cart" "Remove All <get-var class>">
+
+<var-case
+  action="Place in Cart"
+  <prog
+    <get-posted-items>
+    <session-export "<get-var class>">>
+
+  action="Put Back <get-var class>"
+  <prog
+    <session-delete-package "<get-var class>">
+    <redirect "<get-session-var mhtml::full-url>">>>
+
+<redirect "<get-var mhtml::url-to-dir>/">

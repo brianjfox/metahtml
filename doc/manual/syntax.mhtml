@@ -1,0 +1,112 @@
+;;; syntax.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Jul  6 01:20:05 1996.
+<if <not <get-var files-are-included>>
+    <prog
+      <set-var title="Language Syntax"
+	prev-page="implementation.mhtml" prev-title="The Implementation"
+	next-page="view-section.mhtml?key=arithmetic-operators"
+	next-title="Arithmetic Operators">
+      <include header.mhtml>>
+  <prog <h3>Syntax Overview</h3>>>
+<set-var mhtml::cacheable=true>
+
+<ptext>
+  A <meta-html> document consists of plain text, <b>HTML</b> directives, and
+  <meta-html> statements.
+
+  The syntax of the <meta-html> language was designed to be as similar
+  to <b>HTML</b> as possible, so as to not sacrifice readability of the total
+  document.  All of the <meta-html> statements are delivered as a form
+  of <b>HTML</b> <emph>tags</emph>.  There are two types of <meta-html> tags:
+  <i>simple</i> and <i>complex</i>.
+
+  A <i>simple tag</i> begins with an open angle bracket
+  (<b>&lt;</b>) and ends with a corresponding close angle bracket
+  (<b>&gt;</b>).  The text enclosed within the brackets is called the
+  <i>body</i>; it can contain <i>assigned variables</i> and
+  <i>positional arguments</i>.
+
+  A <i>complex tag</i> begins with what looks exactly like a
+  simple tag, continues throughout the body of the text, and ends with
+  the a matching <i>closing tag</i>.  This is analogous to the use
+  of tags within <b>HTML</b>.  The body of a complex tag is all of the text
+  which appears between the opening tag and the closing tag, exclusive
+  of those tags themselves.
+
+  Here is an example of using the simple tag <code>set-var</code>:
+
+  <example>
+    <set-var foo=bar>
+  </example>
+
+  Here is an example of using the complex tag <code>when</code>:
+
+  <example>
+    <when <get-var foo>>
+      The value of `foo' is <get-var foo>.
+    </when>
+  </example>
+
+  Note that both the <code>set-var</code> and <code>when</code> forms
+  have opening tags which contain additional material.  This
+  material is used to supply information to the form.
+
+  Additionally note that ``simple'' and ``complex'' do not refer to the
+  complexity of the function performed; they simply refer to the syntax
+  used to write the form in a document.  For example, the simple tag
+  <funref variables var-case> performs a complex operation based upon
+  the arguments it is given.
+
+  Variables assigned in the opening (or simple) tag have the form:
+
+  <example>
+    name=value
+  </example>
+
+  This gives the variable referred to as <code>name</code> a local value
+  of <code>value</code>.  Variable assignments such as these give the
+  <meta-html> writer a way to pass dynamic arguments to a function.  For
+  example, the <funref databases with-open-database> form can open the
+  requested database in one of 3 modes; you control which one by locally
+  assigning the variable <code>mode</code> within the form:
+
+  <example>
+    <with-open-database db "/phones.db" mode=<get-var db-mode>>
+     ...
+    </with-open-database>
+  </example>
+
+  <a name="quoting"></a>
+  <h3>Quoting Syntax</h3>
+
+  At times, you will need to quote the expressions that you pass to
+  various <meta-html> functions.  You do this with double quotes
+  (<code>"</code>) and blackslashes (<code>\</code>).  Here is a ;;;"
+  somewhat hairy example of quoting:
+  
+  <example>
+    <if <get-var "Space Name">
+        <get-var "Space Name[space index]">
+      <set-var space-name-present=false>>
+  </example>
+
+  For most cases, quoting is unnecessary, because open braces are
+  expected to match close braces, and doubles quotes are expected to
+  come in pairs.  This is the usual case.  For example:
+
+  <example>
+    <ifeq <get-var foo[index]> <get-var bar>
+        <set-var array[index]=<get-var bar>-found>
+      <set-var array[index]=<get-var bar>-missing>>
+  </example>
+
+  In the above example, no quoting was required because the only
+  whitespace which appeared in the expression was within a set of
+  matched braces.
+  <p>
+</ptext>
+
+<include footer.mhtml>
+

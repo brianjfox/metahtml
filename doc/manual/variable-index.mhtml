@@ -1,0 +1,30 @@
+;;; variable-index.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul  3 13:04:48 1996.
+<set-var title="Variable Index">
+<include header.mhtml>
+<set-var mhtml::cacheable=true>
+
+<if <get-var-once posted::key>
+    <redirect <get-var mhtml::url-to-dir>/man-page.mhtml?<cgi-encode key>>>
+
+<with-open-database db <metahtml::function-db> mode=read>
+  <database-query db <string-eq <get-var funtype> variable> keys=keys>
+</with-open-database>
+
+<set-var keys[]=<downcase <get-var keys[]>>>
+<sort keys>
+
+<if <get-var hacking-frames>
+    <vertical-table default::keys 3
+		    <get-var mhtml::url-to-dir>/man-page-frame.mhtml
+		    target="manpage-frame">
+  <vertical-table default::keys 3 <get-var mhtml::url-to-dir>/man-page.mhtml>>
+
+<br>
+<a href="<get-var mhtml::url-to-dir>/function-index.mhtml">
+  Function Index
+</a>
+<include footer.mhtml>
+

@@ -1,0 +1,5 @@
+;;; header.mhtml: -*- Meta-HTML -*- 
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul 23 13:10:31 1997.
+<include ../header.mhtml>

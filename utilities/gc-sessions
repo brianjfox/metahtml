@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# Reorganize the server session databases.
+#
+dir=`echo $0 | sed -e 's@/[^/]*$@@'`
+if [ "$dir" = "" ]; then dir=`pwd`; fi
+PATH=$dir:$PATH:/usr/lib/metahtml
+export PATH
+export LD_LIBRARY_PATH
+LD_LIBRARY_PATH="`echo $dir | sed -e 's@/[^/]*$@@'`/lib:/lib:/usr/lib:$LD_LIBRARY_PATH"
+
+# List of hostnames that should start their own copy of Mhttpd.
+HOSTNAMES=$1
+
+dir=`echo $0 | sed -e 's@/[^/]*$@@'`
+if [ "$dir" = "" ]; then dir=`pwd`; fi
+
+if [ "$HOSTNAMES" = "" ]; then
+   for possibles in $dir /etc/sysconfig /etc /usr/lib/metahtml /www/bin; do
+      if [ -f $possibles/LOCAL-SITES ]; then
+         HOSTNAMES=$possibles/LOCAL-SITES
+         break;
+      fi
+   done
+fi
+
+if [ "$HOSTNAMES" ]; then
+   MHTTPD_HOSTS=`cat $HOSTNAMES 2>/dev/null`
+fi
+
+if [ "$MHTTPD_HOSTS" ]; then
+   for site in $MHTTPD_HOSTS; do
+      sessiondir=/www/$site/writable
+      if [ -r $sessiondir/sessions.db ]; then
+	 echo "Reorganizing sessions.db for $site."
+	 gc-database -f $sessiondir/sessions.db
+	 /bin/chown www.wwwadmin $sessiondir/sessions.db 2>/dev/null >/dev/null
+      fi
+   done
+fi

@@ -1,0 +1,9 @@
+;;; header.mhtml: -*- Meta-HTML -*-  HTML header for the coloring book app.
+;;;
+;;; Copyright (c) 2000 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Wed Dec  6 06:05:05 2000.
+<html>
+<head>
+<title>Brian's Instant Coloring Book</title>
+<body bgcolor=white text=brown>
+<session::initialize>

@@ -1,0 +1,17 @@
+;;; base-gt.mhtml: -*- Meta-HTML -*-  Test gt math function.
+;;;
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 23 01:37:09 PDT 1996
+
+Result: true: <gt 9 5>
+Result: true: <gt 9.0 5.0>
+Result: true: <not <gt 5 9.0>>
+Result: : <gt 5 9.0>
+Result: true: <gt 5 -9.0>
+Result: true: <gt -5 -9.0>
+Result: : <gt -9.0 -5>
+Result: true: <gt -5.00 -9.0>
+Result: : <gt -9.00 -5.0>
+Result: true: <gt -5.00 -9.00000>
+Result: true: <gt -5.0000001 -5.0000002>
+Result: true: <gt -9.001 -9.0000001>

@@ -1,0 +1,117 @@
+;;; Welcome.mhtml -- Top level file for Meta-HTML raw site.
+;;;
+
+<defun /body>
+  <p>
+  <div align=center>
+  <a href="http://www.metahtml.com/">
+    <font size=1>
+    <i><concat "Meta-HTML Powered"></i>
+    </font>
+  </a>
+  <verbatim></body></verbatim>
+</defun>
+<defun release>release/<get-var mhtml::version></defun>
+
+<if <file-exists <thisdir>/documentation>
+    <set-var doclink=/documentation/>
+  <if <file-exists <thisdir>/<release>/documentation>
+      <set-var doclink=/<release>/documentation/>
+    <if <file-exists <thisdir>/Documentation>
+      <set-var doclink=/Documentation/>>>>
+
+<if <lt mhtml::version 6.0>
+    <set-var msite=www.metahtml.org>
+  <set-var msite=www.metahtml.com>>
+
+<html>
+<head> <title> Welcome to Meta-HTML </title> </head>
+<body bgcolor="#FFFFFF">
+<DEBUGGING-OUTPUT>
+<p><br>
+<plain-text>
+  <center>
+    <img src="<release>/images/top-banner.gif">
+
+    <table width=400 border=2>
+      <tr>
+	<td>
+	  <center>
+	    <b>Welcome to <Meta-HTML> Version <get-var mhtml::version>!</b>
+
+	    <a href="<release>/">
+	      <b>Version <get-var mhtml::version> Release Notes</b>
+	    </a>
+
+	    <a href="<get-var doclink>">
+	      <b>Meta-HTML Reference Manual</b>
+	    </a>
+
+	    <when <file-exists <thisdir>/<release>/sql-rolodex/welcome.mhtml>>
+	      <a href="<release>/sql-rolodex/welcome.mhtml">
+		<b>Example SQL Rolodex App</b>
+	      </a>
+	    </when>
+
+	    <when <file-exists <thisdir>/<release>/sql-browser/welcome.mhtml>>
+	      <a href="<release>/sql-browser/welcome.mhtml">
+		<b>Example SQL Database Browser</b>
+	      </a>
+	    </when>
+
+	    <a href="http://<get-var msite>/">
+	      <b>
+	      <if <lt mhtml::version 6.0>
+		  WWW.MetaHTML.ORG:
+		WWW.MetaHTML.COM:>
+	      </b>
+	    </a>
+
+	    <when <lt mhtml::version 6.0>>
+	      <a href="release/<get-var mhtml::version>/COPYING.html">
+		<b>The UAI Free Source License</b>
+	      </a>
+	    </when>
+
+	    <when <get-file-properties <thisdir>/MetaSite.mhtml>>
+	      <a href="MetaSite.mhtml">
+		<b>The MetaSite Home Page</b>
+	      </a>
+	    </when>
+	  </center>
+	</td>
+      </tr>
+    </table>
+
+    <hr width=400 size=2>
+
+    <table border=2 width=400>
+      <tr valign=center>
+	<td align=center height=80%>
+	  <br>
+	  If you've just downloaded <Meta-HTML>, please let us know! Simply
+	  click on the button below to send a note to us, or to add or remove
+	  yourself from a <Meta-HTML> users mailing list.  See the
+	  <a href="http://<get-var msite>/support/">Support</a>
+	  page for more details.
+
+	  <form action="http://<get-var msite>/support/ack-download.mhtml"
+		method="POST">
+	    <input type=hidden name="Version" value="<get-var mhtml::version>">
+	    <input type=hidden name="Server"
+		   value="<get-var env::server_software>">
+	    <input type=hidden name="Engine"
+		   value="<get-var env::engine_software>">
+	    <input type=hidden name=activation-key
+		   value="<get-var mhtml::activation-key>">
+	    <center>
+	      <b><input type=submit name=action value="Push Me!!"></b>
+	    </center>
+	  </form>
+	</td>
+      </tr>
+    </table>
+  </center>
+</plain-text>
+</body>
+</html>

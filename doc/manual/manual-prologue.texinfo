@@ -1,0 +1,51 @@
+@c manual-prologue.texi: -*- Texinfo -*-  The prologue of the Meta-HTML manual.
+
+@c  Copyright (c) 1996, 2001 Brian J. Fox
+@c  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Nov  1 15:04:02 1996.
+
+@ifinfo
+@macro mref{node}
+@xref{\node\}
+@end macro
+
+@macro vref{node}
+@b{\node\}
+@end macro
+@end ifinfo
+
+@node Welcome To Meta-HTML
+@chapter Welcome To Meta-HTML
+
+This document describes the Meta-HTML programming language.  It
+constitutes the definitive reference for this version of the
+language. While the functions described in this manual will continue to
+operate as documented, there may be new functions or enhancements
+appearing in future versions of the language which will supersede the
+functionality that the documented ones provide.
+
+This manual is not a tutorial, or user guide.  There is a project
+underway to create such tools -- a short web-based tutorial exists at
+@url{http://www.metahtml.org/tutorial}; there are code examples at
+@url{http://www.metahtml.com/examples}.
+
+Comments and/or suggestions for improvement on this manual, the
+language definition, or writing style(!!) should be sent to
+@b{bug-manual@@metahtml.com}.
+
+Although World Wide Web use of the Internet has been growing at a
+phenomenal rate over the past few years, there remains a dearth of
+interesting and useful client/server applications.  Traditional
+programming languages do not provide an optimal environment for
+programming such applications because of the syntactical and
+paradigmatic distance between traditional languages and the target
+output, namely @b{HTML}.
+
+The stateless and dynamic nature of the WWW requires a level of
+support from traditional programming languages which they are hard
+pressed to provide.  Must each application programmer write his or her
+own tool set to accomplish goals which are fundamentally similar
+across applications?
+
+Meta-HTML presents an alternative language choice for the design and
+implementation of Web applications, and supplies four methods of
+delivering the language.

@@ -1,0 +1,115 @@
+# Makefile.in: -*- Text -*-  Source for configure to make a Makefile from.
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+#
+# You should have received a copy of the UAI Free Software License
+# along with this program; if you have not, you may obtain one by
+# writing to:
+#
+# Universal Access Inc.
+# 129 El Paseo Court
+# Santa Barbara, CA
+# 93101
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+GDBMLIB = @SUB_SUB_GDBMLIB@
+GDBM_IN = @SUB_SUB_GDBM_IN@
+DESLIB	= @SUB_SUB_DESLIB@
+DBINC	= $(GDBM_IN)
+DBLIB	= $(GDBMLIB) $(DESLIB)
+
+OS_LIBS = @OS_LIBS@
+EXE	= @EXE@
+
+WEBBASEDIR = @WEBBASEDIR@
+WEBDEF	= -DWEBBASEDIR='"$(WEBBASEDIR)"'
+VERSDEF = -DMHTML_VERSION_STRING='"$(MHTML_VERSION)"'
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+bindir	= $(exec_prefix)/bin
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+MYINSTALL = cp
+
+# You cannot compile with anything other than GNU C.
+CC		 = gcc $(GCC_WARN)
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+# OPTIMIZE_FLAGS	= -O69
+INCLUDE_FLAGS	= @EXTRAINC@ -I../../libutils -I../../libmhtml $(DBINC)
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(PCFLAGS) $(INCLUDE_FLAGS)
+LDFLAGS		= $(DEBUG_FLAGS)
+
+LIBUTILS	= ../../libutils/libutils.a
+LIBMHTML	= ../../libmhtml/libmhtml.a
+
+IMAGEMAP	= imagemap$(EXE)
+
+PROGS		= $(IMAGEMAP)
+REQLIBS		= $(LIBMHTML) $(LIBUTILS) $(DBLIB)
+TARGETS		= $(PROGS)
+
+.c.o:
+	$(CC) $(CFLAGS) $(DEFS) $(VERSDEF) $(CHECK_TIMESTAMP) $(INCLUDE_FLAGS) -c $<
+
+all:	$(TARGETS)
+
+$(LIBUTILS):
+	(cd ../../libutils; $(MAKE) $@)
+
+$(LIBMHTML):
+	(cd ../../libmhtml; $(MAKE) $@)
+
+$(PROGS): $(LIBUTILS) $(LIBMHTML)
+
+$(IMAGEMAP): imagemap.o
+	$(CC) $(LDFLAGS) -o $@ imagemap.o $(REQLIBS) $(OS_LIBS)
+
+Makefile: Makefile.in
+	(cd ../..; ./config.status)
+
+install: $(TARGETS)
+	for file in $(PROGS); do \
+	  $(MYINSTALL) $$file $(bindir)/$$file; chmod a+rx $(bindir)/$$file; \
+	done
+
+clean-executables: FORCE
+	$(RM) $(TARGETS) mhc.o
+
+clean:  FORCE
+	$(RM) *.o $(TARGETS)
+
+distclean realclean: clean
+	$(RM) *.cache *.log Makefile
+
+tags TAGS: FORCE
+	(cd ..; $(MAKE) $@)
+
+FORCE:

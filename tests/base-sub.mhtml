@@ -1,0 +1,18 @@
+;;; base-sub.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sat Oct 26 19:03:18 1996.
+
+Result: 2: <sub 4 2>
+Result: 2: <sub -2 -4>
+Result: 2: <sub 1 -1>
+Result: 2: <sub 2.5 .5>
+Result: -2: <sub -4 -2>
+Result: -2: <sub 2 4>
+Result: 2: <sub 1 -1>
+Result: 2: <sub 2.0001 .0001>
+Result: 2.0002: <sub 2.0001 -.0001>
+Result: -3.05: <sub -2.0 1.05>
+Result: 2: <sub 2.000 .>
+Result: -1.000069: <sub -3.000074 -2.000005>
+Result: 2: <sub 2.0 -.>

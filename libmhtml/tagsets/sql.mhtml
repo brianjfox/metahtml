@@ -1,0 +1,937 @@
+;;; sql.mhtml: -*- Meta-HTML -*-  Convert database commands to ODBC,
+;;; mSQL, MySQL, or pgSQL.
+;;;
+;;;  Copyright (c) 1997, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Jun  3 19:14:54 1997.
+
+<set-var *sql*::function-names[] =
+  <prog
+    WITH-OPEN-DATABASE
+    DATABASE-EXEC-QUERY
+    DATABASE-EXEC-SQL
+    DATABASE-NEXT-RECORD
+    DATABASE-SAVE-RECORD
+    DATABASE-DELETE-RECORD
+    DATABASE-LOAD-RECORD
+    DATABASE-SAVE-PACKAGE
+    PACKAGE-TO-TABLE
+    NUMBER-OF-ROWS
+    AFFECTED-ROWS
+    SET-ROW-POSITION
+    DATABASE-QUERY
+    HOST-DATABASES
+    DATABASE-TABLES
+    DATABASE-TABLES-INFO
+    DATABASE-TABLE-INFO
+    DATABASE-COLUMNS
+    DATABASE-COLUMN-INFO
+    DATABASE-COLUMNS-INFO
+    DATABASE-QUERY-INFO
+    DATABASE-SET-OPTIONS
+    CURSOR-GET-COLUMN
+    QUERY-GET-COLUMN
+    SQL-TRANSACT>>
+
+;;; Where TYPE is one of "msql", "mysql", "pgsql", or "odbc".
+<defun sql::set-database-type type nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Create a command set called SQL::... which contains all of the functions
+  ;;; normally used for accessing ODBC, mySQL, or mSQL databases.  This allows
+  ;;; you to write a complete application using the mySQL database,
+  ;;; <funref generic-sql-interface sql::with-open-database> and
+  ;;; friends, and then to painlessly "port" it to ODBC, simply by calling this
+  ;;; function with an argument of <code>odbc</code>.
+  ;;; 
+  ;;; The possible values for <var type> are
+  ;;; 
+  ;;; <ul>
+  ;;; <li> <b>msql</b>: The Minerva mSQL database from Hughes,
+  ;;; <li> <b>mysql</b>: The MySQL database,
+  ;;; <li> <b>mysqlper</b>: A persistant connection version of MySQL,
+  ;;; <li> <b>podbc</b>: The PostGres database, using the ODBC interface lib,
+  ;;; <li> <b>odbc</b>: A generic ODBC database, such as Oracle or Sybase.
+  ;;; </ul>
+  <set-var type = <downcase <subst-in-string <get-var-once type> "[ \t\r\n]+" "">>>
+  <if <not <defined? <get-var-once type>::with-open-database>>
+      <set-var loaded? = <load-module mod<get-var-once type>>>>
+  <set-var *sql*::database-type = <get-var-once type>>
+  <set-var *sql*::error-message-variable =
+    <get-var-once type>::<get-var-once type>-error-message>
+  <set-var *sql*::recent-query-variable = <get-var-once type>::recent-query>
+  <foreach function *sql*::function-names>
+    <undef sql::<get-var-once function>>
+    <copy-var *meta-html*::<get-var-once type>::<get-var-once function>
+	      *meta-html*::sql::<get-var-once function>>
+  </foreach>
+</defun>
+
+<defun sql::allow-system-tables &optional allow?>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; For those underlying database engines which keep information
+  ;;; about the database structure within the database itself, a
+  ;;; request to <example code><sql::host-databases ...></example>
+  ;;; can return a great deal of information, most of which is
+  ;;; uninteresting to an application.  Call this function with an
+  ;;; argument of "true" to allow such system tables to be returned,
+  ;;; or with no argument to disallow them.
+  <set-var <sql::get-database-type>::allow-system-tables=<get-var-once allow?>>
+</defun>
+
+<defun sql::get-database-type>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Return the type of the underlying SQL database which will be accessed
+  ;;; by the various SQL::... functions.  The possibilities are one of
+  ;;; 
+  ;;; <ul>
+  ;;; <li> <b>msql</b>: The Minerva mSQL database from Hughes,
+  ;;; <li> <b>mysql</b>: The MySQL database,
+  ;;; <li> <b>mysqlper</b>: A persistant connection version of MySQL,
+  ;;; <li> <b>podbc</b>: The PostGres database, using the ODBC interface lib,
+  ;;; <li> <b>odbc</b>: A generic ODBC database, such as Oracle or Sybase.
+  ;;; </ul>
+  <get-var-once *sql*::database-type>
+</defun>
+
+<defun sql::admin-prog>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Returns the complete path of the executable program which is used to
+  ;;; perform administration functions on the underlying SQL database.
+  ;;; For example, <code>/usr/local/Hughes/bin/msqladmin</code>, or
+  ;;; <code>/usr/bin/mysqladmin</code>.
+  <if <string-eq <sql::get-database-type> msql caseless=true>
+      <set-var
+	admin-prog = msqladmin
+	mhtml::exec-path=<concat <get-var-once mhtml::exec-path>
+				 :/usr/local/Hughes/bin
+				 :/usr/local/Minerva/bin>>
+    <if <string-eq <sql::get-database-type> mysql caseless=true>
+	<set-var admin-prog = mysqladmin>
+      <set-var admin-prog = false>>>
+  <path::find-executable <get-var-once admin-prog>>
+</defun>
+
+<defun sql::sql-error-message>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Return the current error message from recent SQL statements.
+  <get-var-once <get-var-once *sql*::error-message-variable>[]>
+</defun>
+
+<defun sql::recent-query>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Returns the last SQL query statement that was sent to the underlying
+  ;;; SQL database.  Can be useful in debugging.
+  <get-var-once <get-var-once *sql*::recent-query-variable>[]>
+</defun>
+
+;;; The documntation for the generic SQL commands go here.
+;;; By default, each command does nothing.  You will have to
+;;; call <sql::set-database-type dbtype> before the functions
+;;; perform at all.
+
+<defmacro SQL::WITH-OPEN-DATABASE dbvar &key dsn\=dsn-string nolock\=true nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Opens the database specified by DSN (database service name)
+  ;;; string, and stores a referent to it in <var dbvar>.  If the
+  ;;; connection fails, the value of <var dbvar> is the empty string.
+  ;;;
+  ;;; <var DSN> should contain a minimum of
+  ;;; "HOST=hostname;DATABASE=dbname" in order to connect successfully
+  ;;; to an mSQL database.  Although the older <var HOST=host> <var
+  ;;; DATABASE=dbname> keyword arguments are still supported, they
+  ;;; have been deprecated, and the <var DSN=dsn-string> form is
+  ;;; preferred.
+  ;;;
+  ;;; If <var nolock=true> is supplied, then no lock file on the server is
+  ;;; created.  This is useful when you don't want to block other processes
+  ;;; from accessing the database for the duration of the
+  ;;; <code>sql::with-open-database</code> form.
+</defmacro>
+
+<defun SQL::DATABASE-EXEC-QUERY dbvar query-string &key cursor\=varname nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Executes the SQL query in <var query-string> by sending it to
+  ;;; the open database connection referenced by <var dbvar>.
+  ;;;
+  ;;; <var query-string> can be any <Meta-HTML> expression which
+  ;;; evaluates to a valid SQL query or command string.
+  ;;;
+  ;;; Returns a cursor object, which can be passed to
+  ;;; <funref generic-sql-interface sql::database-next-record>,
+  ;;; <funref generic-sql-interface sql::number-of-rows>, or
+  ;;; <funref generic-sql-interface sql::set-row-position>.
+  ;;;
+  ;;; If the keyword argument <var cursor=varname> is given, the
+  ;;; returned cursor value is stored in <var varname>.
+  ;;;
+</defun>
+
+<defun SQL::SET-ROW-POSITION cursor pos nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Set the current row number position in the result set from the
+  ;;; last query. This operates on a CURSOR object.
+</defun>
+
+<defun SQL::DATABASE-EXEC-SQL dbvar query-string nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Executes the SQL query in <var query-string>, on the open
+  ;;; database connection specified by <var dbvar>.
+  ;;;
+  ;;; Returns TRUE if no errors are encountered.
+  ;;;
+  ;;; This function differs from
+  ;;; <funref generic-sql-interface sql::database-exec-query> in that
+  ;;; it does not return any cursor; i.e., there is no way to get
+  ;;; results back from the execution of your SQL command. Thus, it is
+  ;;; most useful for sending commands which expect no return values,
+  ;;; such as a SQL DELETE statement:
+  ;;;
+  ;;; <example>
+  ;;; <sql::database-exec-sql 
+  ;;;    db "DELETE FROM maillists WHERE list = '<get-var-once listname>'">
+  ;;; </example>
+</defun>
+
+<defun SQL::DATABASE-NEXT-RECORD cursor &key colnames\=namelist
+  prefixtablenames\=true package\=packagename nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Fill the variables in <var packagename> with the values of the next
+  ;;; record which last satisfied the search referenced by <var cursorvar>.
+  ;;;
+  ;;; If <var packagename> is not supplied, then return an alist of the
+  ;;; values instead.
+  ;;;
+  ;;; Each subsequent call gets a subsequent record from the list of
+  ;;; results, until all of the results are exhausted.
+  ;;;
+  ;;; Returns <code>true</code> if there are any records left in the
+  ;;; search results, or the empty string if not.
+  ;;;
+  ;;; If <var colnames> is supplied, then the column values of this
+  ;;; result are bound sequentially to the comma-separated list of
+  ;;; names in <var namelist> instead of the field names in the result
+  ;;; set.
+  ;;;
+  ;;; <example>
+  ;;; <sql::database-next-record cursor package=tmp
+  ;;;             colnames="a.name, a.partnum, b.name">
+  ;;; <get-var-once tmp::b.name>
+  ;;; <get-var-once tmp::a.name>
+  ;;; </example>
+  ;;;
+  ;;; If <var colnames> is non-null, or the database connection option
+  ;;; <code>SQL-PREFIX-TABLENAMES</code> is non-null, then for each
+  ;;; column in the result set, use the column's table name, if it
+  ;;; exists, as a prefix to the column name as the variable name.
+  ;;;
+</defun>
+
+<defun SQL::DATABASE-SAVE-RECORD dbvar key 
+  &optional var... &key table\=tablename key\=fieldname nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Write a record to the open SQL database connection referenced by
+  ;;; <var dbvar>, using <var key> as the value of the primary key, on
+  ;;; the table <var table>.  The keyword argument <var KEY> is the
+  ;;; SQL column name of the column that you are specifying as the
+  ;;; primary key.
+  ;;;
+  ;;; For each <var var>, treat the name of <var var> as a column
+  ;;; name, and set that column's value to the value stored within
+  ;;; <var var>.
+  ;;;
+  ;;; An <code>UPDATE</code> is initially attempted to store the data.
+  ;;; If the <code>UPDATE</code> fails, then an <code>INSERT</code> is
+  ;;; attempted.
+  ;;;
+  ;;; NOTE: If the key field for table you are using is not configured
+  ;;; as the primary key, then it is possible to create duplicate entries
+  ;;; in the database.
+  ;;;
+  ;;; If you pass in a variable <var var> which does not match a column
+  ;;; name in <var table>, that variable is silently ignored.
+  ;;;
+  ;;; If you try to save character data into a numeric field, the
+  ;;; <code>INSERT</code> or <code>UPDATE</code> will fail.
+  ;;;
+  ;;; As always, the most recent query executed is available by
+  ;;; calling the function <funref generic-sql-interface sql::recent-query>,
+  ;;; and error messages may be retrieved by calling the function
+  ;;; <funref generic-sql-interface sql::sql-error-message>.
+</defun>
+
+<defun SQL::DATABASE-DELETE-RECORD dbvar key
+  &key table\=tablename keyname\=fieldname nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Deletes the specified record in the database referenced by
+  ;;; <var dbvar>. The record to delete is specified by <var key> and
+  ;;; <var keyname>. An SQL <code>DELETE</code> query is issued which
+  ;;; will delete all records in the table named <var table> whose column
+  ;;; named <var fieldname> matches the value of <var key>.
+  ;;;
+  ;;; You must supply values for <var table> and <var keyname>.
+  ;;;
+</defun>
+
+<defun SQL::DATABASE-LOAD-RECORD dbvar key &key table\=tablename
+                  key\=fieldname package\=packagename nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Load variable values from the database referenced by <var dbvar>
+  ;;; and <var key> into the package specified by <var packagename>
+  ;;; (defaulting to the current package if not supplied).
+  ;;;
+  ;;; <var tablename> and <var fieldname> must be supplied -- they
+  ;;; specify the table and primary key field to be operated on.
+  ;;;
+</defun>
+
+<defun SQL::DATABASE-SAVE-PACKAGE dbvar key package
+  &key table\=tablename keyname\=fieldname nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Save the variables in <var package> associated with the value
+  ;;; <var key> in column <var keyname> in the table <var tablename>
+  ;;; of the database referenced by <var dbvar>.
+  ;;;
+  ;;; This only saves variables which have names matching existing
+  ;;; table column names. Package prefixes are stripped from the
+  ;;; variables, and the symbol name is used as the column name to
+  ;;; store the data. Symbol names and column names are treated in a
+  ;;; case-insensitive manner.
+  ;;;
+  ;;; The implementation is to first attempt to do a SQL
+  ;;; <code>INSERT</code> into the table, and if that fails to try a
+  ;;; <code>UPDATE</code> query, with <var keyname> = <var key>.
+  ;;;
+  ;;; Example: Say we want to save some information about employee
+  ;;; Kate Mulgrew, in a table of employees, which has a primary key
+  ;;; field named "id", and we want to save this record with id=103:
+  ;;;
+  ;;; <example>
+  ;;; <set-var record::name="Kate Mulgrew" record::age=45
+  ;;;          record::salary=34000 record::dept=travel>
+  ;;;.blank
+  ;;; <set-var saved? =
+  ;;;    <sql::database-save-package db 103 record table=employees keyname=id>>
+  ;;; </example>
+  ;;;
+  ;;; If a variable in the package you are saving corresponds to a
+  ;;; column with a numeric field type, and the value of the variable
+  ;;; is the empty string, the system will attempt to store a NULL
+  ;;; value into this field of the record. If the table does not
+  ;;; support NULL values on that column, the operation will fail.
+</defun>
+
+<defun SQL::PACKAGE-TO-TABLE dbvar package table &key method nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Save the variables in <var package> in the table
+  ;;; <var table> of the database referenced by <var dbvar>.
+  ;;;
+  ;;; This only saves variables which have names matching existing
+  ;;; table column names. Package prefixes are stripped from the
+  ;;; variables, and the symbol name is used as the column name to
+  ;;; store the data. Symbol names and column names are treated in a
+  ;;; case-insensitive manner.
+  ;;;
+  ;;; If you don't specify a <var method>, then the implementation first
+  ;;; attempts to do an SQL <code>UPDATE</code> on <var table> if, and only if,
+  ;;; there is a record in the table already that exactly matches the primary
+  ;;; keys in the data in <var package>.  Otherwise, an <code>INSERT</code>
+  ;;; statement is used.
+  ;;; If <var method> is specified, then only that method is tried.
+  ;;;
+  ;;; Both the <code>INSERT</code> and <code>UPDATE</code> attempts use
+  ;;; the primary keys of the table in a <code>WHERE</code> clause in order
+  ;;; to ensure the uniquness of this record.  If you want a sloppier
+  ;;; update, please see <funref generic-sql-interface
+  ;;; sql::database-save-package>.
+  ;;;
+  ;;; If a variable in the package you are saving corresponds to a
+  ;;; column with a numeric field type, and the value of the variable
+  ;;; is the empty string, the system will attempt to store a NULL
+  ;;; value into this field of the record. If the table does not
+  ;;; support NULL values on that column, the operation will fail.
+</defun>
+
+<defun SQL::DATABASE-QUERY dbvar query &key colnames\=namelist
+                  prefixtablenames\=true format\=fexpr keys\=varname
+                  keyname\=fieldname window-start window-length nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Select and optionally format records in the database referenced
+  ;;; by <var dbvar> according to the criterion in <var fexpr>.
+  ;;;
+  ;;; <var query> is an SQL query, which is expected to return a list of rows.
+  ;;;
+  ;;; For each result row, <var expr> is then evaluated, with the
+  ;;; column values of each row bound to their corresponding column
+  ;;; name. If the result of that evaluation is not an empty string,
+  ;;; then that record is selected for further processing by either
+  ;;; <var format>, <var keys>, or to return in plain text the list of
+  ;;; keys. If <var format=fexpr> is present, <var fexpr> is an
+  ;;; expression to evaluate in the context of the database fields,
+  ;;; (as with <var expr>).
+  ;;;
+  ;;; The value of "true" for <var expr> is specially optimized to
+  ;;; for those queries where no additional processing is necessary.
+  ;;;
+  ;;; The example below shows an SQL query which is formatted as rows
+  ;;; of an HTML table. In this case, the <var expr> is simply the
+  ;;; constant <code>true</code>, and all of the selection of records
+  ;;; is done via the SQL query itself. (Note that <var expr> could be
+  ;;; used to impose additional conditions to decide whether to invoke
+  ;;; <var fexpr> on a row.
+  ;;;
+  ;;; <example>
+  ;;; <table border=1>
+  ;;;   <tr> <th>Name</th> <th>Age</th> </tr>
+  ;;;   <sql::with-open-database db dsn="DATABASE=ROLO;HOST=localhost">
+  ;;;     <sql::database-query db true
+  ;;;         "SELECT * FROM people
+  ;;;          WHERE name like 'Washington' ORDER BY lastname"
+  ;;;         format=<group <tr>
+  ;;;                       <td> <get-var lastname>, <get-var firstname> </td>
+  ;;;                       <td> <get-var-once age> </td>
+  ;;;                       </tr>>>
+  ;;;   </sql::with-open-database>
+  ;;; </table>
+  ;;; </example>
+  ;;;
+  ;;; If <var keys=varname> is given, then <var varname> is the name
+  ;;; of a variable to receive the array of keys which satisfied
+  ;;; the query.  If you specify an argument for <var keys>, you must
+  ;;; also specify which column to collect the values from, using the
+  ;;; <var keyname=fieldname> keyword argument.
+  ;;;
+  ;;; If the optional argument <var colnames=namelist> is supplied,
+  ;;; then for each row, column values are bound sequentially to these
+  ;;; comma separated names instead of the column names in the result set.
+  ;;;
+  ;;; <example>
+  ;;; <sql::database-query db true <get-var-once query>
+  ;;;    colnames="foo.name, bar.name"
+  ;;;    format=<group FOO.NAME IS <get-var-once foo.name> 
+  ;;;                  BAR.NAME IS <get-var-once bar.name>>>
+  ;;; </example>
+  ;;;
+  ;;; If <var prefixtablenames> is non-null, or the database
+  ;;; connection option <code>SQL-PREFIX-TABLENAMES</code> is
+  ;;; non-null, then for each column in the result set, use that
+  ;;; column's table name as a prefix to the column name as the
+  ;;; variable name.
+  ;;;
+  ;;; The <var window-start> and <var window-length> keywords may be used to
+  ;;; limit the amount of data that is returned from the SQL server.
+  ;;; For example, to get the 10 most recently hired employees from the
+  ;;; database, one might write:
+  ;;; <example>
+  ;;; <sql::database-query db true window-start=0 window-length=10
+  ;;;    format=<array-append <package-to-alist> ^::results>
+  ;;;    "SELECT * FROM employees ORDER BY hiring_date DESC">
+  ;;; </example>
+</defun>
+
+<defun SQL::HOST-DATABASES &optional host nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Return an array of the database names present on <var host>
+  ;;; (defaults to <code>localhost</code>.
+  ;;;
+  ;;; This command is only meaningful to the <code>mSQL</code> and
+  ;;; <code>mySQL</code> database engines -- calling it on
+  ;;; <code>ODBC</code> databases always returns an empty array.
+</defun>
+
+<defun SQL::DATABASE-TABLES dbvar &key result\=varname nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Return the names of the tables in the database referenced by
+  ;;; <var dbvar> as a newline separated list. If <var varname> is
+  ;;; supplied, it is the name of the variable to receive the table
+  ;;; names.
+</defun>
+
+<defun SQL::DATABASE-TABLES-INFO dbvar &optional tablename
+  &key result\=varname
+  tabletype\=regexp tablequalifier\=regexp tableowner\=regexp nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Returns an array of association lists, one per table in the
+  ;;; open SQL database referenced by <var dbvar>.
+  ;;;
+  ;;; Each alist contains database-specific information about the
+  ;;; table, including at least the <i>name</i> of the table.
+  ;;; <example>
+  ;;; ((name . "table_name"))
+  ;;; </example>
+  ;;;
+  ;;; The keyword arguments starting with
+  ;;; <code>"table..."</code> are ANSI SQL regular expression
+  ;;; patterns.  They are used if supplied, ignored if not.
+  ;;;
+  ;;; The keyword <var result=varname> argument specifies the name of
+  ;;; a variable to put the result array into; if not present, the
+  ;;; array is returned to the caller.
+</defun>
+
+<defun SQL::DATABASE-TABLE-INFO dbvar &optional tablename
+  &key result\=varname
+  tabletype\=regexp tablequalifier\=regexp tableowner\=regexp nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Returns an array of association lists, one per table in the
+  ;;; open SQL database referenced by <var dbvar>.
+  ;;;
+  ;;; Each alist contains database-specific information about the
+  ;;; table, including at least the <i>name</i> of the table.
+  ;;; <example>
+  ;;; ((name . "table_name"))
+  ;;; </example>
+  ;;;
+  ;;; The keyword arguments starting with
+  ;;; <code>"table..."</code> are ANSI SQL regular expression
+  ;;; patterns.  They are used if supplied, ignored if not.
+  ;;;
+  ;;; The keyword <var result=varname> argument specifies the name of
+  ;;; a variable to put the result array into; if not present, the
+  ;;; array is returned to the caller.
+</defun>
+
+<defun SQL::DATABASE-COLUMNS dbvar tablename &key result\=varname nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Returns a newline separated list of the columns present in <var
+  ;;; tablename> in the open SQL database referenced by <var dbvar>.
+  ;;;
+  ;;; The keyword <var result=varname> argument specifies the name of
+  ;;; a variable to put the result array into; if not present, the
+  ;;; array is returned to the caller.
+</defun>
+
+<defun SQL::DATABASE-COLUMN-INFO dbvar table fieldname>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Returns an association list of properties on the specified
+  ;;; <var column> in the table <var table>.
+  ;;;
+  ;;; Example:
+  ;;; <pre>
+  ;;; ((NAME . realname)
+  ;;;  (LENGTH . 30)
+  ;;;  (TYPE . GSQL_CHAR)
+  ;;;  (IS_UNIQUE . "")
+  ;;;  (IS_NULLABLE . true)
+  ;;;  (QUALIFIER . "")
+  ;;;  (OWNER . "")
+  ;;;  (TYPENAME . "")
+  ;;;  (PRECISION . 0)
+  ;;;  (SCALE . 0)
+  ;;;  (RADIX . 0)
+  ;;;  (TABLE . accounts))
+  ;;; </pre>
+  ;;;
+  ;;; This is actually implemented by fetching information on <i>all</i>
+  ;;; columns and selecting the specified one.  This means that you should
+  ;;; use the command
+  ;;; <funref generic-sql-interface sql::database-columns-info> if you
+  ;;; are looking for information on several columns, as opposed to
+  ;;; the specific column mentioned by <var column>.
+</defun>
+
+<defun SQL::DATABASE-COLUMNS-INFO dbvar table &key result\=varname nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Analogous to <funref generic-sql-interface sql::database-column-info>,
+  ;;; this function returns an <i>array</i> of association lists where
+  ;;; each entry in the array is the information about a single column.
+</defun>
+
+<defun SQL::DATABASE-QUERY-INFO cursor &key result\=varname nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Returns an array of association lists giving information about
+  ;;; each column in the result set specified by <var cursor>.
+  ;;; 
+  ;;; If the keyword argument <var result=varname> is given, the
+  ;;; resultant array is placed into that variable -- otherwise it is
+  ;;; simply returned.
+</defun>
+
+<defun SQL::DATABASE-SET-OPTIONS dbvar &key option-name\=value nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Sets various database-specific options.
+  ;;;
+  ;;; Possible values for <var option-name> are:
+  ;;; <ul>
+  ;;; <li> <b>SQL-ESCAPE-CHARACTER-CODE</b>:
+  ;;; The character which is used to escape single quotes in strings.
+  ;;; <li> <b>SQL-TRUNCATE-COLUMNS</b>:
+  ;;; When set to a non-empty string, queries composed by
+  ;;; <funref generic-sql-interface sql::database-save-record> and
+  ;;; <funref generic-sql-interface sql::database-save-package> will have
+  ;;; character string field data automatically truncated to the maximum
+  ;;; column width of the field being stored into, before the query is
+  ;;; ever sent to the SQL server.
+  ;;; <li> <b>SQL-PREFIX-TABLENAMES</b>:
+  ;;; For <funref generic-sql-interface sql::database-next-record> and
+  ;;; <funref generic-sql-interface sql::database-query>, prefix the names
+  ;;; of symbols for column of the result set with the name table to which
+  ;;; the column belongs.
+  ;;; </ul>
+</defun>
+
+<defun SQL::CURSOR-GET-COLUMN cursor column-number nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Called with a <var cursor> (the result from a call to
+  ;;; <funref generic-sql-interface sql::database-exec-query>),
+  ;;; which has been filled in by at least one call to
+  ;;; <funref generic-sql-interface sql::database-next-record>,
+  ;;; this function returns the data from the current result set,
+  ;;; in the column numbered <var column-number> (starting at column 0).
+  ;;;
+  ;;; If there is no result set, or if the result set is empty, the
+  ;;; empty string is returned.
+  ;;;
+  ;;; <example>
+  ;;; <sql::with-open-database db dsn="host=localhost;database=admin">
+  ;;;   <set-var query="select * from users">
+  ;;;    <sql::database-exec-query db <get-var-once query> cursor=row>
+  ;;;    <set-var any? = <sql::database-next-record row>>
+  ;;;    <when <get-var-once any?>>
+  ;;;      Result: <sql::cursor-get-column row 0>
+  ;;;    </when>
+  ;;; </sql::with-open-database>
+  ;;; </example>
+</defun>
+
+<defun SQL::QUERY-GET-COLUMN nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Undocumented.
+</defun>
+
+<defun SQL::SQL-TRANSACT>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Currently unimplemented.
+</defun>
+
+<defun SQL::AFFECTED-ROWS cursor nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Return the number of rows affected by the last SQL query execution,
+  ;;; associated with the database referenced indirectly by <var cursor>.
+  ;;; This may be completely unrelated to the query which created the
+  ;;; cursor object, depending on the underlying database which is in
+  ;;; use.
+  0
+</defun>
+
+<defun SQL::NUMBER-OF-ROWS cursor nocompile=true>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Return the number of rows SELECTed by the last SQL query execution,
+  ;;; associated with the database referenced indirectly by <var cursor>.
+  0
+</defun>
+
+<defun sql::search-form-params alist &key dsn table key editurl defcol title>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;;
+  ;;; Get or set the standard search form parameters.
+  ;;; Always returns an association list of the current search form
+  ;;; parameters, and can optionally set them to new values.  In
+  ;;; typical usage, this function might be called as follows:
+  ;;;
+  ;;; <example>
+  ;;; <set-var orig-params =
+  ;;;    <sql::search-form-params DSN=<mydsn> table=CLIENTS>>
+  ;;; <sql::standard-search-form posted>
+  ;;; <set-var ignore = <sql::search-form-params <get-var-once orig-params>>>
+  ;;; </example>
+  ;;;
+  ;;;
+  ;;; We have provided a simple but useful generic search form for use in
+  ;;; your Meta-HTML pages.  Calling
+  ;;; <funref generic-sql-interface sql::standard-search-form> both produces
+  ;;; the search form, and the results.
+  ;;;
+  ;;; You should set the following variables before calling
+  ;;; <var sql::standard-search-form>:
+  ;;;
+  ;;; <ul>
+  ;;; <li> sql::search-dsn -- The DSN string for the database.
+  ;;; <li> sql::search-dbtable -- The name of the table in the database to search.
+  ;;; <li> sql::search-keyname -- The name of the key field in the database.
+  ;;; <li> sql::search-editurl -- The url of a single record editor.
+  ;;; <li> sql::search-defcol -- The default column to display in the list.
+  ;;; <li> sql::search-title -- The title to display in the input form.
+  ;;; </ul>
+  ;;;
+  ;;; Optionally, you can specify columns that you would like not to be
+  ;;; offered as columns that may be searched for, in the array
+  ;;; sql::search-ignore-cols[].
+  <in-package local>
+    <set-var
+      dsn     = <get-var-once sql::search-dsn>
+      table   = <get-var-once sql::search-dbtable>
+      key     = <get-var-once sql::search-keyname>
+      editurl = <get-var-once sql::search-editurl>
+      defcol  = <get-var-once sql::search-defcol>
+      title   = <get-var-once sql::search-title>
+      igncols[] = <get-var-once sql::ignore-cols[]>>
+    <set-var ^::orig-alist = <package-to-alist>>
+  </in-package>
+
+  <if <get-var-once dsn> <set-var sql::search-dsn = <get-var-once dsn>>>
+  <if <get-var-once table>
+      <set-var sql::search-dbtable = <get-var-once table>>>
+  <if <get-var-once key> <set-var sql::search-keyname = <get-var-once key>>>
+  <if <get-var-once editurl>
+      <set-var sql::search-editurl = <get-var-once editurl>>>
+  <if <get-var-once defcol>
+      <set-var sql::search-defcol = <get-var-once defcol>>>
+  <if <get-var-once title> <set-var sql::search-title = <get-var-once title>>>
+  <get-var-once orig-alist>
+</defun>
+
+<defun sql::translate-column col>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Return a pretty version of the column name specified in <var col>,
+  ;;; by translating it through the array <var sql::column-translations>.
+  ;;; Each member of that array is a column name followed by a colon,
+  ;;; followed by a pretty version of that column name.
+  ;;; If <var col> doesn't appear in the list of possible names, then
+  ;;; it is simply capitalized.
+  <foreach entry sql::column-translations>
+    <if <match <get-var-once entry> "^<get-var-once col>:" caseless=true>
+	<concat
+	 <set-var result = <subst-in-string <get-var-once entry>
+					    "(.*):(.*$)" "\\2">>
+	 <break>>>
+  </foreach>
+
+  <defvar result <capitalize <get-var-once col>>>
+  <get-var-once result>
+</defun>
+      
+<defun sql::standard-search-form &optional package
+  &key fsize href title bgcolor fgcolor title-bgcolor title-fgcolor>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Display a complete form suitable for searching for a record from
+  ;;; the database and table specified in <code>sql::search-dsn</code> and
+  ;;; <code>sql::search-dbtable</code>.
+  ;;;
+  ;;; Optional keyword argument HREF specifies the destination page --
+  ;;; it defaults to the current page if not supplied.
+  ;;; Optional keyword FSIZE is the size of the font to use in the form --
+  ;;; this has the effect of growing or shrinking the form.
+  ;;;
+  ;;; When this form is posted to, it gathers all of the
+  ;;; columns which match the specified search criteria, and then
+  ;;; displays the results in a table, linking each to the
+  ;;; sql::search-editurl.  When only one result is found, redirects
+  ;;; to the page specified in <code>search::editurl</code>, providing a
+  ;;; message in the session, displayable with
+  ;;; <funref html-helpers show-message>, which explains why.
+  ;;;
+  ;;; For more information on what happens when this form is posted to,
+  ;;; please see <funref generic-sql-interface
+  ;;; sql::standard-search-handler>.
+  <set-var href-set = <get-var-once href>>
+  <defvar package posted>
+  <defvar bgcolor "#EEEEEE">
+  <defvar fgcolor "#000000">
+  <defvar title-bgcolor "#DDDDDD">
+  <defvar title-fgcolor "#000000">
+  <defvar <get-var-once package>::csf-column <get-var-once sql::search-defcol>>
+  <alist-to-package <package-to-alist <get-var-once package> strip=true>>
+  <defvar href <thisdoc>>
+  <defvar fsize "+0">
+  <defvar title <or <get-var-once sql::search-title>
+		    <concat "Search "
+			    <capitalize <get-var-once sql::search-dbtable>>
+			    " Where...">>>
+
+  ;;; Get the name of every column.
+  <sql::with-open-database db DSN=<get-var-once sql::search-dsn> nolock=true>
+    <set-var colinfo[] =
+      <sql::database-columns-info db <get-var-once sql::search-dbtable>>>
+  </sql::with-open-database>
+
+  <foreach alist colinfo>
+    <if <not <array-member <alist-get-var alist name>
+			   sql::search-ignore-cols caseless=true>>
+	<array-append <alist-get-var alist name> columns>>
+  </foreach>
+
+  <sort columns>
+  <table border=1 bgcolor=<get-var-once bgcolor>>
+    <tr>
+      <td bgcolor=<get-var-once title-bgcolor> align=center>
+	<font color=<get-var-once title-fgcolor> size=<get-var-once fsize>>
+	<b><get-var-once title></b>
+	</font>
+      </td>
+    </tr>
+    <tr>
+      <td>
+	<table>
+	  <tr>
+	    <td align=left>
+	      <form method=post action="<get-var-once href>">
+		<font size="<get-var-once fsize>" face=Courier
+		      color=<get-var-once fgcolor>>
+		<select name=csf-column>
+		  <foreach column columns>
+		    <set-var disp =
+		      <sql::translate-column <get-var-once column>>>
+		    <select-option <get-var-once package>::csf-column
+				   <get-var-once disp>
+				   <get-var-once column>>
+		  </foreach>
+		</select>
+		<select name=csf-operator>
+		  <select-option <get-var-once package>::csf-operator
+				 "contains" "LIKE">
+		  <select-option <get-var-once package>::csf-operator
+				 "doesn't contain" "NOT LIKE">
+		  <select-option <get-var-once package>::csf-operator
+				 "is exactly" "=">
+		</select>
+		<input
+		 type=text name=csf-value size=10
+		 value="<get-var-once <get-var-once package>::csf-value>">
+		<input type=submit name=csf-search value=<lang en="Search">>
+	      </form>
+	    </td>
+	  </tr>
+	</table>
+      </td>
+    </tr>
+    <when <get-var-once posted::csf-value>>
+      <tr>
+	<td align=center bgcolor=black>
+	  <font size=<get-var-once fsize> color=white>
+	  <b>Search Results</b>
+	  </font>
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor=white>
+	  <sql::standard-search-handler <get-var-once package>
+					fsize=<get-var-once fsize>>
+	</td>
+      </tr>
+    </when>
+  </table>
+</defun>
+
+<defun sql::standard-search-handler package &key fsize href>
+  ;;; DOC_SECTION (GENERIC-SQL-INTERFACE)
+  ;;; Perform a database search on the search table using the criteria
+  ;;; in PACKAGE.  Variables in PACKAGE must include:
+  ;;;
+  ;;; <ol>
+  ;;; <li> csf-search   (simply must be set)
+  ;;; <li> csf-column   (the name of the column to search on)
+  ;;; <li> csf-operator (either "LIKE" "NOT LIKE" or "=")
+  ;;; <li> csf-value    (the text to search for)
+  ;;; </ol>
+  ;;;
+  ;;; Produces a table with the contents of the specified column linked
+  ;;; with an href to sql::search-defurl?<cgi-encode sql::search-keyname>.
+  ;;;
+  ;;; You can overide the information which is displayed for each record
+  ;;; that matches the search criteria by creating a function called
+  ;;; <b>sql::search-result-name</b>.  If this function exists, it should
+  ;;; take two arguments: the column name that was being searched for, and
+  ;;; an association list representing the data of the current record.
+  ;;;
+  ;;; An example might be to always display the last and first name of
+  ;;; any search where the column name to be searched contained the
+  ;;; string "name":
+  ;;; <example>
+  ;;; <defun sql::search-result-name col alist>
+  ;;;   <if <match <get-var-once col> "name" caseless=true>
+  ;;;       <concat <alist-get-var alist last_name>
+  ;;;               ", "
+  ;;;               <alist-get-var alist first_name>>
+  ;;;     <alist-get-var alist <get-var-once col>>>
+  ;;; </defun>
+  ;;; </example>
+  <defvar href <get-var-once sql::search-editurl>>
+  <defvar package posted>
+  <defvar fsize +0>
+  <alist-to-package <package-to-alist <get-var-once package> strip=true>>
+
+  <when <get-var-once csf-value>>
+    <set-var query =
+      <concat "SELECT * "
+	      "FROM <get-var-once sql::search-dbtable> "
+	      "WHERE <get-var-once csf-column> <get-var-once csf-operator> "
+	      "'"
+	      <if <match <get-var-once csf-operator> "LIKE"> %>
+	      <get-var-once csf-value>
+	      <if <match <get-var-once csf-operator> "LIKE"> %>
+	      "' "
+	      "ORDER BY <get-var-once csf-column>">>
+    <sql::with-open-database db DSN=<get-var-once sql::search-dsn> nolock=true>
+      <sql::database-query
+       db true <get-var-once query>
+       format=<concat
+	       <if <defined? sql::search-result-name>
+		   <set-var :name =
+		     <sql::search-result-name <get-var-once ^::csf-column>
+					      <package-to-alist>>>
+		 <set-var :name = <get-var-once <get-var-once ^::csf-column>>>>
+	       <array-append <get-var-once :name> ^::names>
+	       <array-append <get-var-once <get-var-once sql::search-keyname>>
+			     ^::keys>>>
+    </sql::with-open-database>
+
+    ;;; How many items did we get back?
+    <set-var items=<array-size names>>
+
+    ;;; Handle zero items.
+    <if <eq 0 items>
+	<return
+	 <prog
+	   Your search for `<b><get-var-once csf-value></b>'  in the database
+	   column `<b><get-var-once csf-column></b>' didn't produce any
+	   matches.>>
+      <if <eq 1 items>
+	  <if <get-var-once href>
+	      <concat
+	       <message One result from search:>
+	       <defvar keyname <or <get-var-once sql::search-keyname> key>>
+	       <set-var <get-var-once keyname> = <get-var-once keys>>
+	       <redirect <concat <get-var-once href>
+				 ?<cgi-encode <get-var-once keyname>>>>>>>>
+
+    ;;; Display all of the possible results.
+    ;;; Get the average characters in a single output column.
+    <set-var total-characters=0>
+    <foreach v names>
+      <increment total-characters by=<string-length <get-var-once v>>>
+    </foreach>
+    <set-var average-characters = <div total-characters items>>
+    <if <lt average-characters 10>
+	<set-var width=5>
+      <if <lt average-characters 20>
+	  <set-var width=4>
+	<if <lt average-characters 30>
+	    <set-var width=3>
+	  <set-var width=2>>>>
+    <table width=100% bgcolor=white>
+      <set-var i=0>
+      <while <lt i items>>
+	<tr valign=top>
+	  <set-var col=0>
+	  <while <and <lt col width> <lt i items>>>
+	    <td align=left width=<div 100 width>%>
+	      <font color=black size=<get-var-once fsize>>
+	      <set-var
+		name=<get-var-once names[i]>
+		<get-var-once sql::search-keyname> = <get-var-once keys[i]>>
+	      <if <get-var-once name>
+		  <concat
+		   <a href=<get-var-once href>?<cgi-encode
+					   <get-var-once sql::search-keyname>>>
+		   <get-var-once name>
+		   </a>>
+		&nbsp;>
+	      </font>
+	    </td>
+	    <increment col>
+	    <increment i>
+	  </while>
+	</tr>
+      </while>
+    </table>
+  </when>
+</defun>

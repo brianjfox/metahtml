@@ -1,0 +1,12 @@
+;;; crypto.mhtml: -*- Meta-HTML -*-  How to get an encrypted string.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Feb 11 13:01:22 1996.
+
+;;; <encrypted-password password [salt]>
+<defun encrypted-password pass salt>
+  ;;; DOC_SECTION (STRING-OPERATORS)
+  ;;; Provided for backwards compatability only.  See
+  ;;; <funref string-operators unix::crypt>.
+  <unix::crypt <get-var pass> <get-var salt>>
+</defun>

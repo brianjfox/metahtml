@@ -1,0 +1,109 @@
+;;; system.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;; Copyright (c) 1999 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Tue Aug 10 11:15:03 1999.
+
+<defun system-preload::initialize></defun>
+
+<defun mhtml::version>
+  <get-var-once mhtml::version-major>.<get-var-once mhtml::version-minor>
+</defun>
+
+;;; Meta-HTML style.
+<defmacro mhttpd::virtual-host server-host server-port &body body
+  package=local>
+  <set-var
+    ignore=<get-var-once body>
+    hostspec=<get-var-once server-host>:<or <get-var-once server-port> 80>
+    mhttpd-virtual-host::<get-var-once hostspec> = <package-to-alist>>
+</defmacro>
+
+;;; Apache style.
+<defmacro VirtualHost hostspec &body body package=local>
+  <set-var info[]=<subst-in-string <get-var-once hostspec> ":" "\n">>
+  <set-var server-name=<get-var-once info[0]>>
+  <set-var server-port=<get-var-once info[1]>>
+  <defvar server-port 80>
+  <set-var the-body[]=<get-var-once body>>
+  <foreach line the-body>
+    <strings::trim line>
+    <when <and <get-var-once line>
+	       <not <match <get-var-once line> "^#">>>>
+      <set-var pair[]=<subst-in-string <get-var-once line>
+				     "(^[^=]+)([ \t])+(.*$)" "\\1\n\\3">>
+      <set-var name=<downcase <get-var-once pair[0]>>>
+      <subst-in-var name
+		    "(^[^ \t]+)([Ll][Oo][Gg])" "\\1-\\2"
+		    "(^[^ \t]+)([Rr][Oo][Oo][Tt])" "\\1-\\2"
+		    "logfile" "access-log">
+      <apply set-var "<get-var-once name>=<get-var-once pair[1]>">
+    </when>
+  </foreach>
+  <if <and <get-var-once ForcedProtocol>
+	   <not <get-var-once forced-protocol>>>
+      <set-var forced-protocol = <get-var-once ForcedProtocol>>>
+
+  <unset-var body the-body line info name pair ForcedProtocol>
+
+  <set-var hostspec=<get-var-once server-name>:<get-var-once server-port>>
+  <set-var mhttpd-virtual-host::<get-var-once hostspec> = <package-to-alist>>
+  <if <eq server-port 80>
+      <set-var mhttpd-virtual-host::<get-var-once server-name> =
+	<package-to-alist>>>
+</defmacro>
+
+<defun mhttpd::any-result-handler code reason whitespace=keep>
+  <HTML>
+  <HEAD>
+  <TITLE>HTTP/1.0 <get-var-once code> <get-var-once reason></TITLE>
+  </HEAD>
+  <BODY BGCOLOR="#EEEEEE">
+  <P>
+  <TABLE HEIGHT="100%">
+    <TR HEIGHT="95%" VALIGN="TOP">
+      <TD ALIGN="LEFT" HEIGHT="95%">
+	<H2>HTTP/1.0 <get-var-once code> <get-var-once reason></H2>
+	<p>
+	<b>Requested URL: &nbsp;</b>
+	  <i><concat <get-var-once mhtml::server-name>:
+		     <get-var-once mhtml::server-port>
+		     <get-var-once mhttpd::requested-url>></i>
+      </TD>
+    </TR>
+    <TR HEIGHT="5%" VALIGN="BOTTOM">
+      <TD ALIGN="LEFT">
+	<hr>
+	<FONT SIZE=-1>
+	<I>
+	This message generated <date> by <get-var-once mhtml::version><br>
+	<get-var-once mhttpd::copyright-string>
+	</I>
+	</FONT>
+      </TD>
+    </TR>
+  </TABLE>
+  </BODY>
+  </HTML>
+</defun>
+
+<defun mhttpd::default-document>
+  <set-var func = mhttpd::<get-var-once mhttpd::result-code>-handler>
+  <if <defined? <get-var-once func>>
+      <apply <get-var-once func>>
+    <mhttpd::any-result-handler <get-var-once mhttpd::result-code>
+				<get-var-once mhttpd::result-reason>>>
+</defun>
+
+<defun mhttpd::directory-document>
+  <set-var file = <get-var mhtml::include-prefix mhttpd::requested-url>>
+  <when <and <eq mhttpd::result-code 404> <file-exists <get-var file>>>>
+    <html>
+    <body bgcolor=white>
+    <h3> Directory Listing of <get-var mhttpd::requested-url> </h3>
+    <dir::dir-table <get-var mhttpd::requested-url>
+                    icon-dir=/images/icons
+                    show-icons=<get-var mhtml::fancy-indexing>>
+    </body>
+    </html>
+  </when>
+</defun>

@@ -1,0 +1,131 @@
+;;; server-install.mhtml: How to install the -*- Meta-HTML -*- Server.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Feb  4 21:55:54 1996.
+
+<if <not <get-var files-are-included>>
+    <prog
+      <set-var
+        title="Installing the Server"
+        prev-page="view-section.mhtml?key=variables" prev-title="Variables"
+        next-page="hiding.mhtml"  next-title="Hiding the Engine">
+      <include header.mhtml>>
+  <prog
+   <h2>Installing the Server</h2>>>
+
+<set-var mhtml::cacheable=true>
+
+<h3>General Instructions for Installation</h3>
+<ptext>
+  There are distribution specific instructions located in the
+  directories <b>Server</b>, <b>Engine</b>, and <b>Processor</b>.  You
+  may have only one of these directories if you elected to obtain only
+  the Server, Engine, or Stand-Alone Processor, or, you may have all
+  of them if you received the <Meta-HTML> Tools Suite distribution.
+</ptext>
+
+<p>
+
+<h3>Installing Your First Web Server</h3>
+<ptext>
+  Installing the <meta-html> Server is quite straight-forward, and only
+  requires you to have the most minimal knowledge of Unix-like systems.
+  For those of you who can't wait, the following sequence is sufficient
+  to install the <meta-html> Server on a machine that is not already
+  running a web server:
+
+<ol>
+  <li> Choose a directory under which your server will be installed,
+  say, "/usr/www".  We will call this directory <example
+  code><wwwroot></example>:<br>
+  <example>
+    (mkdir /usr/www)
+  </example>
+
+  <li> Create <example code><wwwroot>/bin</example>, <example
+  code><wwwroot>/docs</example>, <example
+  code><wwwroot>/conf</example>, and <example
+  code><wwwroot>/logs</example>.<br>
+  <example>
+    (mkdir /usr/www/bin /usr/www/docs /usr/www/conf /usr/www/logs)
+  </example>
+
+  <li> Copy <code>"Server/mhttpd"</code> and <code>"Utilities/*"</code> to
+  <example code><wwwroot>/bin</example>.<br>
+  <example>
+    (cp Server/mhttpd /usr/www/bin)
+  </example>
+
+  <li> Copy <code>"Documentation"</code> to <example
+  code><wwwroot>/docs</example>.<br>
+  <example>
+    (cp -r Documentation /usr/www/docs)
+  </example>
+
+  <li> Copy <code>"Server/mhttpd.conf"</code> to <example
+  code><wwwroot>/conf</example>.<br>
+  <example>
+    (cp Server/mhttpd.conf /usr/www/conf)
+  </example>
+
+  <li> Change <code>"www.myhost.com"</code> to the name of your host in the
+  configuration file <example code><wwwroot>/conf/mhttpd.conf</example>.  You
+  can do this by either editing the file with your favorite editor (say,
+  emacs), or by <code>"sed"</code>ing the original file:<br>
+  <example>
+    (cat Server/mhttpd.conf | sed -e "s/www.myhost.com/`hostname`/"
+		&gt;/usr/www/conf/mhttpd.conf)
+  </example>
+
+  <li> As the superuser, start the server from the <example code>
+  <wwwroot></example> directory:<br>
+  <example>
+    (cd /usr/www; su -c bin/mhttpd)
+  </example>
+  </ol>
+
+  Congratulations, you are now running the Meta-HTML Server, and you
+  have a Web site!  You can now go to your first URL:
+
+  Start a browser, and connect to
+  <example code>"http://<your-host>/Documentation"</example>, where
+  <code>"&lt;your-host&gt;</code>" should be replaced with the name of
+  your machine.
+</ptext>
+
+<p>
+
+<h3>Co-habitating the Meta-HTML Server with an Existing Server</h3>
+<ptext>
+  You may run the <meta-html> Server on a non-standard port (such as 8080), or
+  under an aliased IP address for your machine.  The Server tightly binds to
+  the address and port that it finds in the configuration file.  The newly
+  installed server may serve the same documents that you are already serving
+  with another server, or, may be configured to serve a different set of
+  documents.
+
+  If you are installing the Server with its own set of documents to serve, and
+  its own IP address, simply follow the instructions given under `Installing
+  Your First Web Server'.
+
+  Otherwise, the intructions are almost identical; but you must manually
+  edit the `mhttpd.conf' file and change the port number to 8080.  You
+  do this by changing the line which reads:
+
+  <example>
+    <set-var mhtml::server-port = <if <get-var mhttpd::ssl-server> 443 80>>
+  </example>
+
+  to read:
+
+  <example>
+    <set-var mhtml::server-port = 8080>
+  </example>
+
+  Then start the server as described above.  The documents are served
+  from the directory specified in `<varref MHTML::DOCUMENT-ROOT>'.
+</ptext>
+<p>
+<if <not <get-var files-are-included>>
+    <include footer.mhtml>>
+

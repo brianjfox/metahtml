@@ -1,0 +1,58 @@
+;;; layout.mhtml: -*- Meta-HTML -*-  Macros for laying out checkboxes
+;;; and radio buttons.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Jan 22 05:44:17 1996.
+
+;;; Call like: <layout-checkboxes name [columns]>
+;;; COLUMNS defaults to 3 if not specified.
+<defmacro layout-checkboxes :varname :limit &body body whitespace=delete>
+  <set-var lc::names[]=<get-var-once body> i=0
+    lc::counter=0 lc::limit=<or <get-var-once :limit> 3>>
+  <table>
+    <while <get-var lc::names[i]>>
+      <tr>
+	<while <and <lt lc::counter lc::limit> <get-var lc::names[i]>>>
+	  <td align=right>
+	  <input type="CHECKBOX" name="<get-var-once :varname>"
+		 value="<get-var lc::names[i]>">
+	  </td>
+	  <td align=left><get-var lc::names[i]>
+	    <increment lc::counter>
+	    <if <eq lc::counter lc::limit> <br>>
+	  </td>
+	  <increment i>
+	</while>
+      </tr>
+      <set-var lc::counter=0>
+    </while>
+  </table>
+</defmacro>
+
+;;; Call like: <layout-radiobuttons name [columns]>
+;;; COLUMNS defaults to 3 if not specified.
+<defmacro layout-radiobuttons :varname :limit &body body whitespace=delete>
+  <set-var lc::names[]=<get-var-once body> i=0 lc::counter=0
+    lc::limit=<or <get-var-once :limit> 3>>
+  <table>
+    <while <get-var lc::names[i]>>
+      <tr>
+	<while <and <lt lc::counter lc::limit> <get-var lc::names[i]>>>
+	  <td align=right>
+	    <input type="radio" name="<get-var-once :varname>"
+		   value="<get-var lc::names[i]>"
+		   <if <string-eq <get-var-once <get-var-once :varname>>
+				  <get-var lc::names[i]>>
+		       CHECKED>>
+	  </td>
+	  <td align=left><get-var lc::names[i]>
+	    <increment lc::counter>
+	    <if <eq lc::counter lc::limit> <br>>
+	  </td>
+	  <increment i>
+	</while>
+      </tr>
+      <set-var lc::counter=0>
+    </while>
+  </table>
+</defmacro>

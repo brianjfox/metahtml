@@ -1,0 +1,66 @@
+;;; select.mhtml: -*- Meta-HTML -*-  Select parameters for the database.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Apr 15 11:27:29 1998.
+<session::initialize>
+<var-case
+  posted::action="Clear Parameters"
+  <concat <package-delete posted>
+	  <session-destroy-package gsql>>
+  posted::action="Cancel"	<redirect welcome.mhtml>>
+
+<set-var title="Select DB Parameters">
+<set-var no-gsql-database-display=true>
+<include header.mhtml>
+
+<if <string-eq <get-var-once posted::action> "Set Parameters">
+    <redirect welcome.mhtml>>
+
+<set-var x =
+  <concat
+   <if <not <defined? mysql::with-open-database>> <load-module modmysql>>
+   <if <not <defined? msql::with-open-database>>  <load-module modmsql>>
+   <if <not <defined? odbc::with-open-database>>  <load-module mododbc>>
+   <if <not <defined? pgsql::with-open-database>> <load-module modpgsql>>>>
+
+<system-error-output clear>
+<debugging-output clear>
+
+<layout::page>
+  <center>
+    <tour::form method=post action=<thisdoc>>
+    <gsql::select-engine gsql::database-type>
+    <tour::form-input name=database-host
+		      value="<get-var gsql::database-host>">
+    <tour::form-input name=database-username
+		      value="<get-var gsql::database-username>">
+    <tour::form-input name=database-password
+		      value="<get-var gsql::database-password>">
+    <tour::form-input name=database-service-type
+		      value="<get-var gsql::database-service-type>">
+    <table width=350 bgcolor="#A080A0">
+      <tr>
+	<td align=left>
+	  <font color="#000000">
+	  <b>Allow System Tables: </b>
+	  &nbsp;&nbsp;
+	  Yes:
+	  <input type=RADIO name=allow-system-tables value="Yes"
+		 <if <get-var gsql::allow-system-tables> CHECKED>>
+	  &nbsp;&nbsp;
+	  No:
+	  <input type=RADIO name=allow-system-tables value=""
+		 <if <not <get-var gsql::allow-system-tables>> CHECKED>>
+	  </font>
+	</td>
+      </tr>
+    </table>
+
+    <input type=submit name=action value="Set Parameters">
+    <input type=submit name=action value="Clear Parameters">
+    <input type=submit name=action value="Cancel">
+    </tour::form>
+  </center>
+</layout::page>
+
+<include footer.mhtml>

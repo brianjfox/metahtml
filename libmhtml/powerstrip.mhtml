@@ -1,0 +1,24 @@
+;;; powerstrip.mhtml: -*- Meta-HTML -*-  Contains definitions in Meta-HTML
+;;; that are loaded into the executable image of the library.
+;;;
+;;;  Copyright (c) 1997, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jan 29 10:14:25 1997.
+;;;
+<set-var mhtml::gather-documentation = true>
+<set-var bootstrapper::bootstrap-version = "MetaSite Bootstrap: v2.1">
+
+<include powerstrip-tags/crypto.mhtml>
+<include powerstrip-tags/layout.mhtml>
+<include powerstrip-tags/navicon.mhtml>
+<include powerstrip-tags/navlayout.mhtml>
+<include powerstrip-tags/navbar.mhtml>
+<include powerstrip-tags/parameters.mhtml>
+<include powerstrip-tags/indexer.mhtml>
+<include powerstrip-tags/tables.mhtml>
+<include powerstrip-tags/standard-header.mhtml>
+<include powerstrip-tags/standard-footer.mhtml>
+<include powerstrip-tags/login.mhtml>
+<include powerstrip-tags/nested-items.mhtml>
+<include powerstrip-tags/pstrip.mhtml>
+
+<bootstrap::make-documentation powerstrip-api.c>

@@ -1,0 +1,55 @@
+;;; about-engine.mhtml: -*- Meta-HTML -*-
+;;;  Tell people about the Engine Features.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ua.com) Thu Feb  1 09:47:34 1996.
+<set-var title="The Meta-HTML CGI Engine">
+;;; <set-var mhtml::cacheable=true>
+<include header.mhtml>
+
+<layout::page>
+
+<ptext>
+The <meta-html> CGI Engine is a mini-server which works together with
+your existing Web server to provide unprecedented flexibility and
+compatibility.
+
+You may configure your Web server to use the <meta-html> CGI Engine in
+several ways:
+
+<ul>
+  <li> As a processor only for pages containing <meta-html>.
+  <li> As a pre-processor for a particular area of your site.
+  <li> As a pre-processor for your entire site!
+</ul>
+
+The <meta-html> CGI Engine is ideal for those sites which desire the
+full power of the <meta-html> programming language, but are tied into
+using a Web server other than the
+<a href="<get-var mhtml::url-to-dir>/about-server.mhtml"><meta-html>
+  Web Server</a>.  The same full featured functionality is available
+through use of the Engine as is with the Server, with the exception of
+logging and header parsing (we expect your server to do that).  HTTP
+Cookie support is built-in, and works seamlessly with those servers
+that support it, as well as server-push, and other features.
+
+The <meta-html> Stand-Alone Processor is a quick and easy way to use
+<meta-html> for just a few pages on your entire site.  Designed to be
+used as a direct language interpreter, you can easily invoke the
+processor at the tops of specific Web pages, or, depending on your
+server, for an entire class of Web pages.
+
+Primarily designed for building a static Web Site from a <meta-html>
+template, and because of the invocation model, the processor does not
+automatically handle HTTP Cookies, or statefull sessions.
+
+However, all of the <a href="<get-var
+mhtml::url-to-dir>/welcome.mhtml"><meta-html> language features</a>
+are available in the Stand-Alone processor, so you enjoy the benefits
+of direct access to database functionality, dynamically built pages,
+and a full programming language!
+</ptext>
+
+</layout::page>
+
+<include footer.mhtml>

@@ -1,0 +1,135 @@
+# This Makefile for the compat library is in -*- Text -*- mode for Emacs.
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+#
+# You should have received a copy of the UAI Free Software License
+# along with this program; if you have not, you may obtain one by
+# writing to:
+#
+# Universal Access Inc.
+# 129 El Paseo Court
+# Santa Barbara, CA
+# 93101
+#
+RM = rm -f
+LN = ln
+CP = cp
+MV = mv
+AR = ar
+RANLIB = @RANLIB@
+MKDIR = mkdir
+TAR = tar
+
+VPATH = @srcdir@
+srcdir = @srcdir@
+DEFS = @DEFS@
+
+#
+# ALL_SUBDIRS is the list of all of the subdirectories within which we
+# would like to run various `make's, or ".", which means that there
+# are no subdirectories.
+ALL_SUBDIRS = .
+
+VERSION = 1.0
+DISTNAME = compat-$(VERSION)
+
+CC = gcc
+OPTIMIZE_FLAGS = -O69
+DEBUG_FLAGS = -g
+GCC_FLAGS = -Wall -Wstrict-prototypes
+CFLAGS = $(GCC_FLAGS)  $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) -I../.. -I.. $(DEFS)
+LDFLAGS = $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS)
+
+LIB_CSRC = memmove.c strcasecmp.c strdup.c strchr.c strerror.c qsort.c strstr.c
+LIB_HSRC = 
+LIB_OBJS = memmove.o strcasecmp.o strdup.o strchr.o strerror.o qsort.o strstr.o
+
+TARGET_LIB = libcompat.a
+TEST_PROGS =
+
+REQUIRED_LIBS =
+
+TARGETS = $(TARGET_LIB) $(TEST_PROGS)
+
+.c.o:
+	$(CC) $(CFLAGS) $(DEFS) -c $<
+
+all: $(TARGETS)
+
+$(TARGET_LIB): $(LIB_OBJS)
+	$(RM) $@
+	$(AR) cq $@ $(LIB_OBJS)
+	if [ "$(RANLIB)" ]; then $(RANLIB) $@; fi
+
+clean: FORCE
+	$(RM) $(LIB_OBJS) $(TARGETS)
+
+distclean realclean: clean
+	$(RM) *.o *core* *~ DISTFILES *.bak Makefile
+
+dist: DISTFILES
+	$(RM) -rf $(DISTNAME)
+	$(MKDIR) $(DISTNAME)
+	for d in `find $(ALL_SUBDIRS) -type d -print`; do \
+	  if [ "$$d" != "." -a "$$d" != "./$(DISTNAME)" ]; then \
+	    mkdir $(DISTNAME)/$$d; \
+	  fi \
+	done
+	for f in `cat DISTFILES`; do \
+	   $(LN) $(srcdir)/$$f $(DISTNAME)/$$f || \
+		{ echo copying $$f; cp -p $(srcdir)/$$f $(DISTNAME)/$$f ; } \
+	done
+	(cd $(DISTNAME); $(MAKE) $(MFLAGS) distclean)
+	$(TAR) chvf - $(DISTNAME) | gzip >$(DISTNAME).tar.gz
+	$(RM) -rf $(DISTNAME)
+
+# Gets rid of most of the unwanted files.  Verify manually (if necessary)
+# that this produces a list of all the files desired in the distribution. 
+DISTFILES: FORCE
+	$(RM) -rf $(DISTNAME)
+	(cd $(srcdir); find . ! -type d -print) \
+	| sed  '/\/RCS\//d; \
+	       /\/EMACS-BACKUPS\//d; \
+	       /\.tar.*/d; \
+	       /~$$/d; /\.o$$/d; \
+	       /\/config\.status$$/d; \
+	       /\/.*\.BAK$$/d; \
+	       /\/TAGS$$/d; \
+	       /\/core$$/d; \
+	       /\/[a-z]*\.core$$/d; \
+	       /\/core\.[a-z]*$$/d; \
+	       /\/a.out$$/d; \
+	       /\/=/d; \
+	       /\/conftest\.c$$/d; \
+	       /\/DISTFILES$$/d; \
+	       /\/xact\/xact$$/d; \
+	       /\.toc$$/d; \
+	       /\.aux$$/d; /\.log$$/d; \
+	       /\.cps$$/d; /\.cp$$/d; \
+	       /\.fns$$/d; /\.fn$$/d; \
+	       /\.tps$$/d; /\.tp$$/d; \
+	       /\.vrs$$/d; /\.vr$$/d; \
+	       /\.pgs$$/d; /\.pg$$/d; \
+	       /\.kys$$/d; /\.ky$$/d; \
+	       s/^.\///; /^\.$$/d;' \
+	| sort | uniq > DISTFILES
+
+
+FORCE:

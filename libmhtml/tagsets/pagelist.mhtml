@@ -1,0 +1,136 @@
+;;; pagelist.mhtml: -*- Meta-HTML -*-  Keep a list of pages to cycle through.
+;;;
+;;; This file is part of <Meta-HTML>(tm), a system for the rapid
+;;; deployment of Internet and Intranet applications via the use
+;;; of the Meta-HTML language.
+;;;
+;;; Copyright (c) 1995, 2001, Brian J. Fox (bfox@ai.mit.edu).
+;;;
+;;; Meta-HTML is free software; you can redistribute it and/or modify
+;;; it under the terms of the General Public License as published
+;;; by the Free Software Foundation; either version 1, or (at your
+;;; option) any later version.
+;;;
+;;; This program is distributed in the hope that it will be useful,
+;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;; FSF GPL for more details.
+;;;
+;;; You should have received a copy of the FSF General Public License
+;;; along with this program; if you have not, you may obtain one
+;;; electronically at the following URL:
+;;;
+;;;	http://www.metahtml.com/COPYING
+;;;
+;;;  Author: Henry Minsky
+;;;  Hacker: Brian J. Fox (bfox@ai.mit.edu) Thu Feb  1 13:55:59 2001
+;;;
+;;; Macros for creating auto-navigation bars for a sequence of pages.
+;;; 
+;;; Usage: 
+;;; <def-pagelist set-name>
+;;;  <defpage url pretty-name [prev] [next]>
+;;; </def-page-sequence>
+
+<defsubst pagelist::image-prefix whitespace=delete>
+  <site::system-prefix>/images/pagelist
+</defsubst>
+
+;;; Save the index of this page
+<defun pagelist::defpage url &rest pretty-name>
+  <set-var url=<make-absolute-path <get-var-once url>>>
+  <li><a href="<get-var-once url>"><get-var-once pretty-name></a><p>
+  <set-var pages::<get-var-once url>=<get-var-once pages::counter>>
+  <set-var pages::sequence[pages::counter]="<get-var-once url>">
+  <increment pages::counter>
+</defun>
+
+<defun pagelist::defpage-hidden url pretty-name>
+  <set-var url=<make-absolute-path <get-var-once url>>>
+  <set-var pages::<get-var-once url>=<get-var-once pages::counter>>
+  <set-var pages::sequence[pages::counter]=<get-var-once url>>
+  <increment pages::counter>
+</defun>
+
+<defun make-absolute-path path>
+  <if <not <string-eq <substring <get-var-once path> 0 1> />>
+      <set-var newurl =
+	<concat <get-var-once mhtml::relative-prefix> /
+		<get-var-once path>>>
+    <set-var newurl = <get-var-once path>>>
+  <get-var-once newurl>
+</defun>
+
+<defun pagelist::use-pagelist name>
+  <set-var pages::pagelist-alist=<get-session-var <get-var-once name>>>
+  <alist-to-package <get-var-once pages::pagelist-alist> pages>
+</defun>
+
+<defun pagelist::prev-page>
+  <set-var index=<sub <get-var-once pages::<get-var-once mhtml::location>> 1>>
+  <if <lt index 0>
+      <set-var index = <sub pages::counter 1>>>
+  <get-var-once pages::sequence[index]>
+</defun>
+
+<defun pagelist::next-page>
+  <set-var index=<add <get-var-once pages::<get-var-once mhtml::location>> 1>>
+  <if <gt index <sub pages::counter 1>>
+      <set-var index = 0>>
+  <get-var-once pages::sequence[index]>
+</defun>
+
+<defun pagelist::parent-page>
+  <get-var-once pages::parent-page>
+</defun>
+
+<defun pagelist::control-panel prev up next>
+  <center>
+    <table border=0 width=80%>
+      <tr>
+	<th width="30%">
+	<concat <a href="<pagelist::prev-page>">
+		<img src="<pagelist::image-prefix>/arrow.marble.left.gif"
+		     border=0>
+		<br><get-var-once prev>
+		</a>>
+	</th>
+	<th>
+	<concat <a href="<pagelist::parent-page>">
+		<img src="<pagelist::image-prefix>/arrow.marble.up2.gif"
+		     border=0>
+		<br><get-var-once up>
+		</a>>
+	</th>
+	<th width="30%">
+	<concat <a href="<pagelist::next-page>">
+		<img src="<pagelist::image-prefix>/arrow.marble.right.gif"
+		     border=0>
+		<br><get-var-once next>
+		</a>>
+	</th>
+      </tr>
+    </table>
+    <b><tt>
+    <font size=+4>
+    <get-var-once pages::<get-var-once mhtml::current-doc>>
+    </font>
+    </tt></b>
+  </center>
+</defun>
+
+<defmacro pagelist::define-pagelist name numbered? &body &unevalled body>
+  <set-var
+    pages::counter=0
+    pages::parent-page=<get-var-once mhtml::current-url>>
+  <dl>
+    <if <get-var-once numbered?>
+	<concat "<" "ol" ">">
+      <concat "<" "dd" ">">>
+    <%%eval <get-var-once body>>
+    <if <get-var-once numbered?>
+	<concat "<" "/ol" ">">
+      <concat "<" "/dl" ">">>
+    <set-session-var <get-var-once name>=<package-to-alist pages strip=true>>
+  </dl>
+</defmacro>

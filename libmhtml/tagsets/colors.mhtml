@@ -1,0 +1,633 @@
+;;; colors.mhtml: -*- Meta-HTML -*- Some tags for color manipulation.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu Jun 20 17:19:27 1996.
+;;;
+;;; 
+<set-var
+  hex::0=0 hex::1=1 hex::2=2 hex::3=3 hex::4=4 hex::5=5 
+  hex::6=6 hex::7=7 hex::8=8 hex::9=9 hex::A=10 hex::B=11
+  hex::C=12 hex::D=13 hex::E=14 hex::F=15
+  dec::0=0 dec::1=1 dec::2=2 dec::3=3 dec::4=4 dec::5=5
+  dec::6=6 dec::7=7 dec::8=8 dec::9=9 dec::10=A dec::11=B
+  dec::12=C dec::13=D dec::14=E dec::15=F>
+
+<defun color::parse-hex-digit digit>
+  <get-var-once hex::<get-var-once digit>>
+</defun>
+
+<defun color::parse-hex-pair hex-pair>
+  ;;; DOC_SECTION (COLOR-MANIPULATION)
+  ;;; Return the decimal value of <var hex-pair>.
+  ;;; <complete-example>
+  ;;; <color::parse-hex-pair 84>
+  ;;; </complete-example>
+  <set-var
+    high-byte = <color::parse-hex-digit
+		 <substring <get-var-once hex-pair> 0 1>>
+    lo-byte = <color::parse-hex-digit
+	       <substring <get-var-once hex-pair> 1 2>>>
+  <add <mul high-byte 16> lo-byte>
+</defun>
+
+<defun color::parse-rgb rgb-string>
+  ;;; DOC_SECTION (COLOR-MANIPULATION)
+  ;;; Return an array of decimal values, one for each color in <var
+  ;;; rgb-string>.
+  ;;;
+  ;;; <complete-example>
+  ;;; <color::parse-rgb #ff78e4>
+  ;;; </complete-example>
+  <if <string-eq <substring <get-var-once rgb-string> 0 1> "#">
+      <set-var rgb-string=<substring <get-var-once rgb-string> 1>>>
+  <set-var r = <color::parse-hex-pair
+		<substring <get-var-once rgb-string> 0 2>>>
+  <set-var g = <color::parse-hex-pair
+		<substring <get-var-nce rgb-string> 2 4>>>
+  <set-var b = <color::parse-hex-pair
+		<substring <get-var-once rgb-string> 4 6>>>
+  <concat <get-var-once r>\n<get-var-once g>\n<get-var-once b>>
+</defun>
+
+<defun color::decimal-to-hex byte-value>
+  ;;; DOC_SECTION (COLOR-MANIPULATION)
+  ;;; Return the two hex characters which represent <var byte-value>,
+  ;;; a decimal number between 0 and 255 inclusive.
+  ;;;
+  ;;; <complete-example>
+  ;;; <color::decimal-to-hex 132>
+  ;;; </complete-example>
+  <concat <get-var-once dec::<integer <floor <div byte-value 16>>>>
+	  <get-var-once dec::<integer <mod byte-value 16>>>>
+</defun>
+
+<defun color::opposite color>
+  ;;; DOC_SECTION (COLOR-MANIPULATION)
+  ;;; Return the "opposite" of COLOR in HTML format.  COLOR is supplied
+  ;;; in HTML format as well.  For example:
+  ;;; <example code><color::opposite #000000> --> #FFFFFF</example>
+  ;;;
+  <set-var rgb[]=<color::parse-rgb <get-var-once color>>>
+  <set-var i=0>
+  #
+  <while <lt i 3>>
+    <set-var t = <sub 255 rgb[i]>>
+    <set-var x = <sub t rgb[i]>>
+    <if <lt x 0> <set-var x = <sub 0 t>>>
+    <if <lt x 60> <increment t by=60>>
+    <color::decimal-to-hex <get-var-once t>>
+    <increment i>
+  </while>
+</defun>
+
+<set-var
+  colors::aliceblue = F0F8FF
+  colors::antiquewhite = FAEBD7
+  colors::aqua = 00FFFF
+  colors::aquamarine = 7FFFD4
+  colors::azure = F0FFFF
+  colors::beige = F5F5DC
+  colors::bisque = FFE4C4
+  colors::black = 000000
+  colors::blanchedalmond = FFEBCD
+  colors::blue = 0000FF
+  colors::blueviolet = 8A2BE2
+  colors::brown = A52A2A
+  colors::burlywood = DEB887
+  colors::cadetblue = 5F9EA0
+  colors::chartreuse = 7FFF00
+  colors::chocolate = D2691E
+  colors::coral = FF7F50
+  colors::cornflowerblue = 6495ED
+  colors::cornsilk = FFF8DC
+  colors::crimson = DC143C
+  colors::cyan = 00FFFF
+  colors::darkblue = 00008B
+  colors::darkcyan = 008B8B
+  colors::darkgoldenrod = B8860B
+  colors::darkgray = A9A9A9
+  colors::darkgreen = 006400
+  colors::darkkhaki = BDB76B
+  colors::darkmagenta = 8B008B
+  colors::darkolivegreen = 556B2F
+  colors::darkorange = FF8C00
+  colors::darkorchid = 9932CC
+  colors::darkred = 8B0000
+  colors::darksalmon = E9967A
+  colors::darkseagreen = 8FBC8F
+  colors::darkslateblue = 483D8B
+  colors::darkslategray = 2F4F4F
+  colors::darkturquoise = 00CED1
+  colors::darkviolet = 9400D3
+  colors::deeppink = FF1493
+  colors::deepskyblue = 00BFFF
+  colors::dimgray = 696969
+  colors::dodgerblue = 1E90FF
+  colors::firebrick = B22222
+  colors::floralwhite = FFFAF0
+  colors::forestgreen = 228B22
+  colors::fuchsia = FF00FF
+  colors::gainsboro = DCDCDC
+  colors::ghostwhite = F8F8FF
+  colors::gold = FFD700
+  colors::goldenrod = DAA520
+  colors::gray = 808080
+  colors::green = 008000
+  colors::greenyellow = ADFF2F
+  colors::honeydew = F0FFF0
+  colors::hotpink = FF69B4
+  colors::indianred = CD5C5C
+  colors::indigo = 4B0082
+  colors::ivory = FFFFF0
+  colors::khaki = F0E68C
+  colors::lavender = E6E6FA
+  colors::lavenderblush = FFF0F5
+  colors::lawngreen = 7CFC00
+  colors::lemonchiffon = FFFACD
+  colors::lightblue = ADD8E6
+  colors::lightcoral = F08080
+  colors::lightcyan = E0FFFF
+  colors::lightgoldenrodyellow = FAFAD2
+  colors::lightgreen = 90EE90
+  colors::lightgrey = D3D3D3
+  colors::lightpink = FFB6C1
+  colors::lightsalmon = FFA07A
+  colors::lightseagreen = 20B2AA
+  colors::lightskyblue = 87CEFA
+  colors::lightslategray = 778899
+  colors::lightsteelblue = B0C4DE
+  colors::lightyellow = FFFFE0
+  colors::lime = 00FF00
+  colors::limegreen = 32CD32
+  colors::linen = FAF0E6
+  colors::magenta = FF00FF
+  colors::maroon = 800000
+  colors::mediumaquamarine = 66CDAA
+  colors::mediumblue = 0000CD
+  colors::mediumorchid = BA55D3
+  colors::mediumpurple = 9370DB
+  colors::mediumseagreen = 3CB371
+  colors::mediumslateblue = 7B68EE
+  colors::mediumspringgreen = 00FA9A
+  colors::mediumturquoise = 48D1CC
+  colors::mediumvioletred = C71585
+  colors::midnightblue = 191970
+  colors::mintcream = F5FFFA
+  colors::mistyrose = FFE4E1
+  colors::moccasin = FFE4B5
+  colors::navajowhite = FFDEAD
+  colors::navy = 000080
+  colors::oldlace = FDF5E6
+  colors::olive = 808000
+  colors::olivedrab = 6B8E23
+  colors::orange = FFA500
+  colors::orangered = FF4500
+  colors::orchid = DA70D6
+  colors::palegoldenrod = EEE8AA
+  colors::palegreen = 98FB98
+  colors::paleturquoise = AFEEEE
+  colors::palevioletred = DB7093
+  colors::papayawhip = FFEFD5
+  colors::peachpuff = FFDAB9
+  colors::peru = CD853F
+  colors::pink = FFC0CB
+  colors::plum = DDA0DD
+  colors::powderblue = B0E0E6
+  colors::purple = 800080
+  colors::red = FF0000
+  colors::rosybrown = BC8F8F
+  colors::royalblue = 4169E1
+  colors::saddlebrown = 8B4513
+  colors::salmon = FA8072
+  colors::sandybrown = F4A460
+  colors::seagreen = 2E8B57
+  colors::seashell = FFF5EE
+  colors::sienna = A0522D
+  colors::silver = C0C0C0
+  colors::skyblue = 87CEEB
+  colors::slateblue = 6A5ACD
+  colors::slategray = 708090
+  colors::snow = FFFAFA
+  colors::springgreen = 00FF7F
+  colors::steelblue = 4682B4
+  colors::tan = D2B48C
+  colors::teal = 008080
+  colors::thistle = D8BFD8
+  colors::tomato = FF6347
+  colors::turquoise = 40E0D0
+  colors::violet = EE82EE
+  colors::wheat = F5DEB3
+  colors::white = FFFFFF
+  colors::whitesmoke = F5F5F5
+  colors::yellow = FFFF00
+  colors::yellowgreen = 9ACD32>
+
+<set-var
+  colors::F0F8FF = aliceblue
+  colors::FAEBD7 = antiquewhite
+  colors::00FFFF = aqua
+  colors::7FFFD4 = aquamarine
+  colors::F0FFFF = azure
+  colors::F5F5DC = beige
+  colors::FFE4C4 = bisque
+  colors::000000 = black
+  colors::FFEBCD = blanchedalmond
+  colors::0000FF = blue
+  colors::8A2BE2 = blueviolet
+  colors::A52A2A = brown
+  colors::DEB887 = burlywood
+  colors::5F9EA0 = cadetblue
+  colors::7FFF00 = chartreuse
+  colors::D2691E = chocolate
+  colors::FF7F50 = coral
+  colors::6495ED = cornflowerblue
+  colors::FFF8DC = cornsilk
+  colors::DC143C = crimson
+  colors::00FFFF = cyan
+  colors::00008B = darkblue
+  colors::008B8B = darkcyan
+  colors::B8860B = darkgoldenrod
+  colors::A9A9A9 = darkgray
+  colors::006400 = darkgreen
+  colors::BDB76B = darkkhaki
+  colors::8B008B = darkmagenta
+  colors::556B2F = darkolivegreen
+  colors::FF8C00 = darkorange
+  colors::9932CC = darkorchid
+  colors::8B0000 = darkred
+  colors::E9967A = darksalmon
+  colors::8FBC8F = darkseagreen
+  colors::483D8B = darkslateblue
+  colors::2F4F4F = darkslategray
+  colors::00CED1 = darkturquoise
+  colors::9400D3 = darkviolet
+  colors::FF1493 = deeppink
+  colors::00BFFF = deepskyblue
+  colors::696969 = dimgray
+  colors::1E90FF = dodgerblue
+  colors::B22222 = firebrick
+  colors::FFFAF0 = floralwhite
+  colors::228B22 = forestgreen
+  colors::FF00FF = fuchsia
+  colors::DCDCDC = gainsboro
+  colors::F8F8FF = ghostwhite
+  colors::FFD700 = gold
+  colors::DAA520 = goldenrod
+  colors::808080 = gray
+  colors::008000 = green
+  colors::ADFF2F = greenyellow
+  colors::F0FFF0 = honeydew
+  colors::FF69B4 = hotpink
+  colors::CD5C5C = indianred
+  colors::4B0082 = indigo
+  colors::FFFFF0 = ivory
+  colors::F0E68C = khaki
+  colors::E6E6FA = lavender
+  colors::FFF0F5 = lavenderblush
+  colors::7CFC00 = lawngreen
+  colors::FFFACD = lemonchiffon
+  colors::ADD8E6 = lightblue
+  colors::F08080 = lightcoral
+  colors::E0FFFF = lightcyan
+  colors::FAFAD2 = lightgoldenrodyellow
+  colors::90EE90 = lightgreen
+  colors::D3D3D3 = lightgrey
+  colors::FFB6C1 = lightpink
+  colors::FFA07A = lightsalmon
+  colors::20B2AA = lightseagreen
+  colors::87CEFA = lightskyblue
+  colors::778899 = lightslategray
+  colors::B0C4DE = lightsteelblue
+  colors::FFFFE0 = lightyellow
+  colors::00FF00 = lime
+  colors::32CD32 = limegreen
+  colors::FAF0E6 = linen
+  colors::FF00FF = magenta
+  colors::800000 = maroon
+  colors::66CDAA = mediumaquamarine
+  colors::0000CD = mediumblue
+  colors::BA55D3 = mediumorchid
+  colors::9370DB = mediumpurple
+  colors::3CB371 = mediumseagreen
+  colors::7B68EE = mediumslateblue
+  colors::00FA9A = mediumspringgreen
+  colors::48D1CC = mediumturquoise
+  colors::C71585 = mediumvioletred
+  colors::191970 = midnightblue
+  colors::F5FFFA = mintcream
+  colors::FFE4E1 = mistyrose
+  colors::FFE4B5 = moccasin
+  colors::FFDEAD = navajowhite
+  colors::000080 = navy
+  colors::FDF5E6 = oldlace
+  colors::808000 = olive
+  colors::6B8E23 = olivedrab
+  colors::FFA500 = orange
+  colors::FF4500 = orangered
+  colors::DA70D6 = orchid
+  colors::EEE8AA = palegoldenrod
+  colors::98FB98 = palegreen
+  colors::AFEEEE = paleturquoise
+  colors::DB7093 = palevioletred
+  colors::FFEFD5 = papayawhip
+  colors::FFDAB9 = peachpuff
+  colors::CD853F = peru
+  colors::FFC0CB = pink
+  colors::DDA0DD = plum
+  colors::B0E0E6 = powderblue
+  colors::800080 = purple
+  colors::FF0000 = red
+  colors::BC8F8F = rosybrown
+  colors::4169E1 = royalblue
+  colors::8B4513 = saddlebrown
+  colors::FA8072 = salmon
+  colors::F4A460 = sandybrown
+  colors::2E8B57 = seagreen
+  colors::FFF5EE = seashell
+  colors::A0522D = sienna
+  colors::C0C0C0 = silver
+  colors::87CEEB = skyblue
+  colors::6A5ACD = slateblue
+  colors::708090 = slategray
+  colors::FFFAFA = snow
+  colors::00FF7F = springgreen
+  colors::4682B4 = steelblue
+  colors::D2B48C = tan
+  colors::008080 = teal
+  colors::D8BFD8 = thistle
+  colors::FF6347 = tomato
+  colors::40E0D0 = turquoise
+  colors::EE82EE = violet
+  colors::F5DEB3 = wheat
+  colors::FFFFFF = white
+  colors::F5F5F5 = whitesmoke
+  colors::FFFF00 = yellow
+  colors::9ACD32 = yellowgreen>
+
+<set-var 
+  color-names::aliceblue = "Alice Blue"
+  color-names::antiquewhite = "Antique White"
+  color-names::aqua = "Aqua"
+  color-names::aquamarine = "Aquamarine"
+  color-names::azure = "Azure"
+  color-names::beige = "Beige"
+  color-names::bisque = "Bisque"
+  color-names::black = "Black"
+  color-names::blanchedalmond = "Blanched Almond"
+  color-names::blue = "Blue"
+  color-names::blueviolet = "Blue Violet"
+  color-names::brown = "Brown"
+  color-names::burlywood = "Burlywood"
+  color-names::cadetblue = "Cadet Blue"
+  color-names::chartreuse = "Chartreuse"
+  color-names::chocolate = "Chocolate"
+  color-names::coral = "Coral"
+  color-names::cornflowerblue = "Cornflower Blue"
+  color-names::cornsilk = "Cornsilk"
+  color-names::crimson = "Crimson"
+  color-names::cyan = "Cyan"
+  color-names::darkblue = "Dark Blue"
+  color-names::darkcyan = "Dark Cyan"
+  color-names::darkgoldenrod = "Dark Goldenrod"
+  color-names::darkgray = "Dark Gray"
+  color-names::darkgreen = "Dark Green"
+  color-names::darkkhaki = "Dark Khaki"
+  color-names::darkmagenta = "Dark Magenta"
+  color-names::darkolivegreen = "Dark Olive Green"
+  color-names::darkorange = "Dark Orange"
+  color-names::darkorchid = "Dark Orchid"
+  color-names::darkred = "Dark Red"
+  color-names::darksalmon = "Dark Salmon"
+  color-names::darkseagreen = "Dark Sea Green"
+  color-names::darkslateblue = "Dark Slate Blue"
+  color-names::darkslategray = "Dark Slate Gray"
+  color-names::darkturquoise = "Dark Turquoise"
+  color-names::darkviolet = "Dark Violet"
+  color-names::deeppink = "Deep Pink"
+  color-names::deepskyblue = "Deep Sky Blue"
+  color-names::dimgray = "Dim Gray"
+  color-names::dodgerblue = "Dodger Blue"
+  color-names::firebrick = "Fire Brick"
+  color-names::floralwhite = "Floral White"
+  color-names::forestgreen = "Forest Green"
+  color-names::fuchsia = "Fuchsia"
+  color-names::gainsboro = "Gainsboro"
+  color-names::ghostwhite = "Ghost White"
+  color-names::gold = "Gold"
+  color-names::goldenrod = "Goldenrod"
+  color-names::gray = "Gray"
+  color-names::green = "Green"
+  color-names::greenyellow = "Green Yellow"
+  color-names::honeydew = "Honeydew"
+  color-names::hotpink = "Hot Pink"
+  color-names::indianred = "Indian Red"
+  color-names::indigo = "Indigo"
+  color-names::ivory = "Ivory"
+  color-names::khaki = "Khaki"
+  color-names::lavender = "Lavender"
+  color-names::lavenderblush = "Lavender Blush"
+  color-names::lawngreen = "Lawn Green"
+  color-names::lemonchiffon = "Lemon Chiffon"
+  color-names::lightblue = "Light Blue"
+  color-names::lightcoral = "Light Coral"
+  color-names::lightcyan = "Light Cyan"
+  color-names::lightgoldenrodyellow = "Light Goldenrod Yellow"
+  color-names::lightgreen = "Light Green"
+  color-names::lightgrey = "Light Grey"
+  color-names::lightpink = "Light Pink"
+  color-names::lightsalmon = "Light Salmon"
+  color-names::lightseagreen = "Light Sea Green"
+  color-names::lightskyblue = "Light Sky Blue"
+  color-names::lightslategray = "Light Slate Gray"
+  color-names::lightsteelblue = "Light Steel Blue"
+  color-names::lightyellow = "Light Yellow"
+  color-names::lime = "Lime"
+  color-names::limegreen = "Lime Green"
+  color-names::linen = "Linen"
+  color-names::magenta = "Magenta"
+  color-names::maroon = "Maroon"
+  color-names::mediumaquamarine = "Medium Aquamarine"
+  color-names::mediumblue = "Medium Blue"
+  color-names::mediumorchid = "Medium Orchid"
+  color-names::mediumpurple = "Medium Purple"
+  color-names::mediumseagreen = "Medium Sea Green"
+  color-names::mediumslateblue = "Medium Slate Blue"
+  color-names::mediumspringgreen = "Medium Spring Green"
+  color-names::mediumturquoise = "Medium Turquoise"
+  color-names::mediumvioletred = "Medium Violet Red"
+  color-names::midnightblue = "Midnight Blue"
+  color-names::mintcream = "Mint Cream"
+  color-names::mistyrose = "Misty Rose"
+  color-names::moccasin = "Moccasin"
+  color-names::navajowhite = "Navajo White"
+  color-names::navy = "Navy"
+  color-names::oldlace = "Old Lace"
+  color-names::olive = "Olive"
+  color-names::olivedrab = "Olive Drab"
+  color-names::orange = "Orange"
+  color-names::orangered = "Orange Red"
+  color-names::orchid = "Orchid"
+  color-names::palegoldenrod = "Pale Goldenrod"
+  color-names::palegreen = "Pale Green"
+  color-names::paleturquoise = "Pale Turquoise"
+  color-names::palevioletred = "Pale Violet Red"
+  color-names::papayawhip = "Papaya Whip"
+  color-names::peachpuff = "Peach Puff"
+  color-names::peru = "Peru"
+  color-names::pink = "Pink"
+  color-names::plum = "Plum"
+  color-names::powderblue = "Powder Blue"
+  color-names::purple = "Purple"
+  color-names::red = "Red"
+  color-names::rosybrown = "Rosy Brown"
+  color-names::royalblue = "Royal Blue"
+  color-names::saddlebrown = "Saddle Brown"
+  color-names::salmon = "Salmon"
+  color-names::sandybrown = "Sandy Brown"
+  color-names::seagreen = "Sea Green"
+  color-names::seashell = "Seashell"
+  color-names::sienna = "Sienna"
+  color-names::silver = "Silver"
+  color-names::skyblue = "Sky Blue"
+  color-names::slateblue = "Slate Blue"
+  color-names::slategray = "Slate Gray"
+  color-names::snow = "Snow"
+  color-names::springgreen = "Spring Green"
+  color-names::steelblue = "Steel Blue"
+  color-names::tan = "Tan"
+  color-names::teal = "Teal"
+  color-names::thistle = "Thistle"
+  color-names::tomato = "Tomato"
+  color-names::turquoise = "Turquoise"
+  color-names::violet = "Violet"
+  color-names::wheat = "Wheat"
+  color-names::white = "White"
+  color-names::whitesmoke = "White Smoke"
+  color-names::yellow = "Yellow"
+  color-names::yellowgreen = "Yellow Green">
+
+<set-var i=0 vars[]=<package-vars color-names>>
+<foreach var vars>
+  <set-var color::color-names[i] = <get-var-once <get-var-once var>>>
+  <increment i>
+</foreach>
+
+<defun color::add-color color name &optional nickname>
+  ;;; DOC_SECTION (COLOR-MANIPULATION)
+  ;;; Associate <var color> with <var name> and <var nickname> in the system
+  ;;; color tables and arrays.  <var color> is the hexadecimal representation
+  ;;; of the color, in standard RRGGBB format.  <var name> is a pretty
+  ;;; name of the color, as in "Antique White".
+  <subst-in-var color "#" "">
+  <subst-in-var name "#" "">
+  <defvar nickname <downcase <subst-in-string <get-var-once name> " " "">>>
+  <set-var names[]=<package-vars colors strip=true>>
+  <when <not <array-member <upcase <get-var-once name>> names>>>
+    <set-var
+      colors::<get-var-once color> = <get-var-once nickname>
+      colors::<get-var-once name> = <get-var-once color>
+      colors::<get-var-once nickname> = <get-var-once color>
+      color-names::<get-var-once nickname> = <get-var-once name>>
+    <array-append <get-var-once name> color::color-names>
+  </when>
+</defun>
+
+<defun color::hex-value color>
+  ;;; DOC_SECTION (COLOR-MANIPULATION)
+  ;;; Given the human readable name of a color in <var color>, return the
+  ;;; color value as a string of 6 hex digits: RRGGBB.
+  ;;;
+  ;;; <complete-example>
+  ;;; <color::hex-value "White Smoke">
+  ;;; </complete-example>
+  <subst-in-var color "[ \r\n\t#]+" "">
+  <if <match <get-var-once color> "^[0-9a-fA-F]+$">
+      <get-var-once color>
+    <get-var-once colors::<get-var-once color>>>
+</defun>
+
+<defun color::color-name color>
+  ;;; DOC_SECTION (COLOR-MANIPULATION)
+  ;;; Given a string of hex digits (perhaps with a leading "#"), return
+  ;;; the human readable name of that color as defined in our array of
+  ;;; color names.  The color names are definitely suitable for Netscape,
+  ;;; since I got the names off of their pages.
+  ;;;
+  ;;; <complete-example>
+  ;;; <color::color-name #F5FFFA>
+  ;;; </complete-example>
+  <subst-in-var color "[ \r\n\t#]+" "">
+  <if <match <get-var-once color> "^[0-9a-fA-F]+$">
+      <set-var color = <get-var-once colors::<get-var-once color>>>>
+  <get-var-once color-names::<get-var-once color>>
+</defun>
+
+<defun color::select-any-color varname &key javascript>
+  ;;; DOC_SECTION (COLOR-MANIPULATION)
+  ;;; Create an HTML SELECTion pull-down menu containing the list of colors
+  ;;; taken from the list of known colors in the system array
+  ;;; <var color::color-names>.  Assign the choice to <var varname> when the
+  ;;; containing form is POSTed.
+  <set-var choices[]=<get-var-once color::color-names[]>>
+  <sort choices>
+  <set-var passed-name = <get-var-once varname>>
+  <parser::canonicalize-var varname default>
+  <if <get-var-once javascript>
+      <set-var jname =
+	<downcase <subst-in-string <get-var-once passed-name> "-" "_">>>>
+  <select name="<get-var-once passed-name>"<if <get-var-once javascript>
+	  <prog onChange="set_my_image (this, '<get-var-once jname>');">>>
+    <foreach choice choices>
+      <concat
+       "<option value=\"<get-var-once choice>\""
+       <if <string-eq <get-var-once choice>
+		      <get-var-once <get-var-once varname>>>
+	   " SELECTED">
+       ">"
+       <get-var-once choice>
+       "</option>\n		">
+    </foreach>
+  </select>
+</defun>
+
+<defun color::select-color varname>
+  ;;; DOC_SECTION (COLOR-MANIPULATION)
+  ;;; Create an HTML SELECTion pull-down menu containing a short list of
+  ;;; colors including the primaries and hues.  Assign the choice to
+  ;;; <var varname> when the containing form is POSTed.
+  <set-var choices[]=
+    <prog
+      White
+      Black
+      Red
+      Green
+      Blue
+      Purple
+      Cyan
+      Brown
+      Pink
+      Yellow>>
+  <parser::canonicalize-var varname default>
+  <set-var select-name=<subst-in-string <get-var-once varname> "^[^:]+::" "">>
+  <select name=<get-var-once select-name>>
+    <concat "\n">
+    <foreach choice choices>
+      <concat
+       "  "
+       "<option value=\"<get-var-once choice>\""
+       <if <string-eq <get-var-once choice>
+		      <get-var-once <get-var-once varname>>>
+	   " SELECTED">
+       ">"
+       <get-var-once choice>
+       "\n">
+    </foreach>
+  </select>
+</defun>
+
+;;; Here's something slick.  This function produces a JavaScript applet that
+;;; let's you change colors dynamically.  Then, when you are happy, you send
+;;; the changes to the server.
+;;;
+<defun color::interactive-color-picker>
+</defun>

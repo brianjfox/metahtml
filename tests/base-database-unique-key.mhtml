@@ -1,0 +1,6 @@
+;;; base-database-next-key.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 03:00:57 1996.
+
+Result: db-key: <with-open-database db test.db mode=write-create><set-var result=<database-save-record db key0001 db>><set-var result=<database-save-record db key0002 db>><set-var result=<database-save-record db key0003 db>><database-unique-key db db-key></with-open-database><cgi-exec "/bin/rm test.db">

@@ -1,0 +1,28 @@
+;;; describe-database.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Apr 26 11:47:24 1997.
+;;;
+;;; Describe the contents of the database named in posted::database.
+;;;
+<set-var title="GSQL: Describe Database">
+<set-var site::area="GSQL: Describe DB">
+<include header.mhtml>
+
+<if <get-var-once posted::database>
+    <prog
+      <set-var gsql::database = <get-var database>>
+      <set-session-var gsql::database = <get-var database>>>>
+
+<if <not <get-var gsql::database>>
+    <prog
+      <message Please select a database first.>
+      <redirect welcome.mhtml>>>
+
+<layout::page>
+  <gsql::with-open-database>
+  <sql::database-tables db <get-var gsql::database>>
+  </gsql::with-open-database>
+</layout::page>
+
+<include footer.mhtml>

@@ -1,0 +1,50 @@
+*** Makefile.~1~	Thu Aug 10 13:17:14 1995
+--- Makefile	Wed Sep 20 17:21:16 1995
+***************
+*** 11,17 ****
+  CC= gcc
+  OPTIMIZE_FLAGS = -O69
+  # DEBUG_FLAGS = -g
+! OPTION_FLAGS = -DAPB_BIND_ADDRESS -DAPB_VIRTUAL_HOST # -DXBITHACK
+  CFLAGS= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(OPTION_FLAGS)
+  
+  # Place here any extra libraries you may need to link to. You
+--- 11,17 ----
+  CC= gcc
+  OPTIMIZE_FLAGS = -O69
+  # DEBUG_FLAGS = -g
+! OPTION_FLAGS = -DAPB_BIND_ADDRESS -DAPB_VIRTUAL_HOST -DHTTP_COOKIES # -DXBITHACK
+  CFLAGS= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(OPTION_FLAGS)
+  
+  # Place here any extra libraries you may need to link to. You
+***************
+*** 67,80 ****
+  
+  # Place here any flags you may need upon linking, such as a flag to
+  # prevent dynamic linking (if desired)
+! LFLAGS=  $(DEBUG_FLAGS) -lcrypt
+  
+  # You shouldn't have to edit anything else.
+  
+  OBJS=http_config.o httpd.o http_request.o util.o http_dir.o \
+  http_alias.o http_log.o http_mime.o http_access.o http_auth.o \
+  http_get.o http_post.o http_script.o http_include.o rfc931.o \
+! http_put.o http_delete.o
+  
+  .c.o:
+  	$(CC) -c $(CFLAGS) $(AUX_CFLAGS) $<
+--- 67,80 ----
+  
+  # Place here any flags you may need upon linking, such as a flag to
+  # prevent dynamic linking (if desired)
+! LFLAGS=  $(DEBUG_FLAGS) # -lcrypt
+  
+  # You shouldn't have to edit anything else.
+  
+  OBJS=http_config.o httpd.o http_request.o util.o http_dir.o \
+  http_alias.o http_log.o http_mime.o http_access.o http_auth.o \
+  http_get.o http_post.o http_script.o http_include.o rfc931.o \
+! http_put.o http_delete.o http_cookie.o
+  
+  .c.o:
+  	$(CC) -c $(CFLAGS) $(AUX_CFLAGS) $<

@@ -1,0 +1,11 @@
+;;; bootstrap.mhtml: -*- Meta-HTML -*-  Contains definitions in Meta-HTML
+;;; that are loaded into the executable image of the library.
+;;;
+;;; The functions are initialized by a call (in the C code) to
+;;; bootstrap_metahtml ().  See makebootstrap.c for more details.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jan 29 10:14:25 1997.
+;;;
+<include standard.mhtml>
+<include powerstrip.mhtml>

@@ -1,0 +1,6 @@
+;;; base-replace-page.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 16:55:35 1996.
+
+Result: "Replacement Page not Found": <replace-page base-replace-page-test.mhtml alt="Replacement Page not Found">

@@ -1,0 +1,93 @@
+;;; dbcreate.mhtml: -*- Meta-HTML -*-  Man page for dbcreate.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 09:37:34 1996.
+;;;
+<set-var title="DBCreate: Generate New Databases from ASCII Input">
+<include header.mhtml>
+
+<layout::page>
+<h3>Information Exchange</h3>
+<ptext>
+<synopsis dbcreate --description DESCFILE FILE1 ... FILEN>
+
+<code>dbcreate</code> takes a <i>description file</i> and files
+representing database data, and creates a <meta-html>
+<code>.packed</code> database file.  The output file can be converted
+to a machine dependent form using <a href="dbpack.mhtml">
+<code>dbpack</code></a>.
+
+The contents of <var FILE1> and friends is as follows:
+
+<ol>
+  <li> Each line contains the field data for one record.
+  <li> Field values are delimited by <b>FieldSep</b> characters
+  (<i>defaults to the comma character</i>).
+  <li> Field values may be surrounded by double-quote characters, in
+  order to enter <b>FieldSep</b> characters in a particular field.
+</ol>
+
+The contents of <var DESCFILE> is as follows:
+
+<ol>
+  <li> Blank lines, and lines beginning with a pound-sign (`#')
+  character are ignored.
+  <li> Each line contains a directive, and some arguments to pass to
+  that directive.
+</ol>
+
+Currently, the following directives are supported:
+
+<ul>
+  <li> <b>Database:</b> Names the output file (the
+  <code>.packed</code> file) that <code>dbcreate</code> will write.
+
+  <li> <b>Template:</b> Specifies, in order, the names of the fields
+  which appear within the input data files.  The names of the fields
+  are separated with commas.  This directive may appear more than
+  once; this simply has the effect of concatenating all of the
+  <b>Template</b> lines into one big template.
+
+  <li> <b>KeyField:</b> Specifies the names of the fields which should
+  be concatenated together to make a key for each record.  For
+  example, you might use:
+  <example>
+    KeyField: LastName, FirstName
+  </example>
+
+  <li> <b>KeyUnique:</b> Specifies that the moment of creation and the
+  number of the current record should be appended to each
+  <b>KeyField</b>.  This guarantees that each generated key will be
+  unique.
+
+  <li> <b>AddField:</b> Specifies a static field that should be added
+  to every record in the database.  For example, if the input file was
+  a mailing list for Southern California, and yet that information did
+  not appear in the field data for each field, one might place the
+  following directive in the <var DESCFILE>:
+  <example>
+    AddField: Region, "Southern California"
+  </example>
+
+  This directive may appear as many times as needed.
+
+  <li> <b>FieldSep:</b> Specifies the character which is used to separate
+  the fields of each record in the input file.  This character
+  defaults to a comma (`,').
+</ul>
+
+Here is a sample file of input:
+</ptext>
+<pre>
+<include sample.data>
+
+</pre>
+<ptext>
+And here is a description file for that input:
+</ptext>
+<pre>
+<include sample.desc>
+
+</pre>
+</layout::page>
+<include footer.mhtml>

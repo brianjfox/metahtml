@@ -1,0 +1,48 @@
+;;; welcome.mhtml: -*- Meta-HTML -*-  Welcome to MDB documentation.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 12:42:31 1996.
+<set-var title="MDB: The Meta-HTML Interactive Debugger">
+<include header.mhtml>
+
+<layout::page>
+<h3> Debug Meta-HTML Progams Interactively </h3>
+<ptext>
+<synopsis mdb [filename...]>
+
+<code>mdb</code> is a source-level interactive debugger for
+<meta-html>.  There currently is no comprehensive documentation for
+the debugger.  However, the following instructions may be of help to
+you:
+
+<ul>
+  <li> You may type <meta-html> expressions directly at the debugger
+  prompt.  Any expression beginning with the <b>&lt</b> character is
+  assumed to be a <meta-html> expression, and is immediately
+  evaluated, and the output printed.
+
+  <li> You may place debugger commands in an <code>.mdbinit</code>
+  file.  Commands found therein will be executed by <code>mdb</code>
+  upon startup.
+
+  <li> Mentioning <var filename>s on the invocation line is equivalent
+  to typing <code>load <var filename></code> from within
+  <code>mdb</code>.
+
+  <li> Full completion over <meta-html> symbols is supported.  Press
+  <code>TAB</code> to complete the symbol that you are typing, press
+  it again to see all of the possible completions that are available.
+
+  <li> Type <code>help</code> at the <code>mdb</code> prompt to see
+  what commands are available.
+</ul>
+
+MDB is an extremely useful tool for understanding what a particular
+expression will produce, and for understanding how <meta-html> works.
+<b>
+
+Caveat:</b> The <code>breakpoint</code> facility needs work, but still
+works well enough to be useful.
+</ptext>
+</layout::page>
+<include footer.mhtml>

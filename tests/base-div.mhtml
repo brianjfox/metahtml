@@ -1,0 +1,19 @@
+;;; base-div.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@carraig.samsar.acom) Sat Oct 26 19:36:33 1996.
+
+Result: 2: <div 2 1>
+Result: 2: <div -2 -1>
+Result: 2: <div 16 8>
+Result: 2: <div -4 -2.0>
+Result: 2: <div 2 1.00>
+Result: 2: <div -2 -1.00>
+Result: 2: <div 16.00 8>
+Result: 0: <div 2 0>
+Result: 0: <div 0 1>
+Result: 10: <div 0.005 .0005>
+Result: -10: <div 0.005 -.0005>
+Result: 10: <div -0.005 -.0005>
+Result: -10: <div -.005 0.0005>
+Result: 0: <div -4 .>

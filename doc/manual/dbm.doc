@@ -1,0 +1,17 @@
+Functions starting with "DBM::" operate on legacy Unix dbm, ndbm, and gdbm
+databases, without any Meta-HTML extensions.  For example, you can use
+the DBM:: commands to access the contents of a database created with
+Perl in a very straight-forward fashion:
+
+    <dbm::with-open-database db /perl/some.db mode=read>
+      <set-var key=<dbm::first-key db>>
+      <while <get-var key>>
+	key: <get-var key> -- value: <dbm::get-var db <get-var key>>
+	<set-var key=<dbm::next-key db <get-var key>>>
+      </while>
+    </dbm::with-open-database>
+
+The function <dbm::get-var db key> is used to get the value part of a
+single record -- since there are no Meta-HTML database extensions in
+the DBM package, there isn't any reason to have a <dbm::database-load-record>
+function, as there is in the standard Meta-HTML database functions.

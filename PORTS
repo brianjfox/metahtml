@@ -1,0 +1,21 @@
+Meta-HTML has been compiled and run out of the box on the following systems:
+
+Chip		Manufacturer	OS	Notes
+---------------------------------------------
+pentium		Generic PC	RedHat Linux
+pentium		Generic PC	Debian Linux
+pentium		Generic PC	Slackware Linux
+pentium		Generic PC	FreeBSD
+pentium		Generic PC	Windows/NT
+68040		HP-340		NetBSD
+Sparc		Sun		SunOS 4.1.3
+Sparc		Sun		Solaris 2.4
+Sparc		Sun		Solaris 2.5
+pentium		Generic PC	Solaris 2.5
+Alpha		DEC		OSF 3.x, 4.0
+Alpha		DEC		RedHat Linux 5.0
+Macintosh-PPC	Apple		System 7.5 (with MetroWorks Code Warrior)
+SGI-Challenge	SGI		IRIX-5.3
+hppa		HP		HPUX/9.01
+hppa		HP		HPUX/10.10
+

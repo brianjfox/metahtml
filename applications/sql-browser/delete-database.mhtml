@@ -1,0 +1,44 @@
+;;; delete-database.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu May 15 12:29:13 1997.
+<set-var title="Delete Database">
+<include header.mhtml>
+
+<if <string-eq <get-var posted::action> "Cancel">
+    <redirect welcome.mhtml>>
+
+<when <string-eq <get-var posted::action> "Delete Checked">>
+  <set-var all-ok?=true>
+  <foreach database delete-list>
+    <if <not <gsql::delete-database <get-var database>>>
+	<unset-var all-ok?>>
+  </foreach>
+
+  ;;; <if <get-var all-ok?>
+	  ;;; <redirect welcome.mhtml>>
+</when>
+
+<set-var databases[] = <sql::host-databases <get-var gsql::database-host>>>
+
+<layout::page>
+  <form method=post action=<thisdoc>>
+    <center>
+      <table>
+	<tr>
+	  <td align=left>
+	    <foreach db databases>
+	      <input type=checkbox name=delete-list value=<get-var db>>
+	      <b><code><get-var db></code></b><br>
+	    </foreach>
+	  </td>
+	</tr>
+      </table>
+      <p>
+      <input type=submit name=action value="Delete Checked">
+      <input type=submit name=action value="Cancel">
+    </center>
+  </form>
+</layout::page>
+
+<include footer.mhtml>

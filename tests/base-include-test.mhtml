@@ -1,0 +1,10 @@
+;;; base-include-test.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 01:22:12 1996.
+
+This is a test file for include to put into it's test page to as
+to test it's base functionality.  If this text appears in the result 
+then the include command is working well as you would expect from such 
+an established Web development platform as Meta-HTML.
+

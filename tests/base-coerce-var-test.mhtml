@@ -1,0 +1,8 @@
+;;; base-coerce-var-test.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 19:33:54 1996.
+
+Test coercing the contents of this file into a string type after 
+being read into a binary variable using <stream-get-contents>.
+If you are seeing this it worked correctly !!

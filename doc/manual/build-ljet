@@ -1,0 +1,4 @@
+#/bin/sh
+gs -dBATCH -dNOPAUSE -q -sDEVICE=ljet3 -sOutputFile=metahtml.ljet3 metahtml.ps
+gzip metahtml.ljet3
+

@@ -1,0 +1,43 @@
+;;; tabs.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu May 29 15:09:31 1997.
+<include /documentation/tabs.mhtml>
+
+<defun subsection-tab subsection>
+  <set-var link=<get-var mhtml::relative-prefix>/<get-var subsection>.mhtml>
+  <set-var saved-params = <package-to-alist tabs>>
+  <set-var tabs::images-webpath=/images/documentation-tabs>
+  <set-var tabs::base-tab-image=thin_blue-tab.gif>
+  <set-var tabs::halign=Right>
+  <set-var tabs::valign=Center>
+  <set-var tabs::fontname=Helvetica>
+  <set-var tabs::font-size=9pt>
+  <set-var tabs::font-color=white>
+  <layout::left-border>
+    <transparent-align width=8 height=1>
+  </layout::left-border>
+  <tab <get-var link> <get-var subsection> "" _top>
+  <alist-to-package <get-var saved-params> tabs>
+</defun>
+
+<set-var progs[] =
+  <prog
+    dbcreate
+    dbdump
+    dbpack
+    delete-session
+    gc-database
+    get-session-var
+    imagemap
+    list-sessions
+    reap-sessions
+    set-session-timeout
+    set-session-var
+    strip-tags
+    mklib>>
+
+<foreach prog progs>
+  <subsection-tab <get-var prog>>
+</foreach>
+

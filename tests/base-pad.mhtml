@@ -1,0 +1,12 @@
+;;; base-pad.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 01:54:39 1996.
+
+Result: "       RHS": <pad "   RHS   " 10>
+Result: "       RHS": <pad "RHS   " 10 align=right>
+Result: "LHS       ": <pad "     LHS " 10 align=left>
+Result: "  CENTER  ": <pad "CENTER" 10 align=center>
+Result: "CENTER": <pad "CENTER" 3 align=center>
+Result: "TRUNC": <pad "TRUNCATE  " 5 truncate>
+Result: "TRUNC": <pad "  TRUNCATE  " 5 truncate>

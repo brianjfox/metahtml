@@ -1,0 +1,19 @@
+;;; header.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Universal Access Inc.
+;;;  Author: Henry Minsky (hqm@ua.com) Fri Sep  6 16:09:47 1996.
+
+<require tagsets/session>
+<session::initialize>
+
+<html>
+<title><get-var title></title>
+<body bgcolor=#ffffff>
+<if <get-session-var tasks::username>
+	<prog <h5>[user=<get-session-var>]</h5>>>
+
+<a href="welcome.mhtml"><img border=0 align=right src="images/devil.gif"></a>
+
+<defun small-ball>
+  <img src="images/green-ball-small.gif">
+</defun>

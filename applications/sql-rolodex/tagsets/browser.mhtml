@@ -1,0 +1,365 @@
+;;; browser.mhtml: -*- Meta-HTML -*-  Generic Database Browser.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Nov  3 07:48:39 1997.
+
+<defun browser::shown-field-names>
+  <set-var :fields[] =
+    <subst-in-string <get-var-once browser::summary-fields> ";" "\n">>
+  <foreach :field :fields>
+    <set-var :info[]=<subst-in-string <get-var-once :field> ":" "\n">>
+    <array-append <get-var-once :info[0]> result>
+  </foreach>
+  <get-var-once result[]>
+</defun>
+
+<defun browser::select-sort-order varname>
+  <if <match <get-var browser::order-by> DESC>
+      <set-var current=DESC>
+    <set-var current=ASC>>
+  <select name=<get-var varname>>
+    <option value=ASC <if <string-eq <get-var current> ASC> SELECTED>>
+    Ascending</option>
+    <option value=DESC <if <string-eq <get-var current> DESC> SELECTED>>
+    Descending</option>
+  </select>
+</defun>
+
+<defun browser::select-sort-field varname>
+  <set-var current = <subst-in-string <get-var browser::order-by>
+				      "ORDER BY " "" " (DESC)|(ASC)" "">>
+  <set-var :fields[] = <browser::shown-field-names>>
+  <select name=<get-var varname>>
+  <foreach :field :fields>
+    <set-var :name = <capitalize <subst-in-string <get-var :field> "_" " ">>>
+    <option value=<get-var :field>
+	    <if <string-eq <get-var :field> <get-var current>> SELECTED>>
+    <get-var :name>
+    </option>
+  </foreach>
+  </select>
+</defun>
+
+<defun browser::summary-line data-pack format-string>
+  <set-var :fields[]=<subst-in-string <get-var format-string> ";" "\n">>
+  <foreach :field :fields>
+    <set-var :info[]=<subst-in-string <get-var :field> ":" "\n">>
+    <set-var data = <get-var-once <get-var data-pack>::<get-var :info[0]>>>
+    <set-var
+      :width = <or <get-var :info[1]> <string-length <get-var-once data>>>
+      :align = <or <get-var :info[2]> left>
+      :link-info[] = <subst-in-string <get-var :info[3]> " " "\n">
+      :link-type = <get-var :link-info[0]>
+      :link-data = <get-var :link-info[1]>
+      :link-data1  = <get-var :link-info[2]>>
+
+    <set-var data =
+      <concat 
+       <pad <get-var-once data> <get-var :width> align=<get-var :align>
+	    truncate=true>
+       " ">>
+    <when <get-var :link-type>>
+      <var-case
+	:link-type=mail-link
+	<concat
+	  <set-var data =
+	    <concat
+	     <a href="mailto:<get-var-once <get-var data-pack>::<get-var :link-data>>">
+	     <get-var-once data>
+	     </a>>>
+	  <subst-in-var data "( +)(</a>)$" "</a>\\1">>
+
+	:link-type=jump-link
+	<concat
+	 <set-var <get-var :link-data1> =
+	   <get-var-once <get-var data-pack>::<get-var :link-data1>>>
+	 <set-var data =
+	   <concat <a href="<get-var :link-data>?<cgi-encode
+						   <get-var :link-data1>>">
+		   <get-var-once data>
+		   </a>>>
+	 <subst-in-var data "( +)(</a>)$" "</a>\\1">>
+	 
+	:link-type=edit-link
+	<concat
+	  <set-var <get-var :link-data> =
+	    <get-var-once <get-var data-pack>::<get-var :link-data>>>
+	  <set-var data =
+	    <concat
+	     <a href="<get-var browser::editor>?<cgi-encode 
+						     <get-var :link-data>>">
+	     <get-var-once data>
+	     </a>>>
+	  <subst-in-var data
+			 "( +)(</a>)$" "</a>\\1">>>
+    </when>
+    <get-var-once data>
+  </foreach>
+</defun>
+
+<defun browser::parse-restrictions array &optional pack>
+  <set-var index=0>
+  <defvar pack default>
+  <foreach restriction <get-var array>>
+    <set-var info[]=<subst-in-string <get-var restriction> " +" "\n">>
+    <set-var <get-var pack>::field-name-<get-var index> = <get-var info[0]>>
+    <if <gt <array-size info> 3>
+        <set-var <get-var pack>::field-value-<get-var index> =
+                 <subst-in-string <get-var info[3]> "[%']+" "">
+                 <get-var pack>::field-rule-<get-var index> =
+                 <concat <get-var info[1]> " " <get-var info[2]>>>
+      <set-var <get-var pack>::field-value-<get-var index> =
+               <subst-in-string <get-var info[2]> "[%']+" "">
+               <get-var pack>::field-rule-<get-var index> = <get-var info[1]>>>
+    <increment index>
+  </foreach>
+</defun>
+
+<defun browser::build-summary &key start-char start-field>
+  <when <get-var-once start-char>>
+    <defvar start-field name>
+    <set-var start-char = <upcase <get-var-once start-char>>>
+    ;;; Find out where the entries of interest start, and set the
+    ;;; window start to that entry.  This is expensive, but I don't
+    ;;; really have a better way to do it yet.
+    <sql::with-open-database db DSN=<get-var browser::dsn> nolock=true>
+      <set-var which=0 found?="">
+      <sql::database-query
+       db true
+       "SELECT <get-var start-field> from <get-var browser::table>
+        <get-var browser::select-restrictions> <get-var browser::order-by>"
+       format =
+       <if <and
+	    <not <get-var ^::found?>>
+	    <not
+	     <string-eq less
+			<string-compare
+			 <upcase
+			  <substring <get-var <get-var ^::start-field>> 0 1>>
+			 <get-var ^::start-char>>>>>
+	   <set-var ^::found? = <get-var ^::which>>
+	 <increment ^::which>>>
+    </sql::with-open-database>
+    <set-var browser-window::window-start = <get-var found?>>
+    <set-session-var browser-window::window-start = <get-var found?>>
+  </when>
+
+  <sql::with-open-database db DSN=<get-var browser::dsn> nolock=true>
+    <sql::database-exec-query
+     db "SELECT * FROM <get-var browser::table>
+         <get-var browser::select-restrictions> <get-var browser::order-by>"
+     cursor=cursor>
+    <set-var offset=0>
+    <defvar browser-window::window-start 0>
+    <defvar browser-window::window-length 20>
+    <set-var browser-window::count = <sql::affected-rows cursor>>
+
+    ;;; Advance to the start of the window.
+    <set-var mhtml::iteration-limit=999999>
+    <while <and <lt offset browser-window::window-start>
+		<sql::database-next-record cursor>>>
+      <increment offset>
+    </while>
+
+    ;;; Format the following browser-window::window-length items.
+    <set-var limit=<add 1 offset browser-window::window-length>>
+    <while <and <lt offset limit>
+		<concat <package-delete :temp>
+			<sql::database-next-record cursor package=:temp>>>>
+      <array-append
+       <browser::summary-line :temp <get-var browser::summary-fields>> lines>
+      <increment offset>
+    </while>
+  </sql::with-open-database>
+  <get-var-once lines[]>
+</defun>
+
+<defun browser::make-header format-string>
+  <set-var :fields[] =
+    <subst-in-string <get-var format-string> ";" "\n">>
+  <foreach :field :fields>
+    <set-var :info[]=<subst-in-string <get-var :field> ":" "\n">>
+    <set-var
+      :width = <or <get-var :info[1]> <string-length <get-var-once data>>>
+      :align = <or <get-var :info[2]> left>>
+    <set-var data =
+      <concat
+       <pad <capitalize <get-var-once :info[0]>> <get-var :width>
+	    align=<get-var :align>>
+       " ">>
+    <set-var data = <concat
+		     <a href="<thisdoc>?sorton=<get-var :info[0]>">
+		     <get-var-once data>
+		     </a>>>
+    <subst-in-string <get-var-once data> "( +)(</a>)$" "</a>\\1">
+  </foreach>
+</defun>
+
+<defun browser::info-table item-1 item-2 &key border>
+
+  <table width=550 <if <not <string-eq <get-var border> none>> border>>
+    <tr valign=top>
+      <td width=50% align=center>
+	<get-var item-1>
+    </td>
+    <td width=50% align=center>
+	<get-var item-2>
+    </td>
+  </tr>
+</table>
+</defun>
+
+<defun browser::next-prev-table>
+  ;;; Calculate next and prev windows.
+  <set-var next = <add browser-window::window-start
+		       browser-window::window-length>>
+  <set-var prev = <sub browser-window::window-start
+		       browser-window::window-length>>
+  <if <and <lt prev 0> <gt browser-window::window-start 0>>
+      <set-var prev=0>>
+  <set-var nextend = <sub <add next browser-window::window-length> 1>>
+  <set-var prevend = <sub <add prev browser-window::window-length> 1>>
+  <set-var limit = <sub browser-window::count 1>>
+  <if <gt nextend limit> <set-var nextend=<get-var limit>>>
+  <if <gt prevend limit> <set-var prevend=<get-var limit>>>
+
+  <browser::info-table
+   <prog
+     <when <gt prev -1>>
+     <a href="<thisdoc>?wstart=<get-var prev>">
+     Entries <get-var prev> thru <get-var prevend>
+     </a>
+     </when>
+      &nbsp;>
+   <prog
+     <when <gt nextend next>>
+     <a href="<thisdoc>?wstart=<get-var next>">
+     Entries <get-var next> thru <get-var nextend>
+     </a>
+     </when>
+     &nbsp;>>
+</defun>
+
+<defun browser::page-posted>
+  <when <not <var-exists browser-window::window-start>>>
+    <defvar browser-window::window-start 0>
+    <defvar browser-window::window-length 20>
+    <session-export browser-window browser-window>
+  </when>
+
+  <when <get-var-once posted::sorton>>
+    <set-var browser::order-by =
+      "ORDER BY <downcase <get-var-once posted::sorton>>">
+    <session-export browser browser>
+  </when>
+
+  <when <or <get-var-once posted::wstart>
+	    <get-var-once posted::wlength>>>
+    <if <get-var-once posted::wstart>
+	<set-var browser-window::window-start = <get-var-once posted::wstart>>>
+    <if <get-var-once posted::wlength>
+	<set-var browser-window::window-length = <get-var posted::wlength>>>
+    <session-export browser-window browser-window>
+  </when>
+</defun>
+
+<defun browser::make-restrictions>
+  <unset-var browser::select-restrictions>
+  <when <get-var-once browser::restrictions>>
+    <set-var array[]=<get-var-once browser::restrictions[]>>
+    <set-var browser::select-restrictions =
+      <concat
+       "WHERE "
+       <foreach r array>
+       <get-var r>
+       "\n  AND "
+       </foreach>>>
+    <subst-in-var browser::select-restrictions "[ \n]+AND[ \n]+$" "">
+  </when>
+</defun>
+
+<defun browser::standard-browser-page &optional start-char>
+  <session-import browser-window browser-window>
+  <browser::page-posted>
+  <browser::make-restrictions>
+
+  <set-var summary[]=<browser::build-summary start-char=<get-var start-char>>>
+
+  <browser::info-table
+   <prog Total Entries: <b> <get-var browser-window::count> </b>>
+   <prog Entries Ordered by:
+     <b> <capitalize
+	  <subst-in-string <get-var browser::order-by>
+			   "ORDER BY " "" " (DESC|ASC)" "" "_" " ">> </b>>>
+
+  <set-var index=<add 0 browser-window::window-start>>
+  <table width=550>
+    <tr valign=top>
+      <td>
+	<pre>
+	<concat "\n\n">
+	<concat "        ">
+	<browser::make-header <get-var browser::summary-fields>><hr width=525>
+	<foreach line summary>
+	  <set-var entry-number = <pad <get-var-once index> 6 align=right>>
+	  <concat <get-var entry-number> "  " <get-var-once line> "\n">
+	  <increment index>
+	</foreach>
+	</pre>
+      </td>
+    </tr>
+  </table>
+
+  <browser::next-prev-table>
+
+  <browser::info-table border=none
+   <prog
+     <a href="browse-config.mhtml?browser-page=<get-var mhtml::current-doc>">
+     <i>Configure Browser...</i>
+     </a>>
+   <prog 
+     <a href="browse-restrict.mhtml?browser-page=<get-var mhtml::current-doc>">
+     <i>Restrict Selection...</i>
+     </a>>>
+
+  <when <get-var-once browser::select-restrictions>>
+    <p>
+    <center>
+      <table bgcolor=#D8BFD8 border=2 width=400>
+	<tr>
+	  <td align=center>
+	    <table width=95%>
+	      <tr valign=top>
+		<td align=right>
+		  <font color="#000000"><pre>RESTRICTIONS:</pre></font>
+		</td>
+		<td align=left>
+		  <font color="#000000">
+		  <pre>
+		  <get-var browser::select-restrictions>
+		  </pre>
+		  </font>
+		  <with-local-package>
+		    <set-var action="No Restrictions">
+		    <set-var browser-page=<get-var mhtml::location>>
+		    <a href=<concat
+			     browse-restrict.mhtml?
+			     <cgi-encode action browser-page>>>
+		    <i>Restrictions Off...</i>
+		    </a>
+		  </with-local-package>
+		</td>
+	      </tr>
+	    </table>
+	  </td>
+	</tr>
+      </table>
+    </center>
+  </when>
+</defun>
+
+<defun browser::database-fields>
+  <sql::with-open-database db DSN=<get-var browser::dsn> nolock=true>
+    <sql::database-columns-info db <get-var browser::table>>
+  </sql::with-open-database>
+</defun>

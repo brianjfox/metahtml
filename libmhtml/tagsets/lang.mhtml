@@ -1,0 +1,108 @@
+;;; lang.mhtml: -*- Meta-HTML -*-  Language helper macros.
+;;; 
+;;;  Copyright (c) 1998, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Apr 28 22:12:42 1998.
+
+<set-var lang::languages[]=
+  <prog
+    English:en
+    Deutsch:de
+    Francais:fr:Fran&ccedil;ais
+    Italian:it:
+    Espanol:es:Espa&ntilde;ol
+    Portugues:pt>>
+
+<defvar lang::language-var auth::preflang>
+
+<defun lang::current-language>
+  <or <get-var-once <get-var-once lang::language-var>>
+      <get-var-once auth::preflang>
+      <get-var-once authdata::language>
+      en>
+</defun>
+
+<defun lang &key en de fr it es pt>
+  ;;; Provides an interface for selecting one of several phrases
+  ;;; in different languages, based on the value of the variable
+  ;;; named in <var lang::language-var> (defaults to <var auth::preflang>).
+  ;;;
+  ;;; Use in the following situations:
+  ;;; <example code>
+  ;;; <input type=submit name=action value=<lang en=Now de=Jetzt>>
+  ;;; </example>
+  ;;;
+  <defvar choice <lang::current-language>>
+  <defvar choice en>
+  <if <get-var-once <get-var-once choice>>
+      <get-var-once <get-var-once choice>>
+    <get-var-once en>>
+</defun>
+
+<defun lang-message &key en de fr it es &rest message>
+  ;;; This function uses the value of <tag lang::current-language>
+  ;;; to select a language, and then calls <var message> with that choice.
+  <defvar choice <lang::current-language>>
+  <if <get-var-once <get-var-once choice>>
+      <message <get-var-once <get-var-once choice>>>
+    <message <or <get-var-once en> <get-var-once message>>>>
+</defun>
+
+<defun lang-inform &key en de fr it es &rest info>
+  ;;; This function uses the value of <tag lang::current-language> to
+  ;;; select a language, and then calls <var inform> with <info>.
+  <defvar choice <lang::current-language>>
+  <if <get-var-once <get-var-once choice>>
+      <inform <get-var-once <get-var-once choice>>>
+    <inform <or <get-var-once en> <get-var-once info>>>>
+</defun>
+
+<defmacro lang::en &body &unevalled body whitespace=delete>
+  <when <string-eq <lang::current-language> en>>
+    <%%eval <get-var-once body>>
+  </when>
+</defmacro>
+
+<defmacro lang::de &body &unevalled body whitespace=delete>
+  <when <string-eq <lang::current-language> de>>
+    <%%eval <get-var-once body>>
+  </when>
+</defmacro>
+
+<defmacro lang::fr &body &unevalled body whitespace=delete>
+  <when <string-eq <lang::current-language> fr>>
+    <%%eval <get-var-once body>>
+  </when>
+</defmacro>
+
+<defmacro lang::it &body &unevalled body whitespace=delete>
+  <when <string-eq <lang::current-language> it>>
+    <%%eval <get-var-once body>>
+  </when>
+</defmacro>
+
+<defmacro lang::es &body &unevalled body whitespace=delete>
+  <when <string-eq <lang::current-language> es>>
+    <%%eval <get-var-once body>>
+  </when>
+</defmacro>
+
+<defun lang::select-language varname>
+  <parser::canonicalize-var varname>
+  <set-var
+    var=<get-var-once varname>
+    varname=<subst-in-string <get-var-once varname> "^[^:]::" "">>
+
+  <select name=<get-var-once varname>>
+    <foreach :lang lang::languages>
+      <concat "\n  ">
+      <set-var :info[]=<subst-in-string <get-var :lang> ":" "\n">>
+      <option value="<get-var :info[1]>" <if <string-eq
+					      <get-var-once <get-var var>>
+					      <get-var :info[1]>>
+					     "SELECTED">>
+      <or <get-var-once :info[2]> <get-var-once :info[0]>>
+      </option>
+    </foreach>
+    <concat "\n">
+  </select>
+</defun>

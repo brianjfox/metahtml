@@ -1,0 +1,7 @@
+;;; base-date.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 03:54:22 1996.
+
+Result: "Wed Dec 31 16:00:00 1969": <date 0>
+Result: "Wed Dec 31 16:00:11 1969": <date 11>

@@ -1,0 +1,43 @@
+;;; plexus.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Feb  4 21:24:07 1996.
+<set-var
+  title="Configuring for the Plexus Server"
+  prev-page="cern.mhtml" prev-title="Configuring CERN"
+  next-page="netscape.mhtml" next-title="Configuring Netscape">
+<include header.mhtml>
+
+<plain-text first-char=<font size="+2" nobr=true>>
+  This configuration material comes from Marc Tamsky
+  (<a href="mailto:tamsky@as.ucsb.edu">tamsky@as.ucsb.edu</a>).
+  Although Marc is running the full <meta-html> Server, he also likes to
+  use the Plexus server, and placed the following lines in his
+  <code>local.conf</code> file: 
+</plain-text>
+<p>
+<pre>
+map     __get_default__  cgi.pl                           \
+      {                                                   \
+        if ($path =~ m~\.mhtml$~)                         \
+          {                                               \
+            local($tt) = 'mhtml';                         \
+            if (length($path))                            \
+              {                                           \
+                $tt = $tt . '/' . $path                   \
+              } ;                                         \
+            &cgi'cgi('../mhtml/cgi-bin',$tt,$query);      \
+          }                                               \
+        else                                              \
+         {                                                \
+           &retrieve($path,$query);                       \
+         }                                                \
+      }
+
+# Way-winning CGI
+load    cgi.pl
+map  mhtml   cgi.pl   &cgi'cgi('../mhtml/cgi-bin','engine/' .$rest,$query)
+</pre>
+
+<p>
+<include footer.mhtml>

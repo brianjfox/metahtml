@@ -1,0 +1,291 @@
+# Makefile.in: -*- Text -*-  Source for configure to make a Makefile from.
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+#
+# You should have received a copy of the UAI Free Software License
+# along with this program; if you have not, you may obtain one by
+# writing to:
+#
+# Universal Access Inc.
+# 129 El Paseo Court
+# Santa Barbara, CA
+# 93101
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+DASH_SHARED = @DASH_SHARED@
+SHARED_LD = @SHARED_LD@
+GDBMLIB = @GDBMLIB@
+GDBM_IN = @GDBM_IN@
+MSQLLIB = @MSQLLIB@
+MSQL_IN = @MSQL_IN@
+MYSQLLIB = @MYSQLLIB@
+MYSQL_IN = @MYSQL_IN@
+UDBCLIB = @UDBCLIB@
+UDBC_IN = @UDBC_IN@
+IODBCLIB = @IODBCLIB@
+IODBC_IN = @IODBC_IN@
+DESLIB	= @DESLIB@
+DBINC	=$(GDBM_IN) $(MSQL_IN) $(MYSQL_IN) $(UDBC_IN) $(IODBC_IN)
+DBLIB	=$(GDBMLIB) $(MSQLLIB) $(MYSQLLIB) $(UDBCLIB) $(IODBCLIB) \
+	  $(DESLIB)
+PERL_INC= @PERL_INC@
+PERL_LIB= @PERL_LIB@
+MODPERL_SO = @MODPERL_SO@
+OS_LIBS = @OS_LIBS@
+EXE	= @EXE@
+SHARED_EXT = @SHARED_EXT@
+GCC_FPIC = @GCC_FPIC@
+MODMSQL  = @MODMSQL@
+MODMYSQL = @MODMYSQL@
+MODMYSQLPER = @MODMYSQLPER@
+MODIODBC = @MODIODBC@
+MODUDBC = @MODUDBC@
+MODUDBCPER = @MODUDBCPER@
+MODIODBCPER = @MODIODBCPER@
+MODMATH_SO = @MODMATH_SO@
+MODCOMPILER = @MODCOMPILER@
+MODMACHINE = @MODMACHINE@
+WEBBASEDIR = @WEBBASEDIR@
+WEBDEF	= -DWEBBASEDIR='"$(WEBBASEDIR)"'
+VERSDEF = -DMHTML_VERSION_STRING='"$(MHTML_VERSION)"'
+
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+bindir	= $(exec_prefix)/bin
+libdir	= $(exec_prefix)/lib
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+YACC	= @YACC@
+MKDIR	= mkdir
+LN	= ln
+CP	= cp
+RM	= rm -f
+LD	= ld
+
+# You cannot compile with anything other than GNU C.
+CC		 = gcc $(GCC_WARN)
+CXX		 = g++ 
+SHARED_LDXX	 = $(CXX)
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+# OPTIMIZE_FLAGS	= -O69
+LOCAL_IFLAGS	= -I. -I.. -I../libutils -I../libmhtml
+IFLAGS		= @EXTRAINC@ $(LOCAL_IFLAGS) $(GDBM_IN)
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(PCFLAGS) -DHAVE_CONFIG_H
+LDFLAGS		= $(DEBUG_FLAGS)
+CXXFLAGS	= $(CFLAGS)
+
+DB_MODULES = $(MODMYSQL) $(MODMYSQLPER) $(MODMSQL) \
+	     $(MODIODBC) $(MODUDBC) $(MODUDBCPER) $(MODIODBCPER)
+
+COMPILER_MODULES = $(MODCOMPILER) $(MODMACHINE)
+
+MODULES		= example$(SHARED_EXT) directory$(SHARED_EXT) \
+		  logs$(SHARED_EXT) parser$(SHARED_EXT) timer$(SHARED_EXT) \
+		  profiler$(SHARED_EXT) elsewhen$(SHARED_EXT) $(MODPERL_SO) \
+		  serverfuncs$(SHARED_EXT) csv$(SHARED_EXT) \
+		  $(MODMATH_SO) modstat$(SHARED_EXT) modimage$(SHARED_EXT) \
+		  moddate$(SHARED_EXT) modecho$(SHARED_EXT) \
+		  modsyslog$(SHARED_EXT) modsession$(SHARED_EXT) \
+		  modmd5$(SHARED_EXT) modhtml$(SHARED_EXT)
+
+TARGETS		= $(MODULES) $(DB_MODULES) $(COMPILER_MODULES)
+
+FUNCTARG = functions.db.packed
+SECTARG  = sections.db.packed
+DOCUMENTATION = $(FUNCTARG) $(SECTARG)
+
+.SUFFIXES: .so .O .dll
+
+.c.so:
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o $*.o $(CFLAGS) $(IFLAGS) $(DEFS) $(VERSDEF) $<
+	@$(SHARED_LD) $(LD_FLAGS) $(DASH_SHARED) -o $@ $*.o
+
+.cc.so:
+	@echo Building module $@ from $<
+	@$(CXX) $(GCC_FPIC) -c -o $*.o $(CXXFLAGS) $(IFLAGS) $(DEFS) $(VERSDEF) $<
+	@$(SHARED_LDXX) $(LD_FLAGS) $(DASH_SHARED) -o $@ $*.o
+
+.cc.O:
+	@echo Building module $@ from $<
+	@$(CXX) $(GCC_FPIC) -c -o $*.o $(CXXFLAGS) $(IFLAGS) $(DEFS) $(VERSDEF) $<
+	@$(SHARED_LDXX) $(LD_FLAGS) $(DASH_SHARED) -o $@ $*.o
+
+.c.O:
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o $*.o $(CFLAGS) $(IFLAGS) $(DEFS) $(VERSDEF)  $<
+	@$(SHARED_LD) $(LD_FLAGS) $(DASH_SHARED) -o $@ $*.o
+
+.c.dll:
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o $*.o $(CFLAGS) $(IFLAGS) $(DEFS) $(VERSDEF)  $<
+	@$(SHARED_LD) $(LD_FLAGS) $(DASH_SHARED) -o $@ $*.o
+
+all:	$(TARGETS) $(DOCUMENTATION)
+
+$(MODMYSQL): modmysql.c gsqlbase.c mysqlfuncs.c gsql.c
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o modmysql.o \
+	  $(CFLAGS) $(IFLAGS) $(MYSQL_IN) -Imysql \
+	  $(DEFS) $(VERSDEF) $(INCLUDE_FLAGS) modmysql.c
+	@$(SHARED_LD) $(LD_FLAGS) $(DASH_SHARED) -o $(MODMYSQL) modmysql.o $(MYSQLLIB)
+
+$(MODMYSQLPER): modmysqlper.c gsqlbase.c mysqlperfuncs.c gsql.c
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o modmysqlper.o \
+	  $(CFLAGS) $(IFLAGS) $(MYSQL_IN) -Imysql \
+	  $(DEFS) $(VERSDEF) $(INCLUDE_FLAGS) modmysqlper.c
+	@$(SHARED_LD) $(LD_FLAGS) $(DASH_SHARED) -o $(MODMYSQLPER) modmysqlper.o $(MYSQLLIB)
+
+$(MODMSQL): modmsql.c gsqlbase.c msqlfuncs.c gsql.c
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o modmsql.o \
+	  $(CFLAGS) $(IFLAGS) $(MSQL_IN) -Imsql \
+	  $(DEFS) $(VERSDEF) $(INCLUDE_FLAGS) modmsql.c
+	@$(SHARED_LD) $(LD_FLAGS) $(DASH_SHARED) -o $(MODMSQL) modmsql.o $(MSQLLIB)
+
+$(MODUDBC): mododbc.c gsqlbase.c odbcfuncs.c gsql.c
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o mododbc.o $(CFLAGS) $(IFLAGS) -I. -Iudbc \
+	  $(DEFS) $(VERSDEF) $(INCLUDE_FLAGS) -DOPENLINK_UDBC_CLIENT mododbc.c
+	@$(SHARED_LD) $(LD_FLAGS) $(DASH_SHARED) -o $@ mododbc.o $(UDBCLIB)
+
+$(MODUDBCPER): mododbcper.c gsqlbase.c odbcperfuncs.c gsql.c
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o mododbcper.o $(CFLAGS) $(IFLAGS) -I. -Iudbc \
+	  $(DEFS) $(VERSDEF) $(INCLUDE_FLAGS) -DOPENLINK_UDBC_CLIENT mododbcper.c
+	@$(SHARED_LD) $(LD_FLAGS) $(DASH_SHARED) -o $@ mododbcper.o $(UDBCLIB)
+
+$(MODIODBC): modiodbc.c gsqlbase.c odbcfuncs.c gsql.c
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o modiodbc.o $(CFLAGS) $(IFLAGS) \
+	  -I./$(IODBC_IN) $(DEFS) $(VERSDEF) $(INCLUDE_FLAGS) modiodbc.c
+	@$(SHARED_LD) $(LD_FLAGS) $(DASH_SHARED) -o $(MODIODBC) \
+	  modiodbc.o $(IODBCLIB)
+
+$(MODIODBCPER): modiodbcper.c gsqlbase.c iodbcperfuncs.c gsql.c
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o modiodbcper.o $(CFLAGS) $(IFLAGS) -I. -Iodbc \
+	  $(DEFS) $(VERSDEF) $(INCLUDE_FLAGS) modiodbcper.c
+	@$(SHARED_LD) $(LD_FLAGS) $(DASH_SHARED) -o $@ modiodbcper.o $(IODBCLIB)
+
+$(MODCOMPILER): modcompiler.c compiler/libcompiler.a $(MODMACHINE)
+	echo Building module $@ from $<
+	$(CC) $(GCC_FPIC) -c -o modcompiler.o -g $(CFLAGS) $(IFLAGS) \
+		  $(DEFS) $(INCLUDE_FLAGS) modcompiler.c
+	$(SHARED_LD) $(LD_FLAGS) modcompiler.o $(DASH_SHARED) -o $@ \
+		compiler/libcompiler.a $(MODMACHINE)
+
+compiler/libcompiler.a: FORCE
+	@echo Building compiler library
+	(cd compiler; $(MAKE) $(PCFLAGS))
+
+$(MODMACHINE): modmachine.c machine/libmachine.a
+	echo Building module $@ from $<
+	$(CC) $(GCC_FPIC) -c -o modmachine.o -g $(CFLAGS) $(IFLAGS) \
+	        $(DEFS) $(INCLUDE_FLAGS) modmachine.c
+	$(SHARED_LD) -soname $(MODMACHINE) $(LD_FLAGS) \
+		modmachine.o $(DASH_SHARED) -o $@ machine/libmachine.a
+
+machine/libmachine.a: FORCE
+	@echo Building machine library
+	(cd machine; $(MAKE) $(PCFLAGS))
+
+modperl.so: modperl.c
+	@echo Building module $@ from $<
+	@$(CC) -DPERL_POLLUTE -c -o modperl.o $(CFLAGS) -Wno-shadow -Wno-strict-prototypes\
+	  $(IFLAGS) $(DEFS) $(VERSDEF) $(INCLUDE_FLAGS) $(PERL_INC) $<
+	$(SHARED_LD) $(LD_FLAGS) modperl.o $(PERL_LIB) $(DASH_SHARED) -o $@
+
+modimage$(SHARED_EXT): modimage.c libgd/libgd.a
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o modimage.o $(CFLAGS) $(IFLAGS) \
+	 -I./libgd $(DEFS) $(VERSDEF) $(INCLUDE_FLAGS) modimage.c
+	@$(SHARED_LD) $(LD_FLAGS) modimage.o $(DASH_SHARED) \
+		-o $@ -L./libgd -lgd
+
+libgd/libgd.a: FORCE
+	(cd libgd; $(MAKE))
+
+md5.o: md5.c
+	@$(CC) -c -o md5.o $(CFLAGS) $(IFLAGS) $(DEFS) $(INCLUDE_FLAGS) md5.c
+
+modmd5$(SHARED_EXT): modmd5.c md5.o
+	@echo Building module $@ from $<
+	@$(CC) $(GCC_FPIC) -c -o modmd5.o $(CFLAGS) $(IFLAGS) \
+	 $(DEFS) $(INCLUDE_FLAGS) modmd5.c
+	@$(SHARED_LD) $(LD_FLAGS) modmd5.o md5.o $(DASH_SHARED) -o $@ 
+
+$(DOCUMENTATION): $(MODULES) $(DB_MODULES) ../libmhtml/createdoc
+	../libmhtml/createdoc -o $(FUNCTARG) -s $(SECTARG) *$(SHARED_EXT)
+
+moddate$(SHARED_EXT): parsedate.c moddate.c
+parsedate.c: parsedate.y
+
+../libmhtml/createdoc: ../libmhtml/createdoc.c
+	(cd ../libmhtml; $(MAKE) createdoc)
+
+Makefile: Makefile.in
+	(cd ..; ./config.status)
+
+install: $(TARGETS)
+	if [ ! -d $(libdir) ]; then mkdir $(libdir); fi
+	for file in $(TARGETS); do \
+	  $(INSTALL) $$file $(libdir)/$$file; \
+	done
+	if [ -f libgd/Makefile ]; then \
+	  (cd libgd; $(MAKE) bindir=$(bindir) libdir=$(libdir) install); \
+	fi
+
+install-no-db: $(MODULES)
+	if [ ! -d $(libdir) ]; then mkdir $(libdir); fi
+	for file in $(MODULES); do \
+	  $(INSTALL) $$file $(libdir)/$$file; \
+	done
+
+clean-executables: FORCE
+	$(RM) $(TARGETS) y.output y.tab.h y.tab.c
+
+clean:  FORCE
+	$(RM) *.o $(TARGETS) so_locations *.O *.so *.packed
+
+distclean realclean: clean
+	if [ -f compiler/Makefile ]; then \
+	  (cd compiler; make distclean); \
+	fi
+	if [ -f machine/Makefile ]; then \
+	  (cd machine; make distclean); \
+	fi
+	if [ -f libgd/Makefile ]; then \
+	  (cd libgd; make distclean); \
+	fi
+	$(RM) *.cache *.log Makefile *~ *mmm* try-method.mhtml
+
+tags TAGS: FORCE
+	(cd ..; $(MAKE) $@)
+
+FORCE:

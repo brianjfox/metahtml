@@ -1,0 +1,23 @@
+
+		   Meta-HTML Stand-Alone Processor
+	 Copyright 1995, 1998 Brian J. Fox (bfox@ai.mit.edu)
+
+This directory contains the Meta-HTML Stand-Alone Processor.
+
+Installing the Meta-HTML Stand-Alone Processor:
+----------------------------------------------
+
+    Copy the file `mhc' to some directory in your path, say
+    `/usr/local/bin'.
+
+    Then, simply specify to your server that documents ending in ".mhtml"
+    are executable, make sure that the Meta-HTML documents that you create
+    actually are executable (chmod a+x file.mhtml), and that they begin
+    with:
+
+	#!/usr/local/bin/mhc
+	<set-var mhtml::include-prefix=YOUR-DOCUMENT-ROOT>
+
+    where "YOUR-DOCUMENT-ROOT" is replaced with the full path to your
+    document directory (e.g., /usr/www/docs).
+

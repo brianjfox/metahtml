@@ -1,0 +1,42 @@
+;;; base-include.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 01:21:26 1996.
+
+Result: "
+
+This is a test file for include to put into it's test page to as
+to test it's base functionality.  If this text appears in the result 
+then the include command is working well as you would expect from such 
+an established Web development platform as Meta-HTML.": <include base-include-test.mhtml>
+Result: ";;; base-gt.mhtml: -*- Meta-HTML -*-  Test gt math function.
+;;;
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 23 01:37:09 PDT 1996
+
+Result: true: <gt 9 5>
+Result: true: <gt 9.0 5.0>
+Result: true: <not <gt 5 9.0>>
+Result: : <gt 5 9.0>
+Result: true: <gt 5 -9.0>
+Result: true: <gt -5 -9.0>
+Result: : <gt -9.0 -5>
+Result: true: <gt -5.00 -9.0>
+Result: : <gt -9.00 -5.0>
+Result: true: <gt -5.00 -9.00000>
+Result: true: <gt -5.0000001 -5.0000002>
+Result: true: <gt -9.001 -9.0000001>": <include base-gt.mhtml verbatim>
+Result: "
+
+Result: true: true
+Result: true: true
+Result: true: true
+Result: true: true
+Result: : 
+Result: true: true
+Result: true: true
+Result: true: true
+Result: true: true
+Result: : 
+Result: : 
+Result: :": <include base-not-found.mhtml alt=<include base-eq.mhtml>>

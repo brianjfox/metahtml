@@ -1,0 +1,201 @@
+;;; bootstrap.mhtml: -*- Meta-HTML -*-  Contains definitions in Meta-HTML
+;;; that are loaded into the executable image of the library.
+;;;
+;;; The functions are initialized by a call (in the C code) to
+;;; bootstrap_metahtml ().  See makebootstrap.c for more details.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jan 29 10:14:25 1997.
+;;;
+<set-var bootstrapper::bootstrap-version = "Standard Bootstrap: v1.3">
+<set-var mhtml::gather-documentation=true>
+
+<defun bootstrapper::system-initialize>
+  ;;; DOC_SECTION (LANGUAGE-OPERATORS)
+  ;;; Defined in libmhtml/standard.mhtml, this function is called immediately
+  ;;; <i>after</i> the tagsets in libmhtml/tagsets have been initialized by the
+  ;;; system on bootstrap.  You probably don't know what this means, so just
+  ;;; forget about it.
+  ;;;
+  ;;; Suffice to say, here is the first user-defined function run by Meta-HTML
+  ;;; for every invocation of the server, engine, debugger, or standalone
+  ;;; processor (excepting when that program is called with "-z").
+  ;;;
+  ;;; I cannot think of a reason why or how you would modify this function,
+  ;;; unless you are modifying the behaviour of Meta-HTML in general.  If you
+  ;;; think that you need to modify this, perhaps you really want something
+  ;;; like <funref primitive-operators %%after-page-return>.
+  <if <not <var-exists mhtml::cookie-eating-clients>>
+      <set-var mhtml::cookie-eating-clients[] =
+	<prog
+	  Microsoft Internet Explorer
+	  Mozilla/
+	  OmniWeb
+	  ANT Fresco
+	  Emacs-W3/3
+	  GNNworks
+	  Luxor
+	  NETCOMplete
+	  PRODIGY-WB/3
+	  Pueblo/2
+	  Lynx/2
+	  Spyglass Mosiac/3
+	  FAST-WebCrawler
+	  Googlebot
+	  ArchitextSpider>>>
+  <if <defined? bootstrapper::autoloads>
+      <bootstrapper::autoloads>>
+</defun>
+
+<defun bootstrapper::autoloads>
+  <autoload DIR::DIR-TABLE &optional webpath regexp
+	    &key show-icons icon-dir sort link
+	    module=directory>
+  <autoload CSV::CSV-TO-ARRAY module=csv csv-text array-name &key sep>
+  <autoload WHENELSE test module=elsewhen type=defmacro>
+  <autoload CIF test module=elsewhen type=defmacro>
+  <autoload APROPOS regexp module=example>
+  <autoload PARSER::CHANGE-BRACKETS bracket-pair module=parser>
+  <autoload PROFILER::DUMP filename &key sort module=profiler>
+  <autoload SERVER::MAKE-SERVER start-fun port &key hostname
+	    module=serverfuncs>
+  <autoload MEASURING-ELAPSED-TIME varname &key units type=defmacro
+	    module=timer>
+  <autoload MTIME module=timer>
+  <autoload SQRT x module=modmath>
+  <autoload FLOOR x module=modmath>
+  <autoload CEILING x module=modmath>
+  <autoload ROUND x module=modmath>
+  <autoload ACOS x module=modmath>
+  <autoload ASIN x module=modmath>
+  <autoload ATAN x &optional y module=modmath>
+  <autoload COS x module=modmath>
+  <autoload SIN x module=modmath>
+  <autoload TAN x module=modmath>
+  <autoload COSH x module=modmath>
+  <autoload SINH x module=modmath>
+  <autoload TANH x module=modmath>
+  <autoload ACOSH x module=modmath>
+  <autoload ASINH x module=modmath>
+  <autoload ATANH x module=modmath>
+  <autoload EXP x module=modmath>
+  <autoload LOG x module=modmath>
+  <autoload LOG10 x module=modmath>
+  <autoload LOGB x module=modmath>
+  <autoload RAISE x module=modmath>
+  <autoload CBRT x module=modmath>
+  <autoload IMAGE::CREATE module=modimage imagevar &key width height src>
+  <autoload DATE::DATE-TO-TIME module=moddate date-string>
+  <autoload SYSLOG owner log-message &key facility priority module=modsyslog>
+  <autoload SMALL-CAPS &key upper lower other type=macro module=modhtml>
+  <autoload VERBATIM &key quote type=macro module=modhtml>
+  <autoload COMPILER::COMPILER-VERSION module=modcompiler>
+  <autoload COMPILER::COMPILE-FUNCTION fun-name module=modcompiler>
+  <autoload COMPILER::COMPILE-AND-RUN expression module=modcompiler>
+  <autoload COMPILER::COMPILE-FILE filename module=modcompiler>
+  <autoload COMPILER::DISASSEMBLE fun-name module=modcompiler>
+</defun>
+
+<defun bootstrapper::initialize>
+  <with-open-stream s *standard-output* mode=write-create>
+    <stream-put
+     s
+     <concat
+      "Meta-HTML has been bootstrapped successfully!!\n"
+      "Bootstrapper Version <get-var-once bootstrapper::bootstrap-version>,\n"
+      "For Meta-HTML Version <get-var-once mhtml::version>.\n">>
+  </with-open-stream>
+</defun>
+
+<defun powerstrip &optional upper lower>
+  <defvar upper "+0">
+  <defvar lower "-1">
+  <small-caps upper=<get-var-once upper> lower=<get-var-once lower>>
+    <b>PowerStrip</b>
+  </small-caps>
+</defun>
+
+<include makedoc.mhtml>
+
+<include tagsets/parser.mhtml>
+<include tagsets/dirfuns.mhtml>
+<include tagsets/dump-package.mhtml>
+<include tagsets/english-numbers.mhtml>
+<include tagsets/german-numbers.mhtml>
+<include tagsets/general.mhtml>
+<include tagsets/arrays.mhtml>
+<include tagsets/menus.mhtml>
+<include tagsets/message.mhtml>
+<include tagsets/lang.mhtml>
+<include tagsets/forms.mhtml>
+<include tagsets/numbers.mhtml>
+<include tagsets/pagecount.mhtml>
+<include tagsets/date-time.mhtml>
+<include tagsets/source.mhtml>
+<include tagsets/form-to-database.mhtml>
+<include tagsets/session.mhtml>
+<include tagsets/locale.mhtml>
+<include tagsets/sendmail.mhtml>
+<include tagsets/this.mhtml>
+<include tagsets/math.mhtml>
+<include tagsets/characters.mhtml>
+<include tagsets/http.mhtml>
+<include tagsets/colors.mhtml>
+<include tagsets/mhttpd.mhtml>
+<include tagsets/sql.mhtml>
+<include tagsets/mdb.mhtml>
+<include tagsets/mhc.mhtml>
+<include tagsets/basic-auth.mhtml>
+<include tagsets/unix.mhtml>
+<include tagsets/gnuplot.mhtml>
+<include tagsets/sort.mhtml>
+
+;;; Used to be in powerstrip-tags...
+<include tagsets/pagelist.mhtml>
+<include tagsets/image-builder.mhtml>
+<include tagsets/buttons.mhtml>
+<include tagsets/banners.mhtml>
+<include tagsets/tabs.mhtml>
+<include tagsets/border.mhtml>
+<include tagsets/debug.mhtml>
+<include tagsets/site.mhtml>
+<include tagsets/sitedefs.mhtml>
+
+<defun mhtml::engine-per-page-function>
+  ;;; Code that sets up the URL rewriter.  This has to be a per-page function
+  ;;; because we haven't computed the URL of the document at the time
+  ;;; the engine.conf file is read, so variables such as mhtml::http-prefix
+  ;;; aren't set yet, and will be changed at the time the page location is
+  ;;; computed.
+  <mhtml::post-secure>
+  <when <get-var-once rewriter::engine-webpath>>
+    <set-var
+      mhtml::http-prefix = <get-var-oce mhtml::http-prefix
+			     rewriter::engine-webpath>
+      mhtml::http-prefix-sans-sid = <get-var-once mhtml::http-prefix-sans-sid
+				      rewriter::engine-webpath>
+      mhtml::url-to-dir = <get-var-once mhtml::http-prefix
+					mhtml::relative-prefix>
+      mhtml::url-to-dir-sans-sid = <get-var-once mhtml::http-prefix-sans-sid
+						 mhtml::relative-prefix>
+      mhtml::full-url = <get-var-once mhtml::http-prefix mhtml::location>>
+    <copy-var *meta-html*::rewriter::a *meta-html*::a>
+    <copy-var *meta-html*::rewriter::img *meta-html*::img>
+    <copy-var *meta-html*::rewriter::form *meta-html*::form>
+  </when>
+</defun>
+
+<defun engine::initialize>
+  <set-var mhtml::permanent-cookies = true>
+  <set-var mhtml::cgi-directories[0]=/cgi-bin/>
+  <set-var mhtml::per-page-function = mhtml::engine-per-page-function>
+  <when <get-var-once mhtml::isp-engine?>>
+    <set-var mhttpd::session-database-file =
+      <concat /tmp/
+	      <subst-in-string <get-var-once mhtml::include-prefix> "/" "-">
+	      -sessions.db>>
+    <set-var rewriter::engine-webpath = /<get-var-once mhtml::program-name>>
+  </when>
+</defun>
+
+<bootstrap::make-documentation standard-api.c>

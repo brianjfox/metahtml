@@ -1,0 +1,236 @@
+;;; german-numbers.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;; 
+;;;  Copyright (c) 1998, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu Jun 25 16:20:55 1998.
+<set-var counter::unter-20-namen[] =
+  "Null\nEins\nZwei\nDrei\nFier\nFunf\nSechs\nSieben\nAcht\nNeun\nZehn
+   Elf\nZwolf\nDreizehn\nFierzehn\nFunfzehn\nSechszehn\nSiebzehn
+   Achtzehn\nNeunzehn">
+
+<set-var counter::unter-20te-namen[] =
+  "Nullzte\nErste\nZwiete\nDritte\nFiertel\nFunfte\nSechste\nSiebte\nAchte
+   Neunste\nZehnste\nElfte\nZwolfte\nDreizehnte\nFierzehnte\nFunfzehnte
+   Sechszehnte\nSiebzehnte\nAchtzehnte\nNeunzehnte">
+
+<set-var counter::zehne-namen[] =
+  "None\nZehn\nZwanzig\nDreizig\nFierzig\nFunfzig\nSechszig\nSiebzig
+   Achtzig\nNeunzig">
+
+<set-var counter::zehnte-namen[] =
+  "None\nZehnte\nZwanzigte\nDreizigte\nFierzigte\nFunfzigte
+   Sechzigte\nSiebzigte\nAchtzigte\nNeunzigte">
+
+<set-var counter::deutsche-platz-namen[] =
+  "IGNORE
+   Hundert
+   Tausend
+   Million
+   Billion
+   Trillion
+   Quadrillion
+   Quintillion
+   Sextillion
+   Septillion
+   Octagillion
+   Jillion
+   Googal">
+
+<defun digits-zum-deutsch value>
+  <set-var digits[]=<subst-in-string <get-var-once value> "(.)" "\\1\n">>
+  <foreach digit digits>
+    <concat " " <get-var-once counter::unter-20-namen[digit]>>
+  </foreach>
+</defun>
+
+<defun unter-100-zum-deutsch value>
+  <defvar value 0>
+  <if <lt value 20>
+      <set-var result=<get-var-once counter::unter-20-namen[value]>>
+    <concat
+      <set-var
+	tens=<div value 10>
+	value=<mod value 10>
+	result = <get-var-once counter::zehne-namen[tens]>>
+      <if <not <eq value 0>>
+	  <if <eq value 1>
+	      <set-var result = "Ein und <get-var-once result>">
+	    <set-var result =
+	      <concat <get-var-once counter::unter-20-namen[value]>
+		      und
+		      <downcase <get-var-once result>>>>>>>>
+  <get-var-once result>
+</defun>
+
+<defun unter-100-zum-deutschte value>
+  <if <lt value 20>
+      <set-var result=<get-var-once counter::unter-20te-namen[value]>>
+    <concat
+      <set-var
+	tens=<div value 10>
+	value=<mod value 10>
+	result = <get-var-once counter::zehnte-namen[tens]>>
+      <if <not <eq value 0>>
+	  <if <eq value 1>
+	      <set-var result = "Ein und <get-var-once result>">
+	    <set-var result =
+	      <concat <get-var-once counter::unter-20-namen[value]>
+		      und
+		      <downcase <get-var-once result>>>>>>>>
+  <get-var-once result>
+</defun>
+
+<defun unter-1000-zum-deutsch value>
+  <if <lt value 100>
+      <unter-100-zum-deutsch <get-var-once value>>
+    <concat
+      <concat
+       <set-var
+	 r = <unter-100-zum-deutsch <substring <get-var-once value> 0 1>>>
+       <if <string-eq <get-var-once r> "Eins">
+	   <set-var r = "Ein">>
+       <get-var-once r>
+       " Hundert">
+      <set-var value=<substring <get-var-once value> 1>>
+      <if <gt value 0>
+	  <concat " " <unter-100-zum-deutsch <get-var-once value>>>>>>
+</defun>
+
+<defun unter-1000-zum-deutschte value>
+  <if <lt value 100>
+      <unter-100-zum-deutschte <get-var-once value>>
+    <concat
+     <set-var r = <unter-100-zum-deutsch <substring <get-var-once value> 0 1>>>
+     <if <string-eq <get-var-once r> "Eins">
+	 <set-var r = "Ein">>
+     <get-var-once r>
+     " Hundert"
+     <set-var value = <substring <get-var-once value> 1>>
+     <if <gt value 0>
+	 <concat " " <unter-100-zum-deutschte <get-var-once value>>>
+       te>>>
+</defun>
+
+<defun nummer-zum-deutsch nummer>
+  ;;; DOC_SECTION (MISCELLANEOUS-TAGS)
+  ;;; Produziert die Wourter auf Deutsch, das den numerischen Wert des
+  ;;; <var nummer> darstellt.  Zum Beispiel:
+  ;;; <complete-example>
+  ;;; <nummer-zum-deutsch 232>
+  ;;; </complete-example>
+  <set-var orig-radix = <set-output-radix 10>>
+  <subst-in-var nummer "[ \t\r\n,]+" "">
+  <when <match <get-var-once nummer> "\\.">>
+    <set-var decimals =
+      <subst-in-string <get-var-once nummer> "(.*)(\\.)(.*$)" "\\3">>
+    <subst-in-var nummer "\\..*$" "">
+  </when>
+  <set-var places=<match <get-var-once nummer> "^[0-9]+$" action=length>>
+  <if <lt places 4>
+      <array-append <unter-1000-zum-deutsch <get-var-once nummer>> result>>
+  <when <not <get-var-once result>>>
+    <set-var pad=<mul <div <add places 2> 3> 3>>
+    <set-var nummer=<pad <get-var-once nummer> <get-var-once pad> align=right>>
+    ;;; Break into chunks of three.
+    <set-var chunks[]=<subst-in-string <get-var-once nummer> "(...)" "\\1\n">>
+    <set-var i=0 groups=<array-size chunks> limit=<get-var-once groups>>
+    <while <get-var-once chunks[i]>>
+      <if <gt chunks[i] 0>
+	  <set-var last-member=<get-var-once i>>>
+      <increment i>
+    </while>
+    <set-var i=0>
+    <while <get-var-once chunks[i]>>
+      <when <gt chunks[i] 0>>
+	<if <not <get-var-once chunks[<add i 1>]>>
+	    <array-append 
+	     <concat <if <and <get-var-once result> <lt chunks[i] 100>> " ">
+		     <unter-1000-zum-deutsch <get-var-once chunks[i]>>>
+	     result>
+	  <array-append
+	   <concat
+	    <set-var r = <unter-1000-zum-deutsch <get-var-once chunks[i]>>>
+	    <if <string-eq <get-var-once r> "Eins">
+		<set-var r = "Ein">>
+	    <get-var-once r>
+	    " "
+	    <get-var-once counter::deutsche-platz-namen[groups]>>
+	   result>>
+      </when>
+      <increment i>
+      <decrement groups>
+    </while>
+  </when>
+  <set-var final =
+    <subst-in-string <get-var-once result[]> "^ " "" "[ \t\r\n]+" " ">>
+  <if <get-var-once decimals>
+      <set-var final =
+	<concat <get-var-once final>
+		" punkt"
+		<digits-zum-deutsch <get-var-once decimals>>>>>
+  <get-var-once final>
+  <set-var orig-radix = <set-output-radix <get-var-once orig-radix>>>
+</defun>
+
+<defun nummer-zum-deutschte nummer>
+  ;;; DOC_SECTION (MISCELLANEOUS-TAGS)
+  ;;; Produziert die Wourter auf Deutsch, das den numerischen Wert des
+  ;;; <var nummer> darstellt.  Zum Beispiel:
+  ;;; <complete-example>
+  ;;; <nummer-zum-deutschte 232>
+  ;;; </complete-example>
+  <set-var orig-radix = <set-output-radix 10>>
+  <subst-in-var nummer "[ \t\r\n,]+" "">
+  <when <match <get-var-once nummer> "\\.">>
+    <set-var decimals =
+      <subst-in-string <get-var-once nummer> "(.*)(\\.)(.*$)" "\\3">>
+    <subst-in-var nummer "\\..*$" "">
+  </when>
+  <set-var places=<match <get-var-once nummer> "^[0-9]+$" action=length>>
+  <if <lt places 4>
+      <set-var result=<unter-1000-zum-deutschte <get-var-once nummer>>>>
+  <when <not <get-var-once result>>>
+    <set-var pad=<mul <div <add places 2> 3> 3>>
+    <set-var nummer=<pad <get-var-once nummer> <get-var-once pad> align=right>>
+
+    ;;; Break into chunks of three.
+    <set-var chunks[]=<subst-in-string <get-var-once nummer> "(...)" "\\1\n">>
+    <set-var i=0 groups=<array-size chunks> limit=<get-var-once groups>>
+    <while <get-var-once chunks[i]>>
+      <if <gt chunks[i] 0>
+        <set-var last-member=<get-var-once i>>>
+      <increment i>
+    </while>
+    <set-var i=0>
+    <while <get-var-once chunks[i]>>
+      <when <gt chunks[i] 0>>
+	<if <not <get-var-once chunks[<add i 1>]>>
+	    <set-var result =
+	      <concat <get-var-once result> " "
+		      <if <and <get-var-once result> <lt chunks[i] 100>> " ">
+		      <if <eq <add i 1> limit>
+			  <unter-1000-zum-deutschte <get-var-once chunks[i]>>
+			<unter-1000-zum-deutschte <get-var-once chunks[i]>>>>>
+	  <set-var result =
+	    <concat <get-var-once result>
+		    " <unter-1000-zum-deutsch <get-var-once chunks[i]>> "
+		    <get-var-once counter::deutsche-platz-namen[groups]>
+		    ;;; "te"
+		    >>>
+      </when>
+      <increment i>
+      <decrement groups>
+    </while>
+  </when>
+  <set-var final = <subst-in-string <get-var-once result[]>
+				    "^ " ""
+				    "[ \t\r\n]+" " ">>
+  <if <get-var-once decimals>
+      <set-var final =
+	<concat <get-var-once final>
+		" punkt"
+		<digits-zum-deutsch <get-var-once decimals>>>>>
+  <get-var-once final>
+  <set-var orig-radix = <set-output-radix <get-var-once orig-radix>>>
+</defun>
+
+

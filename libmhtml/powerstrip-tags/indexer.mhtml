@@ -1,0 +1,257 @@
+;;; indexer.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Apr 25 23:52:05 1997.
+
+<defun index-log string>
+  <with-open-stream s /tmp/index-log mode=append>
+    <stream-put s "<date>: ">
+    <stream-put s <get-var string>>
+    <stream-put s "\n">
+  </with-open-stream>
+</defun>
+
+<defun build-index-db>
+  <get-var mhtml::include-prefix>/search-index-build.db
+</defun>
+
+<defun index-db>
+  <get-var mhtml::include-prefix>/search-index.db
+</defun>
+
+<defun physpath file>
+  <get-var mhtml::include-prefix>/<get-var file>
+</defun>
+
+<defun title-of filename>
+  <set-var data = <include <get-var filename> verbatim>>
+  <when <match <get-var-once data> "title" caseless=true>>
+    <set-var title =
+      <match <get-var-once data> "title[ \t]*=[ \t\r\n\"]*[-_a-zA-Z0-9\:. ]+"
+	     action=extract>>
+
+    <if <not <get-var title>>
+	<prog
+	  <subst-in-var
+	   data
+	   "(.*)(<[Tt][Ii][Tt][Ll][Ee]>)([^<]+)(</[Tt][Ii][Tt][Ll][Ee]>)(.*)"
+	   "\\3" "[<>]" "">
+	  <set-var title=<get-var data>>>>
+    
+    <set-var title=<subst-in-string <get-var title>
+				    "title" ""
+				    "=" "" "/" ""
+				    "^[ \t\"]+" ""
+				    "[ \t]+$" "">>
+  </when>
+  <or <get-var title> <get-var filename>>
+</defun>
+
+<set-var indexer::ignored-words[] =
+  <prog
+    [0-9]+
+    [a-z]
+    [a-z][a-z]
+    the
+    when
+    there
+    and
+    not
+    click
+    here
+    page>>
+
+<defun indexer::ignored-words-regexp>
+  <when <not <get-var indexer::ignored-words-regexp>>>
+    <set-var i=0 len=<array-size indexer::ignored-words>>
+    <set-var indexer::ignored-words-regexp = " (">
+    <while <lt i len>>
+      <set-var indexer::ignored-words-regexp =
+	<concat <get-var indexer::ignored-words-regexp>
+		<get-var indexer::ignored-words[i]>
+		<if <lt <add i 1> len> "|">>>
+      <increment i>
+    </while>
+    <set-var indexer::ignored-words-regexp = 
+      <concat <get-var indexer::ignored-words-regexp>
+	      ") ">>
+  </when>
+  <get-var indexer::ignored-words-regexp>
+</defun>
+
+<defun indexer::caseless-regexp word>
+  <subst-in-string <get-var word>
+		   "(.)" "<verbatim>[<upcase \\1><downcase \\1>]</verbatim>">
+</defun>
+
+<defsubst indexer::highlight-contents>
+  <subst-in-var %0
+		"(<indexer::caseless-regexp %1>)"
+		"<b>\\1</b>">
+</defsubst>
+
+<defun index filename title>
+  ;;; DOC_SECTION (SITE-INDEXER)
+  ;;; Add the results of indexing FILENAME with a title of TITLE to the
+  ;;; search database which is currently being built.
+  <index-log "Entering Index: <get-var filename>: <get-var title>">
+  <set-var data[]=<cgi-exec cat <physpath <get-var filename>> | strip-tags>>
+  <index-log "...starting subst-1">
+  <set-var i=0>
+  <while <get-var data[i]>>
+    <set-var data[i] =
+      <subst-in-string <downcase <get-var data[i]>> "[^a-z]+" " "
+		       "<indexer::ignored-words-regexp>| " "\n">>
+    <increment i>
+  </while>
+
+  ;;; Index the title also.
+  <set-var data[i] =
+    <subst-in-string <downcase <get-var title>> "[^a-z]+" " "
+		     "<indexer::ignored-words-regexp>| " "\n">>
+
+  ;;; Sort words, and make them unique.
+  <index-log "...starting sort">
+  <with-open-stream s /tmp/mindex.tmp mode=write-create>
+    <stream-put s <get-var data[]>>
+  </with-open-stream>
+  <set-var words[]= <cgi-exec cat /tmp/mindex.tmp | sort | uniq>>
+
+  <index-log "...starting index (<array-size words> words)">
+  ;;; Add this file to every remaining word.
+  <set-var i=0>
+  <with-open-database db <build-index-db> mode=write-create>
+    <foreach word words>
+      <package-delete temp>
+      <set-var x = <database-load-record db <get-var words> package=temp>>
+      <set-var temp::files[temp::next] = <get-var filename>>
+      <set-var temp::titles[temp::next] = <get-var title>>
+      <set-var x[] =
+	<or <cgi-exec cat <physpath <get-var filename>> | strip-tags |
+		      grep -c -w -i <get-var words> errors=ignore> 0>>
+      <set-var temp::grep-hits[temp::next] = <get-var x>>
+      <increment temp::next>
+      <set-var x = <database-save-package db <get-var words> temp strip=t>>
+      <increment i>
+      <if <eq 0 <mod i 100>>
+	  <index-log "....<get-var i>">>
+    </foreach>
+  </with-open-database>
+  <index-log "...done.">
+</defun>
+
+<defun indexer::search term-string>
+  ;;; DOC_SECTION (SITE-INDEXER)
+  ;;; Search the search-index.db database for the terms in TERM-STRING, and
+  ;;; store the results in the package SEARCH-RESULTS.
+  <package-delete search-results>
+  <set-var words[] =
+    <downcase <subst-in-string <get-var term-string>
+			       "[;\\:'.,?!@#$%&*\\(\\)\\<\\>+=\"]+" " "
+			       "[ \t\r\n]+" "\n">>>
+  <with-open-database db <index-db> mode=read>
+    <set-var i=0>
+    <while <get-var words[i]>>
+      <package-delete x>
+      <set-var found? = <database-load-record db <get-var words[i]> package=x>>
+      <set-var j=0>
+      <while <get-var x::files[j]>>
+	<package-delete y>
+	<alist-to-package
+	 <package-to-alist <get-var search-results::<get-var x::files[j]>> y>>
+	<when <get-var indexer::show-context>>
+	  <set-var context[] = 
+	    <cgi-exec cat <physpath <get-var x::files[j]>> | strip-tags |
+		      grep -w -i -A 1 -B 1 <get-var words[i]> errors=ignore>>
+	  <set-var y::context = <concat "<get-var context[0]>\n"
+					"<get-var context[1]>\n"
+					"<get-var context[2]>">>
+
+	  <subst-in-var y::context
+			"(<indexer::caseless-regexp <get-var words[i]>>)"
+			"<b>\\1</b>">
+	</when>
+	<increment y::hits by=<get-var x::grep-hits[j]>>
+	<set-var y::file = <get-var x::files[j]>>
+	<set-var y::title= <get-var x::titles[j]>>
+	<set-var search-results::<get-var x::files[j]> =
+	  <package-to-alist y strip=true>>
+	<increment j>
+      </while>
+      <increment i>
+    </while>
+  </with-open-database>
+</defun>
+
+<defun indexer::sort-results name>
+  <alist-to-package <get-var <get-var name>> "">
+  <if <match <get-var file> archives/> <set-var hits=0>>
+  <add hits 10000>
+</defun>
+
+<defun indexer::show-results>
+  ;;; DOC_SECTION (SITE-INDEXER)
+  ;;; Display the results stored in the package SEARCH-RESULTS.
+  <set-var names[]=<package-vars search-results>>
+  <sort names indexer::sort-results descending=true>
+  <set-var i=0>
+  <ul>
+    <while <get-var names[i]>>
+      <package-delete temp>
+      <alist-to-package <get-var <get-var names[i]>> temp>
+      <add i 1>.&nbsp
+      <a href="/<get-var temp::file>"><get-var temp::title></a>
+      &nbsp;<i>(<get-var temp::hits>)</i>
+      <if <get-var temp::context>
+	  <prog <p> <ul> <i><get-var temp::context></i> </ul>>>
+      <p>
+      <increment i>
+    </while>
+  </ul>
+</defun>
+
+<defun indexer::search-form action label size allow-context-p>
+  ;;; DOC_SECTION (SITE-INDEXER)
+  ;;; Generate a form which accepts search terms.
+  <defvar size medium>
+  <set-var size=<downcase <get-var size>>>
+  <var-case
+    size=small	<set-var padding=5 fsize=-1>
+    size=medium	<set-var padding=10>
+    size=large	<set-var padding=10 fsize=+1>>
+  <defvar action <thisdoc>>
+  <defvar label "Search">
+  <form method=post action="<get-var action>">
+    <table bgcolor="#A080A0" cellspacing=0 cellpadding=<get-var padding>>
+      <tr>
+	<td align=left>
+	  <font color="#000000" <if <get-var fsize> "size=<get-var fsize>">>
+	  ;;; <b>Search Terms:</b><br>
+	  <input type=text size=34 name=search-terms
+		 value="<get-var default::search-terms>">
+	  &nbsp;&nbsp;
+	  <input type=submit name=action value="<get-var label>">
+	  </font>
+	</td>
+      </tr>
+      <when <get-var allow-context-p>>
+	<tr>
+	  <td align=left>
+	    <font color="#000000" <if <get-var fsize> "size=<get-var fsize>">>
+	    <i>Show Context:</i>
+	    <concat "  "
+		    <input type=radio name=show-context value="true"
+			   <if <get-var indexer::show-context>
+			       CHECKED>>
+		    "Yes   "
+		    <input type=radio name=show-context value=""
+			   <if <not <get-var indexer::show-context>>
+			       CHECKED>>
+		    "No">
+	    </font>
+	  </td>
+	</tr>
+      </when>
+    </table>
+  </form>
+</defun>

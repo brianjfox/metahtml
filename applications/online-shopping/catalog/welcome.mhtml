@@ -1,0 +1,70 @@
+;;; welcome.mhtml: -*- Meta-HTML -*-  Maintenance screen for the merchant.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep 10 09:35:22 1995.
+;;;
+<set-var title="Catalog Maintenance">
+<include header.mhtml>
+<include ../tagsets/action-buttons.mhtml>
+;;;
+;;; The catalog maintainer can add classifications of items,
+;;; individual items to those classifications, and specific
+;;; information about the item, such as price, availibilty, and
+;;; description.
+;;; 
+;;; The items of each class are kept in a separate database for that class.
+;;; There is a master classifications database which contains the class
+;;; names of the other databases.
+;;;
+
+<plain-text first-char=<font size=+2>>
+  Select an existing class, or enter a new class in the place provided.
+</plain-text>
+
+<form method=POST action=class-action.mhtml>
+  <with-open-database db <database classes>>
+    <database-query db true keys=keys sort=key>
+  </with-open-database>
+
+  <center>
+    <table>
+      <set-var current-class=<get-session-var current-class>>
+      <tr>
+	<td align=right>
+	  <font size="+1"><b>Existing Class: </b></font>
+	</td>
+	<td>
+	  <when <get-var keys[]>>
+	    <select name=class>
+	      <set-var i=0>
+	      <while <get-var keys[i]>>
+		<option <if <string-eq <get-var keys[i]>
+				       <get-var current-class>>
+			    SELECTED>><get-var keys[i]>
+		<increment i>
+	      </while>
+	    </select>
+	  </when>
+
+	  <when <not <get-var keys[]>>>
+	    [<i>None...</i>]
+	  </when>
+	  <br>
+	</td>
+      </tr>
+      <tr>
+	<td align=right>
+	  <font size="+1"><b>Create Class: </b></font>
+	</td>
+	<td>
+	  <input name=new-class value=""><br>
+	</td>
+      </tr>
+    </table>
+    <p>
+    <br>
+    <action-buttons "Modify" "Create" "Delete" "Cancel">
+  </center>
+</form>
+
+<include footer.mhtml>

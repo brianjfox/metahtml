@@ -1,0 +1,48 @@
+;;; mklib.mhtml: -*- Meta-HTML -*-  How to use mklib.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul 23 17:01:27 1997.
+;;;
+<set-var title="mklib: Meta-HTML Utility">
+<include header.mhtml>
+
+<layout::page>
+  <h3>Create a Library File for Require</h3>
+  <ptext>
+    <synopsis mklib -o output.lib input.mhtml...>
+
+    <code>mklib</code> creates a <i>library</i> file from the
+    <Meta-HTML> input files that you specify.
+
+    Once a library file exists, the
+    <a href="../manual/man-page.mhtml?KEY=REQUIRE"><code>require</code></a>
+    tag can be used to load it.
+
+    Library files may contain function and tag definitions, and may
+    define variables in any of the non-standard packages.  Variables
+    defined in the DEFAULT, MHTML, MHTTPD, SITE, or ENV packages are
+    not saved in the output library.
+
+    Typically, one will have a directory called <code>tagsets</code>
+    which contains the input source files, a <code>Makefile</code> for
+    building the output library, and the output library itself.  Here
+    is an example <code>Makefile</code> which builds <code>foo.lib</code>
+    files from <code>foo.mhtml</code>:
+
+    <pre>
+    # This Makefile simply builds the binary versions of the library
+    # from the source.
+    #
+    MCC = mklib
+
+    .SUFFIXES: .lib .mhtml
+
+    .mhtml.lib:
+            $(MCC) -o $@ $&lt;
+
+    all: foo.lib
+    </pre>
+  </ptext>
+</layout::page>
+
+<include footer.mhtml>

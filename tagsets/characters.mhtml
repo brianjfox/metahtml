@@ -1,0 +1,13 @@
+;;; characters.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Feb 25 20:00:11 1997.
+
+;;; All the characters you might have ever wanted.  Ugh.
+<set-var
+  char::+-	= &#177;
+  char::micro	= &#181;
+  char::copy	= &#169;
+  char::lt	= &lt;
+  char::gt	= &gt;
+  char::amp	= &amp;>

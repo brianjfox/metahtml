@@ -1,0 +1,46 @@
+;;; shipping.mhtml: -*- Meta-HTML -*-
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Sat Oct 21 14:07:12 1995.
+;;;
+<set-var title="Shipping Info">
+<include header.mhtml>
+<include tagsets/cart-substs.mhtml>
+
+<set-var
+  Payment-Type = <get-session-var Payment-Type>
+  Ship-To      = <get-session-var Ship-To>>
+
+<include cart-display.mhtml>
+<p>
+<form method=POST action="invoice-review.mhtml">
+  <center>
+    <font size=+2><i>Shipping Information</i></font><br>
+    <table border=1>
+      <tr>
+	<td align=right><small-caps>Ship To:</small-caps></td>
+	<td>
+	  <textarea rows=5 cols=35 name=Ship-To><get-var Ship-To></textarea>
+	  <br>
+	</td>
+      </tr>
+      <tr>
+	<td align=right><small-caps>Payment Type:</small-caps></td>
+	<td align=left>
+	  <when <netscape-p>>
+	    <table-option Payment-Type "Major Credit Card">
+	    <br>
+	  </when>
+	  <table-option Payment-Type "Check or Money Order">
+	  <br>
+	  <table-option Payment-Type "Telephone Order">
+	</td>
+      </tr>
+    </table>
+  </center>
+  <p>
+  <center>
+    <action-buttons "Review Invoice">
+  </center>
+</form>
+<include footer.mhtml>

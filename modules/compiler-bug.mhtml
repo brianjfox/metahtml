@@ -1,0 +1,33 @@
+;;; compiler-bug.mhtml: -*- Meta-HTML -*-  simple test case (1)
+;;;
+;;; Copyright (c) 2000 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Mon Dec  4 16:42:31 2000.
+
+<defun emit-attributes alist>
+  ;;; Re-emit the attribute list from a tag.
+  <set-var vars[]=<alist-package-vars alist>>
+  <unset-var result>
+  <foreach var vars>
+    <set-var
+      output = <get-var-once var>
+      val = <alist-get-var alist <get-var-once var>>>
+    <if <get-var-once val>
+	<set-var output =
+	  <concat <get-var-once output>
+		  "="
+		  <%%quote-for-set-var <get-var-once val>>>>>
+    <array-append <get-var-once output> result>
+  </foreach>
+  <subst-in-string <get-var-once result[]> "\n" " ">
+</defun>
+
+<defun bug &attributes attr>
+  <apply set-var <get-var-once attr>>
+  <set-var href=<get-var-once href>>
+  <emit-attributes <package-to-alist>>
+</defun>
+
+<defun compile-array item>
+  <array-append <get-var-once item> arr>
+  <get-var-once arr>
+</defun>

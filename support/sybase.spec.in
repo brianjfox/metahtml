@@ -1,0 +1,13 @@
+%package sybase
+Summary: Sybase ODBC connectivity module for Meta-HTML.
+Group: Applications/WWW
+Requires: metahtml
+
+%description sybaseodbc
+Using modsybaseodbc.so, you can enable the connection of Meta-HTML to a
+Sybase Anywhere Server by soft linking /usr/lib/libsybase.so to
+/opt/SYBSasa6/lib/dbodbc6.so (the Sybase ODBC drivers).
+
+%files sybase
+/usr/lib/metahtml/modsybaseodbc.so
+

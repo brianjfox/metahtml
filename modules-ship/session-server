@@ -1,0 +1,304 @@
+#!/usr/bin/mhc
+;;; -*- Meta-HTML -*- A database version of the TCPsession server.
+<set-var mhc::explicit-output-only = true>
+
+;;; These are the defaults.  You can change them on the command line.
+<set-var
+  tcp-session::database-type = mysqlper
+  tcp-session::database-host = localhost
+  tcp-session::database-uid  = mhttpd
+  tcp-session::database-base = sessions
+  tcp-session::listen-host   = localhost
+  tcp-session::listen-port   = 8181
+  tcp-session::debug-level   = 0>
+
+<set-var
+  help::database-type = dbtype
+  help::database-host = hostname
+  help::database-uid  = UserID
+  help::database-base = database-name
+  help::listen-host   = hostname
+  help::listen-port   = integer
+  help::debug-level   = integer>
+
+<defun parse-argument::help>
+  <usage 0>
+</defun>
+
+<defun usage exit-code>
+  <mhc::print "Usage: <get-var-once default::program-arguments[0]>\n">
+  <set-var vars[]=<package-vars tcp-session strip=true>>
+  <foreach var vars>
+    <mhc::print "\t--<downcase <get-var-once var>>=">
+    <mhc::print "[ <or <get-var-once help::<get-var-once var>> value> ]\n">
+  </foreach>
+  <if <get-var-once exit-code>
+      <mhc::exit <get-var-once exit-code>>>
+</defun>
+
+<foreach arg program-arguments start=1>
+  <when <string-eq <substring <get-var-once arg> 0 1> "-">>
+    <subst-in-var arg "^-+" "">
+    <set-var
+      n-v[] = <subst-in-string <get-var-once arg> "(.*)=(.*$)" "\\1\n\\2">
+      name  = <get-var-once n-v[0]>
+      value = <get-var-once n-v[1]>>
+    <if <defined? parse-argument::<get-var-once name>>
+	<apply parse-argument::<get-var-once name> <get-var-once value>>
+      <apply set-var tcp-session::<get-var-once name> = <get-var-once value>>>
+  </when>
+</foreach>
+
+<set-var the-dump[]=<dump-package text-mode?=true tcp-session>>
+<set-var the-dump[0]="Values used for this invocation of the session server:">
+<mhc::print "\n<get-var-once the-dump[]>\n">
+
+<defun db::dsn &key host uid pwd svt database>
+  <defvar host <or <get-var-once tcp-session::database-host> localhost>>
+  <defvar uid <get-var-once tcp-session::database-uid>>
+  <defvar pwd <get-var-once tcp-session::database-pwd>>
+  <defvar svt <get-var-once tcp-session::database-svt>>
+  <defvar base <get-var-once tcp-session::database-base>>
+  <concat
+   "HOST=" <get-var-once host>
+   <if <get-var-once uid> ";UID=<get-var-once uid>">
+   <if <get-var-once pwd> ";PWD=<get-var-once pwd>">
+   <if <get-var-once svt> ";SVT=<get-var-once svt>">
+   <if <get-var-once base> ";DATABASE=<get-var-once base>">>
+</defun>
+
+<if <not <load-module modsession>>
+    <concat
+     <mhc::print <concat "<get-var-once program-arguments[0]>: "
+			 "Couldn't load modsession!\n">>
+     <mhc::exit 1>>>
+
+<if <not <load-module modsyslog>>
+    <concat
+     <mhc::print <concat "<get-var-once program-arguments[0]: "
+			 "Couldn't load modsyslog!\n">>
+     <mhc::exit 1>>>
+
+<sql::set-database-type <get-var-once tcp-session::database-type>>
+
+<if <not <defined?
+	   <get-var-once tcp-session::database-type>::with-open-database>>
+    <concat
+     <mhc::print
+      <concat "<get-var-once program-arguments[0]>: "
+	      "Couldn't load mod<get-var-once dbtype>!\n">>
+     <mhc::exit 1>>>
+
+<defun initialize-session-db>
+  <sql::with-open-database db DSN="<db::dsn database=mysql>" nolock=true>
+    <set-var ignore=<sql::database-exec-sql db "DROP DATABASE sessions">>
+    <debugging-output clear>
+    <set-var ignore=<sql::database-exec-sql db "CREATE DATABASE sessions">>
+  </sql::with-open-database>
+  <sql::with-open-database db DSN=<db::dsn>>
+    <sql::database-exec-sql
+     db
+     <prog
+       CREATE TABLE sessions
+       ( sid	char (40) PRIMARY KEY NOT NULL,
+	 data	mediumblob )>>
+  </sql::with-open-database>
+  <set-var errors=<debugging-output retrieve>>
+  <if <get-var-once errors>
+      <debug "Errors from INIT: <get-var-once errors>\n">>
+</defun>
+
+<defun log message>
+  <syslog "Meta-HTML Session Server" <get-var-once message>>
+</defun>
+
+<defun debug string>
+  <if <gt :debug-level 0>
+      <log <get-var-once string>>>
+</defun>
+
+<debugging-on debug=<get-var-once tcp-session::debug-level>>
+
+<defun cmd::UNKNOWN-COMMAND!>
+  <log "Server received an unknown command!">
+</defun>
+
+<defun cmd::INIT>
+  <log "Calling initialize-session-db.">
+  <initialize-session-db>
+</defun>
+
+<defun cmd::OPEN>
+  <log "We aren't ever supposed to see an OPEN command!">
+</defun>
+
+<defun cmd::CLOSE>
+  <debug "Received CLOSE, closing connection.">
+  <when <defined? <sql::get-database-type>::shutdown>>
+    <sql::with-open-database db DSN=<db::dsn> nolock=true>
+      <debug "Closing the database connection...">
+      <apply <sql::get-database-type>::shutdown db>
+    </sql::with-open-database>
+  </when>
+</defun>
+
+<defun cmd::STORE>
+  <debug "In STORE, reading KEY">
+  <set-var keylen=<read-dbobj key>>
+  <debug "In STORE, reading DATA">
+  <set-var datalen=<read-dbobj data>>
+  <coerce-var key type=string>
+  <coerce-var data type=string>
+  <debug "In STORE, have key `<get-var-once key>' and DATA (<get-var-once datalen>)">
+  <sql::with-open-database db DSN=<db::dsn>>
+    <debug "In STORE, writing data">
+    <set-var written? =
+      <sql::database-save-record db <get-var-once key> data key=sid 
+				 table=sessions>>
+  </sql::with-open-database>
+</defun>
+
+<defun cmd::FETCH>
+  <debug "In FETCH, reading KEY">
+  <set-var keylen = <read-dbobj key>>
+  <coerce-var key type=string>
+  <debug "In FETCH, have key `<get-var-once key>'">
+
+  <sql::with-open-database db DSN=<db::dsn> nolock=true>
+    <debug "DB IS OPEN">
+    <sql::database-query
+     db true "SELECT data FROM sessions WHERE sid = '<get-var-once key>'"
+     format=<set-var ^::data = <get-var-once data> ^::loaded?=true>>
+  </sql::with-open-database>
+  <coerce-var data type=binary>
+  <debug <concat "In FETCH "
+		 <if <get-var-once loaded?>
+		     "have data (<content-length data>)"
+		   "UNABLE to get `DATA' variable!">>>
+  <set-var bytes-written=<write-dbobj data>>
+  <debug "Wrote <get-var-once bytes-written> bytes to client">
+</defun>
+
+<defun cmd::DELETE>
+  <set-var keylen = <read-dbobj key>>
+  <coerce-var key type=string>
+
+  <sql::with-open-database db DSN=<db::dsn> nolock=true>
+    <set-var removed? =
+      <sql::database-exec-sql
+       db "DELETE FROM sessions WHERE sid='<get-var-once key>'">>
+  </sql::with-open-database>
+</defun>
+
+<defun cmd::FIRSTKEY>
+  <debug "In FIRSTKEY, opening database">
+  <sql::with-open-database db DSN=<db::dsn> nolock=true>
+    <debug "In FIRSTKEY, Opened...">
+    <sql::database-query
+     db true "SELECT sid FROM sessions ORDER BY sid ASC limit 1"
+     format = <set-var ^::key=<get-var-once sid>>>
+  </sql::with-open-database>
+  <debug "Done with database, key is: <get-var-once key>...">
+  <set-var bytes-written=<write-dbobj key>>
+  <debug "Wrote <get-var-once bytes-written> bytes to client">
+</defun>
+
+<defun cmd::NEXTKEY>
+  <debug "In NEXTKEY, reading KEY">
+  <set-var keylen = <read-dbobj key>>
+  <coerce-var key type=string>
+  <debug "In NEXTKEY, KEY = `<get-var-once key>'">
+
+  <debug "In NEXTKEY, opening database">
+  <sql::with-open-database db DSN=<db::dsn> nolock=true>
+    <debug "In NEXTKEY, Opened...">
+    <sql::database-query
+     db true format=<set-var ^::next-key=<get-var-once sid>>
+     "SELECT sid FROM sessions WHERE sid > '<get-var-once key>'
+       ORDER BY sid ASC limit 1">
+    <debug "In NEXTKEY, next-key is `<get-var-once next-key>'...">
+  </sql::with-open-database>
+  <set-var bytes-written=<write-dbobj next-key>>
+  <debug "Wrote <get-var-once bytes-written> bytes to client">
+</defun>
+
+<defun cmd::HANG>
+  <set-var x=true>
+  <while <get-var-once x>>
+  </while>
+</defun>
+
+<defun cmd::EXIT>
+  <log "Exiting server due to 'exit' command!">
+  <server::kill-server>
+</defun>
+
+<defun cmd::QUIT>
+  <cmd::exit>
+</defun>
+
+<defun cmd::STAT>
+  <sql::with-open-database db DSN=<db::dsn> nolock=true>
+    <sql::database-query
+     db true format=<set-var ^::count=<get-var-once c>>
+     "SELECT count(*) as c FROM sessions">
+  </sql::with-open-database>
+  <set-var info="STAT: <get-var-once count> Sessions in DB">
+  <log <get-var-once info>>
+  <with-open-stream s *standard-output* mode=write-create>
+    <stream-put s <concat <get-var-once info> "\n">>
+  </with-open-stream>
+</defun>
+
+<defun cmd::EXPR>
+  <sql::with-open-database db DSN=<db::dsn> nolock=true>
+    <sql::database-query
+     db true "select data from sessions"
+     format=<concat
+	     <if <gt <sub <time> <alist-get-var data access>>
+		     <mul 60 <alist-get-var data timeout>>>
+		 <array-append <alist-get-var data sid> ^::expires>>>>
+    <when <get-var-once expires>>
+      <set-var in=<subst-in-string <get-var-once expires[]> "\n" "','">>
+      <set-var ignore =
+	<sql::database-exec-sql
+	 db "DELETE FROM sessions WHERE sid IN ('<get-var-once in>')">>
+    </when>
+  </sql::with-open-database>
+  <log "Expired <pluralize <array-size expires> session>.">
+</defun>
+      
+<defun server::connection-handler>
+  <debugging-output clear>
+  <system-error-output clear>
+  <set-var working?=true>
+  <debug "Got connection from <get-var server::remote-addr>">
+  <while <get-var-once working?>>
+    <debug "Waiting for command">
+    <set-var command = <read-command>>
+    <debug "Got command `<get-var-once command>'">
+    <set-var fun = cmd::<get-var-once command>>
+    <if <defined? <get-var-once fun>>
+	<apply <get-var-once fun>>
+      <unset-var working?>>
+    <if <string-eq <get-var-once command> "CLOSE" caseless=true>
+	<unset-var working?>>
+    <set-var warnings[]=<debugging-output retrieve clear>>
+    <set-var errors[]=<system-error-output retrieve clear>>
+    <when <get-var-once warnings[]>>
+      <foreach warning warnings>
+	<log <get-var-once warning>>
+      </foreach>
+    </when>
+    <when <get-var-once errors[]>>
+      <foreach error errors>
+	<log <get-var-once error>>
+      </foreach>
+    </when>
+  </while>
+</defun>
+
+<set-var info =
+  <server::make-server server::connection-handler
+		       <get-var-once tcp-session::listen-port>
+		       hostname=<get-var-once tcp-session::listen-host>>>

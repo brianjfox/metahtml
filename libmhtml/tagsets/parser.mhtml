@@ -1,0 +1,228 @@
+;;; parser.mhtml: -*- Meta-HTML -*-  Functions aid in parser tracking.
+;;; 
+;;;  Copyright (c) 1997, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu Jul 10 10:25:46 1997.
+;;;
+<defun *parser*::push-file filename nocompile=true>
+  <array-shift 1 *parser*::filename-pdl>
+  <array-shift 1 *parser*::current-lineno>
+  <set-var *parser*::filename-pdl[0] = <get-var-once filename>>
+  <set-var *parser*::current-lineno[0] = <*parser*::current-lineno>>
+  <subst-in-var filename <get-var mhtml::include-prefix> "" "/[^/]*$" "">
+  <set-var %%::relpref = <get-var-once filename>>
+  <*parser*::current-lineno 0>
+</defun>
+
+<defun *parser*::pop-file nocompile=true>
+  <set-var %%::libinit-relpref = <get-var-once %%::relpref>>
+  <array-shift -1 *parser*::filename-pdl>
+  <array-shift -1 *parser*::current-lineno>
+  <*parser*::current-lineno <or <get-var *parser*::current-lineno[0]> 0>>
+  <set-var filename=<get-var *parser*::filename-pdl[0]>>
+  <subst-in-var filename <get-var mhtml::include-prefix> "" "/[^/]*$" "">
+  <set-var %%::relpref = <get-var-once filename>>
+</defun>
+
+<defun *parser*::current-file>
+  <get-var *parser*::filename-pdl[0]>
+</defun>
+
+<defun *parser*::line-error text>
+  <set-var files[]=<subst-in-string <get-var *parser*::filename-pdl[]>
+				    <get-var mhtml::include-prefix> "">>
+  <set-var i=1>
+  <page-debug
+   <concat "In file "
+	   <concat "<get-var files[0]> at line "
+		   <get-var *parser*::current-lineno[0]>
+		   <foreach file files start=1>
+		   ", included from <get-var file> at line "
+		   <get-var *parser*::current-lineno[i]>
+		   <increment i>
+		   </foreach>>
+	   ": <get-var text>">>
+</defun>
+
+;;;
+;;; Here follow some functions for grinding code.
+<defsubst parser::canonicalize-var :pcv-var :pcv-pack whitespace=delete
+  nocompile=true>
+  <defvar :pcv-pack "^">
+  <if <not <match <get-var-once <get-var-once :pcv-var>> "::">>
+      <set-var <get-var-once :pcv-var> =
+	<get-var-once :pcv-pack>::<get-var-once <get-var-once :pcv-var>>>>
+</defsubst>
+
+<defsubst parser::canonicalize-vars &key :pack whitespace=delete>
+  <defvar :pack "^">
+  <set-var :pcv-vars[]=<subst-in-string "%attributes" " " "\n">>
+  <foreach :pcv-var :pcv-vars>
+    <if <not <match <get-var-once <get-var-once :pcv-var>> "::">>
+	<set-var <get-var-once :pcv-var> =
+	  <get-var-once :pack>::<get-var-once <get-var-once :pcv-var>>>>
+  </foreach>
+</defsubst>
+
+<defun function-def fun>
+  ;;; Return a human readable rendition of the function named by <var fun>.
+  <set-var def = <%%function-def <get-var-once fun>>>
+  <get-var-once def>
+</defun>
+
+<defun parser::indent-line linevar amount>
+  <parser::canonicalize-var linevar>
+  <subst-in-var <get-var-once linevar> "^[ \t]+" "">
+  <set-var indentation = "                                                   ">
+  <set-var <get-var-once linevar> =
+    <concat
+     <substring <get-var-once indentation> 0 amount>
+     <get-var-once <get-var-once linevar>>>>
+</defun>
+
+<defun parser::funcall? line>
+  <if <string-eq <substring <get-var-once line> 0 1> "<">
+      <subst-in-string <get-var-once line> "^<" "" "(^[^ \t\r\n]+)(.*)" "\\1">>
+</defun>
+
+<defun parser::gobble-complex-sexp :sexp :orig-index :index>
+  <parser::canonicalize-vars :sexp :orig-index :index>
+  <set-var level = 1>
+  <set-var sexp =
+    <%%read-sexp <get-var-once :sexp> <get-var-once :orig-index>>>
+  <set-var <get-var-once :index> = <get-var-once <get-var-once :orig-index>>>
+  <set-var fname = <downcase <parser::funcall? <get-var-once sexp>>>>
+  <array-append <get-var-once sexp> output>
+  <while <neq level 0>>
+    <set-var sexp = <%%read-sexp <get-var-once :sexp> <get-var-once :index>>>
+    <if <not <get-var-once sexp>>
+	<break>>
+    <set-var this-fname = <downcase <parser::funcall? <get-var-once sexp>>>>
+    <if <string-eq <get-var-once this-fname> <get-var-once fname>>
+	<increment level>
+      <if <string-eq "/<get-var-once this-fname>" <get-var-once fname>>
+	  <decrement level>>>
+    <array-append <get-var-once sexp> output>
+  </while>
+  <get-var-once output[]>
+</defun>
+  
+<defvar parser::line-width 78>
+
+<defun parser::funcall-body funcall arrayvar>
+  <parser::canonicalize-var arrayvar>
+  <set-var offset = 1>
+  <set-var ignore = <%%read-sexp funcall offset>>
+  <subst-in-var funcall ">$" "">
+  <while <concat <set-var sexp=<%%read-sexp funcall offset>>
+		 <get-var-once sexp>>>
+    <array-append <get-var-once sexp> <get-var-once arrayvar>>
+  </while>
+</defun>
+
+<defun parser::grind-funcall fname expr indent>
+  <set-var offset=1 fsexp=<%%read-sexp expr offset>>
+  <parser::funcall-body <get-var-once expr> args>
+  <set-var line=<concat "<" <get-var-once fsexp>>>
+  <parser::indent-line line <get-var-once indent>>
+  <get-var-once line>
+  <if <lt <array-size args> 1>
+      <concat ">" <return>>>
+  <foreach sexp args>
+    <set-var fname = <parser::funcall? <get-var-once sexp>>>
+    <if <not <get-var-once fname>>
+	<concat " " <get-var-once sexp>>
+      <parser::grind-funcall <get-var-once fname> <get-var-once sexp>
+			     <add 3 indent>>>
+  </foreach>
+  <concat ">">
+</defun>
+
+<comment>
+  Can't make this work right now.  Have to hack <apply> and <backquote>.
+
+<defun parser::grind-if if-expr indent>
+  ;;; Skip past opener.
+  <set-var index=1 fword=<%%read-sexp if-expr index>>
+  <set-var open = <substring <get-var-once if-expr> 0 <get-var-once index>>>
+  <parser::indent-line open <get-var-once indent>>
+  <get-var-once open>
+  <set-var
+    test=<%%read-sexp if-expr index>
+    then=<%%read-sexp if-expr index>
+    else=<%%read-sexp if-expr index>>
+  <concat " " <get-var-once test> "\n">
+  <parser::indent-line then <add indent 4>>
+  <get-var-once then>
+  <if <or <not <get-var-once else>>
+	  <string-eq <get-var-once else> ">">>
+      <concat ">">
+    <concat "\n"
+	    <parser::indent-line else <add indent 2>>
+	    <get-var-once else>
+	    ">">>
+  <concat "\n">
+</defun>
+</comment>
+
+<defun parser::grind-sexps sexps index indent arrayvar>
+  <defvar index 0>
+  <set-var orig-index = <get-var-once index>>
+  <set-var sexp = <%%read-sexp sexps index>>
+  <while <get-var-once sexp>>
+    <set-var line = <get-var-once sexp>>
+    <set-var fname = <parser::funcall? <get-var-once line>>>
+    <if <get-var-once fname>
+	<concat
+	 <set-var falist = <%%function-alist <get-var-once fname>>>
+	 <if <match <alist-get-var falist type> MACRO>
+	     <concat
+	      <set-var
+		expr[] = <parser::gobble-complex-sexp sexps orig-index index>
+		offset = 0
+		last = <get-var-once expr[<sub <array-size expr> 1>]>
+		expr[<sub <array-size expr> 1>] = ""
+		expr = <get-var-once expr[]>
+		sexp = <%%read-sexp expr offset>>
+	      <parser::indent-line sexp <get-var indent>>
+	      <get-var-once sexp>
+	      <concat "\n"
+		      <parser::grind-sexps <get-var-once expr>
+					   <get-var offset>
+					   <add indent 2>>
+		      <parser::indent-line last <get-var indent>>
+		      <get-var-once last>
+		      "\n">>
+	   ;;; Not a macro, but still a function call.
+	   ;;; If we have a function specifically for grinding this
+	   ;;; function call, then call it now.
+	   <if <defined? parser::grind-<get-var-once fname>>
+	       <apply parser::grind-<get-var-once fname>
+		      <%%quote-for-set-var <get-var-once line>>
+		      <get-var-once indent>>
+	     ;;; No specialized function for grinding this funcall exists.
+	     ;;; If the expression is a long one, grind it anyway.
+	     <if <gt <string-length <get-var-once line>> parser::line-width>
+		 <parser::grind-funcall <get-var-once fname>
+					<get-var-once line>
+					<get-var-once indent>>
+	       <concat
+		<parser::indent-line line <get-var indent>>
+		<get-var-once line>
+		<concat "\n">>>>>>
+      ;;; Not a function call.  Just print the line.
+      <concat
+       <parser::indent-line line <get-var indent>>
+       <get-var-once line>
+       <concat "\n">>>
+    <set-var orig-index = <get-var-once index>>
+    <set-var sexp = <%%read-sexp sexps index>>
+  </while>
+</defun>
+
+<defun parser::test foo>
+<when x>
+<when y>
+<get-var-once foo>
+</when>
+</when>
+</defun>

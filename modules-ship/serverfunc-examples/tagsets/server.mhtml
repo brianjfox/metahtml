@@ -1,0 +1,225 @@
+;;; server.mhtml: -*- Meta-HTML -*-  Generic TCP/IP server.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu Oct  2 17:27:57 1997.
+;;;
+;;; Using this server, you simply write the commands that implement your
+;;; protocol.  You document the commands with semicolon comments as the
+;;; first elements of a defun, defsubst, or defmacro.
+;;; Each command should be written as follows:
+;;;
+;;;  <defun commands::command-name cmd arg1 arg2>
+;;;    ;;; The COMMAND-NAME function does something interesting.
+;;;    ;;; These comments are used to create the documentation for this
+;;;    ;;; command.
+;;;    <server::put-line "<frob <get-var arg1>> <get-var arg2>">
+;;;  </defun>
+;;;
+;;; Of course, the "server.mhtml" file and the "commands.mhtml" file are
+;;; placed in the "tagsets/" subdirectory of your main server.  Next,
+;;; to start your server listening on port 2005, place the following
+;;; file at top level, make it executable, and run it.
+;;;
+;;; ------------------------------------------------------------
+;;; #!/www/bin/mhc
+;;; ;;; -*- Meta-HTML -*-
+;;; <set-var mhc::explicit-output-only = true>
+;;; <set-var x = <load-module /www/lib/serverfuncs.so>>
+;;; <require ./tagsets/server>
+;;; <set-var info=<server::make-server server::connection-handler 2005>>
+;;; <with-open-stream s *standard-output* mode=write-create>
+;;;   <stream-put s <get-var-once info>>
+;;;   <stream-put s "\n">
+;;; </with-open-stream>
+;;; ------------------------------------------------------------
+;;;
+
+<set-var mhtml::gather-documentation=true>
+
+<defun .libinit>
+  <when <get-var server::logins-required>>
+    <server::get-passwords <server::password-file>>
+  </when>
+</defun>
+
+<defun server::password-file>
+  <or <get-var server::password-file> /etc/passwd>
+</defun>
+
+<defun server::get-passwords &optional password-file>
+  <package-delete passwd>
+  <defvar password-file /etc/passwd>
+  <with-open-stream s <get-var password-file> mode=read>
+    <stream-get-contents s lines>
+  </with-open-stream>
+  <coerce-var lines type=array>
+  <foreach line lines>
+    <set-var elements[]=<subst-in-string <get-var line> ":" "\n">>
+    <set-var passwd::<get-var elements[0]> = <get-var elements[1]>>
+  </foreach>
+</defun>
+
+<defun server::password-match? user password>
+  <set-var existing = <get-var passwd::<get-var user>>>
+  <set-var test = <unix::crypt <get-var password> <get-var existing>>>
+  <string-eq <get-var test> <get-var existing>>
+</defun>
+
+<defun server::kill-self>
+  <unset-var server::server-active>
+</defun>
+
+<defun server::get-line>
+  <with-open-stream s *standard-input* mode=read>
+    <set-var line=<stream-get s stop-at="\n">>
+  </with-open-stream>
+  <subst-in-var line "[<>]" "" "^[ \t\r\n]+" "" "[ \t\r\n]+$" "">
+  <get-var-once line>
+</defun>
+
+<defun server::put-line line>
+  <with-open-stream s *standard-output* mode=write-create>
+    <stream-put s "<get-var-once line>\n">
+  </with-open-stream>
+</defun>
+
+<defun server::put-text line>
+  <with-open-stream s *standard-output* mode=write-create>
+    <stream-put s <get-var-once line>>
+  </with-open-stream>
+</defun>
+
+<defun server::logged-in?>
+  <get-var server::logged-in?>
+</defun>
+
+<defun server::do-command line>
+  <set-var args[]=<subst-in-string <get-var-once line> "[ \t\r\n]+" "\n">>
+  <set-var function = <get-var-once args[0]>>
+  <set-var command = <get-var-once function>>
+  <array-shift -1 args>
+  <if <not <function-def commands::<get-var-once function>>>
+      <set-var function=unimplemented>>
+  <set-var :expr = <commands::<get-var-once function>
+			      <get-var-once command>
+			      <get-var-once args[]>>>
+  <get-var :expr>
+</defun>
+
+<defun server::connection-handler>
+  <unset-var server::username server::password server::logged-in?>
+  <set-var server::server-active = true>
+  <if <get-var server::welcome-message>
+      <server::put-line "<get-var server::welcome-message>">>
+
+  <while <get-var server::server-active>>
+    <if <and <get-var server::logins-required>
+	     <not <get-var server::logged-in?>>>
+	<server::put-line "% Please login with \"LOGIN <user> <pass>\"">>
+    <set-var line = <server::get-line>>
+    <if <not <get-var-once line>>
+	<prog
+	  <server::put-line "% Sorry, timed out waiting for a command.">
+	  <break>>>
+    <server::do-command <get-var-once line>>
+  </while>
+</defun>
+  
+;;; ------------------------------------------------------------
+;;;
+;;; A few commands are defined by default.  If you don't want them,
+;;; simply <undef> them in your commands.mhtml file.
+;;;
+;;; The pre-defined commands are:
+;;; commands::quit          -- Exits the server instance.
+;;; commands::help          -- Handles help requests.
+;;; commands::unimplemented -- Handles unimplemented commands.
+;;; commands::login         -- Handles logging in using /etc/passwd.
+;;;
+;;; ------------------------------------------------------------
+
+<defun commands::quit>
+  ;;; Exit the server.
+  <server::put-line "Quitting...">
+  <server::kill-self>
+</defun>
+
+<defun commands::help command &rest args[]>
+  ;;; Show help for the various commands, or, without any arguments, shows
+  ;;; help for all of the commands.
+  <when <not <get-var args>>>
+    <foreach cmd server::command-names>
+      <unset-var doc>
+      <server::put-line <concat "<get-var server::help-prefix>- "
+				"<get-var cmd> "
+				"<get-var commands::<get-var cmd>-args>">>
+      <set-var doc =
+	<word-wrap <get-var commands::<get-var cmd>-help> indent=6>>
+      <coerce-var doc type=array>
+      <foreach line doc>
+	<server::put-line "<get-var server::help-prefix>-<get-var line>">
+      </foreach>
+      <server::put-line "<get-var server::help-prefix>-">
+    </foreach>
+    <server::put-line "<get-var server::help-prefix> End of HELP info">
+    <return>
+  </when>
+
+  <foreach cmd args>
+    <set-var index =
+      <array-member <get-var cmd> server::command-names caseless=true>>
+    <when <get-var index>>
+      <unset-var doc>
+      <server::put-line <concat "<get-var server::help-prefix>- "
+				"<get-var cmd> "
+				"<get-var commands::<get-var cmd>-args>">>
+      <set-var doc =
+	<word-wrap <get-var commands::<get-var cmd>-help> indent=6>>
+      <coerce-var doc type=array>
+      <foreach line doc>
+	<server::put-line "<get-var server::help-prefix>-<get-var line>">
+      </foreach>
+      <server::put-line "<get-var server::help-prefix>-">
+    </when>
+    <when <not <get-var index>>>
+      <server::put-line
+       "<get-var server::help-prefix>- <get-var cmd>: UNKNOWN COMMAND.">
+    </when>
+  </foreach>
+  <server::put-line "<get-var server::help-prefix> End of HELP info">
+</defun>
+
+<defun commands::unimplemented command &rest args[]>
+  ;;; Function to call for unimplemented commands.
+  <server::put-line "Unknown command `<get-var-once command>'">
+</defun>
+
+<defun commands::login command username password>
+  ;;; Login with your username and password.
+  <unset-var server::username server::password>
+  <set-var server::logged-in? = 
+    <server::password-match? <get-var username> <get-var password>>>
+  <when <server::logged-in?>>
+    <set-var
+      server::password = <get-var password>
+      server::username = <get-var username>>
+    <%%switch-user <get-var username>>
+    <server::put-line "Welcome <get-var username>!">
+  </when>
+</defun>
+
+<include commands.mhtml>
+
+<set-var all[]=<package-vars *user-functions* strip=true>>
+<foreach var all>
+  <when <match <get-var var> "^COMMANDS::">>
+    <set-var name = <subst-in-string <get-var var> "^COMMANDS::" "">>
+    <array-append <get-var name> server::command-names>
+    <set-var <get-var var>-help = <%%function-documentation <get-var var>>>
+    <set-var temp[] = <%%function-arguments <get-var var>>>
+    <if <string-eq <get-var temp[0]> "command"> <array-shift -1 temp>>
+    <set-var args = <concat <foreach arg temp> "<get-var arg> " </foreach>>>
+    <set-var <get-var var>-args = <get-var args>>
+  </when>
+  <sort server::command-names>
+</foreach>

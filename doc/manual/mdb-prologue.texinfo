@@ -1,0 +1,32 @@
+@c manual-prologue.texi: -*- Texinfo -*-  DESCRIPTIVE TEXT.
+
+@c  Copyright (c) 1996 Brian J. Fox
+@c  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Nov  1 15:04:02 1996.
+
+@ifinfo
+@macro mref{node}
+@xref{\node\}
+@end macro
+
+@macro vref{node}
+@b{\node\}
+@end macro
+@end ifinfo
+
+@node MDB: The Meta-HTML Debugger
+@chapter MDB: The Meta-HTML Debugger
+
+This document describes the interactive debugger for Meta-HTML language,
+called MDB.  We expect that you, the reader of this manual, have a
+working knowledge of Meta-HTML, and that you are interested in learning
+how to debug a program that you are currently working on.  Thus, this
+manual is relatively crisp and straight-forward, and focuses on the
+process of debugging existing code.  Several tricks and tips are
+explained.
+
+This manual does not attempt to teach you the Meta-HTML language --
+there is another manual for that, called The Meta-HTML Reference
+Manual.
+
+Comments and/or suggestions for improvement in this manual or in the
+debugger itself, should be sent to @b{bug-mdb@@metahtml.com}.

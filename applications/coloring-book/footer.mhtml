@@ -1,0 +1,8 @@
+;;; footer.mhtml: -*- Meta-HTML -*-  Footer for the coloring book app.
+;;;
+;;; Copyright (c) 2000 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Wed Dec  6 06:06:47 2000.
+</body>
+</html>
+<layout::resolve-contents>
+<cleanup-whitespace>

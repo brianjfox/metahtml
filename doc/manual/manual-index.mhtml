@@ -1,0 +1,15 @@
+;;; manual-index.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Jul  9 10:25:02 1996.
+<html>
+<head> <title> Meta-HTML Manual Index </title> </head>
+<frameset rows="25%,*">
+  <frame name=index-frame src=toc-frame.mhtml>
+  <frame name=manpage-frame src="man-page-frame.mhtml">
+</frameset>
+
+<noframes>
+<include welcome.mhtml>
+</noframes>
+</html>

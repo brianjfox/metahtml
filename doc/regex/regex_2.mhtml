@@ -1,0 +1,453 @@
+<set-var title="Regex - Regular Expression Syntax">
+<include header.mhtml>
+<layout::page>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_1.mhtml">previous</A>, <A HREF="regex_3.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC2" HREF="welcome.mhtml#TOC2">Regular Expression Syntax</A></H1>
+
+<P>
+<A NAME="IDX3"></A>
+<A NAME="IDX4"></A>
+
+</P>
+<P>
+<STRONG>Characters</STRONG> are things you can type.  <STRONG>Operators</STRONG> are things in
+a regular expression that match one or more characters.  You compose
+regular expressions from operators, which in turn you specify using one
+or more characters.
+
+</P>
+<P>
+Most characters represent what we call the match-self operator, i.e.,
+they match themselves; we call these characters <STRONG>ordinary</STRONG>.  Other
+characters represent either all or parts of fancier operators; e.g.,
+<SAMP>`.'</SAMP> represents what we call the match-any-character operator
+(which, no surprise, matches (almost) any character); we call these
+characters <STRONG>special</STRONG>.  Two different things determine what
+characters represent what operators:
+
+</P>
+
+<OL>
+<LI>
+
+the regular expression syntax your program has told the Regex library to
+recognize, and
+
+<LI>
+
+the context of the character in the regular expression.
+</OL>
+
+<P>
+In the following sections, we describe these things in more detail.
+
+</P>
+
+
+
+<H2><A NAME="SEC3" HREF="welcome.mhtml#TOC3">Syntax Bits</A></H2>
+
+<P>
+<A NAME="IDX5"></A>
+
+</P>
+<P>
+In any particular syntax for regular expressions, some characters are
+always special, others are sometimes special, and others are never
+special.  The particular syntax that Regex recognizes for a given
+regular expression depends on the value in the <CODE>syntax</CODE> field of
+the pattern buffer of that regular expression.
+
+</P>
+<P>
+You get a pattern buffer by compiling a regular expression.  See section <A HREF="regex_7.mhtml#SEC45">GNU Pattern Buffers</A>, and section <A HREF="regex_7.mhtml#SEC55">POSIX Pattern Buffers</A>, for more information
+on pattern buffers.  See section <A HREF="regex_7.mhtml#SEC46">GNU Regular Expression Compiling</A>, section <A HREF="regex_7.mhtml#SEC56">POSIX Regular Expression Compiling</A>, and section <A HREF="regex_7.mhtml#SEC62">BSD Regular Expression Compiling</A>, for more information on compiling.
+
+</P>
+<P>
+Regex considers the value of the <CODE>syntax</CODE> field to be a collection
+of bits; we refer to these bits as <STRONG>syntax bits</STRONG>.  In most cases,
+they affect what characters represent what operators.  We describe the
+meanings of the operators to which we refer in section <A HREF="regex_3.mhtml#SEC7">Common Operators</A>,
+section <A HREF="regex_4.mhtml#SEC25">GNU Operators</A>, and section <A HREF="regex_5.mhtml#SEC37">GNU Emacs Operators</A>.  
+
+</P>
+<P>
+For reference, here is the complete list of syntax bits, in alphabetical
+order:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>RE_BACKSLASH_ESCAPE_IN_LISTS</CODE>
+<DD>
+<A NAME="IDX6"></A>
+ 
+If this bit is set, then <SAMP>`\'</SAMP> inside a list (see section <A HREF="regex_3.mhtml#SEC17">List Operators (<CODE>[</CODE> ... <CODE>]</CODE> and <CODE>[^</CODE> ... <CODE>]</CODE>)</A>
+quotes (makes ordinary, if it's special) the following character; if
+this bit isn't set, then <SAMP>`\'</SAMP> is an ordinary character inside lists.
+(See section <A HREF="regex_2.mhtml#SEC6">The Backslash Character</A>, for what `\' does outside of lists.)
+
+<A NAME="IDX7"></A>
+<DT><CODE>RE_BK_PLUS_QM</CODE>
+<DD>
+If this bit is set, then <SAMP>`\+'</SAMP> represents the match-one-or-more
+operator and <SAMP>`\?'</SAMP> represents the match-zero-or-more operator; if
+this bit isn't set, then <SAMP>`+'</SAMP> represents the match-one-or-more
+operator and <SAMP>`?'</SAMP> represents the match-zero-or-one operator.  This
+bit is irrelevant if <CODE>RE_LIMITED_OPS</CODE> is set.
+
+<A NAME="IDX8"></A>
+<DT><CODE>RE_CHAR_CLASSES</CODE>
+<DD>
+If this bit is set, then you can use character classes in lists; if this
+bit isn't set, then you can't.
+
+<A NAME="IDX9"></A>
+<DT><CODE>RE_CONTEXT_INDEP_ANCHORS</CODE>
+<DD>
+If this bit is set, then <SAMP>`^'</SAMP> and <SAMP>`$'</SAMP> are special anywhere outside
+a list; if this bit isn't set, then these characters are special only in
+certain contexts.  See section <A HREF="regex_3.mhtml#SEC23">The Match-beginning-of-line Operator (<CODE>^</CODE>)</A>, and
+section <A HREF="regex_3.mhtml#SEC24">The Match-end-of-line Operator (<CODE>$</CODE>)</A>.
+
+<A NAME="IDX10"></A>
+<DT><CODE>RE_CONTEXT_INDEP_OPS</CODE>
+<DD>
+If this bit is set, then certain characters are special anywhere outside
+a list; if this bit isn't set, then those characters are special only in
+some contexts and are ordinary elsewhere.  Specifically, if this bit
+isn't set then <SAMP>`*'</SAMP>, and (if the syntax bit <CODE>RE_LIMITED_OPS</CODE>
+isn't set) <SAMP>`+'</SAMP> and <SAMP>`?'</SAMP> (or <SAMP>`\+'</SAMP> and <SAMP>`\?'</SAMP>, depending
+on the syntax bit <CODE>RE_BK_PLUS_QM</CODE>) represent repetition operators
+only if they're not first in a regular expression or just after an
+open-group or alternation operator.  The same holds for <SAMP>`{'</SAMP> (or
+<SAMP>`\{'</SAMP>, depending on the syntax bit <CODE>RE_NO_BK_BRACES</CODE>) if
+it is the beginning of a valid interval and the syntax bit
+<CODE>RE_INTERVALS</CODE> is set.
+
+<A NAME="IDX11"></A>
+<DT><CODE>RE_CONTEXT_INVALID_OPS</CODE>
+<DD>
+If this bit is set, then repetition and alternation operators can't be
+in certain positions within a regular expression.  Specifically, the
+regular expression is invalid if it has:
+
+
+<UL>
+
+<LI>
+
+a repetition operator first in the regular expression or just after a
+match-beginning-of-line, open-group, or alternation operator; or
+
+<LI>
+
+an alternation operator first or last in the regular expression, just
+before a match-end-of-line operator, or just after an alternation or
+open-group operator.
+
+</UL>
+
+If this bit isn't set, then you can put the characters representing the
+repetition and alternation characters anywhere in a regular expression.
+Whether or not they will in fact be operators in certain positions
+depends on other syntax bits.
+
+<A NAME="IDX12"></A>
+<DT><CODE>RE_DOT_NEWLINE</CODE>
+<DD>
+If this bit is set, then the match-any-character operator matches
+a newline; if this bit isn't set, then it doesn't.
+
+<A NAME="IDX13"></A>
+<DT><CODE>RE_DOT_NOT_NULL</CODE>
+<DD>
+If this bit is set, then the match-any-character operator doesn't match
+a null character; if this bit isn't set, then it does.
+
+<A NAME="IDX14"></A>
+<DT><CODE>RE_INTERVALS</CODE>
+<DD>
+If this bit is set, then Regex recognizes interval operators; if this bit
+isn't set, then it doesn't.
+
+<A NAME="IDX15"></A>
+<DT><CODE>RE_LIMITED_OPS</CODE>
+<DD>
+If this bit is set, then Regex doesn't recognize the match-one-or-more,
+match-zero-or-one or alternation operators; if this bit isn't set, then
+it does.
+
+<A NAME="IDX16"></A>
+<DT><CODE>RE_NEWLINE_ALT</CODE>
+<DD>
+If this bit is set, then newline represents the alternation operator; if
+this bit isn't set, then newline is ordinary.
+
+<A NAME="IDX17"></A>
+<DT><CODE>RE_NO_BK_BRACES</CODE>
+<DD>
+If this bit is set, then <SAMP>`{'</SAMP> represents the open-interval operator
+and <SAMP>`}'</SAMP> represents the close-interval operator; if this bit isn't
+set, then <SAMP>`\{'</SAMP> represents the open-interval operator and
+<SAMP>`\}'</SAMP> represents the close-interval operator.  This bit is relevant
+only if <CODE>RE_INTERVALS</CODE> is set.
+
+<A NAME="IDX18"></A>
+<DT><CODE>RE_NO_BK_PARENS</CODE>
+<DD>
+If this bit is set, then <SAMP>`('</SAMP> represents the open-group operator and
+<SAMP>`)'</SAMP> represents the close-group operator; if this bit isn't set, then
+<SAMP>`\('</SAMP> represents the open-group operator and <SAMP>`\)'</SAMP> represents
+the close-group operator.
+
+<A NAME="IDX19"></A>
+<DT><CODE>RE_NO_BK_REFS</CODE>
+<DD>
+If this bit is set, then Regex doesn't recognize <SAMP>`\'</SAMP><VAR>digit</VAR> as
+the back reference operator; if this bit isn't set, then it does.
+
+<A NAME="IDX20"></A>
+<DT><CODE>RE_NO_BK_VBAR</CODE>
+<DD>
+If this bit is set, then <SAMP>`|'</SAMP> represents the alternation operator;
+if this bit isn't set, then <SAMP>`\|'</SAMP> represents the alternation
+operator.  This bit is irrelevant if <CODE>RE_LIMITED_OPS</CODE> is set.
+
+<A NAME="IDX21"></A>
+<DT><CODE>RE_NO_EMPTY_RANGES</CODE>
+<DD>
+If this bit is set, then a regular expression with a range whose ending
+point collates lower than its starting point is invalid; if this bit
+isn't set, then Regex considers such a range to be empty.
+
+<A NAME="IDX22"></A>
+<DT><CODE>RE_UNMATCHED_RIGHT_PAREN_ORD</CODE>
+<DD>
+If this bit is set and the regular expression has no matching open-group
+operator, then Regex considers what would otherwise be a close-group
+operator (based on how <CODE>RE_NO_BK_PARENS</CODE> is set) to match <SAMP>`)'</SAMP>.
+
+</DL>
+
+
+
+<H2><A NAME="SEC4" HREF="welcome.mhtml#TOC4">Predefined Syntaxes</A></H2>
+
+<P>
+If you're programming with Regex, you can set a pattern buffer's
+(see section <A HREF="regex_7.mhtml#SEC45">GNU Pattern Buffers</A>, and section <A HREF="regex_7.mhtml#SEC55">POSIX Pattern Buffers</A>)
+<CODE>syntax</CODE> field either to an arbitrary combination of syntax bits
+(see section <A HREF="regex_2.mhtml#SEC3">Syntax Bits</A>) or else to the configurations defined by Regex.
+These configurations define the syntaxes used by certain
+programs---GNU Emacs,
+<A NAME="IDX23"></A>
+POSIX Awk,
+<A NAME="IDX24"></A>
+traditional Awk, 
+<A NAME="IDX25"></A>
+Grep,
+<A NAME="IDX26"></A>
+<A NAME="IDX27"></A>
+Egrep--in addition to syntaxes for POSIX basic and extended
+regular expressions.
+
+</P>
+<P>
+The predefined syntaxes--taken directly from <TT>`regex.h'</TT>---are:
+
+</P>
+
+<PRE>
+#define RE_SYNTAX_EMACS 0
+
+#define RE_SYNTAX_AWK                                                   \
+  (RE_BACKSLASH_ESCAPE_IN_LISTS | RE_DOT_NOT_NULL                       \
+   | RE_NO_BK_PARENS            | RE_NO_BK_REFS                         \
+   | RE_NO_BK_VBAR               | RE_NO_EMPTY_RANGES                   \
+   | RE_UNMATCHED_RIGHT_PAREN_ORD)
+
+#define RE_SYNTAX_POSIX_AWK                                             \
+  (RE_SYNTAX_POSIX_EXTENDED | RE_BACKSLASH_ESCAPE_IN_LISTS)
+
+#define RE_SYNTAX_GREP                                                  \
+  (RE_BK_PLUS_QM              | RE_CHAR_CLASSES                         \
+   | RE_HAT_LISTS_NOT_NEWLINE | RE_INTERVALS                            \
+   | RE_NEWLINE_ALT)
+
+#define RE_SYNTAX_EGREP                                                 \
+  (RE_CHAR_CLASSES        | RE_CONTEXT_INDEP_ANCHORS                    \
+   | RE_CONTEXT_INDEP_OPS | RE_HAT_LISTS_NOT_NEWLINE                    \
+   | RE_NEWLINE_ALT       | RE_NO_BK_PARENS                             \
+   | RE_NO_BK_VBAR)
+
+#define RE_SYNTAX_POSIX_EGREP                                           \
+  (RE_SYNTAX_EGREP | RE_INTERVALS | RE_NO_BK_BRACES)
+
+/* P1003.2/D11.2, section 4.20.7.1, lines 5078ff.  */
+#define RE_SYNTAX_ED RE_SYNTAX_POSIX_BASIC
+
+#define RE_SYNTAX_SED RE_SYNTAX_POSIX_BASIC
+
+/* Syntax bits common to both basic and extended POSIX regex syntax.  */
+#define _RE_SYNTAX_POSIX_COMMON                                         \
+  (RE_CHAR_CLASSES | RE_DOT_NEWLINE      | RE_DOT_NOT_NULL              \
+   | RE_INTERVALS  | RE_NO_EMPTY_RANGES)
+
+#define RE_SYNTAX_POSIX_BASIC                                           \
+  (_RE_SYNTAX_POSIX_COMMON | RE_BK_PLUS_QM)
+
+/* Differs from ..._POSIX_BASIC only in that RE_BK_PLUS_QM becomes
+   RE_LIMITED_OPS, i.e., \? \+ \| are not recognized.  Actually, this
+   isn't minimal, since other operators, such as \`, aren't disabled.  */
+#define RE_SYNTAX_POSIX_MINIMAL_BASIC                                   \
+  (_RE_SYNTAX_POSIX_COMMON | RE_LIMITED_OPS)
+
+#define RE_SYNTAX_POSIX_EXTENDED                                        \
+  (_RE_SYNTAX_POSIX_COMMON | RE_CONTEXT_INDEP_ANCHORS                   \
+   | RE_CONTEXT_INDEP_OPS  | RE_NO_BK_BRACES                            \
+   | RE_NO_BK_PARENS       | RE_NO_BK_VBAR                              \
+   | RE_UNMATCHED_RIGHT_PAREN_ORD)
+
+/* Differs from ..._POSIX_EXTENDED in that RE_CONTEXT_INVALID_OPS
+   replaces RE_CONTEXT_INDEP_OPS and RE_NO_BK_REFS is added.  */
+#define RE_SYNTAX_POSIX_MINIMAL_EXTENDED                                \
+  (_RE_SYNTAX_POSIX_COMMON  | RE_CONTEXT_INDEP_ANCHORS                  \
+   | RE_CONTEXT_INVALID_OPS | RE_NO_BK_BRACES                           \
+   | RE_NO_BK_PARENS        | RE_NO_BK_REFS                             \
+   | RE_NO_BK_VBAR          | RE_UNMATCHED_RIGHT_PAREN_ORD)
+</PRE>
+
+
+
+<H2><A NAME="SEC5" HREF="welcome.mhtml#TOC5">Collating Elements vs. Characters</A></H2>
+
+<P>
+POSIX generalizes the notion of a character to that of a
+collating element.  It defines a <STRONG>collating element</STRONG> to be "a
+sequence of one or more bytes defined in the current collating sequence
+as a unit of collation."
+
+</P>
+<P>
+This generalizes the notion of a character in
+two ways.  First, a single character can map into two or more collating
+elements.  For example, the German
+collates as the collating element <SAMP>`s'</SAMP> followed by another collating
+element <SAMP>`s'</SAMP>.  Second, two or more characters can map into one
+collating element.  For example, the Spanish <SAMP>`ll'</SAMP> collates after
+<SAMP>`l'</SAMP> and before <SAMP>`m'</SAMP>.
+
+</P>
+<P>
+Since POSIX's "collating element" preserves the essential idea of
+a "character," we use the latter, more familiar, term in this document.
+
+</P>
+
+
+<H2><A NAME="SEC6" HREF="welcome.mhtml#TOC6">The Backslash Character</A></H2>
+
+<P>
+<A NAME="IDX28"></A>
+The <SAMP>`\'</SAMP> character has one of four different meanings, depending on
+the context in which you use it and what syntax bits are set
+(see section <A HREF="regex_2.mhtml#SEC3">Syntax Bits</A>).  It can: 1) stand for itself, 2) quote the next
+character, 3) introduce an operator, or 4) do nothing.
+
+</P>
+
+<OL>
+<LI>
+
+It stands for itself inside a list
+(see section <A HREF="regex_3.mhtml#SEC17">List Operators (<CODE>[</CODE> ... <CODE>]</CODE> and <CODE>[^</CODE> ... <CODE>]</CODE>)</A>) if the syntax bit
+<CODE>RE_BACKSLASH_ESCAPE_IN_LISTS</CODE> is not set.  For example, <SAMP>`[\]'</SAMP>
+would match <SAMP>`\'</SAMP>.
+
+<LI>
+
+It quotes (makes ordinary, if it's special) the next character when you
+use it either:
+
+
+<UL>
+<LI>
+
+outside a list,<A NAME="DOCF1" HREF="regex_foot.mhtml#FOOT1">(1)</A> or
+
+<LI>
+
+inside a list and the syntax bit <CODE>RE_BACKSLASH_ESCAPE_IN_LISTS</CODE> is set.
+
+</UL>
+
+<LI>
+
+It introduces an operator when followed by certain ordinary
+characters--sometimes only when certain syntax bits are set.  See the
+cases <CODE>RE_BK_PLUS_QM</CODE>, <CODE>RE_NO_BK_BRACES</CODE>, <CODE>RE_NO_BK_VAR</CODE>,
+<CODE>RE_NO_BK_PARENS</CODE>, <CODE>RE_NO_BK_REF</CODE> in section <A HREF="regex_2.mhtml#SEC3">Syntax Bits</A>.  Also:
+
+
+<UL>
+<LI>
+
+<SAMP>`\b'</SAMP> represents the match-word-boundary operator
+(see section <A HREF="regex_4.mhtml#SEC28">The Match-word-boundary Operator (<CODE>\b</CODE>)</A>).
+
+<LI>
+
+<SAMP>`\B'</SAMP> represents the match-within-word operator
+(see section <A HREF="regex_4.mhtml#SEC29">The Match-within-word Operator (<CODE>\B</CODE>)</A>).
+
+<LI>
+
+<SAMP>`\&#60;'</SAMP> represents the match-beginning-of-word operator <BR>
+(see section <A HREF="regex_4.mhtml#SEC30">The Match-beginning-of-word Operator (<CODE>\&#60;</CODE>)</A>).
+
+<LI>
+
+<SAMP>`\&#62;'</SAMP> represents the match-end-of-word operator
+(see section <A HREF="regex_4.mhtml#SEC31">The Match-end-of-word Operator (<CODE>\&#62;</CODE>)</A>).
+
+<LI>
+
+<SAMP>`\w'</SAMP> represents the match-word-constituent operator
+(see section <A HREF="regex_4.mhtml#SEC32">The Match-word-constituent Operator (<CODE>\w</CODE>)</A>).
+
+<LI>
+
+<SAMP>`\W'</SAMP> represents the match-non-word-constituent operator
+(see section <A HREF="regex_4.mhtml#SEC33">The Match-non-word-constituent Operator (<CODE>\W</CODE>)</A>).
+
+<LI>
+
+<SAMP>`\`'</SAMP> represents the match-beginning-of-buffer
+operator and <SAMP>`\''</SAMP> represents the match-end-of-buffer operator
+(see section <A HREF="regex_4.mhtml#SEC34">Buffer Operators</A>).
+
+<LI>
+
+If Regex was compiled with the C preprocessor symbol <CODE>emacs</CODE>
+defined, then <SAMP>`\s<VAR>class</VAR>'</SAMP> represents the match-syntactic-class
+operator and <SAMP>`\S<VAR>class</VAR>'</SAMP> represents the
+match-not-syntactic-class operator (see section <A HREF="regex_5.mhtml#SEC38">Syntactic Class Operators</A>).
+
+</UL>
+
+<LI>
+
+In all other cases, Regex ignores <SAMP>`\'</SAMP>.  For example,
+<SAMP>`\n'</SAMP> matches <SAMP>`n'</SAMP>.
+
+</OL>
+
+<P><HR><P>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_1.mhtml">previous</A>, <A HREF="regex_3.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+</layout::page>
+<include footer.mhtml>

@@ -1,0 +1,57 @@
+;;; substs.mhtml: -*- Meta-HTML -*-  Any global macros and substs go here.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep 10 08:39:45 1995.
+;;;
+
+<defvar shopping::dir <get-var mhtml::relative-prefix>>
+;;; Returns "true" if the variable passed contains a number.
+<defsubst digits-p whitespace=delete>
+  <match <get-var "%0"> "^[0-9]+$">
+</defsubst>
+
+;;; Returns the number of elements in the array specified by VAR.
+<defsubst array-length whitespace=delete>
+  <set-var macros::i = 0 macros::array[] = <get-var "%0[]">>
+  <while <get-var macros::array[macros::i]>>
+    <increment macros::i>
+  </while>
+  <get-var macros::i>
+</defsubst>
+
+;;; Passed a variable containing a fully qualified variable name, this
+;;; returns only the variable part without the package part.
+<defsubst var-name whitespace=delete>
+  <match <get-var "%0"> "[^:]*::" action=delete>
+</defsubst>
+
+;;; Passed a variable containing a fully qualified variable name, this
+;;; returns only the package part without the variable part.
+<defsubst pack-name whitespace=delete>
+  <set-var pack-name::temp=<match <get-var "%0"> "[^:]*::" action=extract>>
+  <subst-in-var pack-name::temp "::$" "">
+  <get-var pack-name::temp>
+</defsubst>
+
+<set-var dbdir=<get-var mhtml::include-prefix shopping::dir>/catalog/>
+<defsubst database><get-var dbdir>%0.db</defsubst>
+    
+<defsubst canonicalize whitespace=delete>
+  <upcase
+   <subst-in-string <prog %0> "^[ \t\n]+" "" "[ \t\n]+$" "" "[ \t\n_]+" "-">>
+</defsubst>
+
+<defsubst db-of-class><database <canonicalize "%0">></defsubst>
+
+<defsubst check-password whitespace=delete>
+  <unset-var password-db-readable>
+  <with-open-database db "<database %0>">
+    <set-var
+      password-db-readable = true
+      password-present-p   = <database-load-record db system-password>>
+  </with-open-database>
+  <if <get-var password-db-readable>
+      <or <not <get-var password-present-p>>
+	  <string-eq <get-session-var maintenance-password>
+		     <get-var system-password>>>>
+</defsubst>

@@ -1,0 +1,1277 @@
+2001-02-01  Brian J. Fox  <bfox@ua.com>
+
+	* powerstrip-tags/pagelist.mhtml (def-pagelist): Use "strip=true"
+	when creating the alist of information.
+
+	* alistfuncs.c: Add "&key strip" to the documentation.
+
+2001-01-30  Brian J. Fox  <bfox@ua.com>
+
+	* powerstrip-tags/nested-items.mhtml (nested-items-list): Use
+	"&body" instead of "&bdoy".
+
+	* standard.mhtml (bootstrapper::autoloads): Function is called
+	SMALL-CAPS, not SMALLCAPS.
+	(powerstrip): Typo (get-var-oce to get-var-once).
+
+2001-01-29  Brian J. Fox  <bfox@ua.com>
+
+	* sections.c: Modifiy documentation of several server variables.
+
+2001-01-28  Brian J. Fox  <bfox@ua.com>
+
+	* sessionfuncs.c: (pf_get_session_var): Fix example to create a
+	session.
+
+	* flowfuncs.c (pf_group): Documentation modification.
+
+	* alistfuncs.c (pf_alist_package_vars): Documentation typo.
+	(pf_alist_to_package): Documentation addition.
+
+2000-09-19  Brian J. Fox  <bfox@ua.com>
+
+	* tagsets/mdb.mhtml (mdb::complete-example): Fix busted definition.
+
+	* sections.c: Brian SQL documentation more up to date.
+
+	* varfuncs.c (pf_symbol_info): Cast "length" to a long for printf.
+
+2000-01-20  Brian J. Fox  <bfox@ua.com>
+
+	* tagsets/dirfuns.mhtml (dir::names-in-dir): Files of type
+	EXECUTABLE are also of type FILE.
+
+1999-06-19  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* tagsets/arrays.mhtml (comma-separated): No comma before "and".
+
+1998-11-04  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* parser.c (mhtml_canonicalize_file_name): Make sure there is
+	enough space allocated for filename extensions to be tacked on to
+	saved_webname.
+
+1998-09-25  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* tagsets/dirfuns.mhtml: <dir::create-emacs-backup-file...> now
+	takes "max" keyword argument.
+
+1998-09-24  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* tagsets/dirfuns.mhtml: Save file modes for dir::create-emacs-backup.
+
+	* filefuncs.c (get_file_properties): Added MODE to the information
+	returned.
+
+	* tagsets/dirfuns.mhtml: New function <dir::create-emacs-backup>.
+
+1998-09-23  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* tagsets/dirfuns.mhtml: <dir::names-in-dir>.  Don't aggressively
+	delete the first two items -- make sure that they are "." and "..".
+
+1998-09-10  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* gsql.c (pf_database_load_record): Allow "pack" as well as
+	"package" and "prefix".
+
+	* parser.c (mhtml_execute_function): Free the local package for
+	the case of a defun which has no formal parameters.  HUGE memory
+	leak, uncommon in some programs, big problem in others.
+
+1998-09-09  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* gsql.c (pf_database_save_package): Free "table_fields" after use.
+	(pf_database_columns): Free "result" after use.
+	(pf_database_load_record): Free "table_fields" after use.
+	(pf_database_save_record): Free "table_fields" after use.
+	(pf_database_delete_record): Free "table_fields" after use.
+
+1998-07-07  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* gsql.c (bprintf_gsql_escape): Only truncate if truncate_p is set.
+
+	* tagsets/parser.mhtml: Moved relative pathname parsing to
+	<*parser*::push/pop-file>.
+
+1998-07-03  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* mathfuncs.c (pf_max): Add MIN and MAX tags.
+
+1998-06-25  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* Makefile.in (STANDARD_TAGS): Also include
+	tagsets/german-numbers.mhtml.
+
+1998-06-23  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* stringfuncs.c (pf_char_offsets): New function produces offsets
+	of CHAR in STRING.
+
+1998-06-12  Brian J. Fox  <bfox@speedy.datawave.net>
+
+	* libmhtml/*funcs.c: Use new DEFINE_SECTION macro for documentation.
+
+	* relfuncs.c (pf_or, pf_and): Better docs.
+
+1998-06-08  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* flowfuncs.c (pf_ifneq): New function.
+
+1998-06-05  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* tagsets/sql.mhtml: Added pgSQL to possible database types.
+
+1998-06-04  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* tagsets/general.mhtml: Write and document strings::left-trim,
+	strings::right-trim, and strings::both-trim.
+
+1998-05-27  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* parser.c (mhtml_execute_function): Allow "&body foo" to collect
+	the body of a macro.  This works well with &unevalled, and doesn't
+	reset &key.  The following is completely valid:
+	<defmacro macro arg1 &key foo bar &unevalled &body qbody &body body>
+	   <get-var-once qbody> evaluates to <get-var-once body>
+	</defmacro>
+
+	* require.c (pf_require): When the required file is stored in text
+	format, modify `%%::incpref' and `%%::relpref' just as we do for
+	<include>.
+
+1998-05-25  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* arrayfuncs.c (pf_foreach): Copy the contents of the array that
+	we are about to manipulate.  This allows functions to manipulate
+	the symbol contents of the array without destroying the array
+	pointers that we are using.  It also takes more RAM, but this
+	is something that we can hopefully live with.
+
+	* tagsets/session.mhtml: Cleanup documentation, advertise specific
+	variables which are set dependent on session state.
+
+1998-05-22  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* parser.c (mhtml_execute_function): New definition keyword
+	&unevalled causes remaining arguments to not be evalled before
+	assignation.
+
+1998-05-21  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* gsql.c (dsn_lookup): Moved from all other files to here.
+
+1998-05-20  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* modfuncs.c (pf_load_module): Allow a different initialization
+	function to called, instead of `module_initialize'.  When the
+	keyword argument "initfunc" is given, this overrides the default
+	of inhibiting initialization on some systems (linux, solaris, etc).
+
+1998-05-19  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* tagsets/dump-package.mhtml: Can now dump the local package.
+	Also added <dump-alist alist>.
+
+	* tagsets/sql.mhtml: New functions generate generic search forms
+	for specific SQL database tables.
+
+1998-05-18  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* parser.c (mhtml_execute_function): If a defun with a keyword
+	argument was called without any arguments at all, the value of the
+	keyword was set to the value of the keyword in the CurrentPackage,
+	not to NULL as it should have.
+
+1998-05-15    <bfox@roadshow.datawave.net>
+
+	* tagsets/dirfuns.mhtml: New function <dir::handle-dots pathname>.
+	Cleans up "./" and "../", returning a new pathname.
+
+1998-05-07    <bfox@roadshow.datawave.net>
+
+	* parser.c (pagefunc_initialize_notifiers): New variable
+	mhtml::verbose-error-reporting causes the parser to spit out
+	more information for missing tag enders.
+
+1998-04-30    <bfox@roadshow.datawave.net>
+
+	* tagsets/general.mhtml: Rewrite select-option.  Deprecate
+	select-option-value.
+	New functions: strings::kill-trailing, strings::kill-leading, and
+	strings::delete-whitespace each take a variable name as an argument.
+
+1998-04-28    <bfox@roadshow.datawave.net>
+
+	* Makefile.in (POWERSTRIP_TAGS): New lang.mhtml file added.
+
+1998-04-26    <bfox@roadshow.datawave.net>
+
+	* tagsets/general.mhtml: <copy-package> Rewrite to handle binary
+	variables and functions.
+
+1998-04-25    <bfox@roadshow.datawave.net>
+
+	* symbols.c (symbol_copy): Actually copy UserFunctions, not just
+	the pointer to them.  Ahhh, the expense is necessary.
+
+	* modfuncs.c (pf_load_module): Don't call module_initialize() for
+	linux as well as FreeBSD, since they always call _init().
+
+1998-04-24    <bfox@roadshow.datawave.net>
+
+	* pages.c (page_find_tag_end): Fixed a bug where a comment
+	containing extra close brackets could confuse page_find_tag_end()
+	(Reported by Marc Tamsky (marc@mag.net)).
+
+1998-04-21    <bfox@roadshow.datawave.net>
+
+	* parser.c (mhtml_add_user_function): If the variable
+	mhtml::warn-on-redefine is set, then redefining a primitive or a
+	user function or macro produces error text in SYSTEM-ERROR-OUTPUT.
+	If the variable mhtml::warn-on-redefine-primitive is set, then
+	only the redefinitions of primitives cause warnings.
+
+1998-04-11  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_make_identifier): Write as a primitive.  It is
+	heavily used on modern sites.
+
+Fri Apr  3 19:30:12 1998  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* filefuncs.c (pf_mkfifo): New function <unix::mkfifo>.
+
+Wed Apr  1 10:09:09 1998  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* stringfuncs.c (pf_string_neq): Added <string-neq ...>.
+
+	* mathfuncs.c: Added <neq ...>.
+
+Tue Mar 31 03:21:39 1998  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_redirect): Allow "target=foo" arg to specify
+	the window that the redirected document should appear in.
+
+Sun Mar  1 07:56:20 1998  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* tagsets/dirfuns.mhtml: Added <dir::dirname>.
+
+Tue Jan  6 20:32:22 1998  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* gsql.c (bprintf_gsql_escape): Escape parenthesis for both mSQL
+	and MySQL.
+
+Sat Jan  3 22:47:57 1998  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* forms.c (forms_set_tag_value_in_package): Disallow negative indices.
+	(forms_get_tag_value_in_package): Disallow negative indicies.
+
+Thu Dec 11 16:41:20 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* parser.c (mhtml_canonicalize_file_name): Don't allow last_slash
+	to get negative. (if (last_slash < 0) last_slash = 0;).
+
+Sun Dec  7 09:55:14 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* mysqlfuncs.c (gsql_get_column): Make sure that msql_row is not
+	null before dereferencing.
+
+	* msqlfuncs.c (gsql_get_column): Make sure that msql_row is not
+	null before dereferencing.
+
+Thu Nov 27 12:37:57 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* tagsets/sendmail.mhtml (e-mail::sendmail): Surround RCPT TO
+	recipients with angle brackets.  Anal mailers such as qmail won't
+	take badly formatted addresses.
+
+Tue Nov 11 11:15:15 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* powerstrip-tags/site.mhtml (site::dynamic-bg): Don't assume that
+	the directory where dynamically created backgrounds is the
+	canonical one: /images/backgrounds.
+
+Sat Nov  8 13:02:56 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* parser.c (mhtml_execute_function): Only destroy param_package if
+	it was unnamed.
+	(mhtml_let): Only copy FROM to PACK if it isn't already the same
+	symbol.
+
+	* tagsets/mhttpd.mhtml: (mhtml::post-secure) Save the raw data in
+	the package RAW-POSTED.
+
+Thu Nov  6 12:41:45 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* gsql.c (gsql_database_set_prefix_tablenames): Allow the user to
+	set this value to off.
+	(gsql_database_set_truncate_columns): Allow the user to set this
+	value to off.
+
+Mon Oct 27 07:30:16 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/http.c (decompose_and_post): Rewrite from scratch.
+
+Mon Oct 27 07:31:18 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* tagsets/general.mhtml: (with-safe-environment) Execute BODY in
+	an environment where commands that could affect the file system
+	are disabled.  In addition, commands which can define or undefine
+	functions are disabled.
+
+	* parser.c (mhtml_base64encode): Takes an additional argument
+	SHORTLINES -- non-zero says that is how many characters to place
+	on a line.  A value of zero means don't break any lines.
+
+	* stringfuncs.c (func_table): Moved BASE64[DE/EN]CODE and
+	UNIX::CRYPT into this file.  Building without libdes still allows
+	you to encode and decode base64 data.
+
+Tue Oct 14 07:36:18 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* stringfuncs.c (pf_pad): Don't evaluate the padded material twice.
+
+	* packfuncs.c (pf_with_local_package): Use symbol_push_package and
+	symbol_pop_package to allow the use of "^::foo" notation.
+
+Sat Oct 11 14:51:27 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* mysqlfuncs.c (free_database_resources): Free dbname and hostname.
+	(gsql_connect): Make error messages be informative.
+
+	* msqlfuncs.c (free_database_resources): Free dbname and hostname.
+
+	* mysqlfuncs.c (New File): Allow mySQL database usage.
+
+Thu Oct  9 09:01:39 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* cryptfuncs.c (pf_base64decode): Allow the decoding of the data
+	into a binary variable.
+	(pf_base64encode): You can now encode data as well.
+
+Mon Sep 22 08:14:41 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* require.c (pf_require): Call a function named ".libinit" if
+	present in the library.  For both included and library loaded
+	files.
+
+Sat Sep 20 04:22:18 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* arrayfuncs.c: Write documentation for arrayfuncs.c.
+
+	* sessionfuncs.c (pf_create_session): Document session commands.
+	(pf_set_session_data): Allow optional SID argument.
+
+Fri Sep 12 20:07:57 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pages.c (page_find_tag_start): Skip semi-colon comments while
+	searching.
+
+Thu Sep  4 07:40:16 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* tagsets/general.mhtml: <apply>, <mapply> -- rewrite using new
+	language features and avoiding non-double-evaluation of body.
+
+Wed Sep  3 16:43:40 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/http.c (mr_set_cookie): If the variable
+	MHTML::NEVER-SEND-COOKIES is set, *never* send the client a
+	cookie.
+
+Wed Aug 20 05:33:14 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* tagsets/http.mhtml: New file implements URL retrieval in Meta-HTML.
+
+Sun Aug 17 20:27:15 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* powerstrip-tags/standard-header.mhtml: Call <get-var-once
+	title>, not <get-var title>.
+
+	* powerstrip-tags/pagelist.mhtml: Rewrite <next> and <prev> tags.
+
+
+Mon Aug 18 15:14:49 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* libserver/http.c (decompose_and_post): When enctype is
+	multipart/form-data, allow multiple values for the same variable
+	name, just as we do in the standard case.
+
+Thu Aug 14 10:21:26 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* stringfuncs.c (pf_string_length): Write as a primitive.
+
+Mon Aug  4 08:36:52 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pages.c (page_push_page): Add information about the current page
+	to a page stack.
+	(page_pop_page): Pop off the top element of the stack, discarding
+	it.
+	(page_pdl_tos): Return the currently pushed page.
+	(page_pdl_page): Return the page at offset OFFSET.  This is used
+	to get the first page in the execution chain by commands which
+	operate on the entire buffer, such as subst-in-page and
+	cleanup-whitespace.
+
+	* parser.c (mhtml_let): New function does what pf_with used to do,
+	but internally.
+	(mhtml_execute_function): Every function is now executed via the
+	use of mhtml_let -- i.e., nothing gets left in the page to be
+	evaluated.
+
+Fri Jul 25 14:08:09 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* stringfuncs.c (pf_plain_text): Complete rewrite evaluates the
+	body before performing the <p> insertion.  You can now call
+	plain-text on a variable:  <plain-text> <get-var foo> </plain-text>.
+
+	* parser.c (mhtml_execute_function): Make sure that the closer for
+	<with> matches the opener -- i.e., cannot use </with> when
+	LEFT_BRACKET and RIGHT_BRACKET aren't the defaults.
+
+Thu Jul 24 14:09:19 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* mathfuncs.c (arithmetic_process): Complete rewrite allows
+	arithmetic functions (and <gt, lt, and eq) to take an unbounded
+	number of arguments (i.e., you can now write <mul 3 4 5> and get 60).
+
+Tue Jul 22 23:32:10 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Many files: Split apart pagefuncs.c into section manageable
+	parts. New macros DEFUN, DEFMACRO, DEFUNX, DEFMACROX, and
+	DOC_SECTION are used to place the documentation for a function
+	as part of the source of that function.  New program "createdoc.c"
+	reads source files and builds a packed documentation database.
+	Code in docs/Makefile understands how to build consistent database
+	information during the transition phase -- you can create new
+	documentation in either place and it won't be destroyed.
+	The documentation in libmhtml/*.c takes precedence for function
+	documentation in case of conflict.
+
+	* cryptfuncs.c (pf_unix_crypt): Define <unix::crypt string salt>
+	if the user has crypt () on their system.
+
+Mon Jul 21 11:41:21 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* forms.c (forms_input_data): Make sure that PROGRAM-ARGUMENTS'
+	values_index agrees with the actual number of arguments interned.
+
+Sat Jul 19 13:21:28 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* stringfuncs.c: New file encapsulates all of the string
+	manipulation functions from pagefuncs.c.
+	Makefile.in: Added stringfuncs to the appropriate variables.
+
+	* filefuncs.c (pf_file_exists): Now written in C.
+
+	* tagsets/general.mhtml: Remove definition of file-exists-p.
+
+	* lockname.c (hashname): Use a larger prime number to avoid
+	gratuitous locking conflicts.
+
+	* tagsets/menus.mhtml: Rewrite, using new language features (&key,
+	anonymous package reference.
+
+	* tagsets/general.mhtml (make-alist): Return an alist from the
+	name=value pairs passed.
+
+	* tagsets/dirfuns.mhtml: Minor mods, using new language features.
+
+	* tagsets/english-numbers.mhtml: Use new features.
+
+	* tagsets/form-to-database.mhtml: Rewrite, adding documentation
+	and using new language features.
+
+Fri Jul 18 16:10:35 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* flowfuncs.c (pf_with): Don't save a variable if already saved.
+
+	* parser.c (mhtml_execute_function): Protect named parameters in
+	defsubst, defmacro and defweakmacro with <with ...> ... </with>.
+
+Thu Jul 17 03:31:42 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* powerstrip-tags/parameters.mhtml: Rewrite some functions using
+	new parser features.  Some speedup realized.
+
+	* prims.c: Add <%%quote-for-set-var &rest body>
+
+	* parser.c (quote_for_setvar): Expose to world.
+
+	* require.c (pf_require): If the required file is found in source
+	code mode, push the new filename on the stack so that errors
+	reflect the correct file.
+
+	* symbols.c (PackagePDL): An array of recently current packages.
+	The packages get on this list with symbol_push_package
+	(new_package), and are removed with symbol_pop_package ().
+	Deleting a package from the global list side effects this PDL --
+	possibly destroying the usefulness of the carat referencing
+	semantics.
+
+	Semantics for referencing packages on this list:
+	<get-var ^::bar> --> "previous" value of bar.
+	<get-var ^^::bar> --> "previous previous" value of bar.
+	<defun foo x> <get-var x>:<get-var ^::x>:<get-var ^^::x> </defun>
+	<defun foo-1 x> <foo <get-var x>-1> </defun>
+	<set-var x=hello>
+	<foo this> --> this:hello:
+	<foo-1 this> --> this-1:this:hello
+
+	* parser.c (mhtml_add_user_function): If keywords arguments are to
+	be allowed for this function, set the flag here.
+	
+	(mhtml_execute_function): Handle &key, &rest.  Substantial
+	rewrite.
+
+	* symbols.c (symbol_canonical_name): Put the zero in RESULT, not
+	in NAME.
+
+Wed Jul 16 14:48:12 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* tagsets/dump-package.mhtml: Rewrite, allowing recursive dumping
+	of packages (i.e., alist expansion).
+
+Sun Jul 13 16:54:57 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pages.c (page_subst_in_page_pivot): Use REG_NOTBOL when
+	executing regexec () after the first match, disallowing
+	beginning-of-line matches for subsequent calls.
+
+Sat Jul 12 11:20:18 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_alist_to_package): Specifying a package name of
+	"" is equivalent to specifying no package name at all: i.e., the
+	current package, not the "DEFAULT" package.
+
+	* tagsets/numbers.mhtml (comma-separated-digits): Handle numbers
+	with decimal places gracefully.
+
+Thu Jul 10 09:58:30 1997  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* tagsets/dirfuns.mhtml: Use new ticks field in <file-newer?>
+
+	* filefuncs.c (unix_add_date): Add seconds since epoch as
+	additional last element.  Affects CREATED, WRITTEN, and READ.
+
+	* mathfuncs.c: New file contain transplanted arithmetic functions.
+
+	* Makefile.in (FUNCFILES): Add mathfuncs.o.
+
+	* flowfuncs.c (pf_current_lineno): Return the parser's idea of the
+	current line number, or set the line number.  Not for mortals.
+
+	(pf_prog, pf_concat): Moved here from simplefuncs.c
+
+	* parser.c: New variable `parser_current_lineno' used to keep
+	track of the current line number.
+	
+	(page_process_page_internal): Increment parser_current_lineno in
+	comments, and in between tags.
+
+	* Makefile.in (STANDARD_TAGS): Add tagsets/parser.mhtml to the
+	list of necessary functions.
+
+	* tagsets/parser.mhtml: New file contains helper functions for the
+	parser.
+
+	* standard.mhtml: Include tagsets/parser.mhtml.
+
+	* pagefuncs.c (pf_include): Remember the name of the last read file.
+
+	* pages.c (page_read_template): Save the name of the most recently
+	loaded file in `page_last_read_filename'.
+
+	* pagefuncs.c (pf_include): If debug_level is set, and the file
+	couldn't be included, and there is no ALT code, display debugging
+	message.
+
+Thu Nov 28 18:50:14 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* filefuncs.c (pf_directory_contents): Given the empty string as
+	the package name, use the current package.
+
+Thu Nov 21 15:28:19 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_sub): If called with no arguments, then just put
+	it back in the page.
+	(pf_ifeq): Don't evaluate the consequent twice.
+	(pf_if): Don't evaluate the consequent twice.
+	(pf_while): Don't evaluate the already evaluated body results.
+	(pf_downcase): Don't evaluate the already evaluated text.
+	(pf_upcase): Don't evaluate the already evaluated text.
+	(pf_capitalize): Don't evaluate the already evaluated text.
+
+Mon Nov 18 08:27:25 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* parser.c (mhtml_add_user_function): Strip comments at define
+	time.
+
+    -------------------- Above are changes for 5.02 --------------------
+
+Sat Nov 16 15:16:01 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* database.c: Add GDBM_FAST to databases opened with WRITE mode.
+
+Thu Oct 31 11:02:48 1996  Henry Minsky  <hqm@pixis.datawave.net>
+
+	* gsql.c (pf_database_tables): SQLRowCount returns 0 on anything
+ 	but results of INSERT and UPDATE, so we have to manually count the
+ 	rows returned from a SQLTables command, and dynamically allocate
+ 	storage for the mhtml result array.
+
+Mon Oct 28 12:20:31 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* database.c (database_strerror): Return a string describing the
+	most recent error in the database system.
+
+Sat Oct 26 02:18:09 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* cryptfuncs.c (triple_des): Zero out the destination before
+	encryption.  This means that a string S encrypted with key K will
+	always return the same encrypted string.
+	(triple_des): Pad the input buffer to 8 byte boundary before
+	encrypting.
+
+Wed Oct 23 13:48:53 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* parser.c (read_sexp_1): Don't forget to put back semi-colons
+	which don't start a comment.
+
+Tue Oct 22 07:37:44 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_redirect): Use the current protocol and version,
+	not just HTTP/1.0.
+
+	* symdump.c (symbol_dump_package): Don't dump the package if there
+	are no symbols in it.
+
+Sat Oct 19 08:31:41 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* parser.c (read_sexp_1): Skip comments outside of quotes.  This
+	fixes <if> statements containing comments.
+
+Mon Oct  7 08:35:06 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* symbols.c (symbol_store_array): Add definition for this function.
+
+	* symbols.h: Add prototype for symbol_store_array ().
+
+Thu Oct  3 09:51:52 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pages.c (http_return_image): Deprecate unused function.
+	(page_set_cookie): Deprecate unused function.
+	(page_insert_http_header): Deprecate unused function.
+	(page_syserr): Analogous functions to page_debug and friends for
+	system errors only.
+
+Wed Oct  2 01:15:35 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* require.c (pf_require): Make sure that mhtml_user_keywords has a
+	value after calling symbol_load_package ().
+
+Tue Oct  1 14:37:07 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (add_user_function): Carefully handle CR/NL sequence.
+	(read_sexp_1): Carefully handle CR/NL sequence.
+	(page_process_page_internal): Carefully handle CR/NL sequence.
+
+Mon Sep 30 09:49:06 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (change_increment): Multiply the BY= value by the
+	default increment, thus making decrement with arguments do the
+	right thing.
+
+Fri Sep 27 12:02:19 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* filefuncs.c (unix_add_date): Store 2 digits per item -- pad with
+	leading zeros.
+
+	* msqlfuncs.c (pf_database_query): Merge/edit in changes from
+	hqm@ua.com which allow the user to specify a "keys=foo" argument.
+
+Sun Sep 15 08:28:20 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* msqlfuncs.c (pf_database_save_record): Don't print keyfield name
+	twice.  Merge in changes from hqm.
+
+Tue Sep  3 13:33:40 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_redirect): Allow protocols other than http to
+	pass through unharmed.
+
+Mon Sep  2 10:29:20 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* symbols.c (symbol_copy): Allow user defined functions to be
+	copied.
+
+Thu Aug 29 12:28:02 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_create_session): And other functions.  Use
+	"DEFAULT::SID" whereever "SID" is referenced.
+
+Fri Aug 16 08:33:58 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_substring): Fix inverted calculation (beg - end)
+	should have been (end - beg).
+	(page_process_page_internal): Complain loudly to page_debug () if
+	an internal function resets search_start to before the beginning
+	of the buffer.
+
+Thu Aug 15 12:38:10 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pages.c (page_subst_in_page): Don't do replacement in the case
+	that the length of the matched string is 0.
+
+Wed Aug  7 13:09:20 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_pad): Allow "center" as a synonym for "middle".
+	(pf_package_to_alist): When not passed a package name, use the
+	current package.  That is, no package is a synonym for a package
+	name of "".
+
+Tue Aug  6 12:58:08 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* cryptfuncs.c (pf_decrypt, pf_encrypt): Encrypt variable contents
+	using triple-DES encryption   Only compiled when --with-des is
+	specified to configure.
+
+Wed Jul 31 09:36:14 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* cgi-exec.c (): New file.
+
+	* pagefuncs.c (pf_server_push): Use write () to output data, not
+	fprintf ();  Set variable mhtml::server-pushed when called.
+	(pf_cgi_exec): Moved to cgi-exec.c.  Similar changes made to
+	pagefuncs.h.
+
+Fri Jul 26 17:28:56 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (execute_user_function): Additional argument ATTR is
+	the open tag body of the called function.  Now <set-var
+	%attributes> does "the right thing".  Yeah, right.
+
+Sat Jul 20 17:37:34 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* Makefile.in (prims.c): New file implements %%READ and %%EVAL.
+
+Mon Jul  8 12:14:01 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_plain_text): New keyword NOLOWER says not to
+	operate on lowercase characters at the starts of paragraphs.
+
+Fri Jul  5 14:06:21 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (read_sexp_1): Hairy changes to limit when
+	backslashes are stripped from the input stream.  Don't ask, you
+	don't want to know!
+
+Thu Jul  4 00:11:27 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* session.c (session_lock_database): New arg MODE controls whether
+	the database should be locked for read or for write.  All callers
+	in this file changed.
+
+Tue Jul  2 19:33:57 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_get_variable_once, pf_get_variable): If
+	debugging is set greater than 11, notify when the value is not
+	present.
+	
+Sat Jun 29 09:06:38 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* session.h: Allow the user to specify the location of the session
+	database.  New function set_session_database_location ().
+
+Sat Jun 15 09:57:01 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* streamfuncs.c (pf_stream_get_contents): New arg CHUNK-SIZE=size
+	causes that many bytes to be read from the stream, and ignores
+	STOP-AT argument.
+	(pf_stream_writeable): Use select () on those systems which have
+	it to check if the stream is actually writeable.
+	(pf_stream_shutdown): New function.  Close an open socket.
+	(stream_write): 
+	(set_io_timer): A 28.8 modem can deliver a maximum of 3.6k per
+	second without taking compression into consideration.  A 14.4 can
+	only deliver 1.8k per second.  So, we will give the network 2
+	seconds to deliver each 1k of data, and then cushion that with a 10
+	second grace period.  Gee, isn't the Internet Fantastic?
+	The actual timeout can be controlled with the value of the
+	variable mhtml::minimum-data-transfer-rate; the number of bytes
+	per second that we insist on being able to transfer.
+
+Wed Jun 12 16:57:48 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_cgi_encode): Make sure that symbol names passed
+	in a package get the package name as part of the symbol.  Without
+	this, several existing packages will break.
+
+Tue Jun 11 15:53:03 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c, session.c, session.h: Change all references to
+	`sid_t' to be `session_id_t'.  HPUX already has sid_t.
+
+Fri Jun  7 17:49:08 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (arithmetic_process): Don't call strchr () on  the
+	NULL string, you moron.  Give debugging output when arithmetic
+	operators called with fewer than two args.
+
+Sun Jun  2 10:25:15 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (page_process_page_internal): Delete the body text
+	even when syntax checking only.
+
+Fri May 24 10:56:32 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_cgi_decode): Implement this function.
+
+Sat May 18 09:36:39 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* filefuncs.c (pf_directory_contents): Only free RESULT if
+	non-null.
+
+Fri May 17 10:40:55 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* simplefuncs.c: New file implements PROG, CONCAT, and STRING-EQ.
+
+	* Makefile.in (TEST_PROGS): Deprecate session-export-posted,
+	session-import-posted, and html-quote.
+
+Sun May  5 16:00:51 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_string_compare): New function returns "less",
+	"equal" or "greater" depending on string comparision of two
+	arguments.  Argument "caseless=true" means do the comparison with
+	case being insignificant.
+
+	* pages.c (page_subst_in_page): Allow the replacement string to
+	contain \\digit representing the matched text of a subexpression.
+
+Thu Apr 25 13:40:46 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_match): Argument of package=PACKNAME installs
+	various variables in PACKNAME.  The variables are:
+	     PACKNAME::EXPR: The passed in expression.
+	  PACKNAME::MATCHED: The number of subexpressions that matched.
+	  PACKNAME::MATCHES: Extracted matched subexpressions.
+	    PACKNAME::START: Indicies of matched subexpression starts.
+	      PACKNAME::END: Indicies of matched subexpression ends.
+	   PACKNAME::LENGTH: Lengths of matched subexpressions.
+	
+Wed Apr 24 00:15:26 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_date): Allow a numeric argument to specify the
+	time to convert in ticks.
+
+Sat Apr 20 14:37:02 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* dbfuncs.c (pf_database_query): New argument SEARCH-LIMIT=num
+	causes search to stop when that many records satisfying the search
+	criteria have been found.
+	(pf_database_query): New argument FORMAT-LIMIT=num causes
+	formatting to stop when that many records have been formatted.
+
+Thu Apr 18 16:19:32 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (execute_user_function): Handle named parameters.
+
+Mon Apr 15 09:08:58 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_subst_in_string): New function operates on a
+	string and leaves the results in the page.
+
+Sun Apr 14 13:04:04 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* symbols.c: Add flags field to symbol type.
+ 	(symbol_clear_flag): Clear in SYMBOL the flag FLAG.
+	(symbol_set_flag): Give SYMBOL the flag FLAG.
+	(symbol_get_flags): Return the flags associated with SYMBOL.
+
+Sun Mar 24 21:50:47 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* dbfuncs.c (pf_database_unique_key): Allow a suggestion to be
+	given.
+
+Thu Mar 21 19:33:02 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pagefunc_destroy_package): Destroy package *after*
+	checking against well-known internals.
+
+Thu Feb 29 02:12:18 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* dbfuncs.c (pf_database_load_record): Now can load arrays.
+	(pf_database_save_package): New function saves an entire package.
+
+Wed Feb 28 10:22:08 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_function_def): New function prints out user
+	defined functions verbatim.
+
+Sun Feb 11 12:21:25 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (alist_to_package): Make sure the alist is really a
+	list.
+	(pf_package_vars): Accept "strip=true" to not insert the package
+	names in the output.
+
+	* pagefuncs.h: Okay, I give up.  Implemented <upcase>, <downcase>,
+	and <capitalize>.
+
+Sun Feb  4 03:46:52 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* pagefuncs.c (pf_match): Added new actions: `startpos', `endpos'
+	and `length'.
+	(pf_substring): New function does what you think it does.
+
+Wed Jan 31 22:08:12 1996  Brian J. Fox  <bfox@nirvana.datawave.net>
+
+	* dbfuncs.c: New file contains database functions.
+
+	* Makefile.in (LIB_CSRC): Add dbfuncs.c,o,h to files list.
+
+	* pagefuncs.c (pagefunc_get_descriptor): Initialize database
+	functions if MHTML_DATABASE is set (see pagefuncs.h).  All
+	database functions moved into separate file (dbfuncs.h).
+
+Sat Dec  9 00:03:15 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_while): Free `code' after use even if bindex == 0.
+
+	* session.c (session_reap): Free `key' and `to_be_reaped' after use.
+
+Fri Dec  8 18:08:17 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* forms.c (forms_set_tag_value_in_package): Free `name' if it has
+	been reallocated.
+
+	* session.c (session_access): Free `info' after use.
+
+	* pagefuncs.c (pf_sessions_of_key): Free `info_list' after use.
+	(page_process_page_internal): Free `closer' after use.
+	(pf_alist_to_package): Free `symbols' after use.
+	(pf_set_form_input_values): Free `symbols' after use.
+
+	* symbols.c (symbol_destroy_package): Free
+	package->table->symbol_list as well as the contents.
+
+Thu Dec  7 03:22:50 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (arithmetic_operate): New variable
+	mhtml::decimal-places can be set to indicate the number of decimal
+	places to be produced during arithmetic operations.
+
+Tue Nov 28 14:14:35 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_plain_text): Allow variable NOBR.  When set, the
+	initial paragraph break does not appear.
+
+Sat Nov 18 14:57:01 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (number_p): Check for NULL string.
+
+Sat Nov 11 07:35:20 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_database_unique_key): New function.
+
+Fri Nov 10 11:55:10 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_sessions_of_key): New function.
+	(all session functions): Call session_free () where appropriate.
+
+	* session.h: New function (session_free);
+
+Tue Nov  7 21:33:26 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pages.c (page_insert_http_header): Check for NULL buffer before
+	calling strncasecmp.
+
+Mon Nov  6 08:56:59 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (arithmetic_operate): Handle floating point
+	transparently.  Output results are integers unless input
+	parameters contain a decimal point, in which case, the output
+	contains a decimal point if required to specify the value of the
+	number.  Only two decimal places are returned.
+
+Sat Nov  4 09:15:03 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_package_delete): New Function.  Delete the
+	contents of the packages named by the arguments.
+
+Mon Oct 16 23:17:01 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_undef): New function.  Remove a defined subst or
+	macro.
+
+Sun Oct 15 13:04:23 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (dbrec_comp): If both of the resultant string fields
+	are fully comprised of digits, then sort numerically, from largest
+	to smallest.
+
+Fri Oct 13 12:54:48 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.h: Added new function: WITH-LOCKED-SESSION.
+
+	* pagefuncs.c: Now that we have server push, many processes can
+	share a single session, so we allow for the locking of access to a
+	particular session record during atomic operations, such as
+	get-session-var and set-session-var.
+
+Thu Oct 12 11:06:40 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pagefunc_canonicalize_file_name): New function
+	returns the complete path to a file.
+	(pf_include): Modified to call pagefunc_canon....
+
+Mon Oct  9 12:20:38 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_server_push): New command implements server
+	pushing in a polite way.
+
+Fri Sep 29 10:11:25 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* streamfuncs.c: Add stream-readable.
+
+Sun Sep 24 16:33:04 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (arithmetic_process): Good idea? Bad idea? Cause
+	arithmetic operators to lookup values that are not all digits as
+	page variables.  Thus, <add counter 12> is now equivalent to
+	<add <get-var counter> 12>.  I'm not convinced this is a good
+	idea.
+
+Sat Sep 23 11:36:47 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.h: Added pf_randomize and pf_random.
+
+Thu Sep 21 02:24:05 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_plain_text): Only operate on the first character
+	of a paragraph if it is alpha-numeric.
+	(pf_redirect): If no redirection is given, return a "No Response"
+	code from the server.  Return a full MIME header for redirections,
+	and process the redirected URL to make it fully qualified.
+
+	* pages.c (page_set_cookie): New function sets the cookie in the
+	outgoing reply.  You must have a fully compliant MIME header in
+	PAGE already.
+	(page_insert_http_header): Add all of the required headers.  CGI's
+	could now run as standalone "nph-" programs.
+
+	* pages.h: Add page_set_cookie () prototype.
+
+Mon Sep 18 13:50:54 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* forms.c (forms_set_tag_value_in_package): Set symbol->notifier
+	based upon value being set, if it is present.
+
+	* pagefuncs.c (page_process_page_internal): Set
+	`semicolon_comments' to the inverse of
+	mhtml_inhibit_comment_parsing.
+	
+	(pagefunc_initialize_notifiers): Initialize symbols which require
+	special notification.  In this case, the only variable is
+	mhtml_inhibit_comment_parsing.
+
+	* symbols.c (symbol_notify_value): Set SYMBOL to change the value
+	of NOTIFIER when SYMBOL is either set or freed.  NOTIFIER is set
+	to 1 when SYMBOL has any value, 0 otherwise.
+
+Sun Sep 17 09:56:40 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (unlock_database): Pass in the name of the database
+	to unlock, and that function unlinks the lockfile.  All callers
+	changed.
+	(lock_database): Write the PID of the locking process into the
+	lock file.
+	(add_user_function): When "whitespace=delete" only remove unquoted
+	newlines and the whitespace that follows them, not all whitespace
+	indiscriminately.
+	(page_process_page_internal): Okay.  Any sequence of 3 semicolons
+	indicates a comment from there through the end of the line
+	inclusive.
+	(pf_plain_text): Start with a paragraph, delete comments cleverly,
+	and insert opener and closer even for text that doesn't start a
+	line.
+
+Sat Sep 16 07:56:13 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_session_import): If the external name is "" that
+	is a different case from no external name.  In that case, preserve
+	the package names of imported symbols while placing them in the
+	import package.
+
+Fri Sep 15 09:14:55 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_debugging_on): Allow debugging on user defined
+	functions.
+	(pf_subst_in_var): Increase output for debug levels greater than 5.
+	(pf_page_debug): New function inserts evaluation of argument into
+	debugging output.
+
+Thu Sep 14 09:08:02 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (wrap_by_character_class): New argument to function
+	`leav_braces' says to leave full brace constructs undisturbed if
+	non-zero.  All callers changed.  pf_small_caps now leaves brace
+	structures undisturbed.
+	(pagefunc_snarf_vars): New argument `allow_assignments_p' when
+	non-zero says to read the old way, when zero says never let the
+	equals sign be significant.
+
+Wed Sep 13 10:15:34 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_if): If the test is empty_string_p, that
+	indicates failure.
+	(pf_increment): Evaluate the INCREMENT argument.
+	(pf_var_case): Evalute both the variable and it's case value.
+
+Tue Sep 12 00:18:07 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_match): Allow the empty string to be matched
+	against, but not the NULL string.  Change the default action to
+	"report".
+	(db_mode): Allow "write" as well as "writer" for db modes.
+
+Mon Sep 11 04:17:38 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_database_query): Rewrite to allow sorted
+	output.
+	(read_sexp): Only remove quotes if they appear at top-level.
+	Quotes appearing within braces are retained.  This means that
+	<set-var foo" "bar=baz> creates a variable named "foo bar".
+
+	(pf_not): Read the first s-expression in the body, and evaluate
+	that.  We cannot simply evaluate the body the way that we used to,
+	because parsing of s-exprs has changed.
+
+	* pagefuncs.c (pf_or, pf_and): Test for an empty string, not only
+	the null string.
+
+Sun Sep 10 00:06:42 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (find_user_function): Lookup user functions in the
+	user function package.
+	
+	(pagefunc_get_descriptor): Lookup keywords in a special keyword
+	package.  Build the contents of that package in this function if
+	not already built.
+	
+	(page_process_page_internal): Remove fancy hair for speeding up
+	lookup.  We now simply use packages, so lookups are plenty fast.
+	
+	(add_user_function): Add user defined functions in their own
+	package, not in a static array.
+
+	(user_keywords): New package contains user keywords.
+	
+	* pages.c (page_read_template): Fail if the page to read is a
+	directory.
+
+Mon Aug 28 01:29:14 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (arithmetic_operate): Allow "eq" to caseless compare
+	strings if both args do not contain all digits.
+
+Sun Aug 27 18:06:25 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_database_query): New function handles looping
+	through the database and evaluating forms within that scope.
+	(Arithmetic Operators): We now have gt, lt, eq, add, sub, mul,
+	div, and mod.  `string-eq' is not present, but `match' is.
+
+Sat Aug 26 22:51:22 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (read_sexp): New function is now used when reading
+	the arguments to a Meta-HTML function.  This obviates the need for
+	ridiculous quoting rules, and remains backwards compatible.
+
+Fri Aug 25 12:29:49 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* forms.c (forms_set_tag_value_in_package): Implement shorthand
+	notation for array references.  Now "foo[j]" is treated as
+	"foo[<get-var j>]".
+
+Sun Aug 20 10:55:17 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_unset_variable): Allow array names.
+	(pf_unset_session_var): Allow array names.
+
+Wed Aug 16 20:57:24 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* database.c (many functions): Anally cast (char *) to (unsigned
+	char *) and vice-versa to make the alpha compiler happy.  Note
+	that this was only necessary because the FUCKING LOSERS at UCSB
+	can't install Gcc correctly.  Gosh, what a win.
+
+Tue Aug 15 17:49:25 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pagefunc_snarf_vars): Allow "\n\t\f\r" to appear in
+	strings as they are represented here.
+
+Mon Aug 14 13:11:30 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* session.c (whole file): Change all references to "database_xxxx"
+	to "sessiondb_xxxx".  Make #defines for "sessiondb_xxxx" point to
+	database routines if not compiling with the shared memory database.
+
+	* forms.c (forms_set_tag_value): Allocate enough space for the
+	additional NULL at the end of item->values.  In this case, it is
+	(2 + var_index), not (1 + var_index).
+	(forms_set_tag_value): Implement new syntax.  Now "tag[]" refers
+	to the entire array of values, and if VALUE contains newlines, the
+	lines are stored in successive elements of TAG.
+ 	(forms_get_tag_value): Implement new syntax.  Now "tag[]" refers
+	to the entire array.  The value returned is all of the elements of
+	TAG, separated by newlines.
+
+	* pagefuncs.c (pf_cgi_exec): Page evaluate the contents of the
+	string to execute before calling shell_exec.
+
+Sun Aug 13 12:29:25 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (page_process_page_internal): Remove extra carriage
+	returns from output for complex-tag bodies.
+	Move logic of building the optimizing test strings to a separate
+	function; this is now called from add_user_function ().
+	More code: Implements user functions.
+	New commands: <defmacro> and <defsubst>.
+	(page_process_page_internal): User functions can override builtins.
+	(pf_example): Removed, since this is trivial ro produce with a
+	macro.
+
+	* pagefuncs.h: New commands <defmacro> and <defsubst> implement
+	user functions.
+	
+Sat Aug 12 23:00:36 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* session.c (session_restore): Force the restoration of the
+	(SESSION_INFO *) passed.  If the session is already active,
+	do nothing except update the access time.
+
+Fri Aug 11 12:42:37 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pages.c (http_return_image): Add http_return_image ().  Creates
+	a page containing the HTTP magic and image of FILENAME and
+	IMAGETYPE.
+
+Wed Aug  9 02:44:57 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pages.c (page_complex_tag_bounds): Malloc enough space in CLOSER
+	for additional slash character.
+
+Tue Aug  8 20:41:45 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.h: Added CGI-EXEC and SUBST-IN-VAR.
+
+Sun Aug  6 14:32:13 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* pagefuncs.c (pf_include): Change MHTML-INCLUDE-PREFIX to
+	MHTML::INCLUDE-PREFIX.
+
+Sat Aug  5 14:37:54 1995  Brian J. Fox  <bfox@wizard.datawave.net>
+
+	* forms.c (forms_input_data): Prepend "ENV::" to every environment
+	variable.  They now cannot be found any other way.

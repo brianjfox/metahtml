@@ -1,0 +1,103 @@
+;;; metahtml.mhtml: Language Reference Manual  -*- Meta-HTML -*-
+;;;
+<set-var title="The Meta-HTML Reference Manual"
+  next-page="overview.mhtml" next-title=Overview>
+<include header.mhtml>
+<set-var mhtml::cacheable=true>
+
+<layout::page>
+  <ptext>
+
+    This document describes the <meta-html> language, Version
+    <get-var-once mhtml::version>.  It constitutes the definitive
+    reference for this version of the language. While the functions
+    described in this manual will continue to operate as documented,
+    there may be new functions or enhancements appearing in future
+    versions of the language which will supersede the functionality
+    that the documented ones provide.
+
+    This manual is not a tutorial, or user guide.  There is a project
+    underway to create such tools -- a short web-based tutorial exists at
+    <url http://www.metahtml.org/tutorial>; there are code examples at
+    <url http://www.metahtml.com/examples>; there is a complete function
+    index at <url function-index.mhtml>.
+
+    I have tried to lay the manual out so that it can be viewed from
+    different angles.  Clicking on a top-level section in the
+    <a href="#TOC">Table of Contents</a> below returns a page which
+    contains all of the subsections displayed under that section name.
+    Clicking on a subsection returns only that subsection, but the top of
+    each page allows you to go forward and backwards through the
+    subsections of the manual.
+
+    Comments and/or suggestions for improvement on this manual, the
+    language definition, or writing style(!!) should be sent to
+    <a href="mailto:bug-manual@metahtml.com">
+    <b>bug-manual@metahtml.com</b></a>.
+  </ptext>
+
+  ;;;
+  <defsubst page>%0.mhtml</defsubst>
+
+  <A NAME="TOC"></a>
+  <h2>Table of Contents:</h2>
+  <ol>
+    <li>
+    <a href="<page overview>">
+      <b><font size="+1">Language Overview</font></b>
+    </a>
+    <ul>
+      <li> <a href="<page purpose>">The Purpose of <meta-html></a>
+      <li> <a href="<page implementation>">Implementation Design</a>
+      <li> <a href="<page syntax>">Syntax of Commands</a>
+    </ul>
+    <p>
+    <li>
+    <a href="<page features>">
+      <b><font size="+1">Language Features</font></b>
+    </a>
+    <ul>
+      <section::get-sections>
+      <foreach section sections>
+	<set-var name=<capitalize <subst-in-string <get-var section> "-" " ">>>
+	<set-var key=<get-var section>>
+	<li> <a href="<page view-section>?<cgi-encode key>"><get-var name></a>
+      </foreach>
+    </ul>
+    <p>
+    <li>
+    <a href="<page install>">
+      <b><font size="+1">Installation Guide</font></b>
+    </a>
+    <ul>
+      <li> <a href="<page server-install>">Installing the Server</a>
+      <li> <a href="<page hiding>">Installing the Engine</a>
+      <li> <a href="<page serverconf>">Configuring the Server</a>
+    </ul>
+    <p>
+    <a href="<page Appendices>">
+      <b><font size="+1">Appendices</font></b>
+    </a>
+    <ul>
+      <section::get-appendices>
+      <foreach appendix appendices>
+	<set-var name=<capitalize <subst-in-string <get-var appendix> "-" " ">>>
+	<set-var key=<get-var appendix>>
+	<li> <a href="<page view-section>?<cgi-encode key>"><get-var name></a>
+      </foreach>
+    </ul>
+    <p>
+    <li>
+    <a href="<page function-index>">
+      <b><font size="+1">Function Index</font></b>
+    </a>
+    <p>
+    <li>
+    <a href="<page variable-index>">
+      <b><font size="+1">Variable Index</font></b>
+    </a>
+    <p>
+  </ol>
+  <p>
+</layout::page>
+<include footer.mhtml>

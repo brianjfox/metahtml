@@ -1,0 +1,44 @@
+;;; standalone-header.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Apr 13 18:55:13 1998.
+<session::initialize>
+<when <and <defined? layout::initialize>
+	   <path::find-executable alchemy>>>
+  <set-var gsql-pro = true>
+  <include config/graphic.params>
+  <layout::initialize>
+  <html>
+  <head> <title> Generic SQL: <get-var title> </title> </head>
+  <body text=<or <get-var siteprefs::text-color>
+		 <color::hex-value White>>
+	link=<or <get-var siteprefs::link-color>
+		 <color::hex-value AntiqueWhite>>
+	vlink=<or <get-var siteprefs::vlink-color>
+		  <color::hex-value AntiqueWhite>>
+	alink=<or <get-var siteprefs::alink-color>
+		  <color::hex-value Red>>
+	bgcolor=<or <get-var siteprefs::bgcolor>
+		    <color::hex-value SlateGray>>
+	background=<get-var bgspec>
+	<get-var body-extra>>
+  <get-var javascript-code>
+  <layout::default-header>
+  <layout::page>
+    <center>
+      <banner <get-var mhtml::url-to-dir>/ " Generic SQL:  <get-var title>">
+      <hr width=90%>
+    </center>
+    <p>
+    <show-message>
+    <p>
+  </layout::page>
+</when>
+
+<when <not <get-var gsql-pro>>>
+  <html>
+  <head> <title> Generic SQL: <get-var title> </title> </head>
+  <body bgcolor=White>
+  <DEBUGGING-OUTPUT>
+  <SYSTEM-ERROR-OUTPUT>
+</when>

@@ -1,0 +1,14 @@
+;;; base-package-vars.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 01:54:23 1996.
+
+Result: "TMP::VAR1
+TMP::VAR2
+TMP::VAR3
+TMP::VAR4": <set-var tmp::var1=scoob tmp::var2=shaggy tmp::var3=darn tmp::var4=kidz><package-vars tmp>
+Result: "VAR1
+VAR2
+VAR3
+VAR4": <set-var tmp::var1=scoob tmp::var2=shaggy tmp::var3=darn tmp::var4=kidz><package-vars tmp strip=true>
+Result: : <set-var tmp::var1=scoob tmp::var2=shaggy><package-vars waky>

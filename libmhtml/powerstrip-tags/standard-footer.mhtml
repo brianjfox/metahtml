@@ -1,0 +1,18 @@
+;;; standard-footer.mhtml: -*- Meta-HTML -*-  The Standard Footer.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Nov 27 11:23:49 1996.
+<defsubst ibis::standard-footer>
+  ;;; DOC_SECTION (POWERSTRIP-SYSTEM-TAGS)
+  ;;; The corollary to <funref POWERSTRIP-SYSTEM-TAGS ibis::standard-header>.
+  <when <and <not <get-var site::inhibit-navigation>>
+	     <match <get-var layout::navigation-buttons> bottom>>>
+    <include <get-var mhtml::relative-prefix>/navbar.mhtml alt="">
+  </when>
+  <include <site::footer> alt="">
+  <layout::resolve-contents>
+  <layout::clear-contents>
+  </body>
+  </html>
+  <cleanup-whitespace>
+</defsubst>

@@ -1,0 +1,624 @@
+;;; locale.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Dec 28 08:36:45 1996.
+
+<set-var iso3166-countrycodes[] =
+  <include iso3166-countrycodes verbatim
+	   alt=<include tagsets/iso3166-countrycodes verbatim>>>
+<sort iso3166-countrycodes>
+
+<foreach entry iso3166-countrycodes>
+  <set-var temp[]=<subst-in-string <get-var entry> ";" "\n">>
+  <array-append <capitalize <get-var temp[0]>> locale::iso-country-names>
+  <array-append <upcase <get-var temp[1]>> locale::iso-country-abbrevs-2>
+  <array-append <upcase <get-var temp[2]>> locale::iso-country-abbrevs-3>
+  <set-var locale-iso-country-codes::<get-var temp[3]> = <get-var temp[0]>>
+  <set-var locale-iso-country-codes::<get-var temp[0]> = <get-var temp[3]>>
+</foreach>
+
+<unset-var iso3166-countrycodes temp>
+
+<set-var locale::country-names[] =
+  <prog
+    USA
+    Afghanistan
+    Albania
+    Algeria
+    American Samoa
+    Andorra
+    Angola
+    Anguilla
+    Antigua & Barbuda
+    Argentina
+    Armenia
+    Aruba
+    Ascension
+    Australia
+    Austria
+    Azerbaijan
+    Azores
+    Bahamas
+    Bahrain
+    Bangladesh
+    Barbados
+    Belarus
+    Belgium
+    Belize
+    Benin
+    Bermuda
+    Bhutan
+    Bolivia
+    Bonaire
+    Bosnia
+    Botswana
+    Brazil
+    British Virgin Islands
+    Brunei
+    Bulgaria
+    Burkina Faso
+    Myanmar (Burma)
+    Burundi
+    Cameroon
+    Canada
+    Cape Verde
+    Cayman Islands
+    Central African Republic
+    Chad
+    Channel Islands (U.K.)
+    Chile
+    China
+    Colombia
+    Comoros
+    Congo
+    Cook Islands (Australia)
+    Corsica (France)
+    Costa Rica
+    Croatia
+    Cuba
+    Curacao (Neth.Ant.)
+    Cyprus
+    Czech Republic
+    Denmark
+    Djibouti
+    Dominica
+    Dominican Republic
+    East Timor
+    Ecuador
+    Egypt
+    El Salvador
+    UK
+    Equatorial Guinea
+    Estonia
+    Ethiopia
+    Falkland Islands
+    Faroe Islands
+    Fiji
+    Finland
+    France
+    French Guyana
+    French Polynesia
+    Gabon
+    Gambia
+    Georgia
+    Germany
+    Ghana
+    Gibraltar
+    Greece
+    Greenland
+    Grenada
+    Guadeloupe
+    Guam (U.S. Terr.)
+    Guatemala
+    Guinea
+    Guinea-Bissau
+    Guyana
+    Haiti
+    Honduras
+    Hong Kong
+    Hungary
+    Iceland
+    India
+    Indonesia
+    Iran
+    Iraq
+    Ireland
+    Israel
+    Italy
+    Ivory Coast (Cote D' Iv.)
+    Jamaica
+    Japan
+    Jordan
+    Cambodia
+    Kenya
+    Kiribati
+    Korea, North
+    Korea, South
+    Kosrae
+    KSA
+    Kuwait
+    Laos
+    Latvia
+    Lebanon
+    Lesotho
+    Liberia
+    Libya
+    Liechtenstein
+    Lithuania
+    Luxembourg
+    Macau
+    Macedonia
+    Madagascar
+    Madeira Islands
+    Malawi
+    Malaysia
+    Maldives
+    Mali
+    Malta
+    Martinique
+    Mauritania
+    Mauritius
+    Mexico
+    Micronesia (U.S. Terr.)
+    Moldova
+    Monaco
+    Mongolia
+    Montserrat
+    Morocco
+    Mozambique
+    Namibia
+    Nauru
+    Nepal
+    Netherlands
+    Netherlands Antilles
+    Nevis (St. Christopher)
+    New Caledonia
+    New Zealand
+    Nicaragua
+    Niger
+    Nigeria
+    Northern Mariana Islands
+    Norway
+    Oman
+    Pakistan
+    Palau (U.S. Terr.)
+    Panama
+    Papua New Guinea
+    Paraguay
+    Peru
+    Philippines
+    Pitcairn Islands
+    Poland
+    Ponape (U.S. Terr.)
+    Portugal
+    Qatar
+    Reunion
+    Romania
+    Rota (U.S. Terr.)
+    Rwanda
+    Russia
+    Saba (Neth.Ant.)
+    Saint Barthelemy (Guadlp.)
+    Saint Christopher & Nevis
+    Saint Croix (U.S. Terr.)
+    Saint Eustatius (Neth.Ant.)
+    Saint Helena
+    Saint Kitts and Nevis
+    Saint Lucia
+    Saint Maarten (Neth.Ant.)
+    Saint Martin
+    Saint Pierre & Miquelon
+    Saint Thomas (U.S. Terr.)
+    Saint Vincent /Grenadines
+    Saipan (U.S. Terr.)
+    San Marino
+    Sao Tome & Principe
+    Saudi Arabia
+    Senegal
+    Serbia
+    Seychelles
+    Sierra Leone
+    Singapore
+    Slovakia
+    Slovenia
+    Solomon Islands
+    Somalia
+    South Africa
+    Spain
+    Sri Lanka
+    Sudan
+    Suriname
+    Swaziland
+    Sweden
+    Switzerland
+    Syria
+    Tahiti (French Polynesia)
+    Taiwan
+    Tanzania
+    Thailand
+    Tinian
+    Togo
+    Tonga
+    Tortola
+    Trinidad and Tobago
+    Tristan da Cunha
+    Truk (U.S. Terr.)
+    Tunisia
+    Turkey
+    Turks & Caicos Islands
+    Tuvalu
+    U.S. Virgin Islands
+    Uganda
+    Ukraine
+    Union Island
+    United Arab Emirates
+    Uruguay
+    USA
+    Uzbekistan
+    Vanuatu
+    Vatican City
+    Venezuela
+    Vietnam
+    Wake Island (U.S. Terr.)
+    Wallis & Futuna Islands
+    West Indies
+    Western Samoa
+    Yap (U.S. Terr.)
+    Yemen,  (North) Arab Rep.
+    Yemen,  (South) Peoples D.
+    Yugoslavia
+    Zaire>>
+
+<set-var locale::common-country-names[] =
+  <prog
+    USA
+    Argentina
+    Australia
+    Austria
+    Belgium
+    Bosnia
+    Brazil
+    British Virgin Islands
+    Cameroon
+    Canada
+    Cayman Islands
+    China
+    Colombia
+    Costa Rica
+    Croatia
+    Czech Republic
+    Denmark
+    Dominican Republic
+    Egypt
+    El Salvador
+    UK
+    Finland
+    France
+    French Guyana
+    Germany
+    Greece
+    Greenland
+    Guatemala
+    Haiti
+    Honduras
+    Hong Kong
+    Hungary
+    Iceland
+    India
+    Indonesia
+    Ireland
+    Israel
+    Italy
+    Japan
+    Kenya
+    Korea
+    Malaysia
+    Mexico
+    Micronesia (U.S. Terr.)
+    Monaco
+    Nepal
+    Netherlands
+    New Zealand
+    Norway
+    Panama
+    Peru
+    Philippines
+    Poland
+    Portugal
+    Romania
+    Russia
+    Saudi Arabia
+    Singapore
+    South Africa
+    Spain
+    Sweden
+    Switzerland
+    Taiwan
+    Thailand
+    Turkey
+    U.S. Virgin Islands
+    Ukraine
+    Vatican City
+    Venezuela
+    Vietnam
+    Yugoslavia
+    Zaire>>
+
+<defun locale::select-from-country postname sitename country-array>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Produce a selection widget suitable for placing in a form which
+  ;;; allows the user to select a country from a pull-down menu.
+  ;;; <var postname> is the name of the variable which should be posted
+  ;;; when the form is submitted.
+  ;;; <var sitename> is the name of another variable which can contain the
+  ;;; currently selected country -- this variable must be fully
+  ;;; qualified with its package name (i.e., DEFAULT::FOO, or SITE::COUNTRY).
+  <select name=<get-var postname>>
+    <concat "\n">
+    <option value="">Select Country
+    <concat "\n">
+    <foreach _country <get-var country-array>>
+      <concat
+       <option<if <string-eq <get-var posted::<get-var postname>>
+			     <get-var _country>>
+		  " SELECTED"
+		<if <string-eq <get-var <get-var sitename>>
+			       <get-var _country>>
+		    " SELECTED">>>
+       <get-var _country></option>
+       "\n">
+    </foreach>
+    </select>
+</defun>
+
+<defun locale::select-country postname &optional sitename>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Produce a selection widget suitable for placing in a form which
+  ;;; allows the user to select a country from a pull-down menu.
+  ;;; <var postname> is the name of the variable which should be posted
+  ;;; when the form is submitted.
+  ;;; <var sitename> is the name of another variable which can contain the
+  ;;; currently selected country -- this variable must be fully
+  ;;; qualified with its package name (i.e., DEFAULT::FOO, or SITE::COUNTRY).
+  <locale::select-from-country <get-var postname> <get-var sitename>
+			       locale::country-names>
+</defun>
+
+<defun locale::select-iso-country postname &optional sitename>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Produce a selection widget suitable for placing in a form which
+  ;;; allows the user to select a country from a pull-down menu which
+  ;;; includes all of the ISO-3166 country names.
+  ;;; <var postname> is the name of the variable which should be posted
+  ;;; when the form is submitted.
+  ;;; <var sitename> is the name of another variable which can contain the
+  ;;; currently selected country -- this variable must be fully
+  ;;; qualified with its package name (i.e., DEFAULT::FOO, or SITE::COUNTRY).
+  <locale::select-from-country <get-var postname> <get-var sitename>
+			       locale::iso-country-names>
+</defun>
+
+<defun locale::iso-country-name-to-abbrev2 country-name>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Returns the two-letter abbreviation of the ISO-3166 country name
+  ;;; passsed in <var country-name>.  If <var country name> isn't an
+  ;;; ISO-3166 country name, then it is simply returned as is.
+  <set-var index = 
+    <array-member <get-var-once country-name> locale::iso-country-names
+		  caseless=true>>
+  <if <get-var index>
+      <set-var result = <get-var-once locale::iso-country-abbrevs-2[index]>>>
+  <defvar result <get-var country-name>>
+  <get-var result>
+</defun>
+
+<defun locale::iso-country-name-to-abbrev3 country-name>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Returns the three-letter abbreviation of the ISO-3166 country name
+  ;;; passsed in <var country-name>.  If there isn't a three-letter
+  ;;; abbreviation, but there is a two-letter one, then that is returned.
+  ;;; If <var country name> isn't an ISO-3166 country name, then it is
+  ;;; simply returned as is.
+  <set-var index = 
+    <array-member <get-var-once country-name> locale::iso-country-names
+		  caseless=true>>
+  <when <get-var index>>
+    <set-var result = <get-var-once locale::iso-country-abbrevs-3[index]>>
+    <if <not <get-var-once result>>
+	<set-var result = <get-var-once locale::iso-country-abbrevs-2[index]>>>
+  </when>
+  <defvar result <get-var country-name>>
+  <get-var result>
+</defun>
+
+<defun locale::select-iso-country-abbrev2 postname &optional sitename>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Produce a selection widget suitable for placing in a form which
+  ;;; allows the user to select an ISO-3166 country name from a pull-down menu.
+  ;;; <var postname> is the name of the variable which should be posted
+  ;;; when the form is submitted.  The long name of the country is displayed,
+  ;;; but the short, two-letter version of the country is returned.
+  ;;; <var sitename> is the name of another variable which can contain the
+  ;;; currently selected country.
+  <locale::select-iso-country-by-code <get-var postname> <get-var sitename> 2>
+</defun>
+
+<defun locale::select-iso-country-abbrev3 postname &optional sitename>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Produce a selection widget suitable for placing in a form which
+  ;;; allows the user to select an ISO-3166 country name from a pull-down menu.
+  ;;; <var postname> is the name of the variable which should be posted
+  ;;; when the form is submitted.  The long name of the country is displayed,
+  ;;; but the short, three-letter version of the country is returned.
+  ;;; <var sitename> is the name of another variable which can contain the
+  ;;; currently selected country.
+  <locale::select-iso-country-by-code <get-var postname> <get-var sitename> 3>
+</defun>
+
+<defun locale::select-iso-country-by-code postname sitename which>
+  <select name="<get-var postname>">
+    <concat "\n">
+    <option value=none>Select Country
+    <concat "\n">
+    <set-var i=0>
+    <while <get-var-once locale::iso-country-names[i]>>
+      <set-var
+	name = <get-var locale::iso-country-names[i]>
+	code = <get-var locale::iso-country-abbrevs-<get-var which>[i]>>
+      <concat
+       "<option value=\"<get-var code>\""
+       <if <or <string-eq <get-var posted::<get-var postname>>
+			  <get-var code>>
+	       <string-eq <get-var <get-var sitename>>
+			  <get-var code>>>
+	   " SELECTED">
+       "><get-var name></option>"
+       "\n">
+      <increment i>
+    </while>
+    </select>
+</defun>
+
+<defun locale::select-common-country postname &optional sitename>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Produce a selection widget suitable for placing in a form which
+  ;;; allows the user to select a country from a pull-down menu.
+  ;;; <var postname> is the name of the variable which should be posted
+  ;;; when the form is submitted.
+  ;;; <var sitename> is the name of another variable which can contain the
+  ;;; currently selected country.
+  ;;;
+  ;;; This differs from <funref html-helpers locale::select-country>
+  ;;; only in the number of countries that are displayed.
+  <locale::select-from-country <get-var postname> <get-var sitename>
+			       locale::common-country-names>
+</defun>
+
+<set-var locale::state-names[]=
+  <prog
+    AL,Alabama
+    AK,Alaska
+    AZ,Arizona
+    AR,Arkansas
+    CA,California
+    CO,Colorado
+    CT,Connecticut
+    DE,Delaware
+    DC,District of Columbia
+    FL,Florida
+    GA,Georgia
+    HI,Hawaii
+    ID,Idaho
+    IL,Illinois
+    IN,Indiana
+    IA,Iowa
+    KS,Kansas
+    KY,Kentucky
+    LA,Louisiana
+    ME,Maine
+    MD,Maryland
+    MA,Massachusetts
+    MI,Michigan
+    MN,Minnesota
+    MS,Mississippi
+    MO,Missouri
+    MT,Montana
+    NE,Nebraska
+    NV,Nevada
+    NH,New Hampshire
+    NJ,New Jersey
+    NM,New Mexico
+    NY,New York
+    NC,North Carolina
+    ND,North Dakota
+    OH,Ohio
+    OK,Oklahoma
+    OR,Oregon
+    PA,Pennsylvania
+    RI,Rhode Island
+    SC,South Carolina
+    SD,South Dakota
+    TN,Tennessee
+    TX,Texas
+    UT,Utah
+    VT,Vermont
+    VA,Virginia
+    WA,Washington
+    WV,West Virginia
+    WI,Wisconsin
+    WY,Wyoming>>
+
+<set-var locale::state-province-names[] = 
+  <include state-province verbatim
+	   alt=<include tagsets/state-province verbatim>>>
+
+<foreach state-province locale::state-province-names>
+  <if <not <array-member <get-var-once state-province> locale::state-names
+			 caseless=true>>
+      <array-append <get-var-once state-province> locale::province-names>>
+</foreach>
+<unset-var state-province>
+
+<defun locale::select-state postname sitename>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Produce a selection widget suitable for placing in a form which
+  ;;; allows the user to select a US state name from a pull-down menu.
+  ;;; <var postname> is the name of the variable which should be posted
+  ;;; when the form is submitted.  The long name of the state is displayed,
+  ;;; but the short, two-letter version of the state is returned.
+  ;;; <var sitename> is the name of another variable which can contain the
+  ;;; currently selected state.
+  <locale::select-state-internal <get-var-once postname>
+				 <get-var-once sitename>
+				 locale::state-names>
+</defun>
+
+<defun locale::select-province postname sitename>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Produce a selection widget suitable for placing in a form which
+  ;;; allows the user to select a province name from a pull-down menu.
+  ;;; <var postname> is the name of the variable which should be posted
+  ;;; when the form is submitted.  The long name of the province is displayed,
+  ;;; but the short, two- or three-letter version of the province is returned.
+  ;;; <var sitename> is the name of another variable which can contain the
+  ;;; currently selected province.
+  <locale::select-state-internal <get-var-once postname>
+				 <get-var-once sitename>
+				 locale::province-names>
+</defun>
+
+<defun locale::select-state-or-province postname sitename>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Produce a selection widget suitable for placing in a form which
+  ;;; allows the user to select a US state or province name from a
+  ;;; pull-down menu.  <var postname> is the name of the variable
+  ;;; which should be posted when the form is submitted.  The long
+  ;;; name of the state or province is displayed, but the short, two-
+  ;;; or three-letter version of the state or province is returned.
+  ;;; <var sitename> is the name of another variable which can contain the
+  ;;; currently selected state or province.
+  <locale::select-state-internal <get-var-once postname>
+				 <get-var-once sitename>
+				 locale::state-province-names>
+</defun>
+
+<defun locale::select-state-internal postname sitename arrayname>
+  <copy-var <get-var arrayname> array>
+  <select name="<get-var postname>">
+    <concat "\n">
+    <option value="">N/A -- Not Applicable</option>
+    <concat "\n">
+    <foreach element array>
+      <set-var state[] = <subst-in-string <get-var element> "," "\n">>
+      <concat
+       "<option value=\"<get-var state>\""
+       <if <string-eq <get-var posted::<get-var postname>>
+                      <get-var state>>
+           " SELECTED"
+         <if <string-eq <get-var <get-var sitename>>
+                        <get-var state>>
+             " SELECTED">>
+       "><get-var state[1]></option>\n">
+    </foreach>
+  </select>
+</defun>

@@ -1,0 +1,49 @@
+;;; game.mhtml: -*- Meta-HTML -*-  World's oldest (and dumbest) game.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ua.com) Thu Feb  1 09:48:20 1996.
+
+;;; This page contains all of the code necessary to run the world's
+;;; oldest and dumbest game; Guess the number!
+;;;
+
+<set-var title="Meta-HTML Game Example">
+<include header.mhtml>
+
+<layout::page>
+<ptext>
+Welcome to the world's stupidest game!
+
+The game is simple: we pick a number between the values you tell us,
+and you try to guess that number.
+
+The entire game, instructions, input, and output are present in this
+single page, and, of course, the
+<a href="/view-source.mhtml/meta-html/game.mhtml">
+  <meta-html> source code is viewable</a>!
+</ptext>
+
+<p>
+
+<if <not <get-var low>> <set-var low="1">>
+<if <not <get-var high>> <set-var high="100">>
+
+<when <get-var posted::guess>>
+  <set-var answer=<add low <random <sub <add 1 high> low>>>>
+  <b>You guessed <get-var guess>, and the answer was <get-var answer>.</b><br>
+  This means that you <if <eq guess answer> <prog <blink>won</blink>> lost.>
+  Why not play again?
+</when>
+
+<form method="POST" action="<get-var mhtml::full-url>">
+  Pick a number between <input size=3 name="low" value="<get-var
+  low>"> and <input size=3 name="high" value="<get-var high>">,
+  and enter it here: <input size=3 name="guess" value="">.
+
+  <p>
+
+  Then click <input type=submit name=button value="guess">
+</form>
+
+</layout::page>
+<include footer.mhtml>

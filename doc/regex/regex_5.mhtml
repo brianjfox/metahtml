@@ -1,0 +1,83 @@
+<set-var title="Regex - GNU Emacs Operators">
+<include header.mhtml>
+<layout::page>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_4.mhtml">previous</A>, <A HREF="regex_6.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC37" HREF="welcome.mhtml#TOC37">GNU Emacs Operators</A></H1>
+
+<P>
+Following are operators that GNU defines (and POSIX doesn't)
+that you can use only when Regex is compiled with the preprocessor
+symbol <CODE>emacs</CODE> defined.  
+
+</P>
+
+
+
+<H2><A NAME="SEC38" HREF="welcome.mhtml#TOC38">Syntactic Class Operators</A></H2>
+
+<P>
+The operators in this section require Regex to recognize the syntactic
+classes of characters.  Regex uses a syntax table to determine this.
+
+</P>
+
+
+
+<H3><A NAME="SEC39" HREF="welcome.mhtml#TOC39">Emacs Syntax Tables</A></H3>
+
+<P>
+A <STRONG>syntax table</STRONG> is an array indexed by the characters in your
+character set.  In the ASCII encoding, therefore, a syntax table
+has 256 elements.
+
+</P>
+<P>
+If Regex is compiled with the preprocessor symbol <CODE>emacs</CODE> defined,
+then Regex expects you to define and initialize the variable
+<CODE>re_syntax_table</CODE> to be an Emacs syntax table.  Emacs' syntax
+tables are more complicated than Regex's own (see section <A HREF="regex_4.mhtml#SEC27">Non-Emacs Syntax Tables</A>).  See section `Syntax' in <CITE>The GNU Emacs User's Manual</CITE>,
+for a description of Emacs' syntax tables.
+
+</P>
+
+
+<H3><A NAME="SEC40" HREF="welcome.mhtml#TOC40">The Match-syntactic-class Operator (<CODE>\s</CODE><VAR>class</VAR>)</A></H3>
+
+<P>
+<A NAME="IDX87"></A>
+
+</P>
+<P>
+This operator matches any character whose syntactic class is represented
+by a specified character.  <SAMP>`\s<VAR>class</VAR>'</SAMP> represents this operator
+where <VAR>class</VAR> is the character representing the syntactic class you
+want.  For example, <SAMP>`w'</SAMP> represents the syntactic
+class of word-constituent characters, so <SAMP>`\sw'</SAMP> matches any
+word-constituent character.
+
+</P>
+
+
+<H3><A NAME="SEC41" HREF="welcome.mhtml#TOC41">The Match-not-syntactic-class Operator (<CODE>\S</CODE><VAR>class</VAR>)</A></H3>
+
+<P>
+<A NAME="IDX88"></A>
+
+</P>
+<P>
+This operator is similar to the match-syntactic-class operator except
+that it matches any character whose syntactic class is <EM>not</EM>
+represented by the specified character.  <SAMP>`\S<VAR>class</VAR>'</SAMP> represents
+this operator.  For example, <SAMP>`w'</SAMP> represents the syntactic class of
+word-constituent characters, so <SAMP>`\Sw'</SAMP> matches any character that is
+not word-constituent.
+
+</P>
+
+<P><HR><P>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_4.mhtml">previous</A>, <A HREF="regex_6.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+</layout::page>
+<include footer.mhtml>

@@ -1,0 +1,93 @@
+;;; shipping.mhtml: -*- Meta-HTML -*-
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Sat Oct 21 14:07:12 1995.
+;;;
+<set-var title="Shipping Info">
+<include header.mhtml>
+<include tagsets/cart-substs.mhtml>
+<include tagsets/action-buttons.mhtml>
+<session-import shipping default>
+<set-form-input-values>
+
+<center>
+  <font size=+2><i>Shipping Information</i></font><br>
+</center>
+<include cart-display.mhtml>
+
+<set-var missing-field=<get-session-var missing-field>>
+<unset-session-var missing-field>
+<defsubst input-title whitespace=delete>
+  <if <and <get-var missing-field>
+	   <match "%body" "<get-var missing-field>">>
+      <prog <blink><small-caps><pad "%body" 10></small-caps></blink>>
+    <prog <small-caps><pad "%body" 10></small-caps>>>
+  :
+</defsubst>
+
+<p>
+<form method=POST action="invoice-review.mhtml">
+<p>
+
+<center>
+    <table border=1>
+      <tr>
+	<td align=center>
+	  <table>
+	    <tr>
+	      <td align=right><input-title Ship To></td>
+	      <td><input name="shipping-name" value="" size=36><br></td>
+	    </tr>
+	    <tr>
+	      <td align=right><input-title Street></td>
+	      ;;; Don't ask me, I just work here... (bfox)
+	      <td><input name="shipping-street" value="" size=36><br></td>
+	    </tr>
+	    <tr>
+	      <td align=right></td>
+	      <td><input name="shipping-street-2" value="" size=36><br></td>
+	    </tr>
+	    <tr>
+	      <td align=right><input-title City></td>
+	      <td>
+		<input name="shipping-city" value="" size=15>
+		<input-title State>
+		<input name="shipping-state" size=3 value="" maxlength=2>
+		<input-title Zip>
+		<input name="shipping-zip" size=7 value="" maxlength=5><br>
+	      </td>
+	    </tr>
+	    <tr>
+	      <td align=right><input-title E-Mail></td>
+	      <td><input name=email size=36 value=""><br></td>
+	    </tr>
+	  </table>
+	</td>
+      </tr>
+      <tr>
+	<td align=left>
+	  <table>
+	    <tr>
+	      <td align=right>
+		<input-title Payment Type>
+	      </td>
+	      <td align=left>
+		<select name=payment-type>
+		<when <netscape-p>>
+		  <select-option Payment-Type "Major Credit Card">
+		</when>
+		<select-option Payment-Type "Check or Money Order">
+		<select-option Payment-Type "Telephone Order">
+		</select>
+	      </td>
+	    </tr>
+	  </table>
+	</td>
+      </tr>
+    </table>
+    <p>
+    <action-buttons "Review Invoice">
+    <hr size=6 width=60%>
+  </center>
+</form>
+<include footer.mhtml>

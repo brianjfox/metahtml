@@ -1,0 +1,290 @@
+;;; rolodex.mhtml: -*- Meta-HTML -*-  The SQL-based Rolodex Library.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 27 20:09:42 1998.
+;;;
+;;; This mini application is meant to serve as a roadmap to creating
+;;; your own (probably hairy) SQL/ODBC based Meta-HTML Web applications.
+;;;
+;;; By providing the basic framework for a Meta-HTML DB application, we
+;;; hope to give you enough insight to create your own.
+;;;
+;;; Please don't hesitate to critique this example -- it can only help
+;;; us to make better examples, and thus to help others to build quality
+;;; Meta-HTML applications.
+;;;
+
+;;; This function is called automatically just after the library is loaded.
+<defun .libinit>
+  ;;; You might do some initialization here, including calling functions
+  ;;; within this library, or examining variables to change its behavior.
+  <if <match <get-var-once env::http_user_agent> "^Lynx">
+      <set-var site::text-only-mode = true>>
+
+  ;;; Perhaps you are clever, and keep site parameters in a configuration
+  ;;; file in webspace:
+  <include ../config/site.params
+	   alt=<include config/site.params
+			alt=<page-debug No Configuration Params!>>>
+
+  ;;; Initialize our search form parameters.
+  <rolodex::initialize-search-params>
+
+  ;;; Here is the default database engine.
+  <sql::set-database-type <or <get-var site::database-engine> msql>>
+</defun>
+
+;;;
+;;; By convention, we give every function in this file a name prefix of
+;;; "rolodex".  This helps us to keep track of the source, and it helps
+;;; the `mkapi' program to keep related functions together.
+;;;
+
+<defun rolodex::dsn>
+  ;;; Return the Data Service Name string for our database.
+  ;;; Controlled by parameters set in /config/site.params, with
+  ;;; reasonable defaults.
+  <concat
+   "HOST=<or <get-var site::database-host> localhost>"
+   ";DATABASE=<or <get-var site::database-name> test>"
+   <if <get-var site::database-uid> ";UID=<get-var site::database-uid>">
+   <if <get-var site::database-pwd> ";PWD=<get-var site::database-pwd>">
+   <if <get-var site::database-svt> ";SVT=<get-var site::database-svt>">>
+</defun>
+
+<defun rolodex::rolo-table>
+  ;;; Return the name of the table to be used for storing Rolodex information.
+  ROLO
+</defun>
+
+;;;
+;;; The description of a rolodex entry in an SQL database.
+;;;
+<defun rolodex::initialize-rolodex-db>
+  ;;; Call this function to initialize the Rolodex database table.
+  ;;; It first drops the table from the database, and then creates it anew.
+  <unset-var db::initialization-errors>
+  <sql::with-open-database db DSN=<rolodex::dsn> nolock=true>
+
+    ;;; Drop the table.
+    <set-var removed? =
+      <sql::database-exec-sql db "DROP TABLE <rolodex::rolo-table>">>
+
+    ;;; Create the table.
+    <set-var created? =
+      <sql::database-exec-sql
+       db <prog
+	    CREATE TABLE <rolodex::rolo-table>
+	    ( entry_id	char (16) NOT NULL,	;;; Unique ID.
+	      fname	char (64) NOT NULL,	;;; Person's First Name.
+	      lname	char (64) NOT NULL,	;;; Person's Last Name.
+	      mname	char (64),		;;; Person's Middle Name.
+	      email	char (64),		;;; E-Mail address.
+	      url	char (127),		;;; Personal URL.
+	      ;;; Address information...
+	      street	char (64),
+	      city	char (64),
+	      state	char (2),
+	      ccode	char (3),		;;; ISO Country Code.
+	      pcode	char (14),		;;; Postal Code.
+	      hphone	char (14),		;;; Home phone.
+	      wphone	char (14),		;;; Work phone.
+	      fphone	char (14),		;;; Fax phone.
+	      cphone	char (14),		;;; Cell phone.
+	      bmonth	int,			;;; Month of birth, zero based.
+	      bday	int,			;;; Day of month, one-based.
+	      byear	int			;;; Year of birth.
+
+	      ;;; MySQL allows us to create a primary key here.
+	      <if <string-eq <sql::get-database-type> mysql>
+		  <prog ,PRIMARY KEY (entry_id)>>
+		)>>>
+
+    ;;; If this the mSQL database, create your indices now.
+    <if <string-eq <sql::get-database-type> msql>
+	<set-var created? =
+	  <sql::database-exec-sql
+	   db
+	   "CREATE UNIQUE INDEX entidx ON <rolodex::rolo-table> (entry_id)">>>
+  </sql::with-open-database>
+
+  ;;; The error messages from initialization are in <sql::sql-error-message>.
+  ;;; We don't need them here -- we can display them if this function returns
+  ;;; the empty string.
+  <debugging-output clear>
+
+  ;;; Return "true" if the creation was successful.
+  <get-var created?>
+</defun>
+
+;;;
+;;; How to add an entry to the rolodex.
+;;;
+<defun rolodex::modify-entry package>
+  ;;; Create/Modify an entry in the Rolodex using the values from PACKAGE.
+  ;;; If the variable <PACKAGE>::entry_id is set, then we are modifying
+  ;;; values, otherwise we are creating a new entry.
+  ;;; It is assumed that the data in PACKAGE has already been validated.
+
+  ;;; Generate a unique ID for this entry, in case there isn't one yet.
+  <defvar <get-var package>::entry_id = <make-identifier>>
+
+  ;;; Uh, save the data.
+  <sql::with-open-database db DSN=<rolodex::dsn> nolock=true>
+    <set-var saved? =
+      <sql::database-save-package
+       db <get-var <get-var package>::entry_id> <get-var package>
+       table=<rolodex::rolo-table> keyname=entry_id>>
+  </sql::with-open-database>
+
+  ;;; And, return "true" if the data was saved.
+  <get-var saved?>
+</defun>
+
+;;;
+;;; We can create, now let's delete.
+;;;
+<defun rolodex::delete-entry entry_id>
+  ;;; Return "true" if the entry represented by ENTRY_ID is successfully
+  ;;; deleted from the Rolodex database.
+  <set-var deleted? =
+    <sql::database-exec-sql
+     db "DELETE FROM <rolodex::rolo-table>
+          WHERE entry_id = '<get-var entry_id>'">>
+  <get-var deleted?>
+</defun>
+
+;;;
+;;; And, here is how to get the details for a specific entry.
+;;;
+<defun rolodex::load-entry entry_id &optional pack>
+  ;;; Get the data for the entry specified by ENTRY_ID, and
+  ;;; place the values in PACK if it is supplied.
+  ;;; If PACK is not supplied, return an association list of the
+  ;;; entry data. If PACK is supplied, and the entry was found,
+  ;;; return "true", and place the data for the entry in PACK.
+  <sql::with-open-database db DSN=<rolodex::dsn> nolock=true>
+    <set-var loaded? =
+      <sql::database-load-record
+       db <get-var entry_id> package=<get-var pack> keyname=entry_id
+       table=<rolodex::rolo-table>>>
+  </sql::with-open-database>
+  <if <get-var loaded?>
+      <if <get-var pack> true <package-to-alist>>>
+</defun>
+
+;;;
+;;; Here is the pretty form that we have for entering/displaying the
+;;; information for a single entry.
+<defun rolodex::entry-form-fields pack>
+  ;;; Display a form suitable for entering/editing information about a
+  ;;; specific Rolodex entry in our database.  The data that this form
+  ;;; might be displaying is potentially stored in the package PACK.
+  ;;; The form is designed to be displayed within a <pre></pre> environment,
+  ;;; so that it will look good no matter what browser is in effect.
+  <defvar pack entry>
+  <defvar <get-var pack>::entry_id <make-identifier>>
+  <rolodex::identity-form-fields <get-var pack>>
+  <rolodex::contact-form-fields <get-var pack>>
+</defun>
+
+<defun rolodex::identity-form-fields pack>
+  <alist-to-package <package-to-alist <get-var pack> strip=true>>
+  <concat
+   "                                <b>Name/Identity</b>\n"
+   <hr width=80%>
+   "       Entry ID: " <b><get-var entry_id></b>
+   <input type=hidden name=entry_id value="<get-var entry_id>">
+   "\n"
+   "      Last Name: "
+   <input type=text size=48 name=lname value="<get-var lname>">
+   "\n"
+   "     First Name: "
+   <input type=text size=48 name=fname value="<get-var fname>">
+   "\n"
+   "    Middle Name: "
+   <input type=text size=48 name=mname value="<get-var mname>">
+   "\n"
+   "         E-Mail: "
+   <input type=text size=48 name=email value="<get-var email>">
+   "\n"
+   "   Personal URL: "
+   <input type=text size=48 name=url value="<get-var url>">>
+</defun>
+
+<defun rolodex::contact-form-fields pack>
+  <alist-to-package <package-to-alist <get-var pack> strip=true>>
+  <concat
+   "\n\n"
+   "                             <b>Contact Information</b>\n"
+   <hr width=80%>
+   "     Home Phone: "
+   <input type=text size=16 name=hphone value="<get-var hphone>">
+   "  Work Phone: "
+   <input type=text size=16 name=wphone value="<get-var wphone>">
+   "\n"
+   "      Fax Phone: "
+   <input type=text size=16 name=fphone value="<get-var fphone>">
+   "  Cell Phone: "
+   <input type=text size=16 name=cphone value="<get-var cphone>">
+   "\n"
+   " Street Address: "
+   <input type=text size=48 name=street value="<get-var street>">
+   "\n"
+   "           City: "
+   <input type=text size=48 name=city value="<get-var city>">
+   "\n"
+   "          State: "
+   <locale::select-state state <get-var pack>::state>
+   "  Zip: "
+   <input type=text size=12 name=pcode value="<get-var pcode>">
+   "\n"
+   "        Country: "
+   <locale::select-iso-country-abbrev3 ccode <get-var pack>::ccode>>
+</defun>
+
+<defun rolodex::initialize-search-params>
+  ;;; Preset the search parameters in the library.
+  ;;; This function is called from .libinit.
+  <set-var
+    sql::search-ignore-cols[] = <prog
+				  bday
+				  entidx
+				  entry_id>
+    sql::column-translations[] =
+    <prog
+      lname:Last Name
+      fname:First Name
+      mname:Middle Name
+      ccode:Country Code
+      hphone:Home Phone
+      wphone:Work Phone
+      fphone:Fax Phone
+      cphone:Cell Phone
+      pcode:Postal Code
+      byear:Birth Year
+      bmonth:Birth Month>
+    saved-settings = <sql::search-form-params dsn=<rolodex::dsn>
+					      table=<rolodex::rolo-table>
+					      key=entry_id
+					      editurl=rolodex-entry.mhtml
+					      defcol=lname>>
+</defun>
+
+<defun sql::search-result-name column alist>
+  ;;; Return the appropriate string to display in the search results box
+  ;;; based on COLUMN (the column that was searched on).  The data for the
+  ;;; current record is in ALIST.
+  <if <match <get-var-once column> NAME caseless=true>
+      <concat <alist-get-var alist lname>
+	      ", "
+	      <alist-get-var alist fname>>
+    <if <match <get-var-once column> PHONE caseless=true>
+	<concat "["
+		<substring <alist-get-var alist fname> 0 1>
+		"."
+		<substring <alist-get-var alist lname> 0 1>
+		"] "
+		<alist-get-var alist <get-var column>>>
+      <alist-get-var alist <get-var column>>>>
+</defun>

@@ -1,0 +1,63 @@
+;;; save-image.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Feb  1 18:15:27 1997.
+<set-var title="Save Your Picture">
+<include header.mhtml>
+<unset-var mhtml::cacheable>
+<require coloring-book>
+<cbook::initialize>
+
+<when <not <cbook::current-image>>>
+  <redirect <get-var mhtml::url-to-dir>/>
+</when>
+
+<subst-in-var save-name "^[ \t\n\r]+" "" "[ \t\n\r]+$" "">
+<subst-in-var user-name "^[ \t\n\r]+" "" "[ \t\n\r]+$" "">
+
+<if <or <not <get-var user-name>>
+	<not <get-var save-name>>>
+    <unset-var posted::action>>
+
+<when <get-var posted::action>>
+  <var-case
+    action="Save It Now!"
+    <prog
+      <set-session-var
+	cbook::user-name=<get-var user-name>
+	cbook::save-name=<get-var save-name>>
+      <cbook::save-image <cbook::current-image>
+			 <get-var user-name>
+			 <get-var save-name>>
+      <redirect color.mhtml>>
+
+    action="Back to Coloring"	<redirect color.mhtml>>
+</when>
+
+<defvar user-name <get-var cbook::user-name>>
+<defvar save-name <capitalize <cbook::current-image>>>
+
+<layout::page>
+  <h3>Save Your Picture..</h3>
+  <form method=POST action="<thisdoc>">
+    <pre>
+    What's <i>your</i> name?
+    <input type=text name=user-name size=40 value="<get-var user-name>">
+
+    What do you want to call this image?
+    <input type=text name=save-name size=40 value="<get-var save-name>">
+
+    <concat <input type=submit name=action value="Save It Now!">
+	    "    "
+	    <input type=submit name=action value="Back to Coloring">>
+    </pre>
+  </form>
+  <p>
+  <center>
+    <img src="<cbook::colored-image <cbook::current-image>>">
+    <p>
+    <a href="welcome.mhtml"><b>Choose another image...</b></a>
+  </center>
+</layout::page>
+
+<include footer.mhtml>

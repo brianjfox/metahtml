@@ -1,0 +1,96 @@
+;;; test-math.mhtml: -*- Meta-HTML -*-  Test the arithmetic functions.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Sep  1 09:35:07 1996.
+
+<html>
+<head> <title> Arithmetic Functions Test </title> </head>
+<body bgcolor="#FFFFFF">
+
+<center>
+  <h3>Arithmetic Functions </h3>
+</center>
+
+<defun test-section name>
+  <tr> <td colspan=2>&nbsp;</td> </tr>
+  <tr>
+    <td align=left><b>Testing <upcase <get-var name>></b></td>
+    <td> &nbsp; </td>
+  </tr>
+</defun>
+
+<defmacro test-entry>
+  <tr valign=top>
+    <td align=left>
+      <code><verbatim quote>%body</verbatim></code>
+    </td>
+    <td align=center>
+      %body
+    </td>
+  </tr>
+</defmacro>
+
+<center>
+  <table border=1>
+    <tr>
+      <td colspan=2 align=left>
+	In the right hand column, all you should see is "True"
+	for each test line.
+      </td>
+    </tr>
+
+    <test-section gt>
+    <test-entry> <gt 9 5> </test-entry>
+    <test-entry> <gt 9.0 5.0> </test-entry>
+    <test-entry> <not <gt 5 9.0>> </test-entry>
+
+    <test-section lt>
+    <test-entry> <lt 5 9> </test-entry>
+    <test-entry> <lt 5.0 9.0> </test-entry>
+    <test-entry> <not <lt 9.0 5>> </test-entry>
+
+    <test-section eq>
+    <test-entry> <eq 3 3> </test-entry>
+    <test-entry> <eq 3 3.0> </test-entry>
+    <test-entry> <prog <set-var x=3> <eq x 3>> </test-entry>
+
+    <tr> <td colspan=2>&nbsp;</td> </tr>
+    <tr>
+      <td colspan=2 align=left>
+	In the right hand column, all you should see is "2"
+	for each test line.
+      </td>
+    </tr>
+    <test-section add>
+    <test-entry><add 1 1></test-entry>
+    <test-entry><add 4 -2></test-entry>
+    <test-entry><add -8 10></test-entry>
+    <test-entry><add 1.7 .3></test-entry>
+
+    <test-section sub>
+    <test-entry><sub 4 2></test-entry>
+    <test-entry><sub -2 -4></test-entry>
+    <test-entry><sub 1 -1></test-entry>
+    <test-entry><sub 2.5 .5></test-entry>
+ 
+    <test-section mul>
+    <test-entry><mul 1 2></test-entry>
+    <test-entry><mul 2 1></test-entry>
+    <test-entry><mul -2 -1></test-entry>
+    <test-entry><mul -4 -.5></test-entry>
+
+    <test-section div>
+    <test-entry><div 2 1></test-entry>
+    <test-entry><div -2 -1></test-entry>
+    <test-entry><div 16 8></test-entry>
+    <test-entry><div -4 -2.0></test-entry>
+
+    <test-section mod>
+    <test-entry><mod 102 50></test-entry>
+    <test-entry><mod 5 3></test-entry>
+    <tr> <td colspan=2 align=center>Expect magnitudes of "-2"...</td> </tr>
+    <test-entry><mod -5 3></test-entry>
+    <test-entry><mod -5 -3.0></test-entry>
+
+  </table>
+</center>

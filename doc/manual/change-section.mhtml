@@ -1,0 +1,129 @@
+;;; change-section.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul 10 01:48:11 1996.
+<set-var title="Move Documentation Items">
+<include header.mhtml>
+
+<when <get-var posted::action>>
+  <if <string-eq <get-var action> Cancel>
+      <redirect <get-var mhtml::url-to-dir>>>
+
+  <set-var move-to-section = <downcase <get-var move-to-section>>>
+  <with-open-database db <metahtml::function-db> mode=write-create>
+    <set-var i=0 findex=0 failed[]="">
+    <while <get-var selected[i]>>
+      <set-var key=<upcase <get-var selected[i]>>>
+      <package-delete doc>
+      <set-var x = <database-load-record db <get-var key> prefix=doc>>
+      <when <not <get-var x>>>
+	<set-var failed[findex]=<get-var key>>
+	<increment findex>
+      </when>
+      <when <get-var x>>
+	<set-var doc::section=<get-var move-to-section>>
+	<set-var x = <database-save-package db <get-var key> doc strip=true>>
+      </when>
+      <increment i>
+    </while>
+  </with-open-database>
+
+  <p>
+  <h2> Moved <get-var i> items to <get-var move-to-section> </h2>
+  <when <get-var failed>>
+    <h2>The following items failed to be moved:
+    <set-var i = 0>
+    <while <get-var failed[i]>>
+      <get-var failed[i]>,
+      <increment i>
+    </while>
+    </h2>
+  </when>
+</when>
+
+<defun vertical-table array-name width link extra-link-info>
+  <set-var array[]=<get-var-once <get-var array-name>[]>>
+  <set-var size=<prog <set-var x[]=<symbol-info array>> <get-var x[1]>>>
+  <set-var limit=<div size <or <get-var width> 1>>>
+  <set-var leftover = <sub size <mul limit <or <get-var width> 1>>>>
+
+  <set-var i=0 limits[]="">
+  <while <lt i width>>
+    <set-var limits[i]=<get-var limit>>
+    <increment i>
+  </while>
+
+  <set-var i=0>
+  <while <gt leftover 0>>
+    <increment limits[i]>
+    <increment i>
+    <decrement leftover>
+  </while>
+
+  <table width=100%>
+    <set-var i=0 col=0>
+    <tr valign=top>
+      <while <lt col width>>
+	<set-var count=0>
+	<td align=left width=<div 100 width>%>
+	  <while <and <get-var-once array[i]> <lt count limits[col]>>>
+	    <set-var key=<get-var-once array[i]>>
+	    <table>
+	      <tr>
+		<td align=right>
+		  <input type=checkbox name=selected value="<get-var key>">
+		</td>
+		<td>
+		  <if <get-var-once link>
+		      <concat <a href="<get-var-once link>?<cgi-encode key>"
+				 <get-var extra-link-info>>
+			      <downcase <get-var-once key>>
+			      </a>>
+		    <downcase <get-var-once key>>>
+		</td>
+	      </tr>
+	    </table>
+	    <br>
+	    <increment i>
+	    <increment count>
+	  </while>
+	</td>
+      <increment col>
+    </while>
+    </tr>
+  </table>
+</defun>
+
+<form method=post action="<thisdoc>">
+  <table>
+    <tr>
+      <td align=right> <b>Move To Section:</b> </td>
+      <td align=left colspan=2>
+	<set-var move-to-section=<capitalize <get-var-once move-to-section>>>
+	<select name=move-to-section>
+	  <with-open-database db <metahtml::section-db> mode=read>
+	    <database-query db true keys=keys>
+	  </with-open-database>
+	  <sort keys>
+	  <set-var i=0>
+	  <while <get-var keys[i]>>
+	    <select-option move-to-section <capitalize <get-var keys[i]>>>
+	    <increment i>
+	  </while>
+	</select>
+      </td>
+    </tr>
+  </table>
+
+  <with-open-database db <metahtml::function-db> mode=read>
+    <database-query db true keys=keys>
+  </with-open-database>
+
+  <sort keys>
+  <vertical-table default::keys 3 create-fundoc.mhtml target=new_window>
+  <p>
+  <input type=submit name=action value="Move Selected Items">
+</form>
+
+<include footer.mhtml>
+

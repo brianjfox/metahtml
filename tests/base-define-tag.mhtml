@@ -1,0 +1,26 @@
+;;; base-define-tag.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 15:19:54 1996.
+
+Result: "Define-Tag Definition Works": <define-tag test-define-tag>Define-Tag Definition Works</define-tag><test-define-tag>
+Result: "Define-Tag Definition Works:<br>arg0": <define-tag test-define-tag>Define-Tag Definition Works:<br>%0</define-tag><test-define-tag "arg0">
+Result: "Define-Tag Definition Works:   <br>   arg0": <define-tag test-define-tag>
+Define-Tag Definition Works:   <br>   %0 %1   
+</define-tag><test-define-tag arg0>
+Result: "Define-Tag Definition Works:   <br>   arg0 value": <define-tag test-define-tag whitespace=delete>
+Define-Tag Definition Works:   <br>   %0 %1
+   
+</define-tag><set-var var2=value><test-define-tag arg0 <get-var var2>>
+Result: "Define-Tag Definition Works:   <br>Variables: value1 value2": <define-tag test-define-tag var1 var2 whitespace=delete>
+
+Define-Tag Definition Works:   <br>
+
+Variables: <get-var var1> <get-var var2>   
+</define-tag><test-define-tag value1 value2>
+Result: "Define-Tag Definition Works:   <br>Variables: value1  value3": <define-tag test-define-tag var1 var2 var3 whitespace=delete>
+
+Define-Tag Definition Works:   <br>
+
+Variables: <get-var var1> <get-var var2> <get-var var3>
+</define-tag><test-define-tag value1 "" value3>

@@ -1,0 +1,6 @@
+;;; base-msql-number-of-rows.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 00:25:26 1996.
+
+Result: 1: <set-var findname="Jarlath"><set-var query="select name,phone from test where name='<get-var findname>'"><msql::with-open-database db database=test host=localhost><msql::database-exec-query db <get-var query> cursor=dbcursor><msql::number-of-rows dbcursor></msql::with-open-database>

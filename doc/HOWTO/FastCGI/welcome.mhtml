@@ -1,0 +1,29 @@
+;;; welcome.mhtml: -*- Meta-HTML -*-  HowTO: fastcgi.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Apr  5 08:44:08 1997.
+;;;
+<include header.mhtml>
+
+<layout::page>
+  <plain-text>
+    <ul>
+      <li> <b>Make sure that you are running a server which supports
+      FastCGI</b>
+
+      <ol>
+	<li> Install the <a href=http://www.fastcgi.com/><b>FastCGI</b></a>
+	module for the Apache server.  If you are already running a
+	recent version of the <a href="http://stronghold.c2.net/">
+	<b>Stronghold Secure Webserver</b></a>, then the necessary
+	code has already been included with your server -- you simply
+	need to turn it on.  For earlier versions of Apache, you can
+	use <a href="apache-fastcgi.tgz"> this <b>mod_fastcgi.c</b></a>.
+	
+      </ol>
+    </ul>
+
+    <h4>The remainder of this document is not yet online...</h4>
+  </plain-text>
+</layout::page>
+<include footer.mhtml>

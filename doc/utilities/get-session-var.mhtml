@@ -1,0 +1,42 @@
+;;; get-session-var.mhtml: -*- Meta-HTML -*-  Man Page for
+;;; get-session-var utility.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 11:56:29 1996.
+;;;
+<set-var title="get-session-var: Meta-HTML Utility">
+<include header.mhtml>
+
+<layout::page>
+  <h3> Get the Value of a Session Variable </h3>
+  <ptext>
+    <synopsis get-session-var [-f session-db] session-id varname>
+
+    <code>get-session-var</code> allows the server administrator to
+    examine a particular variable in a specific session, without having to
+    wade through the entire database, and directly from the command line.
+
+    If you are utilizing a session database which is not stored in the
+    usual location (<code>/tmp/sessions.db</code>), you may give the
+    <code>-f <i>FILENAME</i></code> argument, where
+    <code><i>FILENAME</i></code> is the path to the file containing the
+    session database.
+
+    Here is an example of use:
+  </ptext>
+  <pre>
+  root@server# <a href="list-sessions.mhtml">list-sessions</a> -s
+  Sessions in database [3]:
+  SESSION [Meta Scheduler/2498587655903]  (2100 seconds remaining)
+  SESSION [BIX-Session/25631364981414]  (3271 seconds remaining)
+  SESSION [Online Shopping/25011681853662]  (2119 seconds remaining)
+
+  root@server# get-session-var 2498587655903 connected-browser
+  Mozilla/2.0b6a (X11; I; Linux 1.2.1 i386)
+
+  </pre>
+  <ptext>
+    Also see: <a href="set-session-var.mhtml"><code>set-session-var</a>.
+  </ptext>
+</layout::page>
+<include footer.mhtml>

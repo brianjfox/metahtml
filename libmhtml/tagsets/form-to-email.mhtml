@@ -1,0 +1,26 @@
+;;; form-to-email.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Jul 19 08:34:34 1996.
+<defmacro form-to-email &key method action name to subject cc bcc
+  &body body package=local>
+  <FORM METHOD="<or <get-var-once method> POST>"
+	name="<or <get-var-once name> form-to-email-form>}"
+	ACTION="<thisdoc>">
+    <input type=hidden name=form-to-email value=true>
+    <get-var-once body>
+  </FORM>
+
+  <when <get-var-once posted::form-to-email>>
+    <set-var message=<dump-package posted text-mode?=true>>
+    <e-mail::sendmail webmaster@<get-var-once env::server_name>
+		      <or <get-var-once to>
+			  webmaster@<get-var-once env::server_name>>
+		      <get-var-once cc>
+		      <get-var-once bcc>
+		      "Subject: <or <get-var-once subject> [None]>"
+		      <get-var-once message>>
+    <if <get-var-once action>
+	<redirect <get-var-once action>>>
+  </when>
+</defmacro>

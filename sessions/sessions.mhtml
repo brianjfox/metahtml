@@ -1,0 +1,80 @@
+;;; sessions.mhtml: -*- Meta-HTML -*- 
+;;; Manipulate the session database.
+
+;;;  Copyright (c) 1995 Brian J. Fox & Samsara Partners
+;;;  Author: Brian J. Fox (bfox@datawave.net) Fri Oct 20 14:12:56 1995.
+<DEBUGGING-OUTPUT>
+<set-var path="<get-var env::path>:/www/bin">
+
+<defsubst exec whitespace=delete>
+  <cgi-exec "(export PATH; PATH=<get-var path>; %body)">
+</defsubst>
+
+<when <get-var sessions>>
+  <defsubst extract-sid whitespace=delete>
+    <match <get-var %0> "^[0-9]+" action=extract>
+  </defsubst>
+
+  <defsubst delete-session-list whitespace=delete>
+    <set-var i=0>
+    <while <get-var sessions[i]>>
+      <set-var SID=<extract-sid sessions[i]>>
+      <delete-session>
+      <increment i>
+    </while>
+    <unset-var SID>
+  </defsubst>
+
+  <defsubst verbose-listing>
+    <include /macros/dump-package.mhtml>
+    <set-var i=0>
+    <while <get-var sessions[i]>>
+      <set-var SID=<extract-sid sessions[i]>>
+      <session-import "" "Session <get-var SID>">
+      <dump-package "Session <get-var SID>">
+      <increment i>
+    </while>
+    <unset-var SID>
+  </defsubst>
+
+  <var-case
+    action="Delete Selected"	<delete-session-list>
+    action="Verbose Listing"	<verbose-listing>
+    action="Directly Modify"	<prog>>
+</when>
+
+
+<set-var discard=<exec reap-sessions>>
+<set-var session-lines[]=<exec list-sessions -s | grep SESSION>>
+
+<set-var i=0>
+<while <get-var session-lines[i]>>
+  <set-var
+    session-lines[i] =
+    <match <get-var session-lines[i]> "\\\\[.*\\\\]" action=extract>
+    session-owners[i] =
+    <match <get-var session-lines[i]> "[A-Za-z _-]+" action=extract>
+    session-ids[i] =
+    <match <get-var session-lines[i]> "[0-9]+" action=extract>
+    SID=<get-var session-ids[i]>
+    session-connections[i] =
+    <match <get-session-var connected-from> "\\\\[[0-9]+\\\\.[0-9]+\\\\.[0-9]+\\\\.[0-9]+\\\\]\\\\(.*" action=delete>>
+  <increment i>
+</while>
+
+<form method=POST action="<get-var mhtml::current-doc>">
+  <h2>Sessions:</h2>
+  <select multiple name=sessions size=10>
+  <set-var i=0>
+  <while <get-var session-ids[i]>>
+    <option><a href="foo"><get-var session-ids[i]> [<get-var session-owners[i]>] <get-var session-connections[i]></a>
+    <increment i>
+  </while>
+  </select>
+
+<center>
+  <input type=submit name=action value="Delete Selected">
+  <input type=submit name=action value="Verbose Listing">
+  <input type=submit name=action value="Directly Modify">
+</center>
+</form>

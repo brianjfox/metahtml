@@ -1,0 +1,19 @@
+As my previous letter intimated, there is a new argument feature in
+Meta-HTML which can be used when defining functions, substs, or
+macros.
+
+If there are a variable number of arguments to be given to a function,
+and you now exactly what the first few are, but will need to operate
+on the remaining arguments, either one-by-one or as a group, you can
+use the "&rest" feature.  Here is how it works:
+
+<defun foo bar &rest args> <get-var args> </defun>
+<foo this is a "list of" things> --> is a list of things
+
+<defun foo bar &rest args[]> <foreach a args> <get-var a>: </foreach> </defun>
+<foo this is a "list of" things>
+   --> is:  a:  list of:  things:
+
+This feature appears in 5.05 and 6.04, and thus is not in the current
+release.  But we can start using it whenever we want.
+

@@ -1,0 +1,139 @@
+;;; chathist-internal.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Aug 24 12:13:34 1996.
+
+<if <not <get-var chathist-subfile>> <session-import chat chat>>
+<require tagsets/quicktalk>
+<chat::initialize>
+
+<when <string-eq <get-var-once posted::action> "Mail">>
+  <chat::mail-hist <get-var-once posted::to> <get-var posted::mail-lines>>
+</when>
+
+<when <string-eq <get-var-once posted::action> "Exit Room">>
+  <set-var handle=<get-var chat::handle>>
+  <set-var chat::handle=QUICKTALK>
+  <chat::add-to-history "[<get-var handle> has left the room...]">
+  <redirect welcome.mhtml>
+</when>
+
+<when <string-eq <get-var-once posted::action> "Exit Building">>
+  <set-var handle=<get-var chat::handle>>
+  <set-var chat::handle=QUICKTALK>
+  <chat::add-to-history "[<get-var handle> has left the building...]">
+  <session-destroy-package chat>
+  <redirect welcome.mhtml>
+</when>
+
+
+<when <string-eq <get-var-once posted::action> "Who's Who?">>
+  <center>
+    <h3> Who's Who </h3>
+    <p>
+    <chat::chatter-list>
+    <set-var i=0>
+    <table width=90% border>
+      <tr>
+	<td align=center width=15%> <b> Who </b> </td>
+	<td align=center width=30%> <b> Where </b> </td>
+	<td align=center width=20%> <b> From </b> </td>
+	<td align=center width=35%> <b> Last Remark </b> </td>
+      </tr>
+      <while <get-var-once chat::chatter-list[i]>>
+	<package-delete temp>
+	<alist-to-package <get-var-once chat::chatter-list[i]> temp>
+	<tr>
+	  <td align=center%>
+	    <get-var temp::handle>
+	  </td>
+	  <td align=center>
+	    <get-var temp::current-room>
+	  </td>
+	  <td align=center>
+	    <pad <get-var temp::client> 15 truncate>
+	  </td>
+	  <td align=center>
+	    <if <get-var temp::last-comment>
+		<date <get-var temp::last-comment>>
+	      Never>
+	  </td>
+	</tr>
+	<increment i>
+      </while>
+    </table>
+  </center>
+</when>
+
+<center>
+  <if <get-var chat::privileged>
+      <prog <b>You're privileged!</b>>>
+  <if <get-var chathist-subfile>
+      <prog <font size="-1">
+	Refresh:
+	<font color="#2020D0"><or <get-var chat::refresh-interval> 15></font>
+	<if <not <string-eq <get-var chat::refresh-interval> "None">> Seconds>
+	</font>>>
+  <p>
+  <h3>What they're saying...
+  <font size=-1>[room: <font color="#2020D0"><get-var chat::current-room></font></font>]</h3>
+  <p>
+  <table width=85% border=1>
+    <tr>
+      <td align=left>
+	<chat::chat-history <or <get-var chat::history-lines> 10>>
+      </td>
+    </tr>
+  </table>
+</center>
+
+<center>
+  <table width=90%>
+    <tr valign=top>
+      <td width=25% align=left>
+	<form method=post action="<thisdoc>">
+	  <input type=submit name=action value="Refresh">
+	</form>
+      </td>
+      <td width=25% align=center>
+	<form method=post action="<thisdoc>" target=_parent>
+	  <input type=submit name=action value="Exit Room">
+	</form>
+      </td>
+      <td width=25% align=center>
+	<form method=post action="<thisdoc>" target=_parent>
+	  <input type=submit name=action value="Exit Building">
+	</form>
+      </td>
+      <td width=25% align=right>
+	<form method=post action="<thisdoc>">
+	  <input type=submit name=action value="Who's Who?">
+	</form>
+      </td>
+    </tr>
+  </table>
+</center>
+
+<when <get-var chat::privileged>>
+  <center>
+    <form method=post action="<thisdoc>">
+      <input type=submit name=action value="Mail">
+      the last
+      <select mail-lines>
+	<option>40
+	<option>50
+	<option>100
+	</select>
+      lines to
+      <input type=text name=to value="<get-var chat::handle>@ua.com">
+    </form>
+  </center>
+</when>
+
+<br>
+<br>
+<center>
+  <a href="<get-var mhtml::http-prefix>/" target=_top>
+    <b>Back to your regularly scheduled browsing...</b>
+  </a>
+</center>

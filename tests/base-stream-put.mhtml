@@ -1,0 +1,6 @@
+;;; base-stream-put.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 19:46:00 1996.
+
+Result: "Testing stream put into file: base-stream-put-test.mhtml": <set-var stream-var="Testing stream put into file: base-stream-put-test.mhtml"><with-open-stream stream base-stream-put-test.mhtml type=file mode=write-create><stream-put stream <get-var stream-var>></with-open-stream><include base-stream-put-test.mhtml verbatim><cgi-exec "rm base-stream-put-test.mhtml">

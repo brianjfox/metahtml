@@ -1,0 +1,81 @@
+;;; session.mhtml: -*- Meta-HTML -*-
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 29 08:10:02 1996.
+;;;
+;;; The tag <session::initialize> creates or resumes a session for the
+;;; current user.  To use this tag, you should place the following in
+;;; a file which is executed for each page fetch:
+;;;
+;;;     <require session>
+;;;	<session::initialize>
+;;;
+<defun session::initialize timeout timeout-page>
+  ;;; Create or resume a session for the currently connected browser.
+  ;;; TIMEOUT is the length of time this session should stick around
+  ;;; in the session database expressed in minutes; it defaults to 200.
+  ;;;
+  ;;; If the variable SESSION::INHIBIT-SESSION is non-empty, then no
+  ;;; session processing is done.
+  ;;;
+  <if <not <get-var timeout>>
+      <set-var timeout = 200>>
+
+  <set-var mhtml::sid-prefix="/">
+  <set-var mhtml::permanent-cookies=true>
+  <set-var sid=<get-var default::sid>>
+  <set-session-timeout <get-var timeout>>
+  <if <not <get-var session::inhibit-session>>
+      <require-session
+       missing = <prog
+		   <set-var site::new-arrival=true>
+		   <set-var anonymous=anonymous>
+		   <create-session anonymous allow-multiple>
+		   <set-session-timeout <get-var timeout>>
+		   <set-session-var client=<get-var env::remote_host>>
+		   <set-session-var user-agent=<get-var env::http_user_agent>>
+		   <when <not <get-var mhtml::cookie-compatible>>>
+		   <if <match <get-var env::http_user_agent> "lynx" caseless=t>
+		       <set-session-var
+			 preview::layout = plain
+			 preview::admin-layout = plain
+			 preview::left-border = 0
+			 preview::admin-left-border = 0>>
+		   <redirect <concat
+			      <get-var mhtml::http-to-host>/
+			      <get-var default::sid mhtml::location>>>
+		   </when>>
+
+       timeout = <prog
+		   <if <get-var timeout-page>
+		       <redirect <get-var timeout-page>>>
+		   <package-delete temp>
+		   <set-var site::new-arrival=true>
+		   <set-var
+		     default::sid=<get-var sid>
+		     temp::sid=<get-var sid>
+		     temp::key="Anonymous Restarted"
+		     temp::start=<time>
+		     temp::access=<time>
+		     temp::timeout=<get-var timeout>
+		     temp::data=""
+		     temp::length =
+		     <match <get-var temp::data> ".*" action=length>>
+		   <with-open-database
+		    db <or <get-var mhttpd::session-database-file>
+			   /tmp/sessions.db> mode=write-create>
+		   <set-var saved-p =
+		     <database-save-package
+		      db <get-var temp::sid> temp strip=t>>
+		   </with-open-database>
+		   <set-session-var client=<get-var env::remote_host>>>>>
+</defun>
+
+<defun session::reset-cookie>
+  ;;; Place this at the end of a page which is supposed to timeout the
+  ;;; user's session.  It sends the browser a Set-Cookie header which
+  ;;; makes the cookie go away.
+  <set-var mhtml::sid-prefix="/">
+  <set-var default::sid="">
+  <unset-var mhtml::permanent-cookies>
+</defun>

@@ -1,0 +1,151 @@
+# Makefile.in: -*- Text -*-  Source for configure to make a Makefile from.
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+#
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+REGEX_IN= @REGEX_IN@
+GDBMLIB = @GDBMLIB@
+GDBM_IN = @GDBM_IN@
+DESLIB	= @DESLIB@
+DBINC	= $(GDBM_IN)
+DBLIB	= $(GDBMLIB) $(DESLIB)
+
+PLATFORM= @PLATFORM@
+EXE	= @EXE@
+OS_LIBS = @OS_LIBS@
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+bindir=$(exec_prefix)/bin
+
+WEBBASEDIR	= @WEBBASEDIR@
+WEBDEF		= -DWEBBASEDIR='"$(WEBBASEDIR)"'
+VERSDEF		= -DMHTML_VERSION_STRING='"$(MHTML_VERSION)"'
+ENGINE_MAJOR	= 2
+ENGINE_MINOR	= 2
+ENGINE_DEF	= -DENGINE_VERSION='"Engine/$(ENGINE_MAJOR).$(ENGINE_MINOR) (UAI; $(PLATFORM); Meta-HTML/$(MHTML_VERSION))"' $(VERSDEF) $(CHECK_TIMESTAMP) $(CHECK_ACTIVATION)
+ENGINE_OPT	= 
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+
+# You cannot compile with anything other than GNU C.
+CC		 = gcc $(GCC_WARN)
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+# OPTIMIZE_FLAGS	= -O69
+INCLUDE_FLAGS	= @EXTRAINC@ -I.. -I../libutils -I../libmhtml -I../libserver $(DBINC) $(REGEX_IN)
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(INCLUDE_FLAGS)
+LDFLAGS		= $(DEBUG_FLAGS)
+
+LIBUTILS	= ../libutils/libutils.a
+LIBMHTML	= ../libmhtml/libmhtml.a
+LIBSERVER	= ../libserver/libserver.a
+LIBFCGI		= ./fcgi/libfcgi/libfcgi.a
+
+OBJECTS		= engine.o
+ISP_OBJECTS	= ispengine.o
+FCGI_OBJECTS	= fcgi-engine.o
+
+ENGINE		= engine$(EXE)
+ISP_ENGINE	= ispengine$(EXE)
+FCGI_ENGINE	= @FCGI_ENGINE@
+PROGS		= $(ENGINE) $(ISP_ENGINE) $(FCGI_ENGINE)
+REQLIBS		= $(LIBTIMESTAMP) $(LIBREGISTER) $(LIBMHTML) \
+		  $(LIBUTILS) $(LIBSERVER) $(LIBSSL)
+
+TARGETS		= $(PROGS)
+
+.c.o:
+	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) $(DEFS) $(ENGINE_DEF) $(ENGINE_OPT) -c $<
+
+all:	$(TARGETS) $(SUBDIRS)
+
+$(LIBUTILS):
+	(cd ../libutils; $(MAKE) $@)
+
+$(LIBMHTML):
+	(cd ../libmhtml; $(MAKE) $@)
+
+$(LIBSERVER):
+	(cd ../libserver; $(MAKE) $@)
+
+$(LIBFCGI):
+	(cd ./fcgi; $(MAKE))
+
+$(PROGS): $(REQLIBS)
+
+$(ENGINE): $(OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJECTS) $(REQLIBS) $(DBLIB) $(OS_LIBS)
+
+$(ISP_ENGINE): $(ISP_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(ISP_OBJECTS) $(REQLIBS) $(DBLIB) $(OS_LIBS)
+
+$(FCGI_ENGINE): $(FCGI_OBJECTS) $(LIBFCGI)
+	$(CC) $(LDFLAGS) -o $@ $(FCGI_OBJECTS) $(REQLIBS) $(DBLIB) \
+	 $(OS_LIBS) $(LIBFCGI)
+
+fcgi-engine.o: engine.c
+	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) $(DEFS) \
+	   $(ENGINE_DEF) $(ENGINE_OPT) -DBUILDING_WITH_FAST_CGI \
+	   -o $@ -c engine.c
+
+ispengine.o: engine.c
+	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) $(DEFS) \
+	   $(ENGINE_DEF) $(ENGINE_OPT) -DISPENGINE \
+	   -o $@ -c engine.c
+
+Makefile: Makefile.in
+	(cd ..; ./config.status)
+
+install: $(PROGS)
+	for file in $(PROGS); do \
+	  $(INSTALL) $$file $(bindir)/$$file; \
+	done
+
+redhat_install: $(PROGS)
+	$(INSTALL) engine $(bindir)/metahtml-engine
+	$(INSTALL) fcgi-engine $(bindir)/metahtml-fcgi-engine
+
+clean-executables: FORCE
+	$(RM) $(TARGETS) \
+	engine.o fcgi-engine fcgi-engine.o \
+	nph-fcgi-engine nph-engine
+
+clean:  FORCE
+	$(RM) *.o $(TARGETS)
+	-(cd fcgi; make clean)
+
+distclean realclean: clean
+	$(RM) *.cache *.log Makefile
+	-(cd fcgi; make distclean)
+
+tags TAGS: FORCE
+	(cd ..; $(MAKE) $@)
+
+FORCE:

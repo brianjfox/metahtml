@@ -1,0 +1,6 @@
+;;; base-unset-session-var.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 15:59:46 1996.
+
+Result: "Before: Session Active After: ": <set-var mhttpd::session-database-file="/tmp/test-sessions.db"><set-var anonymous=anonymous><create-session anonymous allow-multiple><set-session-var tmp="Session Active">Before: <get-session-var tmp> After: <unset-session-var tmp><get-session-var tmp><delete-session <get-var SID>><unset-var SID>

@@ -1,0 +1,85 @@
+;;; edit-page.mhtml: Page Editor for -*- Meta-HTML -*- files.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Oct 26 10:22:59 1996.
+
+<defsubst edit-page page::webpath>
+  <when <match <get-var-once env::http_user_agent> "(Mozilla|MSIE)">>
+    <set-var javascript?=true>
+    <script language=JavaScript>
+    <!--
+     function change_target() { document.the_form.target="Previewer"; }
+     function keep_target() { document.the_form.target="_self"; }
+     // -->
+    </script>
+  </when>
+
+  <if <string-eq <get-var-once posted::action> "Return">
+      <redirect <get-var-once mhtml::url-to-dir>/>>
+
+  <when <match <get-var-once posted::action> "Save">>
+    ;;; Remove extraneous <CR>'s from the input.
+    <subst-in-var contents "\r\n" "\n">
+
+    ;;; Put Save-As name in webspace.
+    <if <not <match "<get-var-once save-as>" "^/">>
+	<set-var save-as = /<get-var-once save-as>>>
+    <set-var fullpath=<concat <get-var-once mhtml::include-prefix>
+			      <get-var-once save-as>>>
+
+    ;;; Make a backup file if the file to save to already exists.
+    <set-var backup = <dir::create-emacs-backup <get-var-once fullpath>>>
+    <when <get-var-once backup>>
+      <layout::page>
+	<center><h2>Backup saved as: <get-var-once backup></h2></center>
+      </layout::page>
+    </when>
+
+    ;;; Now save the file.
+    <set-var saved? = <dir::write-file <get-var-once fullpath> contents>>
+
+    ;;; File that is being edited is called whatever this one was saved as.
+    <set-var page::webpath=<get-var-once save-as>>
+
+    ;;; The directory to display is the same as the one containing this file.
+    <set-session-var page::dir-prefix =
+      <match <get-var-once save-as> "[^/]+$" action=delete>>
+  </when>
+
+  <if <match <get-var-once posted::action> "Open">
+      <redirect <get-var-once save-as>>>
+
+  <set-var contents=<include <get-var-once page::webpath> verbatim alt="">>
+
+  ;;; Make contents look like exactly what this page contains.
+  <subst-in-var contents "&" "&amp;" "<" "&lt;" "\r" "\\r">
+
+  <layout::page>
+    <form method=post action="<thisdoc>" name=the_form>
+      <b>Save File As: </b>
+      <font size=<pages::editor-font-size>>
+      <input type=text name=save-as
+	     value="<get-var-once page::webpath>" size=68>
+      </font>
+      <br>
+      <font size=<pages::editor-font-size>>
+      <concat <textarea name=contents
+			rows=<get-var-once pages::editor-lines>
+			cols=<get-var-once pages::editor-columns>>
+	      <get-var-once contents>
+	      </textarea>>
+      </font>
+      <p>
+      <center>
+	<input type=submit name=action value="Save Page"
+	       <if <get-var-once javascript?> <prog onClick="keep_target()">>>
+	<input type=submit name=action value="Save And Open"
+	       <if <get-var-once javascript?> <prog onClick="change_target()">>>
+	<input type=submit name=action value="Open Page"
+	       <if <get-var-once javascript?> <prog onClick="change_target()">>>
+	<input type=submit name=action value="Return"
+	       <if <get-var-once javascript?> <prog onClick="keep_target()">>>
+      </center>
+    </form>
+  </layout::page>
+</defsubst>

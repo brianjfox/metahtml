@@ -1,0 +1,17 @@
+;;; base-stream-test.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 19:06:49 1996.
+
+Test file for Stream commands.  
+Used to test the following commands:
+
+stream-get
+stream-get-contents
+stream-put
+stream-put-contents
+stream-readable
+stream-shutdown
+stream-writable
+with-open-stream
+

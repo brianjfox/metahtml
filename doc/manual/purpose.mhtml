@@ -1,0 +1,78 @@
+;;; purpose.mhtml: -*- Meta-HTML -*- Language Manifesto
+<if <not <get-var files-are-included>>
+    <prog
+      <set-var
+	title="The Purpose of Meta-HTML"
+	prev-page="welcome.mhtml" prev-title="Language Reference"
+	next-page="implementation.mhtml"  next-title="The Implementation">
+      <include header.mhtml>>
+  <prog
+    <h2> The Purpose of <Meta-HTML></h2>>>
+
+<ptext>
+<b>HTML</b> is a <emph>description</emph> layout language.  It describes in
+general the placement and visual style of <emph>elements</emph> in a
+page.  These elements are generally sequences of text, with an
+occasional image thrown in for good measure.
+
+<Meta-HTML> is an <emph>interpreted</emph> computer
+language with dynamic variables and flow-control statements.  Although
+it is not a complete general purpose computer language in the
+traditional sense (i.e., you cannot write a version of a <meta-html>
+interpreter in <meta-html>) it does perform processing and decision
+making of and on data elements.
+
+A quick example for the impatient is in order.  The text:
+
+<b>You are connected to ``<get-var env::server_name>'' and reading
+text written by <get-var the-author>.</b>
+
+<font>i</font>s produced in <meta-html> by:
+
+<example>
+  <b>You are connected to ``<get-var ENV::SERVER_NAME>'' and
+     reading text written by <get-var the-author>.</b>
+</example>
+
+As the WWW grows, more and more document providers are realizing that
+stateless connections are only useful for retrieving documents full of
+static information, and that, at times, it can be very useful to
+remember state pertaining to the browser that is connecting.
+
+The problem of keeping state for a particular browser user has been
+resolved by various individuals; all of the solutions require
+information to be passed back and forth between the browser and the
+server.  For example, to play a WWW Blackjack game could involve the
+passing back and forth of information including the current
+wins/losses of the user, which cards have been dealt from the deck so
+far, and so forth.  This information is most often passed to and fro
+in the form of a "magic" URL.  The problems with passing information
+in this way are two-fold:
+
+<ol>
+  <li> The information can be modified by the user before sending it
+       back, which might allow a user to put more money in his or her
+       bank account, for example, and, less importantly,
+
+  <li> The URL looks "ugly", since there is a large amount of
+       information present which doesn't describe the essence of the
+       location that the user is connecting to.
+</ol>
+
+Another mechanism can be taken advantage of when both the server and
+browser being used support <b>HTTP Cookies</b>.  While this solves
+the problem of "ugly" URLs, (this mechanism does not place information in the
+URL) it generates a new problem: the user must be in possession of a
+compliant browser, and be communicating with a compliant server.  In
+addition, the information can be changed by the user before sending it
+back.
+
+<meta-html> solves the problem of keeping state for a particular
+session, and it does it in a server and browser independent manner.
+Our method requires no additional CGI programs to be written.  You can
+read about the technical details in the <secref session-operators>
+section of this manual.
+</ptext>
+
+<if <not <get-var files-are-included>>
+    <include footer.mhtml>>

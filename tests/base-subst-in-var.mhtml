@@ -1,0 +1,6 @@
+;;; base-subst-in-var.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 20:58:59 1996.
+
+Result: "Before: Replace this value with another After: Old Value of this Variable Replaced": <set-var var1="Replace this value with another">Before: <get-var var1><subst-in-var var1 "Replace this value with another" "Old Value of this Variable Replaced"> After: <get-var var1>

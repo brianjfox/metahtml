@@ -1,0 +1,13 @@
+%package odbc
+Summary: ODBC connectivity module for Meta-HTML.
+Group: Applications/WWW
+Requires: metahtml
+
+%description odbc
+Using mododbc.so, you can enable the connection of Meta-HTML to OpenLink
+Software's UDBC drivers (see <sql::set-database-type odbc>).
+
+%files odbc
+/usr/lib/metahtml/mododbc.so
+/usr/lib/metahtml/mododbcper.so
+

@@ -1,0 +1,84 @@
+;;; plist.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Mar  2 09:09:47 1996.
+;;;
+;;; All of the functions in this file expect a variable name
+;;; as an argument where the actual plist would be seen.
+;;;
+;;; In actual use, the plist is a package, so we use package-to-alist and
+;;; alist-to-package to convert from stored format to useful format.
+;;;
+;;; The default package for plists is "PLIST".
+;;;
+;;; Use <plist-decompose VAR [pkgname]> to make a package representing a plist.
+;;; Use <plist-compose VAR [pkgname]> to make a plist from a package.
+;;; Use <plist-new VAR> to make an empty plist in VAR.
+;;; Use <plist-set-prop VAR NAME VALUE> to give NAME VALUE in the plist VAR.
+;;; Use <plist-get-prop VAR NAME> to get the value of NAME in the plist VAR.
+;;; Use <plist-remove-prop VAR NAME VALUE> to make NAME be non-existant.
+;;;
+;;; It is up to the caller to decide exactly what goes in the plist, and
+;;; what those values mean.  An plist value can be a list of names, or
+;;; the name of another plist, or any indicator of the callers choosing.
+
+;;; The entire abstraction has been made meaningless with the advent of
+;;; the <alist-xxx-var> primitives.  We are deprecating this file slowly --
+;;; all of the functions have been rewritten using the new primitives.
+
+;;; Keep the abstraction clean.
+<defsubst plist-alist-to-plist> </defsubst>
+<defsubst plist-plist-to-alist> </defsubst>
+
+;;;
+;;; <plist-decompose VAR [pkgname]>
+;;;
+<defsubst plist-decompose whitespace=delete>
+  <alist-to-package <get-var "%0"> <or "%1" PLIST>>
+</defsubst>
+
+;;;
+;;; <plist-compose VAR [pkgname]>
+;;;
+<defsubst plist-compose whitespace=delete>
+  <set-var %0=<package-to-alist <or "%1" PLIST> strip=true>>
+</defsubst>
+
+;;;
+;;; <plist-new VAR>
+;;;
+<defsubst plist-new whitespace=delete>
+  <unset-var %0>
+</defsubst>
+
+;;;
+;;; <plist-set-prop VAR name value>
+;;;
+<defsubst plist-set-prop whitespace=delete>
+  <alist-set-var %0 "%1"="%2">
+</defsubst>
+
+;;;
+;;; <plist-get-prop VAR name>
+;;;
+<defsubst plist-get-prop whitespace=delete>
+  <alist-get-var %0 %1>
+</defsubst>
+
+;;;
+;;; <plist-remove-prop VAR name value>
+;;;
+<defsubst plist-remove-prop whitespace=delete>
+  <alist-unset-var %0 %1>
+</defsubst>
+
+;;;
+;;; <plist-merge-plist into new>
+;;;
+<defsubst plist-merge-plist whitespace=delete>
+  <package-delete __plist>
+  <plist-decompose "%0" __plist>
+  <alist-to-package <get-var %1> __plist>
+  <plist-compose "%0" __plist>
+</defsubst>
+

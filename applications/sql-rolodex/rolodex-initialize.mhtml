@@ -1,0 +1,77 @@
+;;; rolodex-initialize.mhtml: -*- Meta-HTML -*-  Initialize the Rolodex.
+;;; 
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 27 21:10:03 1998.
+<set-var title = "Initialize RoloDex">
+<include header.mhtml>
+
+<when <get-var-once posted::cancel>>
+  <message Database table <b><rolodex::rolo-table></b> is unchanged.> 
+  <redirect welcome.mhtml>
+</when>
+
+<when <or <get-var-once posted::really-initialize>
+	  <get-var-once posted::password>>>
+  <when <string-eq <get-var posted::password> <get-var site::admin-password>>>
+    <set-var password-good=true>
+    <set-var result = <rolodex::initialize-rolodex-db>>
+
+    <if <get-var result>
+	<prog
+	  <message The Rolodex table has been successfully initialized.>
+	  <redirect welcome.mhtml>>
+      <internal-message
+       Errors from ROLODEX::INITIALIZE-ROLODEX-DB:
+       <br>
+       Database Engine: <b><sql::get-database-type></b><br>
+       <sql::sql-error-message>>>
+  </when>
+
+  <if <not <get-var password-good>>
+      <internal-message You didn't enter the correct administrator password!>>
+</when>
+
+<layout::page>
+  <center>
+    <table border=2 width=90% bgcolor=#<color::hex-value SlateGray>>
+      <tr>
+	<td align=left>
+	  <center>
+	    <p>
+	    <font color=red>
+	    <blink><h3> WARNING!!! </h3> </blink>
+	    </font>
+	  </center>
+	  <font color=white>
+	  <p>
+	  Initializing the <b>Rolodex</b> database table
+	  will discard any data that you have already saved.
+	  <p>
+	  In the unlikely event that you need to reinitialize a database
+	  table, you should have already
+	  <b>Backed Up The Data</b> before proceeding.
+	  <p>
+	  You should fully understand the ramifications of what you are
+	  about to do before you consider doing it.
+	  </font>
+	  <p>
+	  <center>
+	    <font color=red>
+	    <blink><h3> WARNING!!! </h3> </blink>
+	    </font>
+	  </center>
+	  <p>
+	</td>
+      </tr>
+    </table>
+    <p>
+    <form method=post action=<thisdoc>>
+      <b>Password: </b>
+      <input type=password size=20 name=password value="">
+      <input type=submit name=really-initialize value="Yes, Really Initialize">
+      <b><input type=submit name=cancel value="No, Cancel"></b>
+    </form>
+  </center>
+</layout::page>
+
+<include footer.mhtml>

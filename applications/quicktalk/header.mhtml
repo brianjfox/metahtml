@@ -1,0 +1,26 @@
+;;; header.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu Aug 29 18:15:09 1996.
+<defvar layout::layout plain>
+<session::initialize 200>
+<layout::initialize>
+
+<require tagsets/quicktalk>
+<chat::initialize>
+
+<html>
+<head> <title> <get-var title> </title> </head>
+<body bgcolor="#FFFFFF">
+
+;;; Stuff and Bother.  Here is where the site logo/header might go:
+<concat <a href="<get-var mhtml::http-prefix>/documentation">
+	<img src="images/banner.gif" border=0 align=left alt="Meta-HTML">
+	</a>>
+
+<small-caps upper="+2" lower="+1">
+  <b>QuickTalk: Meta-HTML Chat Room</b>
+</small-caps>
+<br clear=left>
+
+<layout::default-header>

@@ -1,0 +1,73 @@
+;;; cart-display.mhtml: -*- Meta-HTML -*-
+;;; <include> this to display the contents of the shopping cart, for
+;;; browsers which do not support HTML Tables.
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Sat Oct 21 14:07:12 1995.
+;;;
+;;; You must have already included substs and cart-substs.
+
+<p>
+<read-cart>
+<cart-to-array contents>
+;;;
+;;; CONTENTS is now an array of shopping cart items, in the form:
+;;;
+;;;    ("Clothing::C119" 3 SIZE=XXL COLOR=Black)
+;;;
+;;; Cycle through the elements, printing them in a table.
+;;; List the contents of the shopping cart by iterating over all of
+;;; the product ID variables stored therein.
+
+<set-var output[]="" output-index=0>
+<defsubst add-to-output>
+  <set-var output[output-index]="%body">
+  <increment output-index>
+</defsubst>
+
+<when <get-var contents[0]>>
+  <set-var i=0 total=0 num-items=0 names[]=<package-vars cart>>
+  <set-var line =
+    <concat Quant
+	    <if <get-var shopping::show-product-id>
+		<pad "Product ID" 12 align=middle>>
+	    <pad "Item Name" 20 align=middle>
+	    <pad Price 9 align=middle>
+	    <pad Total 9 align=middle>
+	    Remarks
+	    <if <get-var shopping::no-html> "<br>------------------------------------------------------------" <hr>>>>
+  <add-to-output <get-var line>>
+  <while <get-var contents[i]>>
+    <breakout-contents contents[i]>
+    <load-item>
+    ;;; Okay.  CLASS, KEY, QUANTITY, and INFO have been set
+    ;;; up, and the info about this item has been loaded.  Display
+    ;;; a row if this item has a quantity greater than 0.
+    <set-var real-price=<mul quantity unit-price>>
+    <set-var line=
+      <concat <pad <get-var quantity> 4 align=middle>
+	      <if <get-var shopping::show-product-id>
+		  <pad <get-var product-id> 12 align=middle>>
+	      <pad <get-var product-name> 20 align=left truncate>
+	      <pad <get-var unit-price> 9 align=right>
+	      <pad <get-var real-price> 9 align=right>" "
+	      <pad "<or <get-var info> ->" 15 align=left truncate>>>
+    <add-to-output <get-var line>>
+    <set-var
+      total=<add total real-price>
+      num-items=<add num-items quantity>>
+    <increment i>
+  </while>
+  <set-var output[<sub output-index 1>] =
+    "<get-var output[<sub output-index 1>]><br>">
+  <set-var line=
+    <concat <pad <get-var num-items> 4 align=middle>
+	    <pad - 41 align=middle>
+	    <pad "$<get-var total>" 9 align=right>
+	    <if <get-var shopping::no-html> "<br>------------------------------------------------------------" <hr>>>>
+  <add-to-output <get-var line>>
+<pre>
+<get-var output[]>
+</pre>
+</when>
+

@@ -1,0 +1,6 @@
+;;; base-require-test.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 17:15:11 1996.
+
+<defun test-require>Require Works</defun>

@@ -1,0 +1,16 @@
+;;; docsubsts.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Jul  6 01:12:06 1996.
+
+;;; Use "<topic foo>" to start a new topic in plain text.
+<defmacro topic>
+  <p>
+  <br>
+  <font size="+1"><b>%0 %1 %2 %3 %4 %5 %6 %7 %8 %9</b></font><br>
+  <hr width=20% align=left>
+  <ptext>
+    %body
+  </ptext>
+</defmacro>
+

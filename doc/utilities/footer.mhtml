@@ -1,0 +1,17 @@
+;;; footer.mhtml: -*- Meta-HTML -*-  Footer for the Utilities.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Feb  6 14:29:01 1996.
+
+<set-var dochome=<get-var mhtml::url-to-dir>>
+<set-var dochome=<match <get-var dochome> ".*/" action=extract>>
+<p>
+<center>
+  [ <a href="<get-var dochome>">Documentation Home</a> ]
+  [ <a href="<get-var mhtml::url-to-dir>/"> Utilities Home</a> ]
+  <if <match <get-var mhtml::current-doc> "testmap.mhtml">
+      <prog
+	[ <a href="<get-var mhtml::url-to-dir>/imagemap.mhtml">
+	Using Imagemap</a> ]>>
+</center>
+<include ../footer.mhtml>

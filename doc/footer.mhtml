@@ -1,0 +1,24 @@
+;;; footer.mhtml: -*- Mode: Meta-HTML -*-
+;;;
+;;; Stuff that goes at the bottom of the page.
+
+<include ../footer.mhtml
+	 alt=<prog
+	       <include navbar.mhtml>
+	       <defsubst copyright>&#169;</defsubst>
+	       <p>
+	       <center>
+	       <img src="<get-var mhtml::images>rainbowline.gif">
+	       <br>
+	       <small-caps upper=-1 lower=-2 other=-1>This page powered by
+	       <a href="http://www.metahtml.com/">Meta-HTML</a>
+	       <img src="<get-var mhtml::images>separator.gif" alt="*">
+	       Copyright <copyright> 1995, 1998
+	       <a href="http://www.metahtml.com/~bfox/">Brian J. Fox</a>
+	       </small-caps>
+	       </center>
+	       </body>
+	       </html>>>
+;;; Make the page look good when the "source" is viewed.
+<cleanup-whitespace>
+

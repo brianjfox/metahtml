@@ -1,0 +1,58 @@
+;;; chat.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Aug 16 20:33:13 1996.
+<session::initialize 200>
+<session-import chat chat>
+<require tagsets/quicktalk>
+<chat::initialize>
+
+<if <not <get-var chat::handle>>
+    <redirect welcome.mhtml>>
+
+;;; <make-innocuous posted>
+<subst-in-var posted::chat-input "^[ \t\r\n]+" "" "[ \t\r\n]+$" "">
+<when <get-var-once posted::chat-input>>
+  <set-var names[]=<prog
+		     <package-vars *user-functions* strip=true>
+		     <package-vars *meta-html* strip=true>>
+    i=0>
+  <while <get-var names[i]>>
+    <subst-in-var posted::chat-input
+		  "[<]([/]*<get-var names[i]>)" "&lt;\\1"
+		  "[<]([/]*<downcase <get-var names[i]>>)" "&lt;\\1">
+    <increment i>
+  </while>
+  <set-session-var chat::last-comment=<time>>
+  <chat::add-to-history <get-var-once posted::chat-input>>
+</when>
+
+<if <string-eq <get-var-once chat::handle> "Mr. Tester">
+    <set-var no-frames=true>>
+<when <not <get-var no-frames>>>
+<html>
+<head> <title> QuickTalk: The Meta-HTML Chat Room... </title> </head>
+<frameset rows="30%,*">
+  <frame src="<get-var mhtml::url-to-dir>/chatbox.mhtml"
+	 scrolling=auto name="chatbox">
+  <frame src="<get-var mhtml::url-to-dir>/chathist.mhtml"
+	 scrolling=auto name="chathist">
+</frameset>
+</when>
+
+<noframes>
+<html>
+<body bgcolor="#ffffff">
+<ptext>
+  Okay, you don't have frames.  This means that you will have to click
+  "Refresh" to update the screen.  Kind of a bummer.
+
+</ptext>
+
+<include chatbox-internal.mhtml>
+<include chathist-internal.mhtml>
+</body>
+</html>
+</noframes>
+
+</html>

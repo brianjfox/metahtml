@@ -1,0 +1,519 @@
+;;; general.mhtml: -*- Meta-HTML -*-  Generally useful macros.
+;;;
+;;;  Copyright (c) 1996, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 29 09:03:56 1996
+
+<defun double-digits varname>
+  <parser::canonicalize-var varname>
+  <set-var <get-var-once varname> =
+    <subst-in-string <pad <get-var-once <get-var-once varname> 2
+					align=right pad-char="0">>>>
+</defun>
+
+<defun content-length varname>
+  ;;; DOC_SECTION (VARIABLES)
+  ;;; Return the length of the contents of <var var>.
+  ;;; If <var var> is an array or string, returns the number of
+  ;;; elements in the array.
+  ;;; If <var var> is a binary variable, returns the amount of data
+  ;;; stored within.
+  ;;; If <var var> is a function, returns the empty string.
+  ;;; <example>
+  ;;; <dir::read-file /etc/passwd myvar> --> true
+  ;;; <content-length myvar>             --> 864
+  ;;; </example>
+  <parser::canonicalize-var varname>
+  <alist-get-var <symbol-info <get-var-once varname>> SIZE>
+</defun>
+
+<defun copy-package src dest>
+  ;;; DOC_SECTION (PACKAGES)
+  ;;; Copy the contents of the package <var src> to the package <var dest>.
+  <set-var :names[]=<package-vars <get-var-once src> strip=t>>
+  <foreach :name :names>
+    <copy-var <get-var-once src>::<get-var-once :name>
+	      <get-var-once dest>::<get-var-once :name>>
+  </foreach>
+</defun>
+
+<defun select-option varname display &optional value>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Use instead of the <example code><option></example> HTML tag within
+  ;;; the select HTML tag.
+  ;;;
+  ;;; Creates an <i>option</i> item in the page in which <var varname>
+  ;;; is expected to contain the current value of the choice, or nothing,
+  ;;; if no choice has been made.  If you supply the optional <var value>
+  ;;; argument, that value is returned instead of <var display>.
+  ;;;
+  ;;; If <var varname> contains <var value>, then this option has the
+  ;;; HTML <b>SELECTED</b> attribute turned on.
+  ;;;
+  ;;; Example:
+  ;;; <example>
+  ;;; <select name=airport>
+  ;;;   <select-option airport Atlanta>
+  ;;;   <select-option airport Boston>
+  ;;;   <select-option airport Chicago>
+  ;;;   <select-option airport "Los Angeles">
+  ;;;   <select-option airport "New York">
+  ;;;   <select-option airport Miami>
+  ;;;   <select-option airport "San Francisco">
+  ;;; </select>
+  ;;;</example>
+  <set-var vname = <get-var-once varname>>
+  <parser::canonicalize-var vname>
+  <set-var v = <get-var-once <get-var-once vname>>>
+  <set-var val = <or <get-var-once value> <get-var-once display>>>
+  <concat
+   "<option"
+   <if <string-eq <get-var-once v> <get-var-once val>> " SELECTED">
+   <if <var-exists value> " value=\"<get-var-once val>\"">
+   "><get-var-once display></option>">
+</defun>
+
+<defun webpath-exists document-path>
+  ;;; DOC_SECTION (FILE-OPERATORS)
+  ;;; Returns "true" if the specified <var document-path> exists with
+  ;;; "/" being equal to the document root directory.
+  <if <not <string-eq <substring <get-var-once document-path> 0 1> "/">>
+      <set-var document-path =
+	<get-var mhtml::relative-prefix>/<get-var-once document-path>>>
+  <file-exists <get-var-once mhtml::include-prefix document-path>>
+</defun>
+
+<defun session-destroy-package &rest packages>
+  ;;; DOC_SECTION (SESSION-OPERATORS)
+  ;;; Delete all of the variables in the current session which are prefixed
+  ;;; by any of the packages specified in <var packages>.
+  ;;;
+  ;;; Also see <funref packages session-export>.
+  <set-var alist=<get-session-data>>
+  <apply alist-package-delete alist <get-var-once packages>>
+  <set-session-data <get-var-once alist>>
+</defun>
+
+<defun make-innocuous &rest packages[]>
+  ;;; DOC_SECTION (PACKAGES)
+  ;;; Causes each variable in the specified <var packages> to have
+  ;;; non-interpretable text.
+  ;;; This is done by substituting HTML constructs for angle braces,
+  ;;; among other things.
+  ;;;
+  <foreach pack packages>
+    <set-var names[]=<package-vars <get-var-once pack>>>
+    <foreach var names>
+      <subst-in-var <get-var-once var> "&" "&amp;" "<" "&lt;" ">" "&gt;">
+    </foreach>
+  </foreach>
+</defun>
+
+<set-var-readonly
+ mhtml::unsafe-functions[] =
+ <prog
+   apply
+   with-open-stream
+   with-open-database
+   sql::with-open-database
+   msql::with-open-database
+   odbc::with-open-database
+   mysql::with-open-database
+   dbm::with-open-database
+   cgi-exec
+   %%switch-user
+   %%write-package-file
+   create-session
+   delete-session
+   directory-contents
+   file-exists
+   include
+   load-module
+   package-delete
+   package-names
+   pid
+   redirect
+   replace-page
+   require
+   require-session
+   get-file-properties
+   subst-in-page
+   undef
+   defun
+   defsubst
+   defmacro
+   define-function
+   define-container
+   define-tag
+   defweakmacro
+   with-locked-session>>
+
+<defmacro with-safe-environment &unevalled &body !body whitespace=delete>
+  ;;; DOC_SECTION (LANGUAGE-OPERATORS)
+  ;;; Execute <var body> in an environment where commands that could
+  ;;; affect the file system are disabled.  In addition, commands
+  ;;; which can define or undefine functions are disabled.
+  ;;;
+  ;;; This command is especially useful when filtering input from an
+  ;;; external source, such as a third party Web page.
+  <with wse-pack=<make-identifier 16> wse-fun="">
+    <foreach wse-fun mhtml::unsafe-functions>
+      <copy-var *meta-html*::<get-var-once wse-fun>
+		<get-var-once wse-pack>::<get-var-once wse-fun>>
+      <unset-var *meta-html*::<get-var-once wse-fun>>
+    </foreach>
+    <%%eval <get-var-once !body>>
+    <foreach wse-fun mhtml::unsafe-functions>
+      <copy-var <get-var-once wse-pack>::<get-var-once wse-fun>
+		*meta-html*::<get-var wse-fun>>
+      <unset-var <get-var-once wse-pack>::<get-var-once wse-fun>>
+    </foreach>
+  </with>
+</defmacro>
+
+<defun user-function? name>
+  ;;; DOC_SECTION (MACRO-COMMANDS)
+  ;;; Returns "true" if <var name> is defined as a user function, or
+  ;;; the empty string otherwise.
+  <var-exists *user-functions*::<get-var-once name>>
+</defun>
+
+<defun primitive? name>
+  ;;; DOC_SECTION (MACRO-COMMANDS)
+  ;;; Returns "true" if <var name> is defined as a <Meta-HTML> primitive, or
+  ;;; the empty string otherwise.
+  <var-exists *meta-html*::<get-var-once name>>
+</defun>
+
+<defun defined? name>
+  ;;; DOC_SECTION (MACRO-COMMANDS)
+  ;;; Returns "true" if <var name> is defined as a <Meta-HTML> primitive or
+  ;;; a user-defined function, or the empty string otherwise.
+  <or <user-function? <get-var-once name>>
+      <primitive? <get-var-once name>>>
+</defun>
+
+<defun mdb><b><small-caps>MDB</small-caps></b></defun>
+
+<defun strings::trim varname &key collapse>
+  ;;; DOC_SECTION (STRING-OPERATORS)
+  ;;; Trims whitespace from both the "left" and "right" -hand sides
+  ;;; of the string stored in <var varname>, replacing the contents of
+  ;;; that variable with the trimmed string.  With optional keyword
+  ;;; <var collapse=true>, collapses multiple occurrences of whitespace
+  ;;; in the string into a single space.
+  ;;; <complete-example>
+  ;;; <set-var foo="    string with    whitespace     on left and right     ">
+  ;;; String: [<get-var-once foo>]
+  ;;; <strings::trim foo>
+  ;;; String: [<get-var-once foo>]
+  ;;; <strings::trim foo collapse=true>
+  ;;; String: [<get-var-once foo>]
+  ;;; </complete-example>
+  <parser::canonicalize-var varname>
+  <strings::left-trim <get-var-once varname> " \t\r\n">
+  <strings::right-trim <get-var-once varname> " \t\r\n">
+  <if <get-var-once collapse>
+      <strings::collapse <get-var-once varname>>>
+</defun>
+
+<defun string-to-array string arrayvar>
+  ;;; DOC_SECTION (STRING-OPERATORS)
+  ;;; Create an array in <var arrayvar> which is made of of the individual
+  ;;; characters of <var string>.  Given the following:
+  ;;; <example>
+  ;;; <set-var s="This is a string.">
+  ;;; <string-to-array <get-var-once s> chars>
+  ;;; </example>
+  ;;; Then, <example code><get-var chars[3]></example> returns <code>s</code>.
+  ;;;
+  <parser::canonicalize-var arrayvar>
+  <unset-var <get-var-once arrayvar>>
+  <copy-var string <get-var-once arrayvar>>
+  <subst-in-var <get-var-once arrayvar> "(.)" "\\1\n">
+  <coerce-var <get-var-once arrayvar> type=array>
+</defun>
+
+<defmacro page-debug-expr &body &unevalled qbody &body body whitespace=delete>
+  <page-debug <get-var-once qbody> = <get-var-once body>>
+</defmacro>
+
+<defsubst %%backquote-expr &unevalled &body __be:body whitespace=delete nocompile=true>
+  <subst-in-var __be:body
+		",<" "%EVAL-PLACE%"
+		"<" "%OPEN-PLACE%"
+		"%EVAL-PLACE%" "<">
+  <set-var __be:body = <%%eval <get-var-once __be:body>>>
+  <subst-in-var __be:body "%OPEN-PLACE%" "<">
+  <get-var-once __be:body>
+</defsubst>
+
+<defsubst %%backquote-eval &unevalled &body __be:body whitespace=delete nocompile=true>
+  <subst-in-var __be:body
+		",<" "%EVAL-PLACE%"
+		"<" "%OPEN-PLACE%"
+		"%EVAL-PLACE%" "<">
+  <set-var __be:body = <%%eval <get-var-once __be:body>>>
+  <subst-in-var __be:body "%OPEN-PLACE%" "<">
+  <%%eval <get-var-once __be:body>>
+</defsubst>
+
+<defun autoload function &key module type &rest funargs>
+  ;;; DOC_SECTION (LANGUAGE-OPERATORS)
+  ;;; Define <var function> as a placeholder function for a dynamically
+  ;;; loaded one.  <var autoload> creates a function in <Meta-HTML>
+  ;;; which, when invoked, replaces itself with a function of the same name
+  ;;; found in the dynamically loadable module <var module>.
+  ;;; This allows a great many functions to be defined in <Meta-HTML>, without
+  ;;; having to actually have an entire library of support routines loaded.
+  ;;; For example, the function <var cos> is defined as an autoloaded function
+  ;;; by default in a pristine <Meta-HTML>:
+  ;;; <example>
+  ;;; <autoload cos num module=modmath>
+  ;;; </example>
+  ;;;
+  ;;; To define a macro or weakmacro, you must supply the <var type> key:
+  ;;; <example>
+  ;;; <autoload with-open-stream stream &key type mode module=streams type=macro>
+  ;;; </example>
+  <when <not <defined? <get-var-once function>>>>
+    <defvar type defun>
+    <set-var macro?=<match <get-var-once type> "macro">>
+    <%%backquote-eval
+     <,<get-var type> ,<get-var function> ,<get-var-once funargs>
+      &body __body__
+      &attributes __attributes__[]
+      ,<if ,<get-var-once macro?> "whitespace=delete">>
+       <set-var mod?=<load-module ,<get-var-once module>>>
+       <when <get-var-once mod?>>
+         <foreach sym modules::syms-of-,<get-var-once module>>
+	   <undef <get-var-once sym>>
+	 </foreach>
+	 ;;; If this function still isn't defined, then that represents
+	 ;;; a failure to define it through loading the module.  Complain.
+	 <when <not <symbol-info *meta-html*::,<get-var-once function>>>>
+	   <page-debug Loading module ,<get-var-once module> failed to define
+		       ,<get-var-once function>!>
+	   <return>
+	 </when>
+	 <set-var
+	   ^::%_func_%=,<get-var-once function>
+	   ^::%_body_%=<get-var-once __body__>
+	   ^::%_args_%[]="">
+	 <foreach attr __attributes__>
+	   <if <and <not <string-eq <substring <get-var-once attr> 0 1> "<">>
+		    <match <get-var-once attr> "=">>
+	       <concat
+		<set-var
+		  n=<subst-in-string <get-var-once attr> "(^[^=]+).*$" "\\1">
+		  v=<subst-in-string <get-var-once attr> "^[^=]+=(.*$)" "\\1">>
+		<array-append
+		 <concat
+		  <%%quote-for-set-var <get-var-once n>>
+		  "="
+		  <%%quote-for-set-var <get-var-once v>>>
+		 ^::%_args_%>>
+	     <array-append <%%quote-for-set-var <get-var-once attr>>
+			   ^::%_args_%>>
+	 </foreach>
+	 ,<if ,<get-var-once macro?>
+	      ,<concat
+		"<in-package ^>"
+		"<apply <get-var-once %_func_%> <get-var-once %_args_%[]>>"
+		"<get-var-once %_body_%>"
+		"</apply>"
+		"</in-package>;">
+	    ,<concat
+	      "<in-package ^>"
+	      "<apply <get-var-once %_func_%> <get-var-once %_args_%[]>>"
+	      "</in-package>">>
+       </when>
+       <when <not <get-var-once mod?>>>
+         <page-debug AUTOLOAD of `,<get-var-once function>' failed because
+		     the module `,<get-var-once module>' couldn't be loaded!>
+       </when>
+     </,<get-var-once type>>>
+   </when>
+</defun>
+
+<defmacro titled-box title
+  &key height width align talign valign tvalign
+  &body body
+  package=local whitespace=delete>
+  <table border=0 cellpadding=0 cellspacing=0
+	 <if <get-var-once talign> "align=<get-var-once talign>">
+	 <if <get-var-once tvalign> "valign=<get-var-once tvalign>">>
+    <tr>
+      <td colspan=2>&nbsp;</td>
+      <td rowspan=3 align=center>&nbsp;<b><get-var-once title></b></td>
+      <td colspan=2>&nbsp;</td>
+    </tr>
+    <tr>
+      ;;; top left
+      <td bgcolor="#000000" colspan=2>
+	<img src="1x1.gif" alt="" width=1 height=1>
+      </td>
+      ;;; top right
+      <td bgcolor="#000000" colspan=2>
+	<img src="1x1.gif" alt="" width=1 height=1>
+      </td>
+    </tr>
+
+    <tr>
+      ;;; left upper
+      <td bgcolor="#000000">
+	<img src="1x1.gif" alt="" width=1 height=1>
+      </td> 
+      <td width=25>&nbsp;</td>				;;; left title spacer
+      <td width=<add <get-var-once width> 25>>&nbsp;</td>	;;; right title spacer
+
+      <td bgcolor="#000000">
+	<img src="1x1.gif" alt"" width=1 height=1>
+      </td>						;;; right upper
+    </tr>
+
+    <tr>
+      <td bgcolor="#000000">
+	<img src="1x1.gif" alt="" width=1 height=1>
+      </td>
+      <td colspan=3>
+	<table <if <get-var-once width> " width=<get-var-once width>">
+	       <if <get-var-once height> " height=<get-var-once height>">
+	       border=0 cellspacing=5
+	       <if <get-var-once align> " align=<get-var-once align>">
+	       <if <get-var-once valign> " valign=<get-var-once valign>">>
+	  <tr>
+          <td ><P><get-var-once body><P></td>
+	  </tr>
+	</table>
+      </td>
+      <td bgcolor="#000000">
+	<img src="1x1.gif" alt="" width=1 height=1>
+      </td>
+    </tr>
+    <tr>
+      <td colspan=5 bgcolor="#000000">
+	<img src="1x1.gif" alt="" width=1 height=1>
+      </td>
+    </tr>
+  </table>
+</defmacro>
+
+;;; a little more helpful::
+<defmacro tdbox &key rowspan colspan &attributes attr &body &unevalled body
+  whitespace=delete>
+  <td <if <get-var-once colspan> "colspan=<get-var-once colspan>">
+      <if <get-var-once rowspan> "rowspan=<get-var-once rowspan>">>
+    <tbox <get-var-once attr>><%%eval <get-var-once body>></tbox>
+  </td>
+</defmacro>
+
+;;;
+;;; <defmacro description whitespace=delete>
+;;;   <when <get-var-once default::verbose>>
+;;;     <i>%qbody</i><br>
+;;;   </when>
+;;; </defmacro>
+
+<defun eval-file filename &optional &unevalled alt>
+  ;;; DOC_SECTION (LANGUAGE-OPERATORS)
+  ;;; Read the contents of <var filename>, and evaluate its contents in the
+  ;;; context of the caller.  If <var filename> cannot be read, then execute
+  ;;; the value of <var alt> if it is passed.
+  ;;;
+  ;;; <var filename> is a fully qualified pathname to a file anywhere within
+  ;;; the file system.
+  <set-var found? = <dir::read-file <get-var-once filename> contents>>
+  <if <get-var-once found?>
+      <concat
+       <copy-var contents ^::--contents-->
+       <in-package ^>
+       <coerce-var --contents-- type=string>
+       <%%eval <get-var-once --contents-->>
+       </in-package>>
+    <%%eval <get-var-once alt>>>
+</defun>
+
+<defun input::radio-buttons varname &key default &rest value-label-pairs[]>
+  <set-var formvar = <get-var-once varname>>
+  <parser::canonicalize-var varname>
+  <if <match <get-var-once formvar> "::">
+      <subst-in-var formvar "^[^:]+::" "">>
+
+  <defvar <get-var-once varname> <get-var-once default>>
+
+  <foreach item value-label-pairs>
+    <unset-var info>
+    <set-var info=<subst-in-string <get-var-once item> ";" "\n">>
+    <coerce-var info type=array>
+    <set-var
+      value=<get-var-once info[0]>
+      label=<get-var-once info[1]>>
+    ;;; Now, lay it out.
+    <concat
+     <input type=radio name="<get-var-once formvar>"
+	    value="<get-var-once value>"
+	    <if <string-eq <get-var-once <get-var-once varname>>
+			   <get-var-once value>>
+		CHECKED>>
+     &nbsp;
+     <get-var-once label>
+     <br>>
+  </foreach>
+</defun>
+
+<defun input::checkboxes varname &key default &rest value-label-pairs[]>
+  <set-var formvar = <get-var-once varname>>
+  <parser::canonicalize-var varname>
+  <if <match <get-var-once formvar> "::">
+      <subst-in-var formvar "^[^:]+::" "">>
+
+  <defvar <get-var-once varname> <get-var-once default>>
+
+  <foreach item value-label-pairs>
+    <unset-var info>
+    <set-var info=<subst-in-string <get-var-once item> ";" "\n">>
+    <coerce-var info type=array>
+    <set-var
+      value=<get-var-once info[0]>
+      label=<get-var-once info[1]>>
+    ;;; Now, lay it out.
+    <concat
+     <input type=checkbox name="<get-var-once formvar>"
+	    value="<get-var-once value>"
+	    <if <string-eq <get-var-once <get-var-once varname>>
+			   <get-var-once value>>
+		CHECKED>>
+     &nbsp;
+     <get-var-once label>
+     <br>>
+  </foreach>
+</defun>
+
+<defun url text &key target>
+  ;;; DOC_SECTION (HTML-HELPERS)
+  ;;; Shows <var text> as a linkable URL.
+  ;;; Example:
+  ;;; <complete-example>
+  ;;; For more information on <Meta-HTML>, see <url http://www.metahtml.org>,
+  ;;; or send mail to <url info@metahtml.org>.
+  ;;; </complete-example>
+  <if <and <match <get-var-once text> "@">
+	   <not <match <get-var-once text> "://">>>
+      <concat
+       <a href="mailto:<get-var-once text>">
+       <get-var-once text>
+       </a>>
+    <concat
+     <a href="<get-var-once text>"<if <get-var-once target>
+				      " target=<get-var-once target>">>
+     <get-var-once text>
+     </a>>>
+</defun>
+
+<defun fahrenheit-to-celsius f>
+  <mul <div 5.0 9.0> <sub f 32>>
+</defun>
+
+<defun celsius-to-fahrenheit c>
+  <add 32 <mul c <div 9.0 5.0>>>
+</defun>

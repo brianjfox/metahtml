@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Just call install-bin, and install-site.
+#
+bindir=`(cd ..; pwd)`/bin
+CALLED_FROM_Install=true
+. ./install-bin
+if [ -d server -o -d engine ]; then
+   . ./install-site;
+fi

@@ -1,0 +1,37 @@
+;;; footer.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1998 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed May 27 21:18:23 1998.
+
+<defun navigate text &key href>
+  <concat " [" <a href="<get-var href>"><b><get-var text></b></a> " ]">
+</defun>
+
+<layout::page>
+  <p>
+  <center>
+    <hr width=80% size=2>
+    <navigate "Home Page" href=welcome.mhtml>
+    <navigate "Initialize" href=rolodex-initialize.mhtml>
+    <navigate "Create Entry" href=rolodex-entry.mhtml>
+    <navigate "Browse Rolodex" href=rolodex-browse.mhtml>
+    <hr width=80% size=2>
+
+    <font size=-1>
+    Copyright <get-var char::copy> 1998
+    <a href="http://www.metahtml.com/~bfox">Brian J. Fox</a>
+    <br>
+    Implemented in <a href="http://www.metahtml.com/">
+    <font size="-1"><Meta-HTML></font></a>
+    </font>
+  </center>
+</layout::page>
+
+;;; See header.mhtml for the start of this table.
+   </td>
+  </tr>
+</table>
+</body>
+</html>
+<layout::resolve-contents>
+<cleanup-whitespace>

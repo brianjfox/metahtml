@@ -1,0 +1,6 @@
+;;; mail-purchase.mhtml: -*- Meta-HTML -*-  Validate info, say thanks.
+
+;;;  Copyright (c) 1995 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Nov 21 13:34:19 1995.
+
+<redirect thank-you.mhtml>

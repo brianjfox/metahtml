@@ -1,0 +1,10 @@
+;;; base-coerce-var.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Mon Oct 28 03:06:24 1996.
+
+Result: "
+
+Test coercing the contents of this file into a string type after 
+being read into a binary variable using .
+If you are seeing this it worked correctly !!": <with-open-stream stream base-coerce-var-test.mhtml type=file mode=read><stream-get-contents stream stream-var></with-open-stream><coerce-var stream-var type=string><get-var stream-var>

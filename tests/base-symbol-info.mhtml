@@ -1,0 +1,9 @@
+;;; base-symbol-info.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 21:02:13 1996.
+
+Result: "STRING
+1": <set-var var1="Some String"><symbol-info var1>
+Result: "STRING
+3": <set-var var1[]="Some\narray\nvalues"><symbol-info var1>

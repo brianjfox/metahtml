@@ -1,0 +1,6 @@
+;;; base-msql-with-open-database.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 17:27:15 1996.
+
+Result: true: <msql::with-open-database db database=test host=localhost><if <get-var db> true></msql::with-open-database>

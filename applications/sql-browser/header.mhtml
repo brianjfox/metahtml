@@ -1,0 +1,58 @@
+;;; header.mhtml -*- Meta-HTML -*-
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Apr 26 10:23:08 1997.
+
+<defvar title <thisdoc-title>>
+<defvar site::area "Generic SQL Table Browser">
+;;; <include ../header.mhtml alt=<include standalone-header.mhtml>>
+<include standalone-header.mhtml>
+<require tour>
+<require gsql>
+<unset-var mhtml::cacheable>
+
+<session-import gsql gsql>
+
+<when <package-vars posted>>
+  <unset-var update>
+  <if <get-var-once posted::database-host>
+      <set-var gsql::database-host=<get-var database-host> update=t>>
+  <if <get-var-once posted::database>
+      <set-var gsql::database=<get-var database> update=t>>
+  <if <get-var-once posted::table>
+      <set-var gsql::database-table=<get-var table> update=t>>
+  <if <get-var-once posted::database-type>
+      <set-var gsql::database-type=<get-var database-type> update=t>>
+  <if <get-var-once posted::database-username>
+      <set-var gsql::database-username=<get-var database-username> update=t>>
+  <if <get-var-once posted::database-password>
+      <set-var gsql::database-password=<get-var database-password> update=t>>
+  <if <get-var-once posted::database-service-type>
+      <set-var
+	gsql::database-service-type = <get-var database-service-type>
+	update=t>>
+  <if <var-exists posted::allow-system-tables>
+      <set-var
+	gsql::allow-system-tables=<get-var allow-system-tables>
+	update=t>>
+  <if <get-var update>
+      <concat
+       <session-destroy-package gsql>
+       <session-export gsql gsql>>>
+</when>
+
+<defvar gsql::database-host localhost>
+<defvar gsql::database SSI>
+<defvar gsql::database-type <or <sql::get-database-type> mysql>>
+<sql::set-database-type <get-var gsql::database-type>>
+<sql::allow-system-tables <get-var gsql::allow-system-tables>>
+
+<when <not <get-var no-gsql-database-display>>>
+  <layout::page>
+    <center>
+      <gsql::display-database>
+    </center>
+  </layout::page>
+</when>
+<p>;
+<include navigation.mhtml>

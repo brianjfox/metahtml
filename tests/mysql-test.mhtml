@@ -1,0 +1,184 @@
+;;; mysql-test.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1997 Universal Access Inc.
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Oct 11 11:54:49 1997
+;;;
+;;; Tests of the MYSQL access functions 
+;;;
+;;; We assume we can create a table in database named 'test'
+;;;
+;;; Create table called 'employees'.
+;;; Note that we *must* have a PRIMARY KEY column if we
+;;; hope to use any of the save-record functions.
+;;;
+;;; Tables should always have a primary key anyway.
+;;;
+;;; Note also that all table column names which will
+;;; be addressed via the save-record and save-package
+;;; interface *must* be made from all lowercase characters. 
+;;; 
+
+<mysql::with-open-database mydb database=test host=localhost>
+  <mysql::database-query 
+   mydb true 
+   query="DROP TABLE employees">
+
+  <mysql::database-query 
+   mydb true 
+   query="CREATE TABLE employees 
+                (id int PRIMARY KEY,
+                 name char(12),
+                 age int,
+                 salary real,
+                 project char (10),
+                 dept char (10))">
+</mysql::with-open-database>
+
+<defsubst check-result func>
+  <h4>
+  <if <not <get-var result>>
+      <prog <font color=red>Error: <get-var func> failed
+	<br><get-var mysql::mysql-error-message[]></font>
+	>
+    "<get-var func> succeeded">
+  </h4>
+</defsubst>
+
+<defsubst check-var func var value >
+  <h4>
+  <if <not <string-eq <get-var <get-var var>> <get-var value>>>
+      <prog <font color=red>
+	Error: <get-var func> failed: expected <get-var value>, got 
+	<get-var <get-var var>>
+	<br><get-var mysql::mysql-error-message[]></font>>
+    "<get-var func> succeeded">
+  </h4>
+</defsubst>
+
+;;; Add some employees
+
+;;; Using the raw SQL interface
+<mysql::with-open-database mydb database=test host=localhost>
+  <mysql::database-query mydb true 
+   query="INSERT INTO employees (id,name,age,salary,project,dept) VALUES 
+                     (100,'Fred Spoo',24,23000,'wildfire','marketing')">
+
+
+  ;;; Using the save-record interface 
+  <set-var name="Larry Smith" age=34 Salary=25000 dept=sales project=wildfire>
+  <set-var result=<mysql::database-save-record mydb 101 
+					      name age salary 
+					      project dept
+					      table=employees keyname=id>>
+  <check-result mysql::database-save-record>
+
+  ;;; Using the save-record interface. 
+  ;;; Note that variable package names are stripped off, to
+  ;;; get the basic column names. 
+  ;;;
+  ;;; Note also that the variable name case does not matter.
+  ;;; database-save-record will do a non-case-sensitive match
+  ;;; for the correct field name in the table.
+  
+  <set-var foo::name="Arthur Fren" foo::age=45 bar::Salary=34000 foo::dept=research>
+  
+  <set-var result=<mysql::database-save-record mydb 102 
+					      foo::name foo::age foo::dept
+					      bar::SALARY
+					      table=employees keyname=id>>
+  <check-result mysql::database-save-record>
+  
+  
+  ;;; Using the database-save-package function.
+  <set-var baz::name="Kate Mulgrew" baz::age=45 baz::salary=34000 
+    baz::dept=travel>
+  
+  <set-var result=<mysql::database-save-package mydb 103 baz
+					       table=employees keyname=id>>
+  <check-result mysql::database-save-package>
+  
+  <mysql::database-query mydb true 
+    query="INSERT INTO employees
+           (id,name,age,salary,project,dept) 
+           VALUES  (104,'Keyser Soze',43,23000000,'wildfire','operations')">
+
+
+  ;;; Check for rejection of illegal table field name 'badname'
+  <package-delete foo>
+  <set-var foo::name="Larry Flintstone" foo::age=55 foo::Salary=22120 
+    foo::dept=sales foo::badname=bar>
+  
+  <set-var result=<mysql::database-save-record mydb 105
+					      foo::name foo::age foo::dept
+					      bar::SALARY
+					      foo::badname
+					      table=employees keyname=id>>
+  <check-result mysql::database-save-record>
+
+
+  ;;; Make a table of all employees
+  <h3>All Employees</h3>
+  <table border=1>
+    <tr>
+      <th>ID<th>Name<th>Age<th>Salary<th>Project<th>Department
+    </tr>
+    <mysql::database-query mydb true 
+			  query="select * from employees"
+			  format=<prog
+				   <tr>
+				   <td><get-var id>
+				   <td><get-var name>
+				   <td><get-var age>
+				   <td><get-var salary>
+				   <td><get-var project>
+				   <td><get-var dept>
+				   </tr>>>
+  </table>
+
+ ;;; Delete a record
+ <h4>Deleting employee 104</h4>
+ <set-var result =
+   <mysql::database-delete-record mydb "104" table=employees keyname=id>>
+  
+  <check-result mysql::database-delete-record>
+
+;;; Test the database-load-record function.
+ <package-delete tmp>
+ <set-var result = <mysql::database-load-record mydb "101" 
+			       table=employees keyname=id
+			       package=tmp>>
+
+ <check-var mysql::database-load-record tmp::id 101>
+ <check-var mysql::database-load-record tmp::name "Larry Smith">
+ <check-var mysql::database-load-record tmp::age 34>
+
+
+<h4>
+<if <not <string-eq "Larry Smith" <get-var tmp::name>>>
+    "error: mysql::database-load-record failed"
+   "mysql::database-load-record succeeded">
+</h4>
+
+  <table border=1>
+    <tr><th>ID<th>Name<th>Department</tr>
+  <mysql::database-query mydb true 
+                         query="select * from employees"
+			format=<prog
+				 <tr>
+				 <td><get-var id>
+				 <td><get-var name>
+				 <td><get-var dept>
+				 </tr>>
+			>
+      </table>
+
+</mysql::with-open-database>
+
+<mysql::with-open-database mydb database=test host=localhost>
+   <h3>Database Tables</h3>
+   <pre><mysql::database-tables mydb></pre>
+
+   <h3>Tables Fields</h3>
+   <pre><mysql::database-columns mydb employees></pre>   
+
+</mysql::with-open-database>

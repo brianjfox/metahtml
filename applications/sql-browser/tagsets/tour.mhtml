@@ -1,0 +1,117 @@
+;;; tour.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Apr 13 08:57:54 1997.
+
+<defun tour::form-initialize>
+  <set-var %attributes
+    tour::form-<get-var tour::form-self> = ""
+    tour::form-<get-var tour::form-self>-inputs[] = ""
+    tour::form-<get-var tour::form-self>-index = 0
+    tour::form-<get-var tour::form-self>-next-page = <get-var next-page>
+    tour::form-<get-var tour::form-self>-<get-var handler>-handler =
+    <get-var handler>>
+</defun>
+
+<defmacro tour::form>
+  <with-local-package>
+    <set-var %attributes>
+    <set-var tour::form-self = <or <get-var name> default>>
+  </with-local-package>
+  <tour::form-initialize %attributes>
+  <form %attributes>
+    %body
+  </form>
+  <when <get-var-once posted::action>>
+    <tour::form-call-handler
+     <tour::canonicalize <get-var-once posted::action>>>
+  </when>
+</defmacro>
+
+<defun tour::canonicalize name>
+  <downcase <subst-in-string <get-var name> "[ \t\n]+" "-">>
+</defun>
+
+<defun tour::form-call-handler name>
+  <set-var handler = 
+    <get-var tour::form-<get-var tour::form-self>-<get-var name>-handler>>
+  <when <function-def <get-var handler>>>
+    <%%eval <<get-var handler>>>
+  </when>
+</defun>
+
+<defun tour::form-remember>
+  <set-var %attributes>
+  <set-var x = <package-to-alist "">>
+  <set-var <concat tour::form-<get-var tour::form-self>-
+		   inputs[tour::form-<get-var tour::form-self>-index]> =
+		   <get-var x>>
+  <increment tour::form-<get-var tour::form-self>-index>
+</defun>
+
+<defun tour::form-input>
+  <package-delete tour-input>
+  <in-package tour-input>
+    <set-var %attributes>
+    <defvar dname <get-var name>>
+    <set-var name = <downcase <subst-in-string <get-var name> "[ \t]+" "-">>>
+    <subst-in-var dname "[-_]" " ">
+    <defvar type text>
+    <defvar size 30>
+    <defvar value "">
+    <tour::form-remember
+     type=<get-var tour-input::type>
+     size=<get-var tour-input::size>
+     name=<get-var tour-input::name>
+     value=<get-var tour-input::value>
+     handler=<or <get-var tour-input::handler>
+		 <if <string-eq <get-var type> submit caseless=t>
+		     <tour::canonicalize <get-var value>-handler>>>>
+
+    <when <string-eq <get-var type> submit caseless=true>>
+      <font color="#000000">
+      <input type=submit name=action value="<get-var value>">
+      </font>
+      <set-var <concat tour::form-<get-var tour::form-self>-
+		       <tour::canonicalize <get-var value>>-handler> =
+		       <tour::canonicalize <get-var value>-handler>>
+    </when>
+    <when <not <string-eq <get-var type> submit caseless=true>>>
+      <table width=350 bgcolor="#A080A0">
+	<tr>
+	  <td align=left>
+	    <font color="#000000">
+	    <b><capitalize <get-var dname>>:</b><br>
+	    <input type=<get-var type> size=<get-var size>
+		   name="<or <get-var name> Random>" value="<get-var value>">
+	    </font>
+	  </td>
+	</tr>
+      </table>
+    </when>
+  </in-package>
+</defun>
+
+<defun cancel-handler>
+  <message Operation Cancelled by request.>
+  <redirect <get-var mhtml::url-to-dir>/>
+</defun>
+
+<defmacro tour::verbatim-display whitespace=delete>
+  <set-var example=<prog <verbatim quote>%body</verbatim>>>
+  <subst-in-var example "[ \t\r\n]+$" "">
+  <table width=500 border=3 bgcolor=#C0B0C0>
+    <tr>
+      <td align=left>
+	<b>Meta-HTML Source Example</b>
+      </td>
+    </tr>
+    <tr>
+      <td align=left>
+	<br>
+	<pre><get-var example></pre>
+      </td>
+    </tr>
+  </table>
+</defmacro>
+

@@ -1,0 +1,26 @@
+;;; chathist.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Aug 16 20:45:41 1996.
+;;;
+<concat <session-import chat chat>
+	<when <not <string-eq <get-var chat::refresh-interval> None>>>
+	Refresh: <or <get-var chat::refresh-interval> 15>
+	</when>>
+
+
+;;;;;;    DON'T DELETE THE WHITESPACE ABOVE THIS LINE! 
+<html>
+<head>
+<title>Chat History</title>
+<when <not <string-eq <get-var chat::refresh-interval> None>>>
+  <META HTTP-EQUIV="Refresh"
+	CONTENT="<or <get-var chat::refresh-interval> 15>">
+</when>
+</head>
+
+<body bgcolor="#FFFFFF">
+<set-var chathist-subfile=true>
+<include chathist-internal.mhtml>
+</body>
+</html>

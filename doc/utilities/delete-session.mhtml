@@ -1,0 +1,37 @@
+;;; delete-session.mhtml: -*- Meta-HTML -*-  Man page for delete-session.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Feb  7 11:33:56 1996.
+<set-var title="delete-session: Remove an Active Session">
+<include header.mhtml>
+
+<layout::page>
+<h3> Manually Remove Sessions </h3>
+<ptext>
+<synopsis delete-session [-f session-db] session-id ...>
+
+<code>delete-session</code> can be used to manually remove a session
+from the session database.  Since the session database is usually
+owned by the superuser, you should run this command as the superuser
+for it to have an effect.
+
+If you are utilizing a session database which is not stored in the
+usual location (<code>/tmp/sessions.db</code>), you may give the
+<code>-f <i>FILENAME</i></code> argument, where
+<code><i>FILENAME</i></code> is the path to the file containing the
+session database.
+
+Deletion of a session happens automatically after the session has
+timed out, but at times (such as when debugging your new <meta-html>
+application) you may wish to manually delete a single or many session
+records.
+
+Here is an example:
+</ptext>
+<pre>
+<include session.delete>
+
+</pre>
+</layout::page>
+
+<include footer.mhtml>

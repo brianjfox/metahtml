@@ -1,0 +1,184 @@
+<set-var title="Regex - GNU Operators">
+<include header.mhtml>
+<layout::page>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_3.mhtml">previous</A>, <A HREF="regex_5.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC25" HREF="welcome.mhtml#TOC25">GNU Operators</A></H1>
+
+<P>
+Following are operators that GNU defines (and POSIX doesn't).
+
+</P>
+
+
+
+<H2><A NAME="SEC26" HREF="welcome.mhtml#TOC26">Word Operators</A></H2>
+
+<P>
+The operators in this section require Regex to recognize parts of words.
+Regex uses a syntax table to determine whether or not a character is
+part of a word, i.e., whether or not it is <STRONG>word-constituent</STRONG>.
+
+</P>
+
+
+
+<H3><A NAME="SEC27" HREF="welcome.mhtml#TOC27">Non-Emacs Syntax Tables</A></H3>
+
+<P>
+A <STRONG>syntax table</STRONG> is an array indexed by the characters in your
+character set.  In the ASCII encoding, therefore, a syntax table
+has 256 elements.  Regex always uses a <CODE>char *</CODE> variable
+<CODE>re_syntax_table</CODE> as its syntax table.  In some cases, it
+initializes this variable and in others it expects you to initialize it.
+
+</P>
+
+<UL>
+<LI>
+
+If Regex is compiled with the preprocessor symbols <CODE>emacs</CODE> and
+<CODE>SYNTAX_TABLE</CODE> both undefined, then Regex allocates
+<CODE>re_syntax_table</CODE> and initializes an element <VAR>i</VAR> either to
+<CODE>Sword</CODE> (which it defines) if <VAR>i</VAR> is a letter, number, or
+<SAMP>`_'</SAMP>, or to zero if it's not.
+
+<LI>
+
+If Regex is compiled with <CODE>emacs</CODE> undefined but <CODE>SYNTAX_TABLE</CODE>
+defined, then Regex expects you to define a <CODE>char *</CODE> variable
+<CODE>re_syntax_table</CODE> to be a valid syntax table.
+
+<LI>
+
+See section <A HREF="regex_5.mhtml#SEC39">Emacs Syntax Tables</A>, for what happens when Regex is compiled with
+the preprocessor symbol <CODE>emacs</CODE> defined.
+
+</UL>
+
+
+
+<H3><A NAME="SEC28" HREF="welcome.mhtml#TOC28">The Match-word-boundary Operator (<CODE>\b</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX78"></A>
+<A NAME="IDX79"></A>
+
+</P>
+<P>
+This operator (represented by <SAMP>`\b'</SAMP>) matches the empty string at
+either the beginning or the end of a word.  For example, <SAMP>`\brat\b'</SAMP>
+matches the separate word <SAMP>`rat'</SAMP>.
+
+</P>
+
+
+<H3><A NAME="SEC29" HREF="welcome.mhtml#TOC29">The Match-within-word Operator (<CODE>\B</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX80"></A>
+
+</P>
+<P>
+This operator (represented by <SAMP>`\B'</SAMP>) matches the empty string within
+a word. For example, <SAMP>`c\Brat\Be'</SAMP> matches <SAMP>`crate'</SAMP>, but
+<SAMP>`dirty \Brat'</SAMP> doesn't match <SAMP>`dirty rat'</SAMP>.
+
+</P>
+
+
+<H3><A NAME="SEC30" HREF="welcome.mhtml#TOC30">The Match-beginning-of-word Operator (<CODE>\&#60;</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX81"></A>
+
+</P>
+<P>
+This operator (represented by <SAMP>`\&#60;'</SAMP>) matches the empty string at the
+beginning of a word.
+
+</P>
+
+
+<H3><A NAME="SEC31" HREF="welcome.mhtml#TOC31">The Match-end-of-word Operator (<CODE>\&#62;</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX82"></A>
+
+</P>
+<P>
+This operator (represented by <SAMP>`\&#62;'</SAMP>) matches the empty string at the
+end of a word.
+
+</P>
+
+
+<H3><A NAME="SEC32" HREF="welcome.mhtml#TOC32">The Match-word-constituent Operator (<CODE>\w</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX83"></A>
+
+</P>
+<P>
+This operator (represented by <SAMP>`\w'</SAMP>) matches any word-constituent
+character.
+
+</P>
+
+
+<H3><A NAME="SEC33" HREF="welcome.mhtml#TOC33">The Match-non-word-constituent Operator (<CODE>\W</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX84"></A>
+
+</P>
+<P>
+This operator (represented by <SAMP>`\W'</SAMP>) matches any character that is
+not word-constituent.
+
+</P>
+
+
+
+<H2><A NAME="SEC34" HREF="welcome.mhtml#TOC34">Buffer Operators</A></H2>
+
+<P>
+Following are operators which work on buffers.  In Emacs, a <STRONG>buffer</STRONG>
+is, naturally, an Emacs buffer.  For other programs, Regex considers the
+entire string to be matched as the buffer.
+
+</P>
+
+
+
+<H3><A NAME="SEC35" HREF="welcome.mhtml#TOC35">The Match-beginning-of-buffer Operator (<CODE>\`</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX85"></A>
+
+</P>
+<P>
+This operator (represented by <SAMP>`\`'</SAMP>) matches the empty string at the
+beginning of the buffer.
+
+</P>
+
+
+<H3><A NAME="SEC36" HREF="welcome.mhtml#TOC36">The Match-end-of-buffer Operator (<CODE>\'</CODE>)</A></H3>
+
+<P>
+<A NAME="IDX86"></A>
+
+</P>
+<P>
+This operator (represented by <SAMP>`\''</SAMP>) matches the empty string at the
+end of the buffer.
+
+</P>
+
+<P><HR><P>
+Go to the <A HREF="regex_1.mhtml">first</A>, <A HREF="regex_3.mhtml">previous</A>, <A HREF="regex_5.mhtml">next</A>, <A HREF="regex_9.mhtml">last</A> section, <A HREF="welcome.mhtml">table of contents</A>.
+</layout::page>
+<include footer.mhtml>

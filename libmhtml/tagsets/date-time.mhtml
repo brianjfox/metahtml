@@ -1,0 +1,721 @@
+;;; date-time.mhtml: -*- Meta-HTML -*- 
+;;;
+;;;  Copyright (c) 1995, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ua.com) Tue Nov  7 08:49:14 1995.
+
+;;; Relative difference between GMT and your timezone, in hours.
+;;; For example, PST is 8 hours behind GMT, so -8 is the right value
+;;; for California sites.
+<defvar *date*::tz-offset -8>
+
+;;; Don't forget about Daylight savings time.  Set this to non-zero if
+;;; you have daylight savings time where you are.
+<defvar *date*::daylight-savings-time? true>
+
+<set-var *date*::mm-dd-yy-regexp =
+  "([0-9][0-9])([/-])([0-9][0-9])([/-])(([0-9][0-9])|([12][90][0-9][0-9]))">
+
+<defvar TIMEZONE-TRANSLATIONS::EST "EST5EDT">
+<defvar TIMEZONE-TRANSLATIONS::EDT "EST5EDT">
+<defvar TIMEZONE-TRANSLATIONS::CST "CST6CDT">
+<defvar TIMEZONE-TRANSLATIONS::CDT "CST6CDT">
+<defvar TIMEZONE-TRANSLATIONS::MST "MST7MDT">
+<defvar TIMEZONE-TRANSLATIONS::MDT "MST7MDT">
+<defvar TIMEZONE-TRANSLATIONS::PST "PST8PDT">
+<defvar TIMEZONE-TRANSLATIONS::PDT "PST8PDT">
+
+<defun date::parse-date string &optional pack>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Populates the package <var pack> with the result of parsing
+  ;;; <var string>.
+  ;;;
+  ;;; If <var string> is passed, that string is used instead of <tag date>,
+  ;;; and should be the date in human readable format, just as
+  ;;; <funref language-operators date> returns.
+  ;;;
+  ;;; If no <var pack> is specified, returns an alist of the values instead.
+  <defvar string <date>>
+  <set-var result=<date::date-to-time <get-var-once string> parse=true>>
+  <if <get-var-once pack>
+      <alist-to-package <get-var-once result> <get-var-once pack>>
+    <get-var-once result>>
+</defun>
+
+;;; We are deprecating <parse-date-string> in favor of <date::parse-date>.
+<defun parse-date-string string>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Deprecated.  Please use <funref DATES-AND-TIMES date::parse-date> instead.
+  ;;; <example code> <parse-date-string> </example> is equivalent to
+  ;;; <example code> <date::parse-date <date> date> </example>
+  <date::parse-date <get-var-once string> date>
+</defun>
+
+;;; Months, arrayified by index.
+<set-var *date*::month-info[]=
+  <prog
+    <make-alist days=31 short-name=Jan long-name=January>
+    <make-alist days=28 short-name=Feb long-name=February leap=1>
+    <make-alist days=31 short-name=Mar long-name=March>
+    <make-alist days=30 short-name=Apr long-name=April>
+    <make-alist days=31 short-name=May long-name=May>
+    <make-alist days=30 short-name=Jun long-name=June>
+    <make-alist days=31 short-name=Jul long-name=July>
+    <make-alist days=31 short-name=Aug long-name=August>
+    <make-alist days=30 short-name=Sep long-name=September>
+    <make-alist days=31 short-name=Oct long-name=October>
+    <make-alist days=30 short-name=Nov long-name=November>
+    <make-alist days=31 short-name=Dec long-name=December>>>
+
+<set-var i=0 *date*::seconds-per-year = 0>
+<set-var *date*::seconds-per-day = <mul 60 <mul 60 24>>>
+<foreach entry *date*::month-info>
+  <package-delete temp>
+  <alist-to-package <get-var-once entry> temp>
+  <set-var temp::seconds=<mul *date*::seconds-per-day temp::days>>
+  <set-var entry = <package-to-alist temp strip=true>>
+  <set-var *date*::month-info[i] = <get-var-once entry>>
+  <set-var *date*::<get-var-once temp::short-name> = <get-var-once entry>>
+  <set-var *date*::<get-var-once temp::long-name> = <get-var-once entry>>
+  <array-append <get-var-once temp::long-name> *date*::long-month-names>
+  <array-append <get-var-once temp::short-name> *date*::short-month-names>
+  <increment *date*::seconds-per-year by=<get-var-once temp::seconds>>
+  <increment i>
+</foreach>
+
+<unset-var *date*::long-day-names *date*::short-day-names>
+<array-append Sunday *date*::long-day-names>
+<array-append Monday *date*::long-day-names>
+<array-append Tuesday *date*::long-day-names>
+<array-append Wednesday *date*::long-day-names>
+<array-append Thursday *date*::long-day-names>
+<array-append Friday *date*::long-day-names>
+<array-append Saturday *date*::long-day-names>
+
+<foreach day *date*::long-day-names>
+  <array-append <substring <get-var-once day> 0 3> *date*::short-day-names>
+</foreach>
+
+<defun date::is-leap-year? year>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Returns "true" if <var year> is a leap year.
+  <eq year <mul <div year 4> 4>>
+</defun>
+
+<defun date::mm-dd-yy-to-time mm-dd-yy>
+  <date::date-to-time <get-var-once mm-dd-yy>>
+</defun>
+
+<defun date::mm-dd-yy-to-date-string mm-dd-yy>
+  <date <date::date-to-time <get-var-once mm-dd-yy>>>
+</defun>
+
+<defun date::seconds-since-epoch date-string>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return the number of seconds that have transpired between
+  ;;; Jan 1, 1970 and <var date-string>.
+  ;;;
+  ;;; This interface is deprecated, and is replaced by the more robust
+  ;;; <funref dates-and-times date::date-to-time>.
+  <date::date-to-time <get-var-once date-string>>
+</defun>
+
+<defun date::seconds-in-month month>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return the number of seconds in <var month>.
+  ;;; <var month> is the name of a month, such as "Apr" or "april".
+  <alist-get-var <get-var-once *date*::<get-var-once month>> seconds>
+</defun>
+
+<defun date::days-in-month month &key year>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return the number of days in <var month>.
+  ;;; <var month> is the name of a month, such as "Apr" or "april".
+  <defvar year <date::format-time "YYYY">>
+  <alist-to-package <get-var-once *date*::<get-var-once month>>>
+  <if <date::is-leap-year? <get-var-once year>>
+      <add days leap>
+    <get-var-once days>>
+</defun>
+
+<defun date::short-month-name month>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return the canonical short name of <var month>.
+  ;;; <var month> is the name of a month, such as "Apr" or "april".
+  <alist-to-package <get-var-once *date*::<get-var-once month>>>
+  <get-var-once short-name>
+</defun>
+
+<defun date::long-month-name month>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return the canonical long name of <var month>.
+  ;;; <var month> is the name of a month, such as "Apr" or "april".
+  <alist-to-package <get-var-once *date*::<get-var-once month>>>
+  <get-var-once long-name>
+</defun>
+
+<defun date::format-time format-string &optional time &key zone>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return a string representation of the date from the time in <var time>.
+  ;;; If <var time> is not supplied, it defaults to the current time.
+  ;;; The format string consists of any characters you would like, with the
+  ;;; following special sets being replaced by their corresponding elements
+  ;;; of the date.  Please note that case is significant:
+  ;;;
+  ;;; <ul>
+  ;;; <li> <b>YY</b>:   Last two digits of the year.
+  ;;; <li> <b>YYYY</b>: Four digits of the year.
+  ;;; <li> <b>MM</b>:   Two digits of month, with January as <code>01</code>.
+  ;;; <li> <b>MON</b>:  3 characters of month, as in <code>Jan</code>.
+  ;;; <li> <b>MONTH</b>: The long name of the month, as in <code>March</code>
+  ;;; <li> <b>DD</b>:   Two digits of day, as in <code>23</code>.
+  ;;; <li> <b>DDD</b>:  3 character day of week, as in <code>Thu</code>.
+  ;;; <li> <b>DAY</b>:  Full name of the weekday, as in <code>Tuesday</code>.
+  ;;; <li> <b>hh</b>:   Hours, in 24 hour format, as in <code>17</code>.
+  ;;; <li> <b>mm</b>:   Minutes, as in <code>43</code>.
+  ;;; <li> <b>ss</b>:   Seconds, as in <code>04</code>.
+  ;;; </ul>
+  ;;;
+  ;;; Example:
+  ;;; <complete-example>
+  ;;; <date::format-time "DAY, MONTH DD, YYYY (DD-MM-YY) at hh:mm:ss">
+  ;;; </complete-example>
+  <defvar time <time>>
+  <set-var dinfo=<date::parse-date <date <get-var-once time>
+					 zone=<get-var-once zone>>>>
+  <when <match <get-var-once format-string> "RELATIVE">>
+    ;;; Find relative time in English, display that.
+    ;;; Get distance from now.
+    <set-var
+      then = <date::date-to-time <date <get-var-once time>>
+				 zone=<get-var-once zone>>
+      now = <date::date-to-time <date <time> zone=<get-var-once zone>>>
+      diff = <sub now then>>
+    <if <gt diff 0>
+	<set-var next=last from-now=ago>
+      <set-var diff=<sub 0 diff> next=next from-now="from now">>
+
+    ;;; Get some easy-on-the-eyes names.
+    <set-var
+      1-year = <get-var-once *date*::seconds-per-year>
+      1-month = <mul *date*::seconds-per-day 30>
+      1-day = <get-var-once *date*::seconds-per-day>
+      1-week = <mul  *date*::seconds-per-day 7>
+      1-hour = <mul 60 60>
+      1-minute = 60>
+
+    ;;; Decide on granularity.
+    <if <gt diff <mul *date*::seconds-per-day 365>>
+	<concat
+	 <set-var
+	   years = <div diff <mul *date*::seconds-per-day 365>>
+	   temp = <sub diff <mul years 1-year>>
+	   months = <div temp <mul *date*::seconds-per-day 30>>>
+	 <if <gt months 9>
+	     <set-var years=<add years 1> months="">
+	   <if <gt months 3>
+	       <set-var and-a-half=" and a half" plural=true months="">>>
+	 <if <neq years 1> <set-var plural=true>>
+	 <set-var relative = <concat <number-to-english <get-var-once years>>
+				     <get-var-once and-a-half>
+				     <if <get-var-once plural>
+					 " years" " year">
+				     " <get-var-once from-now>">>>
+      <if <gt diff 1-month>
+	  <concat
+	   <set-var
+	     months = <div diff <mul *date*::seconds-per-day 30>>
+	     temp = <sub diff <mul months 1-month>>
+	     weeks = <div temp 1-week>>
+	   <if <gt weeks 2>
+	       <set-var months = <add months 1> weeks="">
+	     <if <gt weeks 1>
+		 <set-var and-a-half=" and a half" plural=true weeks="">>>
+	   <if <neq months 1> <set-var plural=true>>
+	   <set-var relative=<concat <number-to-english <get-var-once months>>
+				     <get-var-once and-a-half>
+				     <if <get-var-once plural>
+					 " months" " month">
+				     " <get-var-once from-now>">>>
+	<if <gt diff 1-week>
+	    <concat
+	     <set-var
+	       weeks = <div diff 1-week>
+	       temp = <sub diff <mul weeks 1-week>>
+	       days = <div temp 1-day>>
+	     <if <gt days 4>
+		 <set-var weeks = <add weeks 1> days="">
+	       <if <gt days 1>
+		   <set-var and-a-half=" and a half" plural=true days="">>>
+	     <if <neq weeks 1> <set-var plural=true>>
+	     <set-var relative=<concat <number-to-english <get-var-once weeks>>
+				       <get-var-once and-a-half>
+				       <if <get-var-once plural>
+					   " weeks" " week">
+				       " <get-var-once from-now>">>>
+	  <if <gt diff 1-day>
+	    <concat
+	     <set-var
+	       days = <div diff 1-day>
+	       temp = <sub diff <mul days 1-day>>
+	       hours = <div temp 1-hour>>
+	     <if <gt hours 16>
+		 <set-var days = <add days 1> hours="">
+	       <if <gt hours 8>
+		   <set-var and-a-half=" and a half" plural=true hours="">>>
+	     <if <neq days 1> <set-var plural=true>>
+	     <set-var relative=<concat <number-to-english <get-var-once days>>
+				       <get-var-once and-a-half>
+				       <if <get-var-once plural>
+					   " days" " day">
+				       " <get-var-once from-now>">>>
+	    <if <gt diff 1-hour>
+		<concat
+		 <set-var
+		   hours = <div diff 1-hour>
+		   temp = <sub diff <mul hours 1-hour>>
+		   minutes = <div temp 60>>
+		 <if <gt minutes 40>
+		     <set-var hours = <add hours 1>>
+		   <if <gt minutes 20>
+		       <set-var and-a-half=" and a half" plural=true>>>
+		 <if <neq hours 1> <set-var plural=true>>
+		 <set-var relative =
+		   <concat <number-to-english <get-var-once hours>>
+			   <get-var-once and-a-half>
+			   <if <get-var-once plural>
+			       " hours" " hour">
+			   " <get-var-once from-now>">>>
+	      <concat
+	       <set-var
+		 minutes=<div diff 1-minute>
+		 seconds = <sub diff <mul minutes 1-minute>>>
+	       <if <gt seconds 39>
+		   <increment minutes>
+		 <if <gt seconds 19>
+		     <set-var and-a-half=" and a half" plural=true>>>
+	       <if <neq minutes 1> <set-var plural=true>>
+	       <if <lt minutes 1>
+		   <set-var relative="right now">
+		 <set-var relative =
+		   <concat <number-to-english <get-var-once minutes>>
+			   <get-var-once and-a-half>
+			   <if <get-var-once plural> " minutes" " minute">
+			   " <get-var-once from-now>">>>>>>>>>
+    <subst-in-var format-string "RELATIVE" <downcase <get-var-once relative>>>
+  </when>
+
+  <subst-in-var
+   format-string
+    "YYYY" <alist-get-var dinfo year>
+      "YY" <alist-get-var dinfo yy>
+   "MONTH" <date::long-month-name <alist-get-var dinfo month>>
+     "MON" <alist-get-var dinfo month>
+      "MM" <alist-get-var dinfo mm>
+     "DDD" <alist-get-var dinfo weekday>
+     "DAY" <get-var-once *date*::long-day-names[<array-member
+					    <alist-get-var dinfo weekday>
+					    *date*::short-day-names>]>
+      "DD" <substring <alist-get-var dinfo canon> 3 5>
+      "hh" <alist-get-var dinfo hour>
+      "mm" <alist-get-var dinfo minute>
+      "ss" <alist-get-var dinfo second>>
+  <get-var-once format-string>
+</defun>
+
+<defun date::canonicalize date-string>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return the canonical version of DATE-STRING, in the format
+  ;;; "MM/DD/YY HH:MM:SS".
+  ;;;
+  ;;; Example:
+  ;;; <complete-example>
+  ;;; <date::canonicalize <date>>
+  ;;; </complete-example>
+  <date::format-time "MM/DD/YY hh:mm:ss" <time <get-var-once date-string>>>
+</defun>
+
+<defun date::month-start-string time>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return a date string represent the first second of the month specified
+  ;;; by <var time>.
+  ;;; <complete-example>
+  ;;; <set-var now  = <time>>
+  ;;; <set-var today= <date <get-var-once now>>>
+  ;;; <set-var mstart = <date::month-start-string <get-var-once now>>>
+  ;;; <pre>
+  ;;;  Now: <get-var-once today>
+  ;;; Then: <get-var-once mstart>
+  ;;; </pre>
+  ;;; </complete-example>
+  <date <time <date::format-time "MM/01/YYYY 00:00:01" <get-var-once time>>>>
+</defun>
+
+<defun date::month-table-standard-formatter day month year &key highlight link>
+  <if <get-var-once link>
+      <a href="<get-var-once link>?<cgi-encode day month year>">>
+  <if <get-var-once highlight> <b>>
+  <get-var-once day>
+  <if <get-var-once highlight> </b>>
+  <if <get-var-once link> </a>>
+</defun>
+
+<defun date::skip-months-forward count &optional time>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return the seconds since the epoch representing the date which is
+  ;;; exactly the first of the month which is <var count> months following
+  ;;; the month represented by <var time>.
+  ;;;
+  ;;; The <i>epoch</i> is defined as Jan 01, 1970, 00:00:00.
+  ;;;
+  ;;; <var time> defaults to the current time.
+  <defvar time <time>>
+  <defvar count 1>
+  <set-var
+    month-date = <date::month-start-string <get-var-once time>>
+    this-time = <time <get-var-once month-date>>
+    this-month = <date::format-time "MON" <get-var-once this-time>>>
+  <decrement count>
+  <while <gt count 0>>
+    <set-var
+      malist = <get-var-once *date*::<get-var-once this-month>>
+      this-time = <add this-time <alist-get-var malist seconds> 86400>
+      this-month = <date::format-time "MON" <get-var-once this-time>>>
+    <decrement count>
+  </while>
+  <get-var-once this-time>
+</defun>
+
+<defun date::skip-months-backward count &optional time>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return the seconds since the epoch representing the date which is
+  ;;; exactly the first of the month which is <var count> months before
+  ;;; the month represented by <var time>.
+  ;;;
+  ;;; The <i>epoch</i> is defined as Jan 01, 1970, 00:00:00.
+  ;;;
+  ;;; <var time> defaults to the current time.
+  <defvar time <time>>
+  <defvar count 1>
+  <set-var
+    month-date = <date::month-start-string <get-var-once time>>
+    time = <time <get-var-once month-date>>>
+  <while <gt count 0>>
+    <set-var
+      month-date = <date::month-start-string <get-var-once time>>
+      time = <sub <time <get-var-once month-date>> *date*::seconds-per-day>>
+    <decrement count>
+  </while>
+  <sub time 1>
+</defun>
+
+<defun date::start-of-today time>
+  <date::date-to-time <date::format-time "MM/DD/YYYY 00:00:00"
+					 <get-var-once time>>>
+</defun>
+
+<defun date::skip-days-backward count &optional time>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return the seconds since the epoch representing the date which is
+  ;;; exactly the first second of the day which is <var count> days before
+  ;;; the day represented by <var time>.
+  ;;;
+  ;;; The <i>epoch</i> is defined as Jan 01, 1970, 00:00:00.
+  ;;;
+  ;;; <var time> defaults to the current time.
+  <defvar time <time>>
+  <defvar count 1>
+  <if <lt count 0> 
+      <return <date::skip-days-forward <sub 0 count> <get-var-once time>>>>
+  <set-var time = <date::start-of-today <get-var-once time>>>
+  <while <gt count 0>>
+    <decrement time by=<get-var-once *date*::seconds-per-day>>
+    <decrement count>
+  </while>
+  <get-var-once time>
+</defun>
+
+<defun date::skip-days-forward count &optional time>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Return the seconds since the epoch representing the date which is
+  ;;; exactly the first second of the day which is <var count> days after
+  ;;; the day represented by <var time>.
+  ;;;
+  ;;; The <i>epoch</i> is defined as Jan 01, 1970, 00:00:00.
+  ;;;
+  ;;; <var time> defaults to the current time.
+  <defvar time <time>>
+  <defvar count 1>
+  <if <lt count 0> 
+      <return <date::skip-days-backward <sub 0 count> <get-var-once time>>>>
+  <set-var time = <date::start-of-today <get-var-once time>>>
+  <while <gt count 0>>
+    <increment time by=<get-var-once *date*::seconds-per-day>>
+    <decrement count>
+  </while>
+  <get-var-once time>
+</defun>
+
+<defun date::month-table &optional time &key highlight-days[] link-days[] href
+  show-year formatter day-width>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Create a table representing the month found in <var time>.
+  ;;;
+  ;;; Keyword argument <var highlight-days> is an array of day numbers
+  ;;; that you would like to have highlighted in the month display.
+  ;;;
+  ;;; Keyword argument <var link-days> is an array of day numbers
+  ;;; that should be linked to <var href> in the month display.
+  ;;; 
+  ;;; The arrays may have overlapping members.
+  ;;;
+  ;;; The keyword argument <var href> is the document to go to when a linked
+  ;;; day is clicked on -- it is passed the day, month, and year, as two
+  ;;; digit fields in the POSTED package under the variable names
+  ;;; <var day>, <var month>, and <var year>.
+  ;;;
+  ;;; If keyword argument <var show-year> is non-empty, the year is
+  ;;; displayed next to the month name.
+  ;;;
+  ;;; Finally, you can control the formatting of each day by supplying a
+  ;;; function which takes day, month, year, and keywords of highlight,
+  ;;; and link.  You pass the name of this function as the value of
+  ;;; the keyword argument <var formatter>, and it is called for each day
+  ;;; in the month to display.
+  ;;;
+  ;;; <html-complete-example>
+  ;;; <date::month-table
+  ;;;    highlight-days="3\n8" link-days="18\n8" href=<thisdoc>>
+  ;;; </html-complete-example>
+  ;;;
+  ;;; <html-complete-example>
+  ;;; <defun myformat day month year &key highlight link>
+  ;;;   <if <get-var-once link>
+  ;;;       <concat <a href="<get-var-once link><cgi-encode day month year>">
+  ;;;               <get-var-once day>
+  ;;;               </a>>
+  ;;;     <if <get-var-once highlight>
+  ;;;         <prog <b><get-var-once day></b>>
+  ;;;       <get-var-once day>>>
+  ;;; </defun>
+  ;;;
+  ;;; <date::month-table
+  ;;;    highlight-days="3" link-days="12" href=<thisdoc> formatter=myformat>
+  ;;; </html-complete-example>
+  <defvar time <time>>
+  <defvar formatter date::month-table-standard-formatter>
+  <set-var start-date = <date::month-start-string <get-var-once time>>>
+  <date::parse-date <get-var-once start-date> date>
+  <set-var
+    malist = <get-var-once *date*::<get-var-once date::month>>
+    first-day = <array-member <get-var-once date::weekday>
+			      *date*::short-day-names>
+    day=01
+    month= <pad <add <array-member
+		      <get-var-once date::month> *date*::short-month-names>
+		     1>
+		2 pad-char=0>
+    year=<substring <get-var-once date::year> 2 4>
+    i=0 limit=<alist-get-var malist days>>
+  <while <lt i first-day>>
+    <array-append <concat <td>&nbsp;</td>> days>
+    <increment i>
+  </while>
+  <set-var i = 0>
+  <while <lt i limit>>
+    <increment i>
+    <set-var opener=<concat "<" "td align=right>"> closer=<concat "<" "/td>">>
+    <array-append
+     <concat
+      <get-var-once opener>
+      <apply
+       <get-var-once formatter>
+       <pad <get-var-once i> 2 align=right pad-char="0">
+       <get-var-once month>
+       <get-var-once year>
+       <if <array-member <get-var-once i> highlight-days> "highlight=true">
+       <if <array-member <get-var-once i> link-days>
+	   "link=<get-var-once href>">>
+      <get-var-once closer>>
+     days>
+  </while>
+  <increment i by=<get-var-once first-day>>
+  <while <lt i 42>>
+    <array-append <concat <td>&nbsp;</td>> days>
+    <increment i>
+  </while>
+
+  ;;; Now place all of the days.
+  <table border=1>
+    <tr>
+      <td bgcolor=black colspan=7 align=center>
+	<font <if <get-var-once title-class>
+		  "Class='<get-var-once title-class>'"
+		"color=White">>
+	<b>
+	<alist-get-var malist long-name>
+	<if <get-var-once show-year> <concat " <get-var-once year>">>
+	</b>
+	</font>
+      </td>
+    </tr>
+    <tr valign=top>
+      <td align=right <if <get-var-once day-class>
+			  "Class='<get-var-once day-class>'">>
+	<b>Su</b>
+      </td>
+      <td align=right <if <get-var-once day-class>
+			  "Class='<get-var-once day-class>'">>
+	<b>Mo</b>
+      </td>
+      <td align=right <if <get-var-once day-class>
+			  "Class='<get-var-once day-class>'">>
+	<b>Tu</b>
+      </td>
+      <td align=right <if <get-var-once day-class>
+			  "Class='<get-var-once day-class>'">>
+	<b>We</b>
+      </td>
+      <td align=right <if <get-var-once day-class>
+			  "Class='<get-var-once day-class>'">>
+	<b>Th</b>
+      </td>
+      <td align=right <if <get-var-once day-class>
+			  "Class='<get-var-once day-class>'">>
+	<b>Fr</b>
+      </td>
+      <td align=right <if <get-var-once day-class>
+			  "Class='<get-var-once day-class>'">>
+	<b>Sa</b>
+      </td>
+    </tr>
+    <foreach td days iter=i>
+      <if <eq 0 <mod i 7>>
+	  <concat
+	   <if <get-var-once in-row> <concat "<" "/tr>">>
+	   <set-var in-row=true>
+	   <concat "<" "tr valign=top>">>>
+      <get-var-once td>
+    </foreach>
+    </tr>
+  </table>
+</defun>
+
+<defun date::month-table-centering-around &optional time count
+  &key bgcolor formatter>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Display a table of <var COUNT> months, centered around <var TIME>.
+  ;;;
+  ;;; <var TIME> defaults to the current time, while <var COUNT> defaults
+  ;;; to <code>3</code>.
+  ;;; <html-complete-example>
+  ;;; <date::month-table-centering-around>
+  ;;; </html-complete-example>
+  <defvar time <time>>
+  <defvar count 3>
+  <defvar bgcolor #<color::hex-value AntiqueWhite>>
+  <set-var
+    beg-time = <date::skip-months-backward <div count 2> <get-var-once time>>
+    end-time = <date::skip-months-forward <sub count <div count 2> 1>
+					  <get-var-once time>>>
+  <while <lt beg-time end-time>>
+    <array-append
+     <date::month-table <get-var-once beg-time>
+			show-year=t
+			formatter=<get-var-once formatter>>
+     months>
+    <increment beg-time by=<date::seconds-in-month <get-var-once date::month>>>
+  </while>
+
+  <table border=3 bgcolor=<get-var-once bgcolor>>
+    <set-var col = 0 cols=3>
+    <foreach elt months iter=i>
+      <if <eq 0 <mod i 3>>
+	  <concat
+	   <if <get-var-once in-row> <concat "<" "/tr>">>
+	   <set-var in-row=true>
+	   <concat "<" "tr valign=top>">>>
+      <td><get-var-once elt></td>
+    </foreach>
+    </tr>
+  </table>
+</defun>
+
+<defun pluralize num word &key english>
+  <concat
+   "<get-var-once num> <get-var-once word>"
+   <if <neq <get-var-once num> 1>  s>>
+</defun>
+
+<defun date::seconds-to-human-readable seconds>
+  ;;; DOC_SECTION (DATES-AND-TIMES)
+  ;;; Display the number of seconds passed in <var seconds> as a human readable
+  ;;; string of text, representing elapsed time.
+  ;;; For example:
+  ;;; <complete-example>
+  ;;; <date::seconds-to-human-readable 8734>
+  ;;; </complete-example>
+  <set-var remainder = <round <get-var-once seconds>>>
+  <subst-in-var remainder "\\..*$" "">
+  <defvar remainder 0>
+  <when <gt remainder *date*::seconds-per-year>>
+    <set-var
+      years = <div remainder *date*::seconds-per-year>
+      remainder = <sub remainder <mul years *date*::seconds-per-year>>>
+  </when>
+
+  <when <gt remainder <mul *date*::seconds-per-day 30>>>
+    <set-var
+      months = <div remainder <mul *date*::seconds-per-day 30>>
+      remainder=<sub remainder <mul months <mul *date*::seconds-per-day 30>>>>
+  </when>
+
+  <when <gt remainder *date*::seconds-per-day>>
+    <set-var
+      days = <div remainder *date*::seconds-per-day>
+      remainder=<sub remainder <mul days *date*::seconds-per-day>>>
+  </when>
+
+  <when <gt remainder 3600>>
+    <set-var
+      hours = <div remainder 3600>
+      remainder=<sub remainder <mul hours 3600>>>
+  </when>
+
+  <when <gt remainder 60>>
+    <set-var
+      minutes = <div remainder 60>
+      remainder=<sub remainder <mul minutes 60>>>
+  </when>
+
+  <if <neq 0 years>
+      <array-append <pluralize <get-var-once years> year> result>>
+  <if <neq 0 months>
+      <array-append <pluralize <get-var-once months> month> result>>
+  <if <neq 0 days>
+      <array-append <pluralize <get-var-once days> day> result>>
+  <if <neq 0 hours>
+      <array-append <pluralize <get-var-once hours> hour> result>>
+  <if <neq 0 minutes>
+      <array-append <pluralize <get-var-once minutes> minute> result>>
+  <if <neq 0 seconds>
+      <array-append <pluralize <get-var-once remainder> second> result>>
+  <defvar result "0 seconds">
+  <comma-separated result>
+</defun>
+
+;;;
+;;; Julian day numbers.
+<defun date::julian-day-of-date date-string>
+  <defvar date-string <date>>
+  <set-var alist = <date::parse-date <get-var-once date-string>>>
+  <set-var month = <alist-get-var alist month>>
+  <foreach dalist *date*::month-info iter=x>
+    <if <string-eq <alist-get-var dalist short-name> <get-var-once month>>
+	<break>
+      <increment days by=<alist-get-var dalist days>>>
+  </foreach>
+  <if <and <gt x 2>
+	   <date::is-leap-year? <alist-get-var alist year>>>
+      <increment days>>
+  <pad <add days <alist-get-var alist day>> 3 pad-char=0 align=right>
+</defun>

@@ -1,0 +1,70 @@
+
+		       Meta-HTML 6.11 Release
+
+Version 6.11 of the Meta-HTML Web Language distribution is now
+available for download from:
+
+	ftp://ftp.metahtml.com/pub/GNU/metahtml-6.11.tar.gz
+
+It should be available from ftp.gnu.org/pub/gnu/metahtml, and GNU
+mirror sites (see http://www.gnu.org/order/ftp.html) within the
+next two weeks.
+
+     ------------------------------------------------------------
+
+			     What is it?
+
+Meta-HTML is a programming language specifically designed for working
+within the World Wide Web environment.  Although it is a genuine
+programming language, suitable for large-scale symbolic manipulation,
+it provides the most commonly wanted Web functionality as built-in
+primitives, so you don't have to write them.  You can find out more
+about the theory of implementation in this white paper
+[http://www.metahtml.org/documentation/manifesto.html].
+
+Web pages are authored using HTML and Meta-HTML statements freely
+intermixed.  When a page is requested by a browser, the page is passed
+through the Meta-HTML interpreter, which dynamically processes any
+Meta-HTML statements to produce a final HTML page that is delivered
+to the browser.
+
+The source distribution provides several different interpreter options:
+
+	* A CGI engine which can be run by any Unix Web server,
+	* A FastCGI engine which can be run under FastCGI compliant servers,
+	* A full-featured Web server (mhttpd) with the interpreter built in,
+	* A standalone processor, much like Perl or Tcl, and
+	* An interactive debugger, with a feel similar to GDB (mdb)
+
+Release 6.11 marks the first release of Meta-HTML with an integrated
+byte compiler, which (although buggy) can bring a 50 to 500 times
+speedup to the execution of your Meta-HTML code.
+
+Also new in 6.11 is an ODBC based PostGres module called modpodbc,
+which can be used to talk directly to a PostGres database.  You load
+this module with <sql::set-database-type PODBC> -- please see the
+documentation for more details.
+
+We are ready to start aggressively maintaining Meta-HTML at this time,
+so please report all bugs as you find them!
+
+     ------------------------------------------------------------
+
+		      E-Mail Addresses and URLs
+
+Bug reports for Meta-HTML should be sent to bug-metahtml@metahtml.com.
+Bug reports for the documentation should be sent to bug-manual@metahtml.com.
+
+There is a user mailing list: metahtml-users@metahtml.com.  You can
+subscribe on the Web [http://www.metahtml.com/E-Mail/], or by
+sending mail to metahtml-users-request@metahtml.com.
+
+     ------------------------------------------------------------
+
+		       Authors and Maintenance
+
+Meta-HTML was designed and implemented by Brian J. Fox (bfox@ai.mit.edu).
+Meta-HTML version 6.11 is released under the GNU Public License.
+The code and utilities are maintained by Brian J. Fox.
+
+     ------------------------------------------------------------

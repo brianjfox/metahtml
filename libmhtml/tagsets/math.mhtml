@@ -1,0 +1,153 @@
+;;; math.mhtml: -*- Meta-HTML -*-  A few math helpers.
+;;; 
+;;;  Copyright (c) 1998, 2001 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sun Apr 19 13:21:39 1998.
+<defsubst float whitespace=delete>
+  ;;; DOC_SECTION (ARITHMETIC-OPERATORS)
+  ;;; Returns the floating point representation of <var x>.
+  ;;; <var x> may be an integer, a floating point number, or a variable
+  ;;; containing an integer or floating point number.
+  ;;; <complete-example>
+  ;;; <set-var foo=7>
+  ;;; <float foo>
+  ;;; <float 3>
+  ;;; <float 3.0>
+  ;;; </complete-example>
+  <mul 1.0 %0>
+</defsubst>
+
+<defun number? arg &key base>
+  ;;; DOC_SECTION (ARITHMETIC-OPERATORS)
+  ;;; Returns "true" if <var arg> is the string representation of an integer
+  ;;; in base <var base> (default <code>10</code>), or the string
+  ;;; representation of a floating point number in base 10.
+  ;;;
+  ;;; For integer checks, the special value of zero (<code>0</code>) for
+  ;;; <var base> allows the common radixes of decimal, octal, and hexadecimal
+  ;;; to be understood.  That is to say:
+  ;;; <example>
+  ;;; <number? <get-var x> base=0>
+  ;;; </example>
+  ;;; is equivalent to:
+  ;;; <example>
+  ;;; <or <integer? <get-var x> base=8>
+  ;;;     <integer? <get-var x> base=10>
+  ;;;     <integer? <get-var x> base=16>
+  ;;;     <real?    <get-var x>>>
+  ;;; </example>
+  ;;;
+  ;;; Some examples:
+  ;;; <example>
+  ;;; <number? 10>          --> true
+  ;;; <number? .9>          --> true
+  ;;; <number 0xEF base=16> --> true
+  ;;; </example>
+  <defvar base 10>
+  <or <integer? <get-var arg> base=<get-var base>> <real? <get-var arg>>>
+</defun>
+
+<defun avg &rest nums[]>
+  ;;; DOC_SECTION (ARITHMETIC-OPERATORS)
+  ;;; Returns the average of all of the arguments passed.
+  ;;; Examples:
+  ;;; <example>
+  ;;; <avg 3 4 5>    --> 4
+  ;;; <avg 4 9 3.2>  --> 5.40
+  ;;; </example>
+  <set-var divisor = <array-size nums>>
+  <set-var dividend = <%%backquote-eval <add ,<get-var nums[]>>>>
+  <div dividend divisor>
+</defun>
+
+<defun factorial x>
+  ;;; DOC_SECTIONS (ARITHMETIC-OPERATORS)
+  ;;; Computes the factorial of <var x>.
+  ;;; Example:
+  ;;; <complete-example>
+  ;;; <factorial 12>
+  ;;; </complete-example>
+  <if <lt x 2>
+      1
+    <mul <float x> <factorial <sub x 1>>>>
+</defun>
+
+<defun percent num total>
+  ;;; DOC_SECTION (ARITMETIC-OPERATORS)
+  ;;; Return the percentage of <var total> that <var num> is.
+  ;;; <example>
+  ;;; <percent 20 200> --> 10.00
+  ;;; </example>
+  <if <not <number? <get-var-once num>>>
+      <concat
+       <parser::canonicalize-var num>
+       <set-var num = <get-var <get-var num>>>>>
+  <if <not <number? <get-var-once total>>>
+      <concat
+       <parser::canonicalize-var total>
+       <set-var total = <get-var <get-var total>>>>>
+  <div <mul num 100.00> total>
+</defun>
+
+<defun percentage percent total>
+  ;;; DOC_SECTION (ARITMETIC-OPERATORS)
+  ;;; Return the number which is <var percentage> of <var total>.
+  ;;; <example>
+  ;;; <percentage 10 200> --> 20.00
+  ;;; </example>
+  <if <not <number? <get-var-once percent>>>
+      <concat
+       <parser::canonicalize-var percent>
+       <set-var percent = <get-var <get-var percent>>>>>
+  <if <not <number? <get-var-once total>>>
+      <concat
+       <parser::canonicalize-var total>
+       <set-var total = <get-var <get-var total>>>>>
+  <div total <div 100.00 percent>>
+</defun>
+
+<defun med &rest nums[]>
+  ;;; DOC_SECTION (ARITHMETIC-OPERATORS)
+  ;;; Returns the median of all of the arguments passed.
+  ;;; The median is defined as the number for which half of the rest of the
+  ;;; numbers is greater, and half of the rest of the numbers is less.
+  ;;; Example:
+  ;;; <example>
+  ;;; <med 3 4 5>       --> 4
+  ;;; <med 2 3 7 8 10>  --> 5.40
+  ;;; </example>
+  <defvar nums[] 0>
+  <sort nums numeric=true>
+  <set-var center=<div <array-size nums> 2>>
+  <get-var nums[center]>
+</defun>
+
+<set-var *math*::one-thousand-pi-digits =
+  <concat
+    "14159265358979323846264338327950288419716939937510582097494459230781640"
+    "62862089986280348253421170679821480865132823066470938446095505822317253"
+    "59408128481117450284102701938521105559644622948954930381964428810975665"
+    "93344612847564823378678316527120190914564856692346034861045432664821339"
+    "36072602491412737245870066063155881748815209209628292540917153643678925"
+    "90360011330530548820466521384146951941511609433057270365759591953092186"
+    "11738193261179310511854807446237996274956735188575272489122793818301194"
+    "91298336733624406566430860213949463952247371907021798609437027705392171"
+    "76293176752384674818467669405132000568127145263560827785771342757789609"
+    "17363717872146844090122495343014654958537105079227968925892354201995611"
+    "21290219608640344181598136297747713099605187072113499999983729780499510"
+    "59731732816096318595024459455346908302642522308253344685035261931188171"
+    "01000313783875288658753320838142061717766914730359825349042875546873115"
+    "95628638823537875937519577818577805321712268066130019278766111959092164"
+    "201989">>
+
+<defun pi &optional digits>
+  ;;; DOC_SECTION (ARITHMETIC-OPERATORS)
+  ;;; Returns <var digits> digits of the numerical quantity <var PI>, up to
+  ;;; a limit of 1,000 decimal places.
+  ;;; <var digits> defaults to 4.
+  <defvar digits 4>
+  <if <gt digits 0>
+      <concat
+       "3."
+       <substring <get-var-once *math*::one-thousand-pi-digits>
+		  0 <get-var-once digits>>>>
+</defun>

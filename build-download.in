@@ -1,0 +1,292 @@
+#!@BASH@
+# -*- Bash -*- Mode works great on this file of Bash code.
+#
+# Build a tree with the downloadable binaries in it.
+#
+set -e
+
+tar=tar
+VERSION=@VERSION@
+
+system="@BUILD_PLATFORM@"
+quiet=""
+pro=""
+product_name=metahtml-${VERSION}-${system}
+VERSION_MAJOR=`echo $VERSION | sed -e 's/\\.[0-9][0-9]//'`
+COPYING=COPYING
+TIMEOUT=40
+
+# Parse arguments.
+while [ "$1" ]; do
+   option=$1
+   shift;
+   case "$option" in
+     --pro | -pro)
+	pro=true;
+	COPYING=COPYING.PRO;
+	;;
+     -q | --quiet | --q)
+	quiet=true;
+	;;
+
+     -timeout | --timeout | -days | --days)
+	TIMEOUT=$1;
+	shift;
+	;;
+     *)
+	system=$option;
+	;;
+   esac
+done
+
+if [ "$system" = "" ]; then
+   echo "You must supply the name of the system that you are building"
+   echo "the download image for."
+   echo ""
+   echo "For example, you might use:"
+   echo "  i386-linuxaout"
+   echo "  alpha-dec-winnt3.5"
+   echo "  BSDI-2.0-i386"
+   echo "  SunOS-4.1.3-Sparc"
+   echo "  SunOS-5.4-Sparc"
+   echo "  OSF-3.2-Alpha"
+   echo " and so forth."
+   echo ""
+   exit 1
+fi
+
+dir="downloads/$system"
+subdirs="Utilities Goodies server engine mhc mdb
+	 doc examples applications tagsets"
+
+if [ "$pro" -a -d ../MetaSite ]; then
+   subdirs="$subdirs MetaSite"
+fi
+
+if [ -f modules/example.so ]; then
+   subdirs="$subdirs modules"
+   # List of files to install in dir/modules.
+   files_modules="`echo modules-ship/*` `echo modules/*.so`"
+fi
+
+# List of files to install in dir/Goodies..
+files_Goodies="elisp/mhtml.el"
+
+# List of files to install in dir/utils..
+strippable_utils="list-sessions delete-session set-session-timeout
+		  set-session-var get-session-var reap-sessions gc-database
+		  dbpack dbdump dbcreate dbget imagemap strip-tags"
+
+files_Utilities="sessions/list-sessions sessions/delete-session
+		 sessions/set-session-timeout sessions/set-session-var
+		 sessions/get-session-var sessions/reap-sessions
+		 sessions/gc-database sessions/create-session
+		 dbutils/dbpack dbutils/dbdump dbutils/dbcreate
+		 dbutils/dbget dbutils/dbdelete
+		 utilities/imagemap/imagemap utilities/start-servers
+		 utilities/stop-servers utilities/strip-tags/strip-tags
+		 utilities/mklib utilities/mkapi
+		 libgd/mkbg libgd/mktrans libgd/gifq libgd/thumbnail
+		 libgd/composite libgd/abut libgd/recolor"
+
+if [ "$pro" ]; then
+   files_Utilities="$files_Utilities utilities/mkpass/mkpass"
+fi
+
+# List of files to install in dir/server.
+files_server="server/mhttpd server/README server/conf server/mhttpd-pages"
+
+# List of files to install in dir/engine.
+files_engine="engine/engine engine/README engine/fcgi-engine"
+files_engine="$files_engine engine/engine.conf server-api/nsapi-dist"
+
+# List of files to install in dir/standlone.
+files_mhc="mhc/mhc mhc/README"
+
+# List of files to install under the debugger directory.
+files_mdb="mdb/mdb mdb/README"
+
+# List of files to install in dir/doc
+files_doc="doc/*"
+
+# List of files to install in dir/examples.
+files_examples="examples/*.mhtml"
+
+# List of files to install in dir/applications.
+files_applications="applications/*"
+files_tagsets="tagsets/*"
+
+# List of files to install in dir/MetaSite.
+files_MetaSite="../MetaSite/docs/*"
+
+echo "Creating $dir..."
+if [ ! -d downloads ]; then mkdir downloads; fi
+rm -rf $dir
+if [ ! -d $dir ]; then mkdir $dir; fi
+
+function copy-file
+{
+   local source="$1" target="" dest="$2"
+   target=$(echo $source | sed -e 's/.*://')
+   if [ "$target" = "$source" ]; then target=""; fi
+   source=${source%%:*}
+   if [ "$target" = "" ]; then
+      target="${source##*/}"
+   fi
+
+   if [ "$target" ]; then dest="$dest/$target"; fi
+
+   if [ "$quiet" != "true" ]; then
+      echo "    $source --> $dest"
+   fi
+   cp -r $source $dest
+}
+
+for subdir in $subdirs; do
+   echo "Creating $dir/$subdir..."
+   if [ ! -d $dir/$subdir ]; then mkdir $dir/$subdir; fi
+   if [ "$(eval echo '$'files_$subdir)" ]; then
+      for file in $(eval echo '$'files_$subdir); do
+	 copy-file $file $dir/$subdir
+      done
+   fi
+done
+
+if [ -f ${COPYING} ]; then
+   cp ${COPYING} $dir/LICENSE;
+else
+   echo "                   ARE YOU NUTS?"
+   echo ""
+   echo "HEY!  YOU CANNOT MAKE A BINARY DISTRIBUTION WITHOUT INCLUDING"
+   echo "      THE \"${COPYING}\" FILE AT TOP-LEVEL AS \"LICENSE\"!"
+   echo ""
+   echo "                   ARE YOU NUTS?"
+   echo ""
+   exit 127
+fi
+
+cp support/install-bin $dir/install-bin
+cp support/Install $dir/Install
+cp support/install-site $dir/install-site
+chmod a+x $dir/install-bin $dir/install-site $dir/Install
+cp Welcome.mhtml $dir/Welcome.mhtml
+chmod a+r $dir/Welcome.mhtml
+
+if [ -f README.$system ]; then
+   cp README.$system $dir/README;
+elif [ -f README.download ]; then
+   cp README.download $dir/README
+fi
+
+if [ -f RELEASE.$system ]; then
+   cp RELEASE.$system $dir/RELEASE
+elif [ -f RELEASE.download ]; then
+   cp RELEASE.download $dir/RELEASE
+fi
+
+if [ -f server/INSTALL.$system ]; then
+   cp server/INSTALL.$system $dir/server/INSTALL
+   chmod a+x $dir/server/INSTALL
+elif [ -f server/INSTALL ]; then
+   cp server/INSTALL $dir/server/INSTALL
+   chmod a+x $dir/server/INSTALL
+fi
+
+if [ -f engine/INSTALL.$system ]; then
+   cp engine/INSTALL.$system $dir/engine/INSTALL
+   chmod a+x $dir/engine/INSTALL
+elif [ -f engine/INSTALL ]; then
+   cp engine/INSTALL $dir/engine/INSTALL
+   chmod a+x $dir/engine/INSTALL
+fi
+
+echo -n "Copying the release/${VERSION} directory..."
+$tar -chf - release/${VERSION} | (cd $dir; tar -xpf -)
+echo "Done."
+
+everydist="README LICENSE Install install-bin install-site"
+
+function make-tarfile
+{
+   local PACKAGE=$1
+   local DISTBASE=${PACKAGE}-dist
+   local DISTNAME=${PACKAGE}.tar.gz
+   shift
+   echo "Creating ${DISTBASE}..."
+   (cd $dir;
+    echo "   Removing old ${DISTBASE}/...";
+    rm -rf ${DISTBASE};
+    echo "   Making new ${DISTBASE}/..."
+    mkdir ${DISTBASE};
+    (cd ${DISTBASE};
+     for file in ${everydist} $@;
+       do ln -s ../$file .;
+       echo "     $file linked...";
+     done);
+    echo "   Building tar file..."
+    $tar -hcf - ${DISTBASE} | gzip >${DISTNAME};
+    echo "   Removing ${DISTBASE}/"
+    rm -rf ${DISTBASE})
+   echo "Done! (${DISTNAME})"
+   echo ""
+}
+
+# Clean up a little bit.
+echo "Cleaning up Emacs Backup files..."
+(cd $dir; find . -name "*~" -exec rm \{\} \; -print)
+(cd $dir; find . -name "#*" -exec rm \{\} \; -print)
+(cd $dir; find . -name "CVS" -exec rm -rf \{\} \; -print)
+(cd $dir/server/mhttpd-pages && make distclean)
+(cd $dir/applications && make distclean)
+(cd $dir/doc && find . -name "*.db" -exec rm  \{\} \; -print)
+(cd $dir/server; rm -f *.c *.h; strip mhttpd)
+(cd $dir/engine; strip engine)
+(cd $dir/mhc; strip mhc)
+(cd $dir/mdb; strip mdb)
+(cd $dir/Utilities; strip ${strippable_utils})
+
+release_files="release Welcome.mhtml"
+
+if [ -d $dir/MetaSite ]; then
+   echo "Cleaning up the MetaSite files..."
+   (cd $dir/MetaSite; find . -name "*.tar.gz" -exec rm \{\} \; -print)
+   (cd $dir/MetaSite; find . -name "foo.*" -exec rm \{\} \; -print)
+   (cd $dir/MetaSite; rm -rf release canonical-manual)
+   if [ -f $dir/MetaSite/search-index.db.packed ]; then
+      echo -n "  Unpacking the search index on this system..."
+      dbutils/dbpack $dir/MetaSite/search-index.db.packed
+      rm $dir/MetaSite/search-index.db.packed
+      echo "done."
+   fi
+
+   # Install the documentation databases.
+   dirman=$dir/MetaSite/documentation/manual
+   rm -f ${dirman}/functions.db* ${dirman}/sections.db*
+   cp doc/manual/functions.db doc/manual/sections.db ${dirman}/
+   echo -n "   Packing documentation databases: "
+   echo -n "functions.db"
+   dbutils/dbpack ${dirman}/functions.db; echo -n "."
+   rm ${dirman}/functions.db; echo -n "."
+   chmod a+r ${dirman}/functions.db.packed; echo -n ". "
+
+   echo -n "sections.db"
+   dbutils/dbpack ${dirman}/sections.db; echo -n "."
+   rm ${dirman}/sections.db; echo -n ". "
+   chmod a+r ${dirman}/functions.db.packed; echo -n ". "
+   echo "done."
+fi
+
+# Maybe make a keyfile.
+if [ "$VERSION_MAJOR" = "6" ]; then
+   echo "Making a keyfile..."
+   keyfile=MHTML.KEY
+   echo "" >${dir}/${keyfile}
+   echo ";;; Your Meta-HTML activation key." >>${dir}/${keyfile}
+   echo "<set-var mhtml::activation-key = $(./libregister/make_key ${TIMEOUT})>" >>${dir}/${keyfile}
+fi
+
+echo "Cleaning up the release files..."
+(cd $dir/release; find . -name "*.tar.gz" -exec rm \{\} \; -print)
+(cd $dir/release; find . -name "*.tgz" -exec rm \{\} \; -print)
+
+make-tarfile $product_name $subdirs ${release_files} ${keyfile}

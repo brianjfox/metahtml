@@ -1,0 +1,147 @@
+# Makefile.in: -*- Text -*-  Source for configure to make a Makefile from.
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 2000, Brian J. Fox (bfox@ai.mit.edu).
+#
+#  Meta-HTML is free software; you can redistribute it and/or modify
+#  it under the terms of the General Public License as published
+#  by the Free Software Foundation; either version 1, or (at your
+#  option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  FSF GPL for more details.
+#
+#  You should have received a copy of the FSF General Public License
+#  along with this program; if you have not, you may obtain one
+#  electronically at the following URL:
+# 
+#	 http://www.metahtml.com/COPYING
+#
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+GDBMLIB = @GDBMLIB@
+GDBM_IN = @GDBM_IN@
+LIBREADLINE = @LIBREADLINE@
+LIBHISTORY = @LIBHISTORY@
+LIBTERMCAP = @LIBTERMCAP@
+DESLIB	= @DESLIB@
+DBINC	= $(GDBM_IN)
+DBLIB	= $(GDBMLIB) $(DESLIB)
+
+OS_LIBS = @OS_LIBS@
+EXE	= @EXE@
+VERSDEF = -DMHTML_VERSION_STRING='"$(MHTML_VERSION)"'
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+bindir	= $(exec_prefix)/bin
+libdir	= $(exec_prefix)/lib
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+
+# You cannot compile with anything other than GNU C.
+CC		 = gcc $(GCC_WARN)
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+# OPTIMIZE_FLAGS	= -O69
+INCLUDE_FLAGS	= @EXTRAINC@ -I. -I.. -I../.. -I../../libutils \
+		 -I../../libmhtml -I../../libutils/rx-1.5 $(DBINC) -I.
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(INCLUDE_FLAGS)
+LDFLAGS		= $(DEBUG_FLAGS)
+
+PASSED_CFLAGS = CC='$(CC)' LDFLAGS='$(LDFLAGS)' CFLAGS='$(CFLAGS) -I../.. $(OPTIONAL_CFLAGS)'
+SUBMAKE_FLAGS = $(PASSED_CFLAGS) $(OPTIONAL_ASSIGN) $(REQUIRED_ASSIGN)
+REQUIRED_ASSIGN = RM='$(RM)' RANLIB='$(RANLIB)' AR='$(AR)'
+
+LIBUTILS	= ../../libutils/libutils.a
+LIBXMALLOC	= ../../libutils/xmalloc/libxmalloc.a
+LIBMHTML	= ../../libmhtml/libmhtml.a
+
+TARGET_LIBS     = libmachine.a
+PROGS		= 
+REQLIBS		= $(LIBMHTML) $(LIBUTILS) $(LIBXMALLOC)
+TARGETS		= $(PROGS) $(TARGET_LIBS)
+
+LIB_CSRC = object.c heap.c engine.c
+LIB_HSRC = machine.h bops.h code.h
+LIB_OBJS = object.o heap.o engine.o
+
+TEST_HEAP_OBJS  = $(TEST_SCAN_OBJS) heap.o object.o
+TEST_OBJ_OBJS   = $(TEST_PARSE_OBJS) object.o heap.o
+TEST_LIBS       = $(LIBUTILS) $(LIBXMALLOC) -lm -lefence
+TEST_FLAGS      = -g -DMETAHTML_COMPILER
+
+.c.o:
+	@echo compiling $< into $@
+	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) $(DEFS) $(VERSDEF) -c $<
+
+all: $(TARGETS)
+
+libmachine.a: $(LIB_OBJS)
+	$(RM) $@
+	$(AR) cq $@ $(LIB_OBJS)
+
+../../libutils/xmalloc/libxmalloc.a: FORCE
+	(cd ../../libutils/xmalloc/libxmalloc.a; make libxmalloc.a)
+
+object:	FORCE
+	$(RM) -f $(TEST_OBJ_OBJS) $@
+	$(MAKE) DEBUG_FLAGS="-g -DOBJ_TEST" $(TEST_OBJ_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(TEST_OBJ_OBJS) $(TEST_LIBS)
+
+heap:	FORCE
+	$(RM) -f $(TEST_HEAP_OBJS) $@
+	$(MAKE) DEBUG_FLAGS="-g -DHEAP_TEST" $(TEST_HEAP_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(TEST_HEAP_OBJS) $(TEST_LIBS)
+
+object.o: machine.h code.h object.c
+heap.o: machine.h code.h object.c heap.c
+engine.o: machine.h code.h engine.c
+
+Makefile: Makefile.in
+	(cd ../..; ./config.status)
+
+install: $(TARGETS)
+	if [ ! -d $(libdir) ]; then mkdir $(libdir); fi
+	for file in $(TARGETS); do \
+	  $(INSTALL) $$file $(libdir)/$$file; \
+	done
+
+install-no-db: $(MODULES)
+	if [ ! -d $(libdir) ]; then mkdir $(libdir); fi
+	for file in $(MODULES); do \
+	  $(INSTALL) $$file $(libdir)/$$file; \
+	done
+
+clean-executables: FORCE
+	$(RM) $(TARGETS)
+
+clean:  FORCE
+	$(RM) *.o $(TARGETS) 
+
+realclean: clean
+	$(RM) *.cache *.log Makefile *~ TAGS
+
+distclean: realclean
+	$(RM) -rf CVS
+
+tags TAGS: FORCE
+	(cd ..; $(MAKE) $@)
+
+FORCE:

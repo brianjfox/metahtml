@@ -1,0 +1,49 @@
+;;; cern.mhtml: -*- Meta-HTML -*-
+;;; Configuring the CERN server.
+<set-var
+  title="Configuring for the CERN Server"
+  prev-page="ncsa.mhtml" prev-title="Configuring NCSA"
+  next-page="plexus.mhtml" next-title="Configuring Plexus">
+<include header.mhtml>
+
+In your server configuration file:
+<pre>
+Map	/*		/cgi-bin/nph-engine/*
+Exec	/cgi-bin/*	<your-document-root>/cgi-bin/*
+</pre>
+
+<ptext>
+  <font size="+1"><b>CERN/3.0A Bug</b></font><br>
+  The <Meta-HTML> Engine tries hard to figure out where your document
+  root is.  It starts out by looking in <code>argv[0]</code> to see
+  which directory the program is running from.  By convention,
+  programs which call <code>fork()</code> and <code>exec()</code>
+  place the  <i>complete</i> path to the program to execute in
+  <code>argv[0]</code>.
+
+  But, does CERN do this?  No.  In fact, there are no variables in the
+  environment, nor in <code>argv[]</code>, from which this information
+  can be gleaned!
+
+  So, the Meta-HTML Engine cannot find a local configuration file, and
+  cannot determine the location of the document root directory from
+  the information supplied by the CERN server.
+
+  <font size="+1"><b><meta-html> Workaround</b></font><br>
+  There is a workaround for this bug in the CERN server.  If the
+  <meta-html> Engine cannot find a configuration file in the normal
+  way, then it looks in the contents of the environment variable
+  <code>METAHTML_ENGINE_CONFIG_FILE</code>, and tries to treat that
+  value as the location for the configuration file.  If that fails,
+  then finally the file <code>"/www/bin/engine.conf"</code> is looked
+  for, and configuration is attempted from that file.
+
+  Try copying the <code>engine.conf</code> file in your
+  <code>/cgi-bin</code> directory to
+  <code>/www/bin/engine.conf</code>, or start your server with the
+  environment variable <code>METAHTML_ENGINE_CONFIG_FILE</code> set to
+  the location of the <code>engine.conf</code> file that came with
+  your distribution.
+</ptext>
+
+<include footer.mhtml>

@@ -1,0 +1,148 @@
+;;; navbar.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat May  3 15:56:21 1997.
+
+;;; Create a navigation bar using the specified information.
+;;; The full pathname of the created image is returned.
+;;; If map? is non-empty, creates the array NAVBAR::IMAGEMAP-INFO, which
+;;; is an array of alists, each one describing an area of the created
+;;; navbar.
+;;;
+;;; The fields of each alist are: SHAPE, POINTS, LINK.
+<defun navbar::create-navbar-gif navinfo[] map?
+  fname fsize fcolor bgcolor srgb>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Create a navigation bar using the specified information.
+  ;;; The full pathname of the created image is returned.
+  ;;; If map? is non-empty, creates the array NAVBAR::IMAGEMAP-INFO, which
+  ;;; is an array of alists, each one describing an area of the created
+  ;;; navbar.
+  ;;;
+  ;;; The fields of each alist are: SHAPE, POINTS, LINK.
+  <defvar fname AvantGarde-Demi>
+  <defvar fsize 16>
+  <defvar fcolor 8080D0>
+  <defvar bgcolor C0C0C0>
+  <defvar srgb 000000>
+  <defvar height <add fsize 4>>
+  <set-var i=0>
+  <when <get-var map?>>
+    <unset-var navbar::imagemap-info>
+    <set-var map-x = 0>
+  </when>
+  <while <get-var navinfo[i]>>
+    <set-var info[]=<subst-in-string <get-var navinfo[i]> ":" "\n">>
+    <set-var words[i] = <get-var info[0]> links[i]=<get-var info[1]>>
+    <set-var letters[]=<subst-in-string <get-var words[i]> "(.)" "\\1\n">>
+    <set-var lsize = <array-size letters>>
+    <set-var width = <mul lsize fsize>>
+    <set-var image =
+      <image-builder::make-text-gif
+       <get-var words[i]> Center Middle <get-var width> <get-var height>
+       <get-var fname> <get-var fsize> <get-var fcolor>>>
+    <cgi-exec mv <get-var image> /tmp/<get-var i>.gif>
+    <cgi-exec mktrans -i -1 /tmp/<get-var i>.gif>
+    <cgi-exec recolor /tmp/<get-var i>.gif
+	      000000:<get-var fcolor> FEFEFE:<get-var bgcolor>>
+    <set-var args[i] = /tmp/<get-var i>.gif>
+    <when <get-var map?>>
+      <package-delete map?>
+      <set-var map?::shape = RECT>
+      <set-var map?::points[]=
+	<prog
+	  <get-var map-x>, 0
+	  <add map-x width>, <get-var height>>>
+      <set-var map?::link = <get-var links[i]>>
+      <increment map-x by=<get-var width>>
+      <set-var navbar::imagemap-info[i] = <package-to-alist map? strip=true>>
+    </when>
+    <increment i>
+  </while>
+
+  <set-var expr =
+    <%cgi-exec abut -h
+	       <if <get-var srgb> "-srgb <get-var srgb>">
+	       <get-var args[]> ">/tmp/foo.gif">>
+  <subst-in-var expr "<%" "<">
+  <get-var expr>
+  /tmp/foo.gif
+</defun>
+
+<defun navbar::create-client-side-imagemap name>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Implicity uses the data in NAVBAR::IMAGEMAP-INFO.
+  <concat "<map name=\"<get-var name>\">" "\n">
+  <set-var i=0>
+  <while <get-var navbar::imagemap-info[i]>>
+    <alist-to-package <get-var navbar::imagemap-info[i]> map?>
+    <concat "  <area shape=<get-var map?::shape> coords=">
+    <subst-in-string <get-var map?::points[]> "[, \t\n]+" ",">
+    <concat " href=\"<get-var map?::link>\">">
+    <concat "\n">
+    <increment i>
+  </while>
+  <concat </map> "\n">
+</defun>
+
+<defun navbar::create-server-side-imagemap name>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+;;; Implicitly uses the data in NAVBAR::IMAGEMAP-INFO.
+  <make-directories <get-var mhtml::include-prefix>/maps>
+  <with-open-stream s <get-var mhtml::include-prefix>/maps/<get-var name>.map
+		    mode=write-create>
+    <stream-put s "# Server Side Imagemap created by navbar.mhtml\n">
+    <stream-put s "# Code Author: Brian J. Fox <bfox@ai.mit.edu>\n">
+    <stream-put s "# Created on: <date>\n">
+
+    <set-var i=0>
+    <while <get-var navbar::imagemap-info[i]>>
+      <alist-to-package <get-var navbar::imagemap-info[i]> map?>
+      <stream-put s "<downcase <get-var map?::shape>> <get-var map?::link> ">
+      <stream-put s <subst-in-string <get-var map?::points[]> "\n" " ">>
+      <stream-put s "\n">
+      <increment i>
+    </while>
+  </with-open-stream>
+</defun>
+
+<defun navbar::create-navbar name navinfo[]>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Undocumented by intent.  This interface is not complete yet.
+  <set-var file =
+    <navbar::create-navbar-gif
+     <get-var navinfo[]> t
+     <get-var navbar::fontname>
+     <get-var navbar::fontsize>
+     <get-var navbar::fontcolor>
+     <get-var navbar::bgcolor>
+     <get-var navbar::separator-color>>>
+  <make-directories <get-var mhtml::include-prefix>/images/navbars>
+  <cgi-exec mv <get-var file>
+	    <get-var mhtml::include-prefix>/images/navbars/<get-var name>.gif>
+  <make-directories <get-var mhtml::include-prefix>/navbars>
+  <set-var navbar::navinfo[]=<get-var navinfo[]>>
+  <set-var navbar::client-side-imagemap =
+    <navbar::create-client-side-imagemap <get-var name>>>
+  <navbar::create-server-side-imagemap <get-var name>>
+  <with-open-stream
+   s <get-var mhtml::include-prefix>/navbars/<get-var name>.info
+   mode=write-create>
+    <stream-put s <package-to-alist navbar strip=true>>
+  </with-open-stream>
+</defun>
+
+<defun navbar::use-navbar name navinfo[]>
+  ;;; DOC_SECTION (DYNAMIC-IMAGES)
+  ;;; Use a (perhaps) previously created navbar.
+  ;;; Undocumented by intent.  This interface is not complete yet.
+  <when <not <webpath-exists /navbars/<get-var name>.info>>>
+    <navbar::create-navbar <get-var name> <get-var navinfo[]>>
+  </when>
+  <alist-to-package <include /navbars/<get-var name>.info> navbar>
+  <get-var navbar::client-side-imagemap>
+  <a href="/cgi-bin/imagemap/maps/<get-var name>.map">
+    <img src="/images/navbars/<get-var name>.gif"
+	 ISMAP USEMAP="#<get-var name>">
+  </a>
+</defun>

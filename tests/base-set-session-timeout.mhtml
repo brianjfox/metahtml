@@ -1,0 +1,6 @@
+;;; base-set-session-timeout.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Thu Oct 31 14:39:33 1996.
+
+Result: "Session Active - Timed Out Session": <set-var mhttpd::session-database-file="/tmp/test-sessions.db"><set-session-timeout=0><set-var anonymous=anonymous><create-session anonymous allow-multiple><set-session-var tmp="Session Active"><get-session-var tmp><require-session timeout=" - Timed Out Session"><delete-session <get-var SID>><unset-var SID>

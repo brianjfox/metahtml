@@ -1,0 +1,24 @@
+;;; base-add.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sat Oct 26 18:40:40 1996.
+
+Result: 2: <add 1 1>
+Result: 2: <add 4 -2>
+Result: 2: <add -8 10>
+Result: 2: <add 1.7 .3>
+Result: 2: <add 1.7 .3>
+Result: -2: <add -1.7 -0.3>
+Result: -2: <add -1.7 -.3>
+Result: 2: <add 1.70 00.30>
+Result: -2: <add -1.70 -00.30>
+Result: 2: <add 1.70 00.30>
+Result: -2: <add -1.70002 -00.20008>
+Result: 2: <add 1.70002 00.20008>
+Result: 2: <add 1.70 00.30>
+Result: -2: <add -1.70002 -00.20008>
+Result: 2.00001: <add 1.70002 00.29999>
+Result: -2.00001: <add -1.70002 -00.29999>
+Result: -1.90011: <add -1.70002 -00.20009>
+Result: 2.00000: <add 2.00003 -0.00003>
+Result: -1.70002: <add -1.70002 -.>

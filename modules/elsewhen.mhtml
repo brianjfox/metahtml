@@ -1,0 +1,40 @@
+;;; elsewhen.mhtml: -*- Meta-HTML -*-  Test the <when> <elsewhen> <when> code.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Thu Jun 19 00:15:18 1997.
+
+<set-var set=set unset="">
+
+<whenelse <get-var set>>
+  This indicates that "set" is set.
+  <whenelse <get-var unset>>
+    You won't see this, because "unset" is not set.
+    <elsewhen>
+    You will see this, because "unset" is not set.
+    <whenelse true>
+      You always see this.
+      <elsewhen>
+      You never see this.
+    </whenelse>
+    And, this is also shown.
+  </whenelse>
+  <elsewhen>
+  Finally, this is not shown.
+</whenelse>
+
+<cif <get-var set>>
+  This indicates that "set" is set.
+  <whenelse <get-var unset>>
+    You won't see this, because "unset" is not set.
+    <elsewhen>
+    You will see this, because "unset" is not set.
+    <cif true>
+      You always see this.
+      <else>
+      You never see this.
+    </cif>
+    And, this is also shown.
+  </whenelse>
+  <else>
+  Finally, this is not shown.
+</cif>

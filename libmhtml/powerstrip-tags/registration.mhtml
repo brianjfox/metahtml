@@ -1,0 +1,98 @@
+;;; registration.mhtml: -*- Meta-HTML -*- Code for tagsets which enable
+;;; registration-restricted areas (different from PowerStrip registration).
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Fri Mar 21 13:25:31 1997.
+;;;
+;;; The tag <ACCESS::RESTRICTIONS [CLASS]...> restricts access to the
+;;; current page based upon whether the user has an element in the
+;;; array session variable named ACCESS::USER-RESTRICTIONS which is a
+;;; member of CLASS.
+;;;
+;;; For example, if the session variable ACCESS::TOKENS contains
+;;; "members", then the user will be allowed access only to those
+;;; pages which contain <access::restrictions members>.
+;;;
+;;; An access class may inherit other restrictions from previously
+;;; defined classes, such that a person who has the "members" property
+;;; also has the "guests" property.  You define such relationships
+;;; with the <ACCESS::DEFINE-CLASS CLASS [INHERITED-CLASS ... ]>
+;;; function.  Thus:
+;;;
+;;;     <access::define-class members guests>
+;;;
+;;; specifies that users with "members" access can also access
+;;; anything that users with "guests" access can.
+;;;
+;;; Obviously, the "guests" class may additionally have sub-classes,
+;;; ad infinitum.
+;;;
+;;; The defined access classes are stored in the package
+;;; ACCESS-CLASSES, where a variable's presence indicates that it is a
+;;; valid access token, and the value of such variables can be an
+;;; array, specifying which access tokens are inherited by that class.
+;;;
+
+<set-var access::denied-default-url =
+  <get-var mhtml::http-prefix>/Register.mhtml>
+
+<defsubst access::denied-default-url whitespace=delete>
+  <get-var access::denied-default-url>
+</defsubst>
+
+<defun access::define-class class i1 i2 i3 i4 i5 i6 i7 i8 i9>
+  <set-var access-classes::<get-var class>[]=
+    <prog
+      <get-var i1>
+      <get-var i2>
+      <get-var i3>
+      <get-var i4>
+      <get-var i5>
+      <get-var i6>
+      <get-var i7>
+      <get-var i8>
+      <get-var i9>>>
+</defun>
+
+<defun access::class-contains? class token>
+  <or <string-eq <get-var class> <get-var token> caseless=true>
+      <concat
+	<set-var i=0>
+	<set-var names[]=<get-var access-classes::<get-var class>[]> result="">
+	<while <and <not <get-var result>> <get-var names[i]>>>
+	  <set-var result =
+	    <access::class-contains? <get-var names[i]> <get-var token>>>
+	  <increment i>
+	</while>
+	<get-var result>>>
+</defun>
+
+<defun access::get-user-restrictions>
+  <if <not <get-var access::user-restrictions>>
+      <set-var access::user-restrictions[] =
+	<get-session-var access::user-restrictions[]>>>
+</defun>
+
+<defun access::restrictions>
+  <access::get-user-restrictions>
+  <set-var %attributes>
+  <set-var classes[]=<subst-in-string %qbody "[ \t\n]+" "\n">>
+  <set-var user-groups[]=<get-var access::user-restrictions[]>>
+  ;;;
+  ;;; Check the user's restrictions against the globals.
+  ;;;
+  <set-var i=0 result="" limit=<array-size classes>>
+  <while <and <not <get-var result>> <get-var user-groups[i]>>>
+    <set-var j=0>
+    <while <and <not <get-var result>> <lt j limit>>>
+      <set-var result =
+	<access::class-contains? <get-var user-groups[i]>
+				 <get-var classes[j]>>>
+      <increment j>
+    </while>
+    <increment i>
+  </while>
+  <when <not <get-var result>>>
+    <redirect <or <get-var denied> <get-var access::denied-default-url>>>
+  </when>
+</defun>

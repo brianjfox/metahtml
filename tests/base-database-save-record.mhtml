@@ -1,0 +1,6 @@
+;;; base-database-save-record.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 02:46:12 1996.
+
+Result: true: <with-open-database db test.db mode=write-create><set-var result=<database-save-record db key0001 db>></with-open-database><cgi-exec "/bin/rm test.db"><get-var result>

@@ -1,0 +1,34 @@
+;;; navigate.mhtml: -*- Meta-HTML -*-
+;;; Given variables NEXT-PAGE and PREV-PAGE, insert the appropriate icons
+;;; and hrefs in the document where this file is included.
+
+<defsubst icon whitespace=delete>
+  <img src="%0.gif" border=0>
+</defsubst>
+
+<center>
+  <table width=100%>
+    <tr>
+      <td align=left width=33%>
+	<if <get-var prev-page>
+	    <concat
+	     <a href="<get-var prev-page>">
+	     <get-var prev-title><icon back>
+	     </a>>>
+      </td>
+      <td align=center width=33%>
+	<concat
+	 <b>[<a href="welcome.mhtml#TOC">
+	 TOC</a>]</b>>
+      </td>
+      <td align=right width=33%>
+	<if <get-var next-page>
+	    <concat
+	     <a href="<get-var next-page>">
+	     <icon forward>
+	     <get-var next-title>
+	     </a>>>
+      </td>
+    </tr>
+  </table>
+</center>

@@ -1,0 +1,172 @@
+# Makefile.in for MDB, the interactive Meta-HTML debugger. -*- text -*-
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 2000, Brian J. Fox (bfox@ai.mit.edu).
+#
+#  Meta-HTML is free software; you can redistribute it and/or modify
+#  it under the terms of the General Public License as published
+#  by the Free Software Foundation; either version 1, or (at your
+#  option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  FSF GPL for more details.
+#
+#  You should have received a copy of the FSF General Public License
+#  along with this program; if you have not, you may obtain one
+#  electronically at the following URL:
+# 
+#	 http://www.metahtml.com/COPYING
+#
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+GDBMLIB = @GDBMLIB@
+GDBM_IN = @GDBM_IN@
+LIBREADLINE = @LIBREADLINE@
+LIBHISTORY = @LIBHISTORY@
+LIBTERMCAP = @LIBTERMCAP@
+DESLIB	= @DESLIB@
+DBINC	= $(GDBM_IN)
+DBLIB	= $(GDBMLIB) $(DESLIB)
+
+OS_LIBS = @OS_LIBS@
+EXE	= @EXE@
+VERSDEF = -DMHTML_VERSION_STRING='"$(MHTML_VERSION)"'
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+bindir	= $(exec_prefix)/bin
+libdir	= $(exec_prefix)/lib
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+
+# You cannot compile with anything other than GNU C.
+CC		 = gcc $(GCC_WARN)
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+# OPTIMIZE_FLAGS	= -O69
+INCLUDE_FLAGS	= @EXTRAINC@ -I. -I.. -I../.. -I../../libutils \
+		 -I../../libmhtml -I../../libutils/rx-1.5 $(DBINC)
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(INCLUDE_FLAGS)
+LDFLAGS		= $(DEBUG_FLAGS)
+
+PASSED_CFLAGS = CC='$(CC)' LDFLAGS='$(LDFLAGS)' CFLAGS='$(CFLAGS) -I../.. $(OPTIONAL_CFLAGS)'
+SUBMAKE_FLAGS = $(PASSED_CFLAGS) $(OPTIONAL_ASSIGN) $(REQUIRED_ASSIGN)
+REQUIRED_ASSIGN = RM='$(RM)' RANLIB='$(RANLIB)' AR='$(AR)'
+
+LIBUTILS	= ../../libutils/libutils.a
+LIBXMALLOC	= ../../libutils/xmalloc/libxmalloc.a
+LIBMHTML	= ../../libmhtml/libmhtml.a
+
+TARGET_LIBS     = libcompiler.a
+PROGS		= test$(EXE)
+REQLIBS		= $(LIBMHTML) $(LIBUTILS) $(LIBXMALLOC)
+TARGETS		= $(PROGS) $(TARGET_LIBS)
+
+LIB_CSRC = scan.c parse.c corex.c expand.c optimize.c generate.c compile.c
+LIB_HSRC = corex.h compiler.h
+LIB_OBJS = scan.o parse.o corex.o expand.o optimize.o generate.o compile.o
+
+TEST_SRCS = test.c
+TEST_HDRS = 
+TEST_OBJS = test.o
+
+TEST_SCAN_OBJS  = scan.o ../machine/object.o ../machine/heap.o
+TEST_PARSE_OBJS = $(TEST_SCAN_OBJS)  parse.o
+TEST_EXP_OBJS   = $(TEST_PARSE_OBJS) corex.o expand.o
+TEST_GEN_OBJS   = $(TEST_EXP_OBJS) optimize.o generate.o
+TEST_LIBS       = $(LIBXMALLOC) $(LIBUTILS) -lm -lefence
+TEST_FLAGS      = -g -DMETAHTML_COMPILER
+
+.c.o:
+	@echo compiling $< into $@
+	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) $(DEFS) $(VERSDEF) -c $<
+
+all: $(TARGET_LIBS)
+
+libcompiler.a: $(LIB_OBJS)
+	$(RM) $@
+	$(AR) cq $@ $(LIB_OBJS)
+
+test$(EXE): $(TEST_OBJS) libcompiler.a ../machine/libmachine.a $(REQLIBS) 
+	$(CC) $(LDFLAGS) -o $@ $(TEST_OBJS) libcompiler.a \
+	      ../machine/libmachine.a $(REQLIBS) $(DBLIB) $(OS_LIBS) \
+		$(LIBTERMCAP) -lefence
+
+../machine/libmachine.a: FORCE
+			 (cd ../machine; make libmachine.a)
+
+../machine/object.o ../machine/heap.o: FORCE
+		     (cd ../machine; make object.o heap.o)
+
+parse.o: parse.h parse.c 
+scan.o: scan.h scan.c
+
+parse:	FORCE
+	$(RM) -f $(TEST_PARSE_OBJS) $@
+	$(MAKE) DEBUG_FLAGS="-g -DPARSE_TEST" $(TEST_PARSE_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(TEST_PARSE_OBJS) $(TEST_LIBS)
+
+scan:	FORCE
+	$(RM) -f $(TEST_SCAN_OBJS) $@
+	$(MAKE) DEBUG_FLAGS="-g -DSCAN_TEST" $(TEST_SCAN_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(TEST_SCAN_OBJS) $(TEST_LIBS)
+
+expand:	FORCE $(REQLIBS) ../machine/libmachine.a
+	$(RM) -f $(TEST_EXP_OBJS) $@
+	$(MAKE) DEBUG_FLAGS="$(TEST_FLAGS) -DEXPAND_TEST" $(TEST_EXP_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(TEST_EXP_OBJS) ../machine/libmachine.a \
+	       $(REQLIBS) $(DBLIB) $(OS_LIBS) $(TEST_LIBS)
+
+generate: FORCE $(REQLIBS) ../machine/libmachine.a
+	$(RM) -f $(TEST_GEN_OBJS) $@
+	$(MAKE) DEBUG_FLAGS="$(TEST_FLAGS) -DGEN_TEST" $(TEST_GEN_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(TEST_GEN_OBJS) ../machine/libmachine.a \
+	       $(REQLIBS) $(DBLIB) $(OS_LIBS) $(TEST_LIBS)
+
+Makefile: Makefile.in
+	(cd ../..; ./config.status)
+
+install: $(TARGETS)
+	for file in $(PROGS); do \
+	  $(INSTALL) $$file $(bindir)/$$file; \
+	done
+	@if [ -f ../doc/manual/functions.db ]; then \
+	  $(INSTALL) ../doc/manual/functions.db $(libdir)/functions.db; \
+	fi
+
+clean-executables: FORCE
+	$(RM) $(TARGETS)
+
+clean:  FORCE
+	$(RM) *.o $(TARGETS)
+	if [ ../machine/Makefile ]; then \
+	  (cd ../machine; $(MAKE) clean); \
+	fi
+
+realclean: clean
+	$(RM) *.cache *.log Makefile *~ TAGS
+
+distclean: realclean
+	$(RM) -rf CVS
+
+tags TAGS: FORCE
+	(cd ..; $(MAKE) $@)
+
+FORCE:
+

@@ -1,0 +1,120 @@
+;;; imagemap.mhtml: -*- Meta-HTML -*-  Describe the imagemap program.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Feb  6 15:31:08 1996.
+<set-var title="Meta-HTML Imagemap Utility">
+<include header.mhtml>
+
+<layout::page>
+  <h3> The Purpose of Imagemap </h3>
+  <ptext>
+    The <code>imagemap</code> program can be used as the target of an HTML
+    anchor tag in a page.  Inside the anchor, you place an image
+    which contains the <code>ISMAP</code> marker.  Using
+    <code>imagemap</code>, the HTML page writer may redirect the page
+    viewer to another URL, dependent on the location within the image
+    where the user clicked the mouse.  In effect, one may dispatch a mouse
+    click in an image to any of numerous locations.
+
+    The <code>imagemap</code> program is invoked when a user clicks on
+    the image, and is passed the <i>x</i> and <i>y</i> coordinates of the
+    click.  <code>imagemap</code> also needs to know where the <i>map
+    resolution file</i> resides; you pass this file name as part of the
+    URL containing <code>imagemap</code>.
+
+    Here is an example:
+    <example>
+      <A HREF="/cgi-bin/imagemap/maps/toplevel.map">
+	<IMG SRC="/images/toplevel.gif" ISMAP>
+      </a>
+    </example>
+
+    In the above example, we have placed the <code>imagemap</code> program
+    in <code>/cgi-bin/imagemap</code>, and the map resolution file in
+    <code>/maps/toplevel.map</code>.  If the user clicks in the center of
+    our 100 by 100 image, the viewer does a <code>GET</code> on the URL:
+
+    <center>
+      <b>GET /cgi-bin-imagemap/maps/toplevel.map?50,50</b>
+    </center>
+  </ptext>
+
+  <p><br>
+
+  <h3> The Map Resolution File </h3>
+  <ptext>
+    The <i>map resolution file</i> is the file which tells
+    <code>imagemap</code> which URL to return to the client, dependent on
+    the location of the click.  It contains <i>shape definitions</i> and
+    corresponding <i>target URLs</i>.
+
+    The syntax of the map resolution file is straightforward.  Each line
+    begins with the name of a shape, continues with the URL which should
+    be returned if the click was within that shape, and finally, a list of
+    points which define the shape.  This format is 100% compatible with
+    the NCSA map resolution file; one could use those files directly with
+    <code>imagemap</code>.  However, <code>imagemap</code> has additional
+    features specifically designed to make working with sessions and
+    variables easier.
+
+    An <a href="testmap.mhtml">Example Imagemap Page</a> is here.
+
+    The possible shapes that can be specified are:
+
+    <ul>
+      <li> <b>rect</b>: You give the upper-left and lower-right points of
+      the rectangle.
+      <li> <b>circle</b>: You give the center point, and one edge point.
+      <li> <b>poly</b>: You specify the points of the vertices.
+      <li> <b>point</b>: You specify a single point.  Many
+      <code>point</code> shapes may be specified.  If the clicked on
+      location does not fall in any of the other shapes, then the point
+      closest to the clicked on point is selected.
+      <li> <b>default</b>: Catch all case.  If nothing else matches, then
+      this is the case that is taken.
+    </ul>
+
+    For each case above, the points are specified in the order: <i>X,Y</i>.
+  </ptext>
+
+  <p><br>
+
+  <h3> Replacement Variables </h3>
+  <ptext>
+    <code>imagemap</code> allows you to specify some special tokens in the
+    target URL which will be dynamically replaced with the appropriate
+    values when that URL is to be returned.  The special variables are:
+
+    <ul>
+      <li> <b>$X</b>: This token is replaced with the X-coordinate of the
+      user's mouse click.
+      <li> <b>$Y</b>: This token is replaced with the Y-coordinate of the
+      user's mouse click.
+      <li> <b>$SID</b>: This token is replaced with the Session ID of the
+      user's current session and a slash, or, if the user does not have a
+      Session ID, it is replaced with nothing.  Here is how to write a
+      target which should include the current Session ID if it is present:
+
+      <example>
+	rect      /$SIDpath/document.mhtml  0,0 100,100
+      </example>
+
+      If the user had a Session ID of <code>12345678</code>, then the
+      previous target would become:
+
+      <example>
+	/12345678/path/document.mhtml
+      </example>
+
+      And, if the user did not have a Session ID:
+
+      <example>
+	/path/document.mhtml
+      </example>
+    </ul>
+  </ptext>
+</layout::page>
+
+<include footer.mhtml>
+
+

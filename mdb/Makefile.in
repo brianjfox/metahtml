@@ -1,0 +1,144 @@
+# Makefile.in for MDB, the interactive Meta-HTML debugger. -*- text -*-
+#
+# Author: Brian J. Fox (bfox@ai.mit.edu).
+#
+# This file is part of <Meta-HTML>(tm), a system for the rapid deployment
+# of Internet and Intranet applications via the use of the Meta-HTML
+# language.
+#
+#  Copyright (c) 1995, 1996, Brian J. Fox (bfox@ai.mit.edu).
+#  Copyright (c) 1996, Universal Access Inc. (http://www.ua.com).
+#
+# Meta-HTML is free software; you can redistribute it and/or modify
+# it under the terms of the UAI Free Software License as published
+# by Universal Access Inc.; either version 1, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# UAI Free Software License for more details.
+#
+# You should have received a copy of the UAI Free Software License
+# along with this program; if you have not, you may obtain one by
+# writing to:
+#
+# Universal Access Inc.
+# 129 El Paseo Court
+# Santa Barbara, CA
+# 93101
+
+# Items that were filled in by configure.
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+DEFS	= @DEFS@
+INSTALL = @INSTALL@
+GDBMLIB = @GDBMLIB@
+GDBM_IN = @GDBM_IN@
+LIBREADLINE = @LIBREADLINE@
+LIBHISTORY = @LIBHISTORY@
+LIBTERMCAP = @LIBTERMCAP@
+DESLIB	= @DESLIB@
+DBINC	= $(GDBM_IN)
+DBLIB	= $(GDBMLIB) $(DESLIB)
+
+OS_LIBS = @OS_LIBS@
+EXE	= @EXE@
+VERSDEF = -DMHTML_VERSION_STRING='"$(MHTML_VERSION)"'
+prefix	= @prefix@
+exec_prefix = @exec_prefix@
+bindir	= $(exec_prefix)/bin
+libdir	= $(exec_prefix)/lib
+
+# The real locations of programs.
+AR	= ar
+RANLIB	= @RANLIB@
+LN	= ln
+CP	= cp
+RM	= rm -f
+
+# You cannot compile with anything other than GNU C.
+CC		 = gcc $(GCC_WARN)
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow
+# PROFILE_FLAGS	= -pg
+DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
+# OPTIMIZE_FLAGS	= -O69
+INCLUDE_FLAGS	= @EXTRAINC@ -I.. -I../libutils -I../libmhtml $(DBINC) -I.
+CFLAGS		= $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) $(INCLUDE_FLAGS)
+LDFLAGS		= $(DEBUG_FLAGS)
+
+PASSED_CFLAGS = CC='$(CC)' LDFLAGS='$(LDFLAGS)' CFLAGS='$(CFLAGS) -I../.. $(OPTIONAL_CFLAGS)'
+SUBMAKE_FLAGS = $(PASSED_CFLAGS) $(OPTIONAL_ASSIGN) $(REQUIRED_ASSIGN)
+REQUIRED_ASSIGN = RM='$(RM)' RANLIB='$(RANLIB)' AR='$(AR)'
+
+LIBUTILS	= ../libutils/libutils.a
+LIBMHTML	= ../libmhtml/libmhtml.a
+
+PROGS		= mdb$(EXE)
+REQLIBS		= $(LIBMHTML) $(LIBUTILS) $(LIBREADLINE) $(LIBHISTORY)
+TARGETS		= $(PROGS)
+
+MDB_SRCS = mdb.c commands.c breakpoints.c mdbline.c
+MDG_HDRS = mdb.h commands.h breakpoints.h
+MDB_OBJS = mdb.o commands.o breakpoints.o mdbline.o
+
+.c.o:
+	@echo compiling $< into $@
+	@$(CC) $(CFLAGS) -I. $(INCLUDE_FLAGS) $(DEFS) $(VERSDEF) -c $<
+
+all: $(PROGS)
+
+-lreadline: .libreadlinebuilt
+	@echo "Using existing libreadline from system..."
+
+-lhistory: .libreadlinebuilt
+	@echo "Using existing libhistory from system..."
+
+-ltermcap: .libreadlinebuilt
+	@echo "Using existing libtermcap from system..."
+
+-lcurses: .libreadlinebuilt
+	@echo "Using libcurses.a instead of libtermcap.a..."
+
+-lncurses: .libreadlinebuilt
+	@echo "Using libncurses.a instead of libtermcap.a..."
+
+.libreadlinebuilt:
+	echo "" >.libreadlinebuilt
+
+mdb$(EXE): $(MDB_OBJS) $(REQLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(MDB_OBJS) $(REQLIBS) $(DBLIB) $(OS_LIBS) $(LIBTERMCAP)
+
+readline/libreadline.a readline/libhistory.a: FORCE
+	(cd readline; $(MAKE) CFLAGS=-O2 $(SUBMAKE_FLAGS))
+
+Makefile: Makefile.in
+	(cd ..; ./config.status)
+
+install: $(TARGETS)
+	for file in $(PROGS); do \
+	  $(INSTALL) $$file $(bindir)/$$file; \
+	done
+	@if [ -f ../doc/manual/functions.db ]; then \
+	  $(INSTALL) ../doc/manual/functions.db $(libdir)/functions.db; \
+	fi
+
+clean-executables: FORCE
+	$(RM) $(TARGETS)
+
+clean:  FORCE
+	$(RM) *.o $(TARGETS) .libreadlinebuilt
+	(cd readline; $(MAKE) clean)
+
+distclean realclean: clean
+	(cd readline; make distclean)
+	$(RM) *.cache *.log Makefile
+
+tags TAGS: FORCE
+	(cd ..; $(MAKE) $@)
+
+
+
+
+FORCE:
+

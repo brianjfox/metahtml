@@ -1,0 +1,12 @@
+# sample.desc: -*- Fundamental -*-
+#
+# Copyright (c) 1995, 1996 Brian J. Fox
+# Author: Brian J. Fox (bfox@ua.com) Thu Dec  7 13:41:15 1995
+# Description of the contents of Sample.data.
+#
+Database:  sample.db.packed
+Template:  LastName, FirstName, Street, City, State, Zip, Home, Work
+Template:  Fax, Cell
+KeyField:  LastName, FirstName
+# KeyUnique: true
+AddField: Mailer-Received, ""

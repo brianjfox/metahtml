@@ -1,0 +1,32 @@
+;;; confirm-delete.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Universal Access Inc.
+;;;  Author: Henry Minsky (hqm@ua.com) Fri Sep  6 18:19:49 1996.
+
+
+<set-var title="Confirm Delete">
+<include header.mhtml>
+<include tasks.mhtml>
+
+<require-tasks-login>
+
+<h1>Confirm Delete Task</h1>
+
+<set-var task=<or <get-var task-name> <get-session-var task-name>>>
+<b>Task Name:</b> <get-var task>
+
+<when <match <get-var posted::action> "Really Delete">>
+  <delete-task <get-var task>>
+  <unset-session-var task-name>
+  <redirect "welcome.mhtml">
+</when>
+
+<if <match <get-var posted::action> "Cancel">
+    <redirect "welcome.mhtml">>
+
+<form method=post action="<get-var mhtml::current-doc>">
+<input type=submit name="action"  value="Really Delete">
+<input type=submit name="action"  value="Cancel">
+</form>
+
+<include footer.mhtml>

@@ -1,0 +1,136 @@
+;;; nested-items.mhtml: -*- Meta-HTML -*-  Clicking opens/closes "folders".
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Apr 29 09:48:01 1996.
+
+;;; This Mac-Like interface was originally concieved and written by
+;;; Henry Minsky (hqm@ua.com).
+;;;
+;;; Brian Fox (bfox@ua.com) hacked up a new version from scratch which
+;;; handles use across multiple pages, as well as multiple times
+;;; within a single page.
+;;;
+
+;;; Each <nested-item> ... </nested-item> has a unique identifier in
+;;; the NI-STATE package.  The value of that identifier is either
+;;; "open" or "closed".  The state information is saved in a session
+;;; variable named after the page which contains the nested-items.
+;;;
+;;; Each <nested-item> ... </nested-item> must appear within a
+;;; <nested-items-list> ... </nested-items-list> construct, in order
+;;; for the state to be correctly saved.
+;;;
+;;; Assumption: A session already exists.
+;;;
+;;; You can set borders on the control triangle by setting
+;;; ni::border=1
+
+;;; The name under which the data for this page is stored in the
+;;; session database.
+<defsubst ni::session-varname whitespace=delete>
+  ni::<get-var mhtml::relative-prefix>/<get-var mhtml::current-doc>
+</defsubst>
+
+;;; How to read the state vector.
+<defsubst ni::load-state whitespace=delete>
+  <alist-to-package <get-session-var <ni::session-varname>> ni-state>
+</defsubst>
+
+;;; How to write the state vector.
+<defsubst ni::save-state whitespace=delete>
+  <set-session-var <ni::session-varname> = <package-to-alist ni-state>>
+</defsubst>
+
+;;; Change the state based upon variables which were posted.
+<defsubst ni::get-posted whitespace=delete package=posted>
+  <if <and <get-var item> <get-var tval>>
+      <set-var ni-state::item-<get-var item> = <get-var tval>>>
+</defsubst>
+
+;;;
+;;; Handle a list of nested items.
+;;;
+<defmacro nested-items-list &body body whitespace=delete>
+  <get-var-once body>
+  <ni::save-state>
+</defmacro>
+
+;;; Handle a nested item.
+;;; Process the entire body before doing anything else.
+<defmacro nested-item arg0 &body &unevalled body whitespace=delete>
+  <with-local-package>
+    <set-var this-item=<get-var ni::which-item>>
+    <increment ni::which-item>
+    <set-var contents = <concat <in-package default>
+				<%%eval <get-var-once body>>
+				</in-package>>>
+
+    ;;; If this item is open, then show the contents, otherwise not.
+    <if <string-eq <get-var-once ni-state::item-<get-var-once this-item>>
+		   "open">
+	<concat
+	 <dl><p><ni::open-marker <get-var this-item>>
+	 <b><in-package default><%%eval <get-var-once arg0>></in-package></b>
+	 <dd><get-var-once contents></dl>>
+      <concat
+       <p><ni::closed-marker <get-var this-item>>
+       <b><in-package default><%%eval <get-var-once arg0>></in-package></b>>>
+  </with-local-package>
+</defmacro>
+
+<defsubst ni::open-marker :name whitespace=delete>
+  <a name="<get-var-once :name>"></a>
+  <a href="<concat <get-var-once mhtml::url-to-dir>/
+		   <get-var-once mhtml::current-doc>
+		   ?<ni::toggle-item <get-var-once :name>>
+                   #<get-var-once :name>>">
+  <img src=<ni::open-triangle> align=top border=<get-var-once ni::border>></a>
+</defsubst>
+
+<defsubst ni::closed-marker :name whitespace=delete>
+  <a name="<get-var-once :name>"></a>
+  <a href="<concat <get-var-once mhtml::url-to-dir>/
+		   <get-var-once mhtml::current-doc>
+		   ?<ni::toggle-item <get-var-once name>>
+                   #<get-var-once :name>>">
+    <img src="<ni::shut-triangle>" align=top border=<get-var-once ni::border>>
+  </a>
+  <concat " ">
+</defsubst>
+
+;;; Generate the encoding string for this item.
+<defsubst ni::toggle-item :item whitespace=delete>
+  <set-var ni::item = <get-var-once :item>>
+  <set-var ni::tval =
+    <if <string-eq <get-var-once ni-state::item-<get-var-once ni::item>>
+		   "open">
+	"closed"
+      "open">>
+  <in-package ni>
+    <cgi-encode tval item>
+  </in-package>
+</defsubst>
+
+<defsubst ni::shut-triangle whitespace=delete package=ni>
+  <get-var current-shut-triangle>
+</defsubst>
+
+<defsubst ni::open-triangle whitespace=delete package=ni>
+  <get-var current-open-triangle>
+</defsubst>
+
+;;; Load the initial state, and set the identifier counter to zero.
+<defun nested-items::initialize>
+  <in-package ni>
+    <defvar default-shut-triangle
+      <site::system-prefix>/images/misc/blacktriangle.gif>
+    <defvar default-open-triangle
+      <site::system-prefix>/images/misc/blacktriangle1.gif>
+    <set-var
+      current-shut-triangle=<get-var-once default-shut-triangle>
+      current-open-triangle=<get-var-once default-open-triangle>>
+  </in-package>
+  <set-var ni::which-item=0>
+  <ni::load-state>
+  <ni::get-posted>
+</defun>

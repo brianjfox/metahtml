@@ -1,0 +1,6 @@
+;;; base-database-next-key.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Wed Oct 30 03:00:57 1996.
+
+Result: "key0001 key0002 key0003 ": <with-open-database db test.db mode=write-create><set-var result=<database-save-record db key0001 db>><set-var result=<database-save-record db key0002 db>><set-var result=<database-save-record db key0003 db>><set-var key=<database-first-key db>><while <get-var key>><get-var key> <set-var key=<database-next-key db <get-var key>>></while></with-open-database><cgi-exec "/bin/rm test.db">

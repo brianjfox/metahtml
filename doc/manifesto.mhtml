@@ -1,0 +1,510 @@
+;;; manifesto.mhtml: -*- Meta-HTML -*-  How Meta-HTML beats other languages.
+;;;
+;;;  Copyright (c) 1995 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Sat Sep 23 02:04:46 1995.
+<set-var title="The Meta-HTML Manifesto">
+<include header.mhtml>
+<include paper-substs.mhtml>
+
+;;; <unset-var mhtml::cacheable>
+<layout::page>
+<center>
+  <paper-title Meta-HTML:>
+  <paper-title A Dynamic Programming Language for WWW Applications>
+  <author Brian J. Fox>
+</center>
+
+<abstract>
+Although World Wide Web use of the Internet has been growing at a
+phenomenal rate over the past 3 years, there remains a dearth of
+interesting and useful client/server applications.  Traditional
+programming languages do not provide an optimal environment for
+programming such applications because of the syntactical and
+paradigmatic distance between traditional languages and the target
+output, namely <b>HTML</b>.
+
+The stateless and dynamic nature of the WWW requires a level of
+support from traditional programming languages which they are hard
+pressed to provide.  Must each application programmer write his or her
+own tool set to accomplish goals which are fundamentally similar
+across applications?
+
+This paper presents an alternative language choice for the design
+and implementation of Web applications called <meta-html>, and
+describes the three methods of delivery that have been completed.
+Requirements, desirable features, and implementation considerations
+are presented.  Finally, future directions of the language and
+implementation are discussed.
+</abstract>
+
+<TABLE_OF_CONTENTS>
+
+<topic Introduction: Look Ma, No Hands!>
+Here is the classic Unix programming example.  How easy is it to write
+a program that produces "Hello World!" as the user-viewable output?
+Here is the <meta-html> version:
+
+<example>
+  Hello World!
+</example>
+
+Traditional programming languages attempt to solve the general problem
+of expressing algorithms in a way which can be efficiently
+implemented on a generic set of hardware.  Scripting languages attempt
+to hide the details of the underlying hardware (and often software)
+implementation by providing high-level ``primitives'' which can be used
+to provide functionality in an atomic fashion.
+
+Looked at in this light, one may consider the Hypertext Markup
+Language (<b>HTML</b>) as a weak scripting language meant to be
+executed on a generic piece of hardware called a <i>browser</i>.  It
+contains high-level primitives for controlling the output (e.g.,
+<example code> <P ALIGN=RIGHT> ... </P></example>), and for receiving
+input from the user (e.g., <example code><INPUT TYPE=TEXT
+...></example>). Yet, unlike a true scripting language, <b>HTML</b> is
+missing variables, iteration, data structures and other general
+programming constructs.
+
+Because the capabilities of the underlying hardware (i.e., the
+browser) are extremely limited, writing even simple Web applications
+requires the server side of the connection to do genuine computational
+work.  This includes processing input, keeping track of state, and
+decision making based on that data, resulting in an output view for
+the client.
+
+The necessity of allowing the programmer to dynamically change the
+client's output view based upon client data was realized early on in
+the development of the Web, and a general mechanism called the Common
+Gateway Interface (<b>CGI</b>) was designed.
+
+However, the implementation languages available for use in CGI programs
+have been limited to the world of general programming languages.  Compiled
+languages such as C and Pascal, and interpreted languages such as Perl
+and TCL have proven themselves as less than optimal languages for the
+implementation of easily maintainable Web applications through the
+length of time that it takes to create an application, and the length
+of time it takes a programmer who is new to the existing application
+code to ``get up to speed''.
+</topic>
+
+
+<section Requirements>
+The overview of the process of programming a Web application is
+identical to traditional application programming: the application
+displays some information which the user may interact with, the
+choices that the user makes are examined by the application code, new
+output is produced, and the cycle repeats.
+
+<subsection Language Syntax>
+One of the primary goals driving the creation of <meta-html> was to
+ease the writing and maintenance of programs which produce HTML as
+their primary output format.  Since the output of Web programs is
+HTML, and since that text is already considered a ``language'' in the
+sense of browser execution, it appeared that the best choice for a
+syntax was one that would not conflict with HTML in any way, and which
+could be interspersed with HTML statements.
+
+The syntax of <meta-html> is the syntax of HTML.  The HTML
+syntax model is quite simple; language statements may only
+appear within matched less-than (&lt;) and greater-than (&gt;)
+symbols, the keyword must appear directly after the less-than
+character without intervening spaces, and the keyword must be on a
+list which the browser supports.  If the keyword is not one which the
+browser understands, the open angle-bracket, containing text, and
+close angle-bracket are ignored.  All other text is treated as
+straight text to be displayed.
+
+The model used in <meta-html> is identical.  However, the language
+interpreter does not recognize any HTML keywords, and thus passes them
+on to the browser to be executed.
+
+A short example is in order:
+
+<example>
+  <body <get-var body-spec>>
+</example>
+
+In the above example, the text <example code><get-var body-spec>
+</example> is a <meta-html> language statement which retrieves the
+value stored in the logical name <code>body-spec</code>.  If that
+variable has a value, the value replaces the entire language
+statement.  If that variable has no value, then the empty string
+replaces the entire language statement.  The text <example code>
+<body ...></example> is an HTML statement, and is ignored by the
+<meta-html> language interpreter.  Thus, the resultant text sent to
+the browser is either:
+
+<example>
+  <body >
+</example>
+
+<font size="+0">if</font> the variable <code>body-spec</code> has no
+value, or
+
+<example>
+  <body bgcolor="ffffff">
+</example>
+
+<font size="+0">if</font> the variable <code>body-spec</code> has the
+value <code>bgcolor="ffffff"</code> as its value.
+</subsection>
+
+<subsection General Programming Constructs>
+In order to write useful programs, the target language must have what
+are widely considered to be the basic language requirements.  The
+question of what comprises the minimum set of language constructs is a
+hotly debated one and beyond the scope of this document.  However, we
+can identify the features which are desirable.
+
+<subsubsection Symbols and Values>
+The ability to assign a value to a logical name, and to be able to
+retrieve that value by use of the logical name is fundamental to
+symbolic programming.  <meta-html> addresses this issue by providing
+assignment statements, retrieval statements, and the ability to group
+a set of logical names in a <i>package</i>.
+<i>
+
+Variables</i> allow the type of symbolic manipulation that is required
+for the vast majority of programming functions.  A collected group of
+such variables is called a <i>package</i> in <meta-html>.  Among other
+things, packages allow programs to switch contexts easily and rapidly.
+<meta-html> has primitive statements which directly manipulate the
+contents of packages (thus allowing direct and indirect symbol
+manipulation), which create and destroy packages, and which copy
+packages.
+</subsubsection>
+
+<subsubsection Flow Control>
+As with other languages, <meta-html> provides constructs which determine
+what code should be executed based on the data which the program is
+manipulating and constructs which allow for iteration and looping.  Flow
+control language statements include <code>if</code>,
+<code>ifeq</code>, <code>when</code>, <code>var-case</code>, and
+<code>while</code>.  Boolean operators can be used to combine tests
+and invert return values: <code>and</code>, <code>or</code>, and
+<code>not</code> are all provided.
+
+The <meta-html> flow control statements all have at least two parts:
+the <i>test</i> and the <i>action</i>.  Test clauses are evaluated,
+the result of that evaluation is checked for non-<i>nullness</i>, and,
+if an action is indicated, that action is then executed.
+</subsubsection>
+
+<subsubsection Arithmetic Operators>
+Symbolically driven computation can provide a solid base for language
+manipulation, logical operations, and the like, but are notoriously
+painful for use in direct arithmetic computation.
+
+This issue is addressed by the inclusion of fundamental arithmetic
+operations, including addition, subtraction, multiplication, division,
+and remainder operators.  A few boolean operations on numeric
+quantities are also provided; there are less than, greater than, and
+equality test operators.
+
+The arithmetic operators use either integer or floating point
+operations depending on the granularity of the input and desired
+output.
+</subsubsection>
+
+<subsubsection Macros and Substitutions>
+Building new atomic operations out of existing ones is a fundamental
+step in good program design.  By providing the programmer with the
+ability to create new language statements by grouping existing ones,
+<meta-html> allows the writing of clear and concise programs.  This
+eases the maintenance of such programs.
+</subsubsection>
+
+<subsubsection Aggregate Values>
+While simple variables (a single logical name containing a single
+physical value) are useful for many computational tasks, it is often
+the case that the storage of multiple values under a single name can
+help a programmer or maintainer to see the logic of a program.
+<meta-html> supports this goal by providing <i>arrays</i>, a
+collection of random data elements, which can be stored together under
+a single logical name.
+</subsubsection>
+</subsection>
+
+</section>
+
+<section Useful Features>
+<subsection Session State>
+In a traditional environment, it is a trivial task for the application
+code to store and recall the history of choices that the user has made
+during the course of the interaction.  By contrast, the Web environment is
+stateless; each time the user interacts with the output view causes a
+single invocation of a program to run.  This means that the program
+may not use traditional means<footnote For example, language variables.>
+to store and recall user interaction history; the information is
+essentially lost for each separate invocation of the program.
+
+If we do not require a change to the Hyper-Text Transfer Protocol
+(<b>HTTP</b>), exactly one solution exists for the problem of storing
+and recalling  user input history across a stateless connection:  the
+client <i>must</i> pass state information back to the server for each
+interaction.
+
+If all of the interaction history must be kept, and is passed back and
+forth between the browser and the server, the growth of this
+information becomes problematic.  Existing Web servers often have
+static limits on the amount of information which can be passed in an
+Universal Resource Locater (<b>URL</b>), and existing browsers also
+have static limits on the amount of information that can be
+represented in an URL.
+
+One solution addressing this problem is to represent large amounts of
+information with a single (smaller) piece of information, called a
+<i>token</i>.  Such tokens can be generated by the server when the
+user first connects, and can be passed back and forth by browser and
+server.  When the user submits some information, the new information
+is saved away in less ephemeral storage, using the token as a key
+under which the data may be found.  Previously submitted information
+can be retrieved from the storage in the same fashion.
+
+The method used to pass the token can be to encode the token as part
+of the URL that the user sees, or, when allowable, to utilize a
+feature of some browsers (e.g., Netscape) which allows the embedding
+of token information in the surrounding HTTP.
+
+Note that the token should be a sufficiently random set of bits that it
+is difficult to derive from any other information, such as the time of
+day, the hostname of the server machine, etc.  Since the token represents
+the input history of a particular user, (essentially identifying that
+user uniquely to the server), it is conceivable that another user
+could masquerade as the owner of a token.  Solutions for this problem
+include the prevention of network sniffing through the use of strong
+encryption<footnote RSA, triple-DES, Public-key, and other encryption
+methods are widely available and detailed elsewhere.  Many of these
+mechanisms are implemented in various browsers and servers.> and
+continued randomization of the token information that is passed back
+and forth.  Such solutions are not discussed in detail here.
+</subsection>
+
+<subsection Database Access>
+Real-world applications often rely on databases to interpret input, to
+deliver output, or as the basis for the application itself.
+Currently, writing a Web application which requires such databases
+requires the programmer to either create the entire data storage and
+retrieval mechanism from scratch, or purchase an off-the-shelf system,
+learn the programmatic interface to that system, and then implement a
+useful abstraction to that interface for the purposes of the application.
+
+Naturally, this situation is less than ideal.  Programs written this
+way are generally strongly tied to a specific database product, which,
+in turn, can limit the hardware platforms available to run the
+application, limit the functionality of the application, and/or limit
+the future of the application (e.g., a necessary database feature
+might be missing).
+
+<meta-html> addresses this issue by providing a small set of database
+manipulation primitives, thus making a clean abstraction to the
+underlying database engine.  A variety of different database engine
+products can be linked into the language interpreter, so engines with
+ISAM capabilities, SQL parsers, and the like may be utilized.  In
+fact, the programmer may easily switch between different database
+engines in the course of a single program, thereby maximizing the
+benefits of each.
+
+The abstraction provides database creation, file locking,
+record-locking, key storage and lookup, and generic query operations
+as part of the basic functionality.  Additional features of a specific
+database engine model can be utilized by means of a single primitive.
+</subsection>
+
+<subsection Miscellaneous Features>
+There are a few convenience functions which were considered for
+inclusion in the language definition.  Some of these functions could
+have been written using the set of features that were considered
+required, however, by supplying the functionality as built in
+primitives, the reinvention of the wheel could be avoided.
+
+A single string operator, <code>match</code>, is provided.  This
+operator allows for complex string comparision, and substring matching
+and extraction.  No string indexing functions are provided; there
+apparently is no driving need for such functions.
+
+A pseudo-random number generator is provided.  The generator can be
+restarted at a specific point to allow testing of code which utilizes
+random numbers with a known set of input values.
+
+Other functionality which is deemed desirable includes:
+<ul>
+  <li> Functions for the manipulation of files and TCP connections,
+  <li> Functions for the inclusion of another file, or to replace the current
+       file with another one,
+  <li> Functions which understand the HTTP environment, and which
+  return information in that syntax.  <code>redirect</code>, and
+  <code>cgi-encode</code> are examples.
+</ul>
+</subsection>
+</section>
+
+<section Implementation Approach>
+During the implementation phase of <meta-html>, several possible
+models were looked at, each with their own sets of merits and
+drawbacks.  It was decided that the first step in implementation would
+be to build a library which contained all of the functionality
+required to implement the language interpreter itself.  Data
+abstractions were carefully chosen to allow high-, middle-, and
+low-level access to the internal operations of the language engine, so
+that programs which used the library could have maximum control over
+its operation.
+
+This approach has paid off in many ways.  Since tasks were
+well-defined, the implementation of any particular task was a
+quick and straight-forward process.  Separate libraries for symbol
+manipulation, textual buffer manipulation, textual translations,
+memory management, database control functions, and session tracking
+and manipulation were written and tested individually, and then linked
+together with a language parser, implementing the complete command set
+of <meta-html>.
+
+Three models were chosen as targets: a standalone language processor,
+which simply takes a filename of <meta-html> statements and produces
+an HTML page as output, a standalone CGI program, which takes
+information from the environment and produces an HTML page as output,
+and a full featured Web server, with the interpreter built in.
+
+Additionally, a source-level debugger similar in look and feel to GDB
+has been implemented, with features including symbol and file name
+completion, Emacs style command line editing, full <meta-html>
+language comprehension (you can simply type in <meta-html> statements
+and see the results immediately), breakpoints, single-step, recursive
+debugging levels, and more.
+
+The driving force for each of the interpreter implementations was to
+provide the most transparent use of <meta-html> as possible.  Points
+were given for minimizing user configuration, for ease of use in
+hiding the language processor from the connecting client, for
+reductions in execution overhead, for lowest impact on code
+portability, and for minimizing required language statements in the
+target file.
+
+<subsection Standalone Filter>
+One model of execution under Unix-like operating systems allows an
+executable file to specify an interpreter for the contents of that
+file.  Interpreter programs which operate in this fashion include
+Bash, Perl, and TCL.  A <meta-html> language interpreter was
+implemented using the interpreter library to operate in this fashion
+in 118 lines of C code.
+
+This model amortizes the cost of installation and use over all of the
+criteria considered.  It requires only minimal server configuration,
+and was found to work with the full set of servers considered<footnote
+The standalone filter works easily with servers from NCSA, CERN,
+Netscape, and even the Plexus server written in Perl.  All of the
+tests have only been run under Unix-like operating systems.>,
+requires essentially no installation other than placing the binary
+somewhere on the system, but the programmer must take care to perform
+various initializations within each target file, and the language
+interpreter must be invoked for each target file individually.
+
+The only pre-assigned variables are that of the calling environment;
+these are the same variables passed to any CGI program by existing Web
+servers and they are provided as <meta-html> variables for the target
+file, and each target file written for this model requires minor
+massaging if it is to be moved to another site or execution model.
+
+Thus, the model is a good one for sites which only require the
+features of <meta-html> for a small subset of their pages.
+</subsection>
+
+<subsection Interpreter as CGI>
+For sites which require the features of <meta-html> for a large set of
+grouped pages, and/or which are committed to using a particular Web
+server, the model of running a subset of pages, or even every page at
+the site through the interpreter can be most easily achieved by the
+installation of the language interpreter as a CGI program which will
+handle those pages.
+
+The CGI interpreter takes its information from the calling
+environment<footnote E.g., PATH_INFO, the existing input stream, etc.>
+and acts as a mini-server, processing the information, making
+decisions on the type of return document, returning images and the
+output of other CGI programs as well as processed <meta-html> files.
+
+Features include the ability for the programmer to specify a prologue
+document (a file of <meta-html> code which is interpreted before the
+target), various translations on the URL which was supplied, and the
+definition of a set of variables describing the environment and
+various aspects of the target file (i.e., the physical location of the
+target file on disk, the URL that the client requested, etc.).
+
+Target files written for this model are transferrable without
+modification to another Web server (including one which interprets
+<meta-html>) or site, or can be easily relocated within the site.
+</subsection>
+
+<subsection Programmable Web Server>
+The <meta-html> server, called <b>Mhttpd</b>, has the advantage over
+other interpreter execution models of never having to invoke a
+separate program to process <meta-html> documents.  This is a genuine
+Web server, with the same features that appear in other popular
+servers, such as configurable logging for accesses, errors, referer
+pointers, user agents, and debugging, support for ``server-push'',
+logical to physical mapping of URLs, fine and large grained control
+over CGI execution, and support for random MIME types.  Additional
+features include Netscape compatible secure connections, server
+corrected headers and performance logging.
+
+One obvious benefit of the server model is the ability for the user to
+write <meta-html> code which can be executed in the server
+environment, effectively creating a user-level programmable server.
+For example, a <meta-html> function can be defined which will be
+called after the client request is read, but before the request is
+acted upon.  Based on information found in the client request, the
+called function may change aspects of the request, perform
+calculations and/or logging functions, or any other operation which is
+of interest to the programmer (e.g., one could send mail whenever a
+specific host accesses a specific URL).
+
+Configuration of the server is done by writing <meta-html> statements
+in a configuration file.  This gives the user the power of a genuine
+programming language, and allows maximum flexibility.
+
+Target files written for this model are transferrable without
+modification to another host, or to the mini-server model.
+</subsection>
+</section>
+
+<section Future Optimizations>
+While tests show that the interpreter runs as fast as can reasonably
+be expected, that speed is still slower than custom targetted native
+code.  This is an area of ongoing research that is being pursued
+aggressively.  Standard speed-up methods such as byte-compilation and
+code translation would seem to be prime candidates, and as such are
+being explored.
+
+<subsection Byte Compilation>
+A <i>byte-engine</i> is under construction at the time of this paper,
+and is expected to be completed by January, 1995.  The byte-engine will
+then become an integral part of <meta-html>; both interpreted language
+statements and byte-compiled code will be supported.
+
+The compiler construction is underway at the same time; areas of
+refinement include selection of fundamental machine operators and
+instruction caching.
+</subsection>
+
+<subsection Standalone Binaries>
+Creating a set of standalone native code binaries from a <meta-html>
+application may be accomplished through language translation and open
+coding.  One proposed solution is the creation of a <b><meta-html> to C</b>
+compiler which would allow the output to be C-compiled on the target
+host.
+
+This can be accomplished in two ways: direct compilation of
+<meta-html> statements into C statements, or, the implementation of
+a <b>byte-code to C</b> compiler.  The latter approach has the
+advantage of allowing the language syntax to undergo changes without
+affecting the compiler, and would take advantage of the work already
+done during byte-compilation, such as loop unrolling and peephole
+optimization.
+</subsection>
+</section>
+
+<set-toc>
+
+<footnotes>
+</layout::page>
+<include footer.mhtml>

@@ -1,0 +1,207 @@
+;;;tests.mhtml: -*- Meta-HTML -*-  Test every function.
+
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Aug 27 15:32:07 1995.
+
+;;; Test server-push right away.
+<server-push>
+<html>
+<head><title> testing </title></head>
+<body>
+<h3>Please wait while I run the tests...</h3>
+</body>
+</html>
+</server-push>
+
+<defsubst prog>%body</defsubst>
+<defsubst spsub>%0</defsubst>
+<defsubst newline><spsub "\n"></defsubst>
+<defsubst space><spsub "%0"></defsubst>
+
+;;; Usage: <dump-package package-name>
+;;; Dump the contents of the given package out.
+;;;
+<defsubst dump-package whitespace=delete>
+  <set-var dump::vars[]=<package-vars %0>>
+  Dump of package: %0<newline>
+  <set-var dump::i=0>
+  <while <get-var dump::vars[dump::i]>>
+    <set-var dump::name=<get-var dump::vars[dump::i]>>
+    <spsub "  "><get-var dump::name>:
+	<if <get-var <get-var dump::name>[1]>
+	    <set-var dump::multiple=true>
+	    <unset-var dump::multiple>>
+        <when <get-var dump::multiple>>
+           <set-var dump::vi=0>
+           <while <get-var <get-var dump::name>[dump::vi]>>
+	      <newline><spsub "    "><get-var dump::vi>.<spsub " ">
+	      <get-var <get-var dump::name>[dump::vi]>
+	      <increment dump::vi>
+	   </while>
+	   <newline>
+	</when>
+	<when <not <get-var dump::multiple>>>
+	   <spsub " "><get-var <get-var dump::name>>
+	   <newline>
+	</when>
+    <increment dump::i>
+  </while>
+</defsubst>
+
+<DEBUGGING-OUTPUT>
+<pre>
+Testing (set-var foo=bar): <set-var foo=bar>
+Testing (get-var foo):     <get-var foo>
+Testing (set-var (get-var foo)=baz): <set-var <get-var foo>=baz>
+Testing (get-var bar):     <get-var bar>
+Testing (unset-var foo):   <unset-var foo>
+Testing (get-var foo):     <get-var foo>
+Testing (pad foo 20 align=right): `<pad foo 20 align=right>'
+Testing (pad foo 20 align=left): `<pad foo 20 align=left>'
+Testing (pad foo 20 align=middle): `<pad foo 20 align=middle>'
+Testing (pad "This long string" 5): `<pad "This long string" 5>'
+Testing (pad "This long string" 5 truncate): `<pad "This long string" 5 truncate>'
+Variables defined in package DEFAULT: <package-vars default>
+
+Testing (subst-in-var bar "z" "x"): <subst-in-var bar "z" "x"><get-var bar>
+Names of defined packages: <package-names>
+Incrementing (set-var foo=1) (increment foo): <set-var foo=1><increment foo><get-var foo>
+Testing if: <if <get-var foo> "Foo is <get-var foo>" "Failed">
+Testing ifeq: <ifeq <get-var foo> 2 "Foo is equal to 2" "Failed">
+Testing when: <when foo>Test worked</when>
+Testing not: <if <not ""> "`Not' worked" Failed>
+Testing and: <and this that Wins>
+Testing and: <if <and <get-var foo>
+		      <get-var not-var>>
+		 Loses
+	       Wins>
+Testing or: <or <get-var nothing> Worked>
+Testing var-case: <var-case bar=baz Failed foo=2 Worked>
+Testing while: <while <not <eq <get-var foo> 0>>><get-var foo>,<increment foo by=-1></while>
+Testing defmacro: <defmacro foo-macro>Called with `%body'</defmacro>
+    <foo-macro>Worked</foo-macro>
+Testing defsubst: <defsubst foo-subst>Called with `%body'</defsubst>
+    <foo-subst Worked>
+Testing match: <match "Meth-HTML Wins" ".* " action=delete>
+Testing (match "foo" ""): `<match "foo" "">'
+Testing (match "foo" ".*"): `<match "foo" ".*">'
+Testing include: <set-var lines[]=<include tests.mhtml verbatim>><get-var lines[0]>
+Not testing replace-page:
+Not testing redirect:
+Testing cgi-encode with foo and bar: <cgi-encode foo bar>
+Not testing cgi-decode:
+Testing cgi-exec: <cgi-exec /bin/ls -l <get-var mhtml::include-prefix>/tests.mhtml>
+Testing (gt 2 1): <gt 2 1>
+Testing (lt 1 2): <lt 1 2>
+Testing (eq 1 1): <eq 1 1>
+Testing (add 1 1): <add 1 1>
+Testing (sub 2 10): <sub 2 10>
+Testing (mul 3 5): <mul 3 5>
+Testing (div 15 3): <div 15 3>
+Testing (mod 15 4): <mod 15 4>
+Testing (random 10): <random 10>, <random 10>, <random 10>, <random 10>
+
+Testing package manipulation:
+   0. (set-var mhtml::bar[]="this\nthat\nthe\nother") <set-var mhtml::bar[]="this\nthat\nthe\nother">
+   1. (package-to-alist mhtml): <set-var alist=<package-to-alist mhtml>> <get-var alist>
+   2. (alist-to-package alist foo): <alist-to-package <get-var alist> foo>
+   3. (package-vars foo): <package-vars foo>
+   4. (dump-package foo):
+<dump-package foo>
+
+Testing session functions:
+<set-var anonymous="Testing Sessions">
+<create-session anonymous allow-multiple>
+(set-session-var foo=bar): <set-session-var foo=bar>
+(get-session-var foo): <get-session-var foo>
+(set-var foo[]=(sessions-of-key)): <set-var foo=<sessions-of-key>>
+(get-var foo[]): <get-var foo[]>
+
+Testing a few database functions:
+<with-open-database db "/tmp/testdata.db" mode=write-create>
+  <set-var FirstName=Brian LastName=Fox Age=35 State=CA>
+  <set-var ignore <database-save-record db <get-var FirstName LastName>
+					FirstName LastName Age State>>
+  <set-var FirstName=Dave LastName=Fox Age=38 State=CA>
+  <set-var ignore <database-save-record db <get-var FirstName LastName>
+					FirstName LastName Age State>>
+  <set-var FirstName=Herb LastName=Fox Age=65 State=MA>
+  <set-var ignore <database-save-record db <get-var FirstName LastName>
+					FirstName LastName Age State>>
+  <set-var FirstName=Dante LastName=DeLucia Age=30 State=CA>
+  <set-var ignore <database-save-record db <get-var FirstName LastName>
+					FirstName LastName Age State>>
+</with-open-database>
+
+<with-open-database db "/tmp/testdata.db">
+Unordered query: <database-query db true>
+Ordered by FirstName: <database-query db true sort=firstname>
+
+Records with LastName == Fox sorted by FirstName:
+  <database-query db <match <get-var LastName> "Fox">
+		  format="
+First name: <get-var FirstName>
+ Last Name: <get-var LastName>
+       Age: <get-var Age>"
+		  keys=keys[] sort=FirstName>
+
+Records with LastName == Fox sorted by Age:
+  <database-query db <match <get-var LastName> "Fox">
+		  format="
+First name: <get-var FirstName>
+ Last Name: <get-var LastName>
+       Age: <get-var Age>"
+		  keys=keys[] sort=Age>
+
+Records with Age lt 40 sorted by LastName:
+  <database-query db <lt <get-var Age> 40>
+		  format="
+First name: <get-var FirstName>
+ Last Name: <get-var LastName>
+       Age: <get-var Age>"
+		  keys=keys[] sort=LastName>
+
+  <unset-var keys>
+  <database-query
+    db true format=<array-append <concat <get-var-once age>
+					 ", "
+					 <get-var-once firstname>>
+				 ^::keys>
+    sort=Age,FirstName>
+Ordered query (Age,FirstName): <get-var-once keys[]>
+
+Some random keys which cannot appear in the database.
+
+(randomize 100): <randomize 100>
+(random 100): <random 100>
+(database-unique-key db): <database-unique-key db>
+(random 100): <random 100>
+(database-unique-key db): <database-unique-key db>
+(random 100): <random 100>
+(database-unique-key db): <database-unique-key db>
+(random 100): <random 100>
+
+</with-open-database>
+
+Testing plain-text with strange body text.
+
+<plain-text first-char=<font size=+2>>
+This first character should be raised.
+
+
+   And the character before this also. ;;; This however, is a comment.
+</plain-text>
+
+Testing some STREAM Functions:
+
+<with-open-stream stream "localhost:finger" type=tcp mode=write-create>
+  <stream-put stream "\r\n">
+  <unset-var done>
+  <while <not <get-var done>>>
+    <set-var line=<stream-get stream>>
+    <if <get-var line>
+	<get-var line>
+      <set-var done=true>>
+  </while>
+</with-open-stream>
+</pre>

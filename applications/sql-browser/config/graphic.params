@@ -1,0 +1,167 @@
+;;; graphic.params: -*- Meta-HTML -*-  Parameters used for dynamic graphics.
+;;; 
+;;;  Copyright (c) 1997 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Dec  8 08:40:16 1997.
+
+;;; Internet Explorer does tables differently than Netscape.
+<when <match <get-var-once env::http_user_agent> "MSIE">>
+  <defvar layout::left-align left>
+</when>
+
+<color::add-color <color::hex-value Chocolate> "Site Border">
+<color::add-color 640264 "Purple Rain">
+
+<copy-package siteprefs :siteprefs>
+<session-import siteprefs siteprefs>
+<copy-package :siteprefs siteprefs>
+<defvar siteprefs::left-border-width <get-var layout::left-border-width>>
+<defvar siteprefs::left-border-color <color::hex-value SiteBorder>>
+<defvar siteprefs::page-color <color::hex-value White>>
+<defvar siteprefs::separator-color <color::hex-value Black>>
+<defvar siteprefs::text-color <color::hex-value Black>>
+<defvar siteprefs::link-color <color::hex-value Blue>>
+<defvar siteprefs::vlink-color <color::hex-value Blue >>
+<defvar siteprefs::alink-color <color::hex-value Red>>
+<defvar siteprefs::bgcolor <color::hex-value White>>
+<defvar siteprefs::left-border-width 130>
+
+<defvar layout::layout bordered-left>
+<defvar layout::left-border-width <get-var siteprefs::left-border-width>>
+<defvar layout::screen-width <add layout::left-border-width 525>>
+
+<set-var layout::left-border-width = <get-var siteprefs::left-border-width>>
+<defvar layout::screen-width <add layout::left-border-width 525>>
+
+<set-var site::image-webpath = <subst-in-string <get-var mhtml::location>
+						"/[^/]+$" "">/images>
+<defun site::web-image path>
+  <get-var site::image-webpath>
+  <if <get-var path>
+      <concat <if <not <string-eq <substring <get-var path> 0 1> "/">> "/">
+	      <get-var path>>>
+</defun>
+
+<set-var site::backgrounds-webpath = <site::web-image dynamic/backgrounds>>
+
+<defvar bgspec <site::dynamic-bg
+		admin
+		<get-var siteprefs::left-border-width>
+		<get-var siteprefs::left-border-color>
+		<get-var siteprefs::page-color>
+		""
+		<get-var siteprefs::separator-color>>>
+
+<defun ibis::trans-image>
+  <site::web-image misc/dot-clear.gif>
+</defun>
+
+<defun banners::base-banner-image-file>
+  <concat
+   <get-var mhtml::include-prefix>
+   <site::web-image base-images/banners/<get-var banners::base-banner-image>>>
+</defun>
+
+<defun tabs::base-tab-image-file>
+  <concat
+   <get-var mhtml::include-prefix>
+   <site::web-image base-images/tabs/<get-var tabs::base-tab-image>>>
+</defun>
+
+<defun title-tab link text &key target>
+  <copy-package tabs :tabs>
+  <set-var Tabs::base-Tab-image=site-menu-tab.gif>
+  <set-var Tabs::halign=Center>
+  <set-var Tabs::valign=Center>
+  <set-var Tabs::fontname=AvantGarde-Demi>
+  <set-var Tabs::italic-fontname=AvantGarde-DemiOblique>
+  <set-var Tabs::font-size=10pt>
+  <set-var Tabs::font-color=White>
+  <page-tab <get-var link> <get-var text> "" <get-var target>>
+  <copy-package :tabs tabs>
+</defun>
+
+<defmacro tab-menu link name target &key default-target package=local>
+  <set-var items[]=%qbody>
+  <table border=2 bgcolor=#003366 width=100>
+    <tr>
+      <td>
+	<center>
+	  <title-tab <get-var link> <get-var name>
+		     target=<or <get-var target> <get-var default-target>>>
+	  <foreach item items>
+	    <set-var info[]=<subst-in-string <get-var item> ":" "\n">>
+	    <page-tab <get-var info[1]> <get-var info[0]> ""
+		      <or <get-var info[2]> <get-var default-target>>>
+	  </foreach>
+	</center>
+      </td>
+    </tr>
+  </table>
+</defmacro>
+
+<defun page-tab link image-text italic? target>
+  <set-var image-name =
+    <downcase <concat <subst-in-string <get-var image-text>
+				       "[~`!@#$%^&*()|']" ""
+				       "^[ \t\r\n]+" ""
+				       "[ \t\r\n]+$" ""
+				       "[ -<>?/]" "_">
+		      <if <get-var italic?>
+			  -tabi -tab>>>>
+  <set-var image-file = <concat <get-var mhtml::include-prefix>
+				<get-var tabs::images-webpath>
+				/<get-var image-name>.gif>>
+  <set-var image-file1 = <concat <get-var mhtml::include-prefix>
+				 <get-var tabs::images-webpath>
+				 /<get-var image-name>-i.gif>>
+  <if <not <file-exists <get-var image-file>>>
+      <concat
+       <tabs::create-tab <get-var image-file> <get-var image-text>>
+       <set-var saved=<package-to-alist tabs>>
+       <set-var tabs::base-tab-image=<get-var tabs::base-tab-image>-bright>
+       ;;; <tabs::create-tab <get-var image-file1> <get-var image-text> t>
+       <tabs::create-tab <get-var image-file1> <get-var image-text>>
+       <alist-to-package <get-var-once saved> tabs>>>
+  <set-var count = <or <get-var default::image_counter> 0>>
+  <increment default::image_counter by=2>
+  <script language=JavaScript>
+  image_<get-var count> = new Image ();
+  image_<get-var count>.src =
+  "<get-var tabs::images-webpath>/<get-var image-name>.gif";
+  <increment count>
+  image_<get-var count> = new Image ();
+  image_<get-var count>.src =
+  "<get-var tabs::images-webpath>/<get-var image-name>-i.gif";
+  </script>
+  <set-var x-y[]=<cgi-exec gifq <get-var image-file> width height>>
+  <a href="<get-var link>"
+    <if <get-var target> "target=<get-var target>">
+    onMouseOver='document["i_<get-var count>"].src =
+                 image_<get-var count>.src; return (true);'
+    onMouseOut='document["i_<get-var count>"].src = image_<sub count 1>.src;
+                return (true);'>
+    <img name="i_<get-var count>"
+         src="<get-var tabs::images-webpath>/<get-var image-name>.gif"
+        width=<get-var x-y[0]> height=<get-var x-y[1]> border=0
+    alt="<get-var image-text>">
+  </a>
+</defun>
+
+<set-var Tabs::images-webpath = <site::web-image dynamic/tabs>>
+<set-var Tabs::base-Tab-image=site-submenu-tab.gif>
+<set-var Tabs::halign=center>
+<set-var Tabs::valign=Center>
+<set-var Tabs::fontname=AvantGarde-Demi>
+<set-var Tabs::italic-fontname=AvantGarde-DemiOblique>
+<set-var Tabs::font-size=10pt>
+<set-var Tabs::font-color=White>
+<set-var image-builder::use-alchemy=yes>
+
+<set-var Banners::images-webpath = <site::web-image dynamic/banners>>
+<set-var Banners::base-banner-image=site-banner.gif>
+<set-var Banners::halign=Left>
+<set-var Banners::valign=Center>
+<set-var Banners::fontname=AvantGarde-Demi>
+<set-var Banners::font-size=14pt>
+<set-var Banners::font-color=White>
+<set-var image-builder::use-alchemy=yes>

@@ -1,0 +1,7 @@
+;;; base-alist-to-package.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 14:34:39 1996.
+
+Result: "string1string-2string 3999": <alist-to-package <prog (("TMP::VAR1" . "string1")("TMP::VAR2" . "string-2")("TMP::VAR3" . "string 3")("TMP::VAR4" . "999"))> tmp><get-var tmp::var1 tmp::var2 tmp::var3 tmp::var4>
+Result: "string1string-2string 3999": <alist-to-package <prog (("VAR1" . "string1")("VAR2" . "string-2")("VAR3" . "string 3")("VAR4" . "999"))> new><get-var new::var1 new::var2 new::var3 new::var4>

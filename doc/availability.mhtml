@@ -1,0 +1,9 @@
+;;; availability.mhtml: Discuss terms for delivery of -*- Meta-HTML -*-.
+;;;
+;;;  Copyright (c) 1995 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue Dec 12 10:17:58 1995.
+<set-var title="Availabilty">
+<include header.mhtml>
+
+<include footer.mhtml>
+

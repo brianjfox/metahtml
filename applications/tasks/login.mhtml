@@ -1,0 +1,36 @@
+;;; login.mhtml: -*- Meta-HTML -*- 
+
+;;;  Copyright (c) 1996 Universal Access Inc.
+;;;  Author: Henry Minsky (hqm@ua.com) Fri Sep  6 18:54:36 1996.
+
+<set-var title="Lab Activity Tracker Login">
+<include header.mhtml>
+<include tasks.mhtml>
+
+<h1>Lab Site Login</h1>
+
+;;; The username and password are simple hardwired constants
+;;; here, both are the string "usual". You can modify this to
+;;; use a gdbm or msql database to save user names and passwords.
+
+<when <match <get-var posted::action> "Login" caseless=true>>
+  <if <and <match <get-var uname> "usual">
+	   <match <get-var password> "usual">>
+      <prog 
+	<set-session-var tasks::username=anonymous>
+	Logged in as <get-session-var tasks::username>
+	<redirect welcome.mhtml>
+	>
+    <prog
+      <h2><font color=red>Incorrect login</font></h2>>>
+</when>
+
+
+<form method=post action="<get-var mhtml::current-doc>">
+<b>Username: </b> <input type=text name=uname>
+<br>
+<b>Password: </b> <input type=password name=password><p>
+<input type=submit name="action"  value="Login">
+</form>
+
+<include footer.mhtml>

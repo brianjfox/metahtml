@@ -1,0 +1,87 @@
+;;; welcome.mhtml: The start of the -*- Meta-HTML -*- pages are here.
+;;;
+<set-var title="Welcome To Meta-HTML">
+<include header.mhtml>
+<include docsubsts.mhtml>
+
+<layout::page>
+<center>
+  <h2>
+  Welcome to the <small-caps upper=+2 lower=+1>Meta-HTML</small-caps>
+  Web Authoring Language!
+  </h2>
+</center>
+
+<topic What is <meta-html>?>
+Put succinctly, <meta-html> is a programming language specifically
+designed for working within the World Wide Web environment.  Although
+it is a genuine programming language, suitable for large-scale symbolic
+manipulation, it provides the most wanted common functionalities as
+built-in primitives, so you don't have to write them.  You can find
+out more about the theory of implementation in
+<if <get-file-properties
+     <get-var mhtml::include-prefix mhtml::relative-prefix>/manifesto.html>
+    <prog
+     <a href="<get-var mhtml::url-to-dir>/manifesto.html">this white paper</a>>
+  <prog
+   <a href="<get-var mhtml::url-to-dir>/manifesto.mhtml">this white paper</a>>>
+. The linked features below are part of a
+<a href="<get-var mhtml::url-to-dir>/manual/">comprehensive user manual</a>:
+
+<defmacro section-anchor key whitespace=delete>
+  <a href="<get-var mhtml::url-to-dir>/manual/view-section.mhtml?<cgi-encode key>">
+    %body
+  </a>
+</defmacro>
+
+<ul>
+  <section-anchor session-operators>
+    <li> Stateful Sessions
+  </section-anchor>
+  <a href="<get-var mhtml::url-to-dir>/manual/variable-index.mhtml">
+    <li> Seamless Access to the Environment
+  </a>
+  <section-anchor packages>
+    <li> A Lisp-like Package System
+  </section-anchor>
+  <section-anchor stream-operators>
+    <li> Network and File Streams
+  </section-anchor>
+  <section-anchor database-commands>
+    <li> Atomic Database Operations
+  </section-anchor>
+  <section-anchor macro-commands>
+    <li> User Functions and Macros
+  </section-anchor>
+  <a href="<get-var mhtml::url-to-dir>/manual/syntax.mhtml">
+    <li> Easy and Intuitive Syntax
+  </a>
+</ul>
+
+As the proliferation of World Wide Web sites increases, the complexity
+of the sites and applications has exploded beyond the expectation of
+many.  Web site implementors often need highly technical solutions to
+solve problems which would be trivial to implement in a non-Web
+environment, such as remembering what text the user typed in 2 screens
+ago!
+
+<meta-html> is the right solution for many of these problems.  It is a
+genuine programming language, suitable for large-scale symbol
+manipulation, with a syntax mostly similar to Lisp-like languages.
+
+However, <meta-html> is not a Lisp interpreter, since that language is
+not especially tailored to building complex Web applications.  Nor is
+it a Scheme, nor is it TCL, or any other existing language.
+
+It has become gut-wrenchingly clear to implementors that the existing
+languages in use today are not well suited to the Web.  Writing a Web
+application in C or Pascal, while possible, can be a painful and
+tedious experience, and that is long before the issues of supporting
+different browser types have arisen.
+
+Join the future now!  All you need is <meta-html>.
+</topic>
+
+</layout::page>
+
+<include footer.mhtml>

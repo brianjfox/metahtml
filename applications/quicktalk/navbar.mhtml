@@ -1,0 +1,73 @@
+;;; navbar.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Tue May 28 11:53:11 1996.
+
+<button-layout>
+
+<defvar site::here <get-var mhtml::location-sans-sid>>
+
+<defun make-regex p1 p2 p3 p4>
+  <set-var regex="(<get-var p1>">
+  <if <get-var p2>
+      <prog
+	<set-var regex="<get-var regex>|<get-var p2>">
+	<if <get-var p3>
+	    <prog
+	      <set-var regex="<get-var regex>|<get-var p3>">
+	      <if <get-var p4>
+		  <set-var regex="<get-var regex>|<get-var p4>">>>>>>
+  <set-var regex="<get-var regex>)">
+  <get-var regex>
+</defun>
+
+<defun navlight gif where docstring p1 p2 p3 p4>
+  <if <or <string-eq <get-var site::here> <get-var where>>
+	  <and <get-var p1>
+	       <match <get-var site::here>
+		      <make-regex <get-var p1> <get-var p2>
+				  <get-var p3> <get-var p4>>>>>
+      <navicon <get-var gif>-ON <get-var where> <get-var docstring>>
+    <navicon <get-var gif> <get-var where> <get-var docstring>>>
+</defun>
+
+;;;  <navicon "button_home" / "Meta-HTML Home Page.">
+<p>
+<navlight TheTechnology /release/what.mhtml "About Our Technology">
+
+<navlight TheAdvantage /release/why.mhtml "Get the Winning Edge">
+
+<navlight TheApplications /apps/welcome.mhtml "About Our Applications">
+
+<navlight TheAnswers /release/answers.mhtml "Get The Answers Now!">
+
+<navlight TheProducts /products.mhtml "Meta-HTML Products"
+	  /products/email-forms.mhtml
+	  /products/email.mhtml
+	  /products/softstore.mhtml>
+
+<navlight TheDemos /demos/welcome.mhtml "See Our Example Demos">
+
+<navlight TheCompany /company/welcome.mhtml "Find Out About UAI">
+
+  <hr width=60% align=left>
+
+<navlight TheDocumentation /tutorial/welcome.mhtml
+	  "Meta-HTML Language Reference and Tutorial"
+	  /tutorial/welcome.mhtml
+	  /tutorial/tutorial.mhtml>
+
+<navlight DownloadSoftware /FreeTrials/welcome.mhtml "Download Meta-HTML Now!">
+
+<navlight Support /support.mhtml "Product Support">
+
+<navlight ContactUs /contact.mhtml "Contacting Universal Access Inc.">
+
+  <hr width=60% align=left>
+<comment>
+<concat
+ <a href="<get-var mhtml::http-prefix>/cgi-bin/imagemap/maps/navmap.map">
+  <img src="<site::image all-sans-line>" border=0 ISMAP>
+  </a>>
+</comment>
+</button-layout>

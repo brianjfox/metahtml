@@ -1,0 +1,92 @@
+;;; man-page.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+;;;
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Mon Jul  1 10:53:32 1996.
+<if <and <not <get-var static::building-html>>
+	 <get-var-once posted::key>
+	 <file-exists <thisdir>/<upcase <get-var-once posted::key>>.html>>
+    <redirect <upcase <get-var-once posted::key>>.html>>
+;;;
+<defvar title "Manual Page Viewer">
+<include header.mhtml>
+<set-var mhtml::cacheable=true>
+
+<when <get-var-once posted::key>>
+  <set-var posted::key =
+    <upcase <subst-in-string
+	     <get-var-once posted::key> "^[ \t]+" "" "[ \t]+$" "" " " "-">>>
+  <package-delete function>
+  <with-open-database db <metahtml::function-db> mode=read>
+    <set-var x =
+      <database-load-record db <get-var posted::key> prefix=function>>
+  </with-open-database>
+
+  <when <not <get-var x>>>
+    <ptext>
+      There isn't a documentation pointer for the function
+      <b><get-var-once posted::key></b>
+      in the database <metahtml::function-db>.
+
+      Perhaps now would be a good time to
+      <concat <a href="create-fundoc.mhtml?<cgi-encode key>">>
+      <b>enter the pointer</b>.</a>
+    </ptext>
+    <p>
+  </when>
+</when>
+
+<if <not <get-var-once posted::key>>
+    <if <get-var hacking-frames>
+	<redirect function-index-frame.mhtml>
+      <redirect function-index.mhtml>>>
+
+<when <get-var x>>
+  <in-package function>
+    <b>Name: <upcase <get-var function::name>></b><p>
+    <b>Section:
+    <if <get-var hacking-frames>
+	<set-var page=view-section-frame.mhtml>
+      <set-var page=view-section.mhtml>>
+    <set-var section = <upcase <get-var section>>>
+    <concat
+     <a href="<get-var page>?<cgi-encode section>">
+     <capitalize <subst-in-string <get-var section> "-" " ">>
+     </a>>
+    </b>
+    <p>
+    <br>
+  </in-package>
+  <b>Synopsis:</b><br>
+  <ul>
+    <format-template function>
+  </ul>
+  <p>
+  
+  <b>Description:</b>
+  <br>
+  <ul>
+    <pformat function::short-desc>
+  </ul>
+</when>
+
+<p>
+<when <not <string-eq <get-var env::server_name> "www.metahtml.com">>>
+  <a href="create-fundoc.mhtml?<cgi-encode key>">
+    Edit Pointer
+  </a>
+  <br>
+</when>
+<a href="function-index.mhtml">
+  Function Index
+</a>
+<br>
+<a href="variable-index.mhtml">
+  Variable Index
+</a>
+<when <not <string-eq <get-var env::server_name> "www.metahtml.com">>>
+  <br>
+  <a href="variable-editor.mhtml">
+    Variable Editor
+  </a>
+</when>
+<include footer.mhtml>

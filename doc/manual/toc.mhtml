@@ -1,0 +1,29 @@
+;;; toc.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Brian J. Fox
+;;;  Author: Brian J. Fox (bfox@ai.mit.edu) Wed Jul  3 13:09:34 1996.
+<set-var title="Table Of Contents">
+<include header.mhtml>
+
+<with-open-database db <metahtml::section-db> mode=read>
+  <database-query db true keys=keys>
+</with-open-database>
+
+<sort keys>
+<set-var i=0>
+<ul>
+  <while <get-var keys[i]>>
+    <set-var key=<get-var keys[i]>>
+    <li>
+    <a href="<get-var mhtml::url-to-dir>/view-section.mhtml?<cgi-encode key>">
+      <capitalize <subst-in-string <get-var key> "-" " ">>
+    </a>
+    <increment i>
+  </while>
+  <li> <a href="<get-var mhtml::url-to-dir>/function-index.mhtml">
+    Function Index</a>
+  <li> <a href="<get-var mhtml::url-to-dir>/variable-index.mhtml">
+    Variable Index</a>
+</ul>
+
+<include footer.mhtml>

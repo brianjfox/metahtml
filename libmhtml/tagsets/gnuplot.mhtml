@@ -1,0 +1,374 @@
+;;; gnuplot.mhtml: -*- Meta-HTML -*-  Functions for calling GNUPLOT to make
+;;; graphs and GIFS.
+;;;
+;;; Copyright (c) 1998, 2001 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ai.mit.edu) Sun Oct 25 08:59:34 1998.
+;;; <defun .libinit>
+;;;   <defvar gnuplot::gnuplot <path::find-executable gnuplot>>
+;;;   <set-var gnuplot::version = 3.6>
+;;; </defun>
+
+<defun gnuplot::postscript-to-gif ps-data &key filename varname>
+  ;;; DOC_SECTION (USING-GNUPLOT)
+  ;;; Using the PostScript text in <var ps-data>, create a GIF image
+  ;;; suitable for display from a Web page.
+  ;;;
+  ;;; If <var filename=foo.gif> is specified, then the GIF image will
+  ;;; be written to "foo.gif", and the function returns "true" if successful.
+  ;;;
+  ;;; If <var varname=gif-var> is specified, then the GIF image will
+  ;;; be placed into the binary variable "GIF-VAR", and the function returns
+  ;;; "true" if successful.
+  ;;;
+  ;;; If neither <var filename> nor <var varname> is specified, the
+  ;;; function writes the raw data of the GIF image as an HTML
+  ;;; document to the standard output, and closes the standard output
+  ;;; stream.  This is to facilitate the creation of Web pages which
+  ;;; produce GIF images as output.
+  <set-var temp-ps = /tmp/temp-<make-identifier 8>.ps>
+  <set-var temp-gif= /tmp/temp-<make-identifier 8>.gif>
+  <set-var ps-written? = <dir::write-file <get-var temp-ps> ps-data>>
+  <set-var alchemy = <path::find-executable alchemy>>
+  <set-var ghostscript = <path::find-executable gs>>
+  <set-var ppmtogif = <path::find-executable ppmtogif>>
+  <when <get-var alchemy ghostscript>>
+    <if <get-var alchemy>
+	<cgi-exec
+	 <get-var alchemy> <get-var temp-ps> -o -g <get-var temp-gif>
+	 -Q -Zd 72 72 -Ze -Za 4 errors=gnuplot::errors output=output>
+      <if <not <get-var ppmtogif>>
+	  <page-debug Can't find executable "ppmtogif"!>
+	<concat
+	 <set-var
+	   bboxline = <cgi-exec grep '%%BoundingBox:' <get-var temp-ps>>
+	   bbox[] = <subst-in-string <get-var bboxline> "[^0-9]+" "\n">
+	   x = <get-var bbox[2]>
+	   y = <get-var bbox[3]>>
+	 <cgi-exec gs -q -dNOPAUSE "-sDEVICE=ppm" "-SOutputFile=-" -r72
+		   -g<get-var x>x<get-var y> -- <get-var temp-ps>
+		   | (ppmtogif "2>/dev/null ><get-var temp-gif>")>>>>
+  </when>
+  <when <file-exists? <get-var temp-gif>>>
+    <set-var result=true>
+    <if <get-var-once filename>
+	<cgi-exec cp <get-var temp-gif> <get-var-once filename>>
+      <if <get-var-once varname>
+	  <concat
+	   <parser::canonicalize-var varname>
+	   <dir::read-file <get-var temp-gif> <get-var varname>>>
+	<concat
+	 <set-var read? = <dir::read-file <get-var temp-gif> image>>
+	 <with-open-stream s *standard-output* mode=write>
+	 <stream-put s "HTTP/1.0 200 Found\n">
+	 <stream-put s "Content-type: image/gif\n">
+	 <stream-put s "Content-length: <content-length image>\n">
+	 <if <get-var-once mhtml::cacheable>
+	     <if <number? <get-var-once mhtml::cacheable>>
+		 <set-var expire-time=<add <time> mhtml::cacheable>>
+	       <set-var expire-time=<add <time>
+					 <mul 24 *date*::seconds-per-hour>>>>
+	   <set-var expire-time=<sub <time> 3600>>>
+	 <stream-put s "Expires: <date <get-var-once expire-time> gmt=t>\n">
+	 <stream-put s "\n">
+	 <stream-put-contents s image>
+	 <stream-shutdown s>
+	 </with-open-stream>>>>
+    <cgi-exec rm -f <get-var temp-gif> <get-var temp-ps>>
+  </when>
+  <get-var-once result>
+</defun>
+  
+<defun gnuplot::make-ps-plot data
+  &key style xlabel ylabel title xtics ytics xtics-rotate>
+  ;;; DOC_SECTION (USING-GNUPLOT)
+  ;;; Create a PostScript plot of the points in <var data>, using <var style>
+  ;;; (default 'boxes') and perhaps labelling the X and Y axes.
+  ;;;
+  ;;; The default value for <var title> is "Unspecified Data Graph".
+  ;;; 
+  ;;; This function returns the PostScript text necessary to produce
+  ;;; the graph itself -- the text could be passed to a PostScript
+  ;;; printer, or, one could use
+  ;;; <funreg using-gnuplot gnuplot::postscript-to-gif> to
+  ;;; create a GIF image suitable for displaying on a Web page.
+  ;;;
+  ;;; Possibilities for <var style> are:
+  ;;; <code>lines</code>, <code>points</code>, <code>linespoints</code>,
+  ;;; <code>impulses</code>, <code>dots</code>, <code>steps</code>,
+  ;;; <code>fsteps</code>, <code>histeps</code>, <code>errorbars</code>,
+  ;;; <code>xerrorbars</code>, <code>yerrorbars</code>,
+  ;;; <code>xyerrorbars</code>, <code>boxes</code>, <code>boxerrorbars</code>,
+  ;;; <code>boxxyerrorbars</code>, <code>financebars</code>,
+  ;;; <code>candlestick</code>s or <code>vector</code>. 
+  ;;;
+  ;;; <example>
+  ;;; <set-var data = "20 45 40 47 68 98">
+  ;;; <set-var ps = <gnuplot::make-ps-plot <get-var-once data[]> title="Foo">>
+  ;;; </example>
+  ;;;
+  <defvar style boxes>
+  <defvar title "Unspecified Data Graph">
+
+  ;;; Create a temporary datafile containing the points to plot.
+  <set-var tempfile = /tmp/gnuplot-<make-identifier 8>.dat>
+  <subst-in-var data "[, \t]+" "\n">
+  <coerce-var data type=array>
+  <with-open-stream s <get-var tempfile> mode=write-create>
+    <foreach datum data iter=i>
+      <defvar datum 0>
+      <stream-put s "<get-var datum>\n">
+    </foreach>
+  </with-open-stream>
+
+  ;;; Call `gnuplot' to actually generate the postscript plot from the data.
+  <with-open-stream s <get-var gnuplot::gnuplot> type=prog mode=write>
+    <stream-put s "set terminal postscript portrait\n">
+    <if <get-var-once xlabel>
+	<stream-put s "set xlabel \"<get-var-once xlabel>\"\n">>
+    <if <get-var-once ylabel>
+	<stream-put s "set ylabel \"<get-var-once ylabel>\"\n">>
+    <if <get-var-once xtics-rotate>
+	<stream-put s "set xtics rotate\n">>
+    <if <get-var-once xtics>
+	<stream-put s "set xtics <get-var-once xtics>\n">>
+    <if <get-var-once ytics>
+	<stream-put s "set ytics <get-var-once ytics>\n">>
+    <stream-put s "plot '<get-var tempfile>' ">
+    <stream-put s "title '<get-var-once title>' with <get-var style>\n">
+    <stream-put s "quit\n">
+    <stream-get-contents s plot>
+  </with-open-stream>
+  <coerce-var plot type=string>
+
+  ;;; Remove the temporary file.
+  <if <eq debug-level 0> <cgi-exec rm -f <get-var-once tempfile>>>
+  <get-var-once plot>
+</defun>
+
+<defun gnuplot::make-gif-plot data &optional output-file
+  &key style xlabel ylabel title xtics ytics>
+  ;;; DOC_SECTION (USING-GNUPLOT)
+  ;;; Create a GIF plot of the points in <var data>, using <var style>
+  ;;; (default 'boxes') and perhaps labelling the X and Y axes.
+  ;;;
+  ;;; The output GIF will be stored in <var output-file>, or returned
+  ;;; directly to <code>*standard-output*</code>, (in which case, the
+  ;;; output stream is then closed).
+  ;;;
+  ;;; The default value for <var title> is "Unspecified Data Graph".
+  ;;; 
+  ;;; Possibilities for <var style> are:
+  ;;; <code>lines</code>, <code>points</code>, <code>linespoints</code>,
+  ;;; <code>impulses</code>, <code>dots</code>, <code>steps</code>,
+  ;;; <code>fsteps</code>, <code>histeps</code>, <code>errorbars</code>,
+  ;;; <code>xerrorbars</code>, <code>yerrorbars</code>,
+  ;;; <code>xyerrorbars</code>, <code>boxes</code>, <code>boxerrorbars</code>,
+  ;;; <code>boxxyerrorbars</code>, <code>financebars</code>,
+  ;;; <code>candlestick</code>s or <code>vector</code>. 
+  ;;;
+  <defvar style boxes>
+  <defvar title "Unspecified Data Graph">
+
+  <gnuplot::plot-alists
+   output-type=gif output-file=<get-var-once output-file>
+   style=<get-var-once style>
+   xlabel=<get-var-once xlabel>
+   ylabel=<get-var-once ylabel>
+   <make-alist data[]=<get-var-once data[]>
+	       title=<get-var-once title>
+	       xtics=<get-var-once xtics>
+	       ytics=<get-var-once ytics>
+	       style=<get-var-once style>>>
+</defun>
+
+<defun gp-debug &rest args>
+  <with-open-stream s /tmp/gnuplot-debug mode=append>
+    <stream-put s "<get-var-once args>\n">
+  </with-open-stream>
+</defun>
+
+<defun gnuplot::plot-alist-internal stream alist>
+  ;;; DOC_SECTION (USING-GNUPLOT)
+  ;;; You pass in <var stream> and an <var alist> containing:
+  ;;; <ul>
+  ;;;    <li>DATA-FUNCTION: The name of the function which generates the points
+  ;;;<li>DATA-FUNCTION-ARGS: Arguments to pass to DATA-FUNCTION
+  ;;;		  <li>TITLE: A title for this data (defaults to DATA-FUNCTION).
+  ;;;             <li>STYLE: The style for plotting.  See (gnuplot::make-plot).
+  ;;;             <li>SCALE: A factor for scaling the data.
+  ;;; </ul>
+  <defvar style <or <alist-get-var alist style> "boxes">>
+  <defvar title <or <alist-get-var alist title>
+		    <alist-get-var alist data-function>
+		    "Unspecified Data Graph">>
+  <set-var data[]=<alist-get-var alist data[]>>
+
+  ;;; Create a temporary datafile containing the points to plot.
+  <set-var tempfile = /tmp/gnuplot-<make-identifier 8>.dat>
+  <when <not <get-var-once data>>>
+    <set-var data=<apply <alist-get-var alist data-function>
+			 <alist-get-var alist data-function-args[]>>>
+    <subst-in-var data "[ \t]+" "\n">
+    <coerce-var data type=array>
+  </when>
+  <set-var max=0 min=0>
+  <when <alist-get-var alist scale>>
+    <set-var
+      scale-factors[]=<subst-in-string <alist-get-var alist scale> "," "\n">
+      scale-min=<get-var-once scale-factors[0]>
+      scale-max=<get-var-once scale-factors[1]>
+      scale=<sub scale-max scale-min>>
+    <foreach datum data nocopy=true>
+      <defvar datum 0>
+      <if <lt datum min> <set-var min = <get-var datum>>>
+      <if <gt datum max> <set-var max = <get-var datum>>>
+    </foreach>
+    <foreach datum data iter=i nocopy=true>
+      <defvar datum 0>
+      <set-var
+	p=<percent datum max>
+	data[i]=<add scale-min <percentage p scale>>>
+      <gp-debug DATA: <get-var-once datum> : <get-var p> : <get-var data[i]>>
+    </foreach>
+  </when>
+
+  <with-open-stream s <get-var tempfile> mode=write-create>
+    <foreach datum data>
+      <defvar datum 0>
+      <stream-put s "<get-var datum>\n">
+    </foreach>
+  </with-open-stream>
+
+  ;;; Tell `gnuplot' how to actually generate the plot from the data.
+  <stream-put stream "'<get-var tempfile>' ">
+  <stream-put stream "title '<get-var-once title>' with <get-var style>">
+
+  ;;; Remember the temporary file for removing.
+  <array-append <get-var-once tempfile> ^::tempfiles>
+</defun>
+
+<defun gnuplot::plot-alists &optional alists[]
+  &key output-type varname output-file rotation
+       xlabel ylabel xtics ytics xtics-rotate boxwidth
+  &rest alists[]>
+  ;;; DOC_SECTION (USING-GNUPLOT)
+  ;;; For now, see <funref using-gnuplot gnuplot::plot-alist-internal>.
+  ;;;
+  ;;; Call `gnuplot' to actually generate the plot from the data.
+  ;;; The default output type is GIF (works with gnuplot 3.6 and greater).
+  <defvar output-type gif>
+
+  ;;; If this file was <include>d instead of <require>d, then gnuplot::gnuplot
+  ;;; won't be defined.  Might as well search for it here.
+  <defvar gnuplot::gnuplot <or <path::find-executable gnuplot>
+			       /usr/bin/gnuplot>>
+
+  ;;; Could have been "postscript portrait".
+  <defvar output-type "postscript portrait">
+
+  <with-open-stream s <get-var gnuplot::gnuplot> type=prog mode=write>
+    ;;; < with-open-stream s /tmp/gnuplot.plot mode=write-create>
+    <stream-put s "set terminal <get-var-once output-type>\n">
+    <if <get-var-once xlabel>
+	<stream-put s "set xlabel \"<get-var-once xlabel>\"\n">>
+    <if <get-var-once ylabel>
+	<stream-put s "set ylabel \"<get-var-once ylabel>\"\n">>
+    <if <var-exists boxwidth>
+	<stream-put s "set boxwidth <get-var-once boxwidth>\n">>
+    <if <get-var-once xtics-rotate>
+	<stream-put s "set xtics rotate\n">>
+    <if <get-var-once xtics>
+	<stream-put s "set xtics <get-var-once xtics>\n">>
+    <if <get-var-once ytics>
+	<stream-put s "set ytics <get-var-once ytics>\n">>
+    <unset-var done-one>
+    <foreach alist alists>
+      <when <get-var-once alist>>
+	<if <not <get-var-once done-one>>
+	    <stream-put s "plot ">
+	  <stream-put s ", ">>
+	<increment done-one>
+	<gnuplot::plot-alist-internal <get-var s> <get-var-once alist>>
+      </when>
+    </foreach>
+
+    <stream-put s "\nquit\n">
+    <stream-get-contents s plot>
+  </with-open-stream>
+
+  <when <gt :debug-level 1>>
+    <with-open-stream s /tmp/gnuplot.plot mode=write-create>
+      <stream-put s "set terminal <get-var-once output-type>\n">
+      <if <get-var-once xlabel>
+	  <stream-put s "set xlabel \"<get-var-once xlabel>\"\n">>
+      <if <get-var-once ylabel>
+	  <stream-put s "set ylabel \"<get-var-once ylabel>\"\n">>
+      <if <var-exists boxwidth>
+	  <stream-put s "set boxwidth <get-var-once boxwidth>\n">>
+      <if <get-var-once xtics-rotate>
+	  <stream-put s "set xtics rotate\n">>
+      <if <get-var-once xtics>
+	  <stream-put s "set xtics <get-var-once xtics>\n">>
+      <if <get-var-once ytics>
+	  <stream-put s "set ytics <get-var-once ytics>\n">>
+      <unset-var done-one>
+      <foreach alist alists>
+	<when <get-var-once alist>>
+	  <if <not <get-var-once done-one>>
+	      <stream-put s "plot ">
+	    <stream-put s ", ">>
+	  <increment done-one>
+	  <gnuplot::plot-alist-internal <get-var s> <get-var-once alist>>
+	</when>
+      </foreach>
+    </with-open-stream>
+  </when>
+
+  <when <match <get-var output-type> "postscript" caseless=true>>
+    <coerce-var plot type=string>
+    <if <get-var-once varname>
+	<concat
+	 <set-var result=true>
+	 <parser::canonicalize-var varname>
+	 <copy-var plot <get-var varname>>>
+      <copy-var plot result>>
+  </when>
+
+  <when <not <match <get-var output-type> "postscript" caseless=true>>>
+    <when <get-var-once rotation>>
+      <set-var rotate-file = /tmp/gnuplot-rotate-<make-identifier>.gif>
+      <set-var x=<dir::write-file <get-var rotate-file> plot>>
+      <cgi-exec composite -r <get-var rotation> <get-var rotate-file>
+		"><get-var rotate-file>r">
+      <set-var x = <dir::read-file <get-var rotate-file>r plot>>
+      <array-append <get-var rotate-file> tempfiles>
+      <array-append <get-var rotate-file>r tempfiles>
+    </when>
+
+    <if <get-var-once varname>
+	<concat
+	 <set-var result=true>
+	 <parser::canonicalize-var varname>
+	 <copy-var plot <get-var varname>>>
+      <if <get-var-once output-file>
+	  <set-var result=<dir::write-file <get-var-once output-file> plot>>
+	<concat
+	 <with-open-stream s *standard-output* mode=write>
+	 <stream-put s "HTTP/1.0 200 Found\n">
+	 <stream-put s "Content-type: image/gif\n">
+	 <stream-put s "Content-length: <content-length plot>\n">
+	 <stream-put s "Expires: <date <sub <time>  3600> gmt=t>\n">
+	 <stream-put s "\n">
+	 <stream-put-contents s plot>
+	 <stream-shutdown s>
+	 </with-open-stream>>>>
+  </when>
+
+  <when <eq debug-level 0>>
+    <foreach file tempfiles>
+      <cgi-exec rm -f <get-var-once file>>
+    </foreach>
+  </when>
+  <get-var-once result>
+</defun>
+

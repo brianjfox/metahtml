@@ -1,0 +1,91 @@
+;;; invoice-formatted.mhtml: -*- Meta-HTML -*-
+;;;
+;;; Copyright (c) 1995 Brian J. Fox
+;;; Author: Brian J. Fox (bfox@ua.com) Mon Oct 23 14:01:27 1995.
+;;;
+;;; Produce an invoice exactly like the one that is produced in
+;;; invoice-review.mhtml, except totally preformatted.
+
+;;; Handle the case of timed-out or missing sessions.
+<include tagsets/session.mhtml>
+
+<session::initialize 200 timedout.mhtml>
+
+;;; Get all of the data from the session database.
+<session-import shipping>
+<include tagsets/substs.mhtml>
+<include tagsets/cart-substs.mhtml>
+
+<html>
+<head><title>Online Shopping: Preformatted Invoice</title></head>
+<body>
+
+<pre>
+<pad "Online Shopping: Preformatted Invoice" 60 align=middle>
+
+
+     This page contains an invoice which has been text
+     formatted for optimal printing on any printer.
+
+     Please select PRINT from the menu on your browser in
+     order to have a paper copy of this invoice.
+
+
+     Mail to: Universal Access Inc.
+              Attn: Marketing Dept.
+              214B State St.
+              Santa Barbara, CA
+              93101
+
+      Fax to: +1 (805) 730-7776
+
+      For questions or phone orders:
+
+        Originating in the US:    (805) 730-7775
+              Other Countries: +1 (805) 730-7775
+
+<pad "----------------------------------------" 60 align=middle>
+
+<pad "Online Shopping: Merchandise Invoice for <get-var shipping-name>" 60 align=middle>
+<pad "<date>" 60 align=middle>
+
+</pre>
+
+;;; If they now how they found the web site, then put it on the invoice.
+<when <get-var posted::found-site-by>>
+<pre>
+I found this site via <get-var found-site-by>.
+</pre>
+</when>
+
+;;; The preformatted text page should contain the Product ID's, so
+;;; tell the cart formatter to place those as well.
+<set-var shopping::show-product-id=true shopping::no-html=true>
+
+<pre>
+Ship To: <get-var shipping-name>
+Address:<if <and <get-var shipping-street>
+		 <get-var shipping-street-2>>
+	    <prog <get-var shipping-street><br>         <get-var shipping-street-2>>
+	   <or " <get-var shipping-street>" <get-var shipping-street-2>>>
+         <get-var shipping-city>, <get-var shipping-state>  <get-var shipping-zip>
+
+------------------------------------------------------------
+</pre>
+
+<include cart-display-nt.mhtml>
+
+;;; Get the totals.
+<calculate-tax-shipping-and-grand-total>
+<set-var tspace=55>
+<pre>
+<pad "Subtotal of Ordered Items: <pad <get-var total> 6 align=right>" <get-var tspace> align=right>
+<if <get-var tax>
+    <pad "Plus <get-var tax-percent>% <get-var shipping-state> Sales Tax: <pad <get-var tax> 6 align=right>" <get-var tspace> align=right>>
+<pad "Plus Shipping & Handling: <pad <get-var shipping-cost> 6 align=right>" <get-var tspace> align=right>
+<pad "---------------------------------" <get-var tspace> align=right>
+<pad "Grand Total: <pad $<get-var grand-total> 6 align=right>" <get-var tspace> align=right>
+
+</pre>
+</body>
+</html>

@@ -1,0 +1,6 @@
+;;; base-stream-get.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Tue Oct 29 19:03:49 1996.
+
+Result: ";;; base-stream-test.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.": <with-open-stream stream base-stream-test.mhtml type=file mode=read><stream-get stream stop-at="\n"></with-open-stream>

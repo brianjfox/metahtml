@@ -1,0 +1,44 @@
+;;; base-plain-text.mhtml: -*- Meta-HTML -*-  DESCRIPTIVE TEXT.
+
+;;;  Copyright (c) 1996 Jarlath O'Carroll
+;;;  Author: Jarlath O'Carroll (jarlath@ua.com) Sun Oct 27 01:11:08 1996.
+
+Result: "<p>  This a paragraph 1.<p>  This is paragraph 2.": 
+<plain-text>
+  This a paragraph 1.
+
+  This is paragraph 2.
+</plain-text>
+Result: "<p>  Each 
+  of
+  these
+  lines
+  are
+  separate
+  paragraphs.": 
+<plain-text>
+  Each 
+  of
+  these
+  lines
+  are
+  separate
+  paragraphs.
+</plain-text>
+Result: "<p>  Each <p>  of<p>  these<p>  lines<p>  are<p>  separate<p>  paragraphs.":
+<plain-text>
+  Each 
+
+  of
+
+  these
+
+  lines
+
+  are
+
+  separate
+
+  paragraphs.
+</plain-text>
+

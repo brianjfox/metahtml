@@ -75,7 +75,7 @@ redhat_rc  = /etc/rc.d/init.d
 # isn't GCC, but it isn't recommended.
 
 CC		= gcc $(GCC_WARN)
-GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow -fvolatile -fvolatile-global
+GCC_WARN	= -Wall -Wstrict-prototypes -Wshadow # -fvolatile -fvolatile-global
 # PROFILE_FLAGS	= -pg
 # DEBUG_FLAGS	= -g $(PROFILE_FLAGS)
 OPTIMIZE_FLAGS	= -O69 -finline-functions
